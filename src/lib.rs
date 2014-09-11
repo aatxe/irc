@@ -12,13 +12,10 @@ pub fn connect(host: &str, port: u16) -> IoResult<Connection> {
 }
 
 fn send_internal(conn: &Connection, msg: &str) -> IoResult<()> {
-    match conn {
-        &Connection(ref tcp) => {
-            let mut writer = BufferedWriter::new(tcp.clone());
-            writer.write_str(msg);
-            writer.flush()
-        },
-    }
+    let &Connection(ref tcp) = conn;
+    let mut writer = BufferedWriter::new(tcp.clone());
+    writer.write_str(msg);
+    writer.flush()
 }
 
 pub struct Message<'a> {
