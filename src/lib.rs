@@ -36,7 +36,7 @@ impl<'a> Message<'a> {
 
 pub fn send(conn: &Connection, msg: Message) -> IoResult<()> {
     let arg_string = msg.args.init().connect(" ").append(" :").append(*msg.args.last().unwrap());
-    send_internal(conn, msg.command.to_string().append(" ").append(arg_string.as_slice()).as_slice())
+    send_internal(conn, msg.command.to_string().append(" ").append(arg_string.as_slice()).append("\r\n").as_slice())
 }
 
 pub struct Bot {
@@ -83,9 +83,12 @@ impl Bot {
             ("PING", [msg]) => {
                 try!(send(&self.conn, Message::new(None, "PONG", [msg])));
             },
-            ("376", _) => {
+            ("376", _) => { // End of MOTD
                 try!(send(&self.conn, Message::new(None, "JOIN", ["#vana"])));
             },
+            ("422", _) => { // Missing MOTD
+                try!(send(&self.conn, Message::new(None, "JOIN", ["#vana"])));
+            }
             ("PRIVMSG", [_, msg]) => {
                 if msg.contains("pickles") && msg.contains("hi") {
                     try!(send(&self.conn, Message::new(None, "PRIVMSG", ["#vana", "hi"])));
