@@ -4,27 +4,71 @@ extern crate regex;
 
 use std::io::{BufferedReader, BufferedWriter, InvalidInput, IoError, IoResult, TcpStream};
 
+pub struct Connection(TcpStream);
+
+pub fn connect(host: &str, port: u16) -> IoResult<Connection> {
+    let socket = try!(TcpStream::connect(host, port));
+    Ok(Connection(socket))
+}
+
+fn send_internal(conn: &Connection, msg: &str) -> IoResult<()> {
+    match conn {
+        &Connection(ref tcp) => {
+            let mut writer = BufferedWriter::new(tcp.clone());
+            writer.write_str(msg);
+            writer.flush()
+        },
+    }
+}
+
+pub struct Message<'a> {
+    source: Option<&'a str>,
+    command: &'a str,
+    args: &'a [&'a str],
+}
+
+impl<'a> Message<'a> {
+    pub fn new(source: Option<&'a str>, command: &'a str, args: &'a [&'a str]) -> Message<'a> {
+        Message {
+            source: source,
+            command: command,
+            args: args,
+        }
+    }
+}
+
+pub fn send(conn: &Connection, msg: Message) -> IoResult<()> {
+    let arg_string = msg.args.init().connect(" ").append(" :").append(*msg.args.last().unwrap());
+    send_internal(conn, msg.command.to_string().append(" ").append(arg_string.as_slice()).as_slice())
+}
+
 pub struct Bot {
-    pub sock: TcpStream
+    pub conn: Connection,
 }
 
 impl Bot {
-    pub fn new() -> Bot {
-        let sock = TcpStream::connect("irc.fyrechat.net", 6667).unwrap();
-        Bot {
-            sock: sock,
-        }
+    pub fn new() -> IoResult<Bot> {
+        let conn = try!(connect("irc.fyrechat.net", 6667));
+        Ok(Bot {
+            conn: conn,
+        })
     }
 
-    pub fn identify(&mut self) {
-        let mut writer = BufferedWriter::new(self.sock.clone());
-        writer.write_str("NICK :pickles\r\n").unwrap();
-        writer.write_str("USER pickles 0 * :pickles\r\n").unwrap();
-        writer.flush().unwrap();
+    pub fn send_nick(&mut self, nick: &str) -> IoResult<()> {
+        send(&self.conn, Message::new(None, "NICK", [nick]))
+    }
+
+    pub fn send_user(&mut self, username: &str, real_name: &str) -> IoResult<()> {
+        send(&self.conn, Message::new(None, "USER", [username, "0", "*", real_name]))
+    }
+
+    pub fn identify(&mut self) -> IoResult<()> {
+        self.send_nick("pickles");
+        self.send_user("pickles", "pickles")
     }
 
     pub fn output(&mut self) {
-        let mut reader = BufferedReader::new(self.sock.clone());
+        let mut reader = { let Connection(ref tcp) = self.conn; BufferedReader::new(tcp.clone()) };
         for line in reader.lines() {
             match line {
                 Ok(ln) => {
@@ -37,31 +81,24 @@ impl Bot {
         }
     }
 
-    fn handle_command(&mut self, source: &str, command: &str, args: &[&str]) -> () {
+    fn handle_command(&mut self, source: &str, command: &str, args: &[&str]) -> IoResult<()> {
         match (command, args) {
             ("PING", [msg]) => {
-                self.send("PONG", msg);
+                try!(send(&self.conn, Message::new(None, "PONG", [msg])));
             },
             ("376", _) => {
-                self.send("JOIN", "#vana");
+                try!(send(&self.conn, Message::new(None, "JOIN", ["#vana"])));
             },
-            ("PRIVMSG", [channel, msg]) => {
+            ("PRIVMSG", [_, msg]) => {
                 if msg.contains("pickles") && msg.contains("hi") {
-                    self.send("PRIVMSG #vana", "hi");
-                }
-
-                if msg.starts_with(". ") {
-                    self.send("PRIVMSG #vana", msg.slice_from(2));
-                }
+                    try!(send(&self.conn, Message::new(None, "PRIVMSG", ["#vana", "hi"])));
+                } else if msg.starts_with(". ") {
+                    try!(send(&self.conn, Message::new(None, "PRIVMSG", ["#vana", msg.slice_from(2)])));
+                };
             },
             _ => (),
-        }
-    }
-
-    fn send(&mut self, command: &str, arg: &str) {
-        let mut writer = BufferedWriter::new(self.sock.clone());
-        write!(writer, "{} :{}\r\n", command, arg);
-        writer.flush().unwrap();
+        };
+        Ok(())
     }
 }
 
