@@ -1,67 +1,46 @@
 #![feature(phase)]
 extern crate regex;
 #[phase(plugin)] extern crate regex_macros;
+extern crate serialize;
 
-use std::io::{BufferedReader, BufferedWriter, InvalidInput, IoError, IoResult, TcpStream};
 
-pub struct Connection(TcpStream);
+use std::io::{BufferedReader, InvalidInput, IoError, IoResult};
+use data::{Message, Config};
+use conn::{Connection, connect, send};
 
-pub fn connect(host: &str, port: u16) -> IoResult<Connection> {
-    let socket = try!(TcpStream::connect(host, port));
-    Ok(Connection(socket))
-}
-
-fn send_internal(conn: &Connection, msg: &str) -> IoResult<()> {
-    let &Connection(ref tcp) = conn;
-    let mut writer = BufferedWriter::new(tcp.clone());
-    writer.write_str(msg);
-    writer.flush()
-}
-
-pub struct Message<'a> {
-    source: Option<&'a str>,
-    command: &'a str,
-    args: &'a [&'a str],
-}
-
-impl<'a> Message<'a> {
-    pub fn new(source: Option<&'a str>, command: &'a str, args: &'a [&'a str]) -> Message<'a> {
-        Message {
-            source: source,
-            command: command,
-            args: args,
-        }
-    }
-}
-
-pub fn send(conn: &Connection, msg: Message) -> IoResult<()> {
-    let arg_string = msg.args.init().connect(" ").append(" :").append(*msg.args.last().unwrap());
-    send_internal(conn, msg.command.to_string().append(" ").append(arg_string.as_slice()).append("\r\n").as_slice())
-}
+pub mod conn;
+pub mod data;
 
 pub struct Bot {
     pub conn: Connection,
+    pub config: Config,
 }
 
 impl Bot {
     pub fn new() -> IoResult<Bot> {
-        let conn = try!(connect("irc.fyrechat.net", 6667));
+        let config = try!(Config::load());
+        let conn = try!(connect(config.server.as_slice(), config.port));
         Ok(Bot {
             conn: conn,
+            config: config,
         })
     }
 
-    pub fn send_nick(&mut self, nick: &str) -> IoResult<()> {
+    pub fn send_nick(&self, nick: &str) -> IoResult<()> {
         send(&self.conn, Message::new(None, "NICK", [nick]))
     }
 
-    pub fn send_user(&mut self, username: &str, real_name: &str) -> IoResult<()> {
+    pub fn send_user(&self, username: &str, real_name: &str) -> IoResult<()> {
         send(&self.conn, Message::new(None, "USER", [username, "0", "*", real_name]))
     }
 
-    pub fn identify(&mut self) -> IoResult<()> {
-        self.send_nick("pickles");
-        self.send_user("pickles", "pickles")
+    pub fn send_join(&self, chan: &str) -> IoResult<()> {
+        send(&self.conn, Message::new(None, "JOIN", [chan.as_slice()]))
+    }
+
+    pub fn identify(&self) -> IoResult<()> {
+        self.send_nick(self.config.nickname.as_slice());
+        self.send_user(self.config.username.as_slice(), self.config.realname.as_slice())
     }
 
     pub fn output(&mut self) {
@@ -84,16 +63,20 @@ impl Bot {
                 try!(send(&self.conn, Message::new(None, "PONG", [msg])));
             },
             ("376", _) => { // End of MOTD
-                try!(send(&self.conn, Message::new(None, "JOIN", ["#vana"])));
+                for chan in self.config.channels.iter() {
+                    try!(self.send_join(chan.as_slice()));
+                }
             },
             ("422", _) => { // Missing MOTD
-                try!(send(&self.conn, Message::new(None, "JOIN", ["#vana"])));
+                for chan in self.config.channels.iter() {
+                    try!(self.send_join(chan.as_slice()));
+                }
             }
-            ("PRIVMSG", [_, msg]) => {
+            ("PRIVMSG", [chan, msg]) => {
                 if msg.contains("pickles") && msg.contains("hi") {
-                    try!(send(&self.conn, Message::new(None, "PRIVMSG", ["#vana", "hi"])));
+                    try!(send(&self.conn, Message::new(None, "PRIVMSG", [chan.as_slice(), "hi"])));
                 } else if msg.starts_with(". ") {
-                    try!(send(&self.conn, Message::new(None, "PRIVMSG", ["#vana", msg.slice_from(2)])));
+                    try!(send(&self.conn, Message::new(None, "PRIVMSG", [chan.as_slice(), msg.slice_from(2)])));
                 };
             },
             _ => (),
