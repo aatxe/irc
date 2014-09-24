@@ -1,6 +1,6 @@
-use serialize::json::{decode};
 use std::io::fs::File;
 use std::io::{InvalidInput, IoError, IoResult};
+use serialize::json::{decode};
 
 pub struct Message<'a> {
     pub source: Option<&'a str>,

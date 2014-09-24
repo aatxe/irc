@@ -4,9 +4,11 @@ extern crate regex;
 extern crate serialize;
 
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::io::{BufferedReader, InvalidInput, IoError, IoResult};
-use data::{Message, Config};
+use std::vec::Vec;
 use conn::{Connection, connect, send};
+use data::{Config, Message};
 
 pub mod conn;
 pub mod data;
@@ -15,6 +17,7 @@ pub struct Bot<'a> {
     pub conn: Connection,
     pub config: Config,
     process: RefCell<|&Bot, &str, &str, &[&str]|:'a -> IoResult<()>>,
+    pub chanlists: HashMap<String, Vec<String>>,
 }
 
 impl<'a> Bot<'a> {
@@ -25,6 +28,7 @@ impl<'a> Bot<'a> {
             conn: conn,
             config: config,
             process: RefCell::new(process),
+            chanlists: HashMap::new(),
         })
     }
 
@@ -78,6 +82,48 @@ impl<'a> Bot<'a> {
                     try!(self.send_join(chan.as_slice()));
                 }
             },
+            ("353", [_, _, chan, users]) => { // /NAMES
+                for user in users.split_str(" ") {
+                    if !match self.chanlists.find_mut(&String::from_str(chan)) {
+                        Some(vec) => {
+                            vec.push(String::from_str(user));
+                            true
+                        },
+                        None => false,
+                    } {
+                        self.chanlists.insert(String::from_str(chan), vec!(String::from_str(user)));
+                    }
+                }
+            },
+            ("JOIN", [chan]) => {
+                match self.chanlists.find_mut(&String::from_str(chan)) {
+                    Some(vec) => {
+                        match source.find('!') {
+                            Some(i) => vec.push(String::from_str(source.slice_to(i))),
+                            None => (),
+                        };
+                    },
+                    None => (),
+                }
+            },
+            ("PART", [chan, _]) => {
+                match self.chanlists.find_mut(&String::from_str(chan)) {
+                    Some(vec) => {
+                        match source.find('!') {
+                            Some(i) => {
+                                match vec.as_slice().position_elem(&String::from_str(source.slice_to(i))) {
+                                    Some(n) => {
+                                        vec.swap_remove(n);
+                                    },
+                                    None => (),
+                                };
+                            },
+                            None => (),
+                        };
+                    },
+                    None => (),
+                }
+            },
             _ => {
                 (*self.process.borrow_mut().deref_mut())(self, source, command, args);
             },
@@ -103,7 +149,7 @@ fn process(msg: &str) -> IoResult<(&str, &str, Vec<&str>)> {
 }
 
 fn parse_args(line: &str) -> Vec<&str> {
-    let reg = regex!(r" ([^: ]+)| :(.*)$");
+    let reg = regex!(r" ([^: ]+)| :([^\r\n]*)[\r\n]*$");
     reg.captures_iter(line).map(|cap| {
         match cap.at(1) {
             "" => cap.at(2),
