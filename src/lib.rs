@@ -40,6 +40,10 @@ impl<'a> Bot<'a> {
         send(&self.conn, Message::new(None, "JOIN", [chan.as_slice()]))
     }
 
+    pub fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()> {
+        send(&self.conn, Message::new(None, "PRIVMSG", [chan.as_slice(), msg.as_slice()]))
+    }
+
     pub fn identify(&self) -> IoResult<()> {
         self.send_nick(self.config.nickname.as_slice());
         self.send_user(self.config.username.as_slice(), self.config.realname.as_slice())
