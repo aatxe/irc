@@ -3,7 +3,7 @@ extern crate regex;
 #[phase(plugin)] extern crate regex_macros;
 extern crate serialize;
 
-
+use std::cell::RefCell;
 use std::io::{BufferedReader, InvalidInput, IoError, IoResult};
 use data::{Message, Config};
 use conn::{Connection, connect, send};
@@ -11,18 +11,20 @@ use conn::{Connection, connect, send};
 pub mod conn;
 pub mod data;
 
-pub struct Bot {
+pub struct Bot<'a> {
     pub conn: Connection,
     pub config: Config,
+    process: RefCell<|&Bot, &str, &str, &[&str]|:'a -> IoResult<()>>,
 }
 
-impl Bot {
-    pub fn new() -> IoResult<Bot> {
+impl<'a> Bot<'a> {
+    pub fn new(process: |&Bot, &str, &str, &[&str]|:'a -> IoResult<()>) -> IoResult<Bot<'a>> {
         let config = try!(Config::load());
         let conn = try!(connect(config.server.as_slice(), config.port));
         Ok(Bot {
             conn: conn,
             config: config,
+            process: RefCell::new(process),
         })
     }
 
@@ -71,15 +73,10 @@ impl Bot {
                 for chan in self.config.channels.iter() {
                     try!(self.send_join(chan.as_slice()));
                 }
-            }
-            ("PRIVMSG", [chan, msg]) => {
-                if msg.contains("pickles") && msg.contains("hi") {
-                    try!(send(&self.conn, Message::new(None, "PRIVMSG", [chan.as_slice(), "hi"])));
-                } else if msg.starts_with(". ") {
-                    try!(send(&self.conn, Message::new(None, "PRIVMSG", [chan.as_slice(), msg.slice_from(2)])));
-                };
             },
-            _ => (),
+            _ => {
+                (*self.process.borrow_mut().deref_mut())(self, source, command, args);
+            },
         };
         Ok(())
     }
