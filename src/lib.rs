@@ -157,3 +157,24 @@ fn parse_args(line: &str) -> Vec<&str> {
         }
     }).collect()
 }
+
+#[test]
+fn process_line_test() {
+    let res = process(":flare.to.ca.fyrechat.net 353 pickles = #pickles :pickles awe\r\n").unwrap();
+    let (source, command, args) = res;
+    assert_eq!(source, "flare.to.ca.fyrechat.net");
+    assert_eq!(command, "353");
+    assert_eq!(args, vec!["pickles", "=", "#pickles", "pickles awe"]);
+
+    let res = process("PING :flare.to.ca.fyrechat.net\r\n").unwrap();
+    let (source, command, args) = res;
+    assert_eq!(source, "");
+    assert_eq!(command, "PING");
+    assert_eq!(args, vec!["flare.to.ca.fyrechat.net"]);
+}
+
+#[test]
+fn process_args_test() {
+    let res = parse_args("PRIVMSG #vana :hi");
+    assert_eq!(res, vec!["#vana", "hi"])
+}
