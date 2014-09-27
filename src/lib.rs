@@ -43,6 +43,10 @@ impl<'a> Bot<'a> {
     pub fn send_join(&self, chan: &str) -> IoResult<()> {
         send(&self.conn, Message::new(None, "JOIN", [chan.as_slice()]))
     }
+    
+    pub fn send_mode(&self, chan: &str, mode: &str) -> IoResult<()> {
+        send(&self.conn, Message::new(None, "MODE", [chan.as_slice(), mode.as_slice()]))
+    }
 
     pub fn send_topic(&self, chan: &str, topic: &str) -> IoResult<()> {
         send(&self.conn, Message::new(None, "TOPIC", [chan.as_slice(), topic.as_slice()]))
