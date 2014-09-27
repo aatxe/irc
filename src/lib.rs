@@ -44,6 +44,10 @@ impl<'a> Bot<'a> {
         send(&self.conn, Message::new(None, "JOIN", [chan.as_slice()]))
     }
 
+    pub fn send_topic(&self, chan: &str, topic: &str) -> IoResult<()> {
+        send(&self.conn, Message::new(None, "TOPIC", [chan.as_slice(), topic.as_slice()]))
+    }
+
     pub fn send_invite(&self, person: &str, chan: &str) -> IoResult<()> {
         send(&self.conn, Message::new(None, "INVITE", [person.as_slice(), chan.as_slice()]))
     }
