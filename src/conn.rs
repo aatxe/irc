@@ -15,6 +15,11 @@ fn send_internal(conn: &Connection, msg: &str) -> IoResult<()> {
 }
 
 pub fn send(conn: &Connection, msg: Message) -> IoResult<()> {
-    let arg_string = msg.args.init().connect(" ").append(" :").append(*msg.args.last().unwrap());
-    send_internal(conn, msg.command.to_string().append(" ").append(arg_string.as_slice()).append("\r\n").as_slice())
+    let mut send = msg.command.to_string();
+    send.push_str(" ");
+    send.push_str(msg.args.init().connect(" ").as_slice());
+    send.push_str(" :");
+    send.push_str(*msg.args.last().unwrap());
+    send.push_str("\r\n");
+    send_internal(conn, send.as_slice())
 }
