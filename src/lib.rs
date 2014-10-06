@@ -43,7 +43,7 @@ impl<'a> Bot<'a> {
     pub fn send_join(&self, chan: &str) -> IoResult<()> {
         send(&self.conn, Message::new(None, "JOIN", [chan.as_slice()]))
     }
-    
+
     pub fn send_mode(&self, chan: &str, mode: &str) -> IoResult<()> {
         send(&self.conn, Message::new(None, "MODE", [chan.as_slice(), mode.as_slice()]))
     }
@@ -61,22 +61,23 @@ impl<'a> Bot<'a> {
     }
 
     pub fn identify(&self) -> IoResult<()> {
-        self.send_nick(self.config.nickname.as_slice());
+        try!(self.send_nick(self.config.nickname.as_slice()));
         self.send_user(self.config.username.as_slice(), self.config.realname.as_slice())
     }
 
-    pub fn output(&mut self) {
+    pub fn output(&mut self) -> IoResult<()> {
         let mut reader = { let Connection(ref tcp) = self.conn; BufferedReader::new(tcp.clone()) };
         for line in reader.lines() {
             match line {
                 Ok(ln) => {
-                    let (source, command, args) = process(ln.as_slice()).unwrap();
-                    self.handle_command(source, command, args.as_slice());
+                    let (source, command, args) = try!(process(ln.as_slice()));
+                    try!(self.handle_command(source, command, args.as_slice()));
                     println!("{}", ln)
                 },
                 Err(e) => println!("Shit, you're fucked! {}", e),
             }
         }
+        Ok(())
     }
 
     fn handle_command(&mut self, source: &str, command: &str, args: &[&str]) -> IoResult<()> {
@@ -137,7 +138,7 @@ impl<'a> Bot<'a> {
                 }
             },
             _ => {
-                (*self.process.borrow_mut().deref_mut())(self, source, command, args);
+                try!((*self.process.borrow_mut().deref_mut())(self, source, command, args));
             },
         };
         Ok(())

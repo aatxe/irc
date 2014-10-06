@@ -20,6 +20,7 @@ impl<'a> Message<'a> {
 
 #[deriving(Decodable)]
 pub struct Config {
+    pub owners: Vec<String>,
     pub nickname: String,
     pub username: String,
     pub realname: String,
@@ -38,5 +39,9 @@ impl Config {
             desc: "Decoder error",
             detail: Some(e.to_string()),
         })
+    }
+
+    pub fn is_owner(&self, nickname: &str) -> bool {
+        self.owners.as_slice().contains(&String::from_str(nickname))
     }
 }

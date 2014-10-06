@@ -11,8 +11,7 @@ pub fn connect(host: &str, port: u16) -> IoResult<Connection> {
 fn send_internal(conn: &Connection, msg: &str) -> IoResult<()> {
     let &Connection(ref tcp) = conn;
     let mut writer = BufferedWriter::new(tcp.clone());
-    writer.write_str(msg);
-    writer.flush()
+    writer.write_str(msg)
 }
 
 pub fn send(conn: &Connection, msg: Message) -> IoResult<()> {
