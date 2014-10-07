@@ -7,7 +7,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::{BufferedReader, InvalidInput, IoError, IoResult};
 use std::vec::Vec;
-use conn::{Connection, connect, send};
+use conn::{Connection, TcpConn, connect, send};
 use data::{Config, Message};
 
 pub mod conn;
@@ -66,7 +66,9 @@ impl<'a> Bot<'a> {
     }
 
     pub fn output(&mut self) -> IoResult<()> {
-        let mut reader = { let Connection(ref tcp) = self.conn; BufferedReader::new(tcp.clone()) };
+        let mut reader = match self.conn {
+            TcpConn(ref tcp) => BufferedReader::new(tcp.clone()),
+        };
         for line in reader.lines() {
             match line {
                 Ok(ln) => {
