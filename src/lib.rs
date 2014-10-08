@@ -103,6 +103,16 @@ impl<'a, T, U> Bot<'a> for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
 }
 
 impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
+    pub fn from_connection(conn: Connection<T, U>, process: |&IrcBot<T, U>, &str, &str, &[&str]|:'a -> IoResult<()>) -> IoResult<IrcBot<'a, T, U>> {
+        let config = try!(Config::load());
+        Ok(IrcBot {
+            conn: RefCell::new(conn),
+            config: config,
+            process: RefCell::new(process),
+            chanlists: HashMap::new(),
+        })
+    }
+
     fn handle_command(&mut self, source: &str, command: &str, args: &[&str]) -> IoResult<()> {
         match (command, args) {
             ("PING", [msg]) => {
