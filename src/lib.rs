@@ -5,27 +5,27 @@ extern crate serialize;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::io::{BufferedReader, InvalidInput, IoError, IoResult};
+use std::io::{BufferedReader, BufferedWriter, InvalidInput, IoError, IoResult, TcpStream};
 use std::vec::Vec;
-use conn::{Connection, TcpConn, connect, send};
+use conn::{Conn, Connection};
 use data::{Config, Message};
 
 pub mod conn;
 pub mod data;
 
-pub struct Bot<'a> {
-    pub conn: Connection,
+pub struct Bot<'a, T, U> where T: Writer + Sized + 'static, U: Reader + Sized + Clone + 'static {
+    pub conn: RefCell<Connection<T, U>>,
     pub config: Config,
-    process: RefCell<|&Bot, &str, &str, &[&str]|:'a -> IoResult<()>>,
+    process: RefCell<|&Bot<T, U>, &str, &str, &[&str]|:'a -> IoResult<()>>,
     pub chanlists: HashMap<String, Vec<String>>,
 }
 
-impl<'a> Bot<'a> {
-    pub fn new(process: |&Bot, &str, &str, &[&str]|:'a -> IoResult<()>) -> IoResult<Bot<'a>> {
+impl<'a, T, U> Bot<'a, T, U> where T: Writer + Sized + 'static, U: Buffer + Sized + Clone + 'static  {
+    pub fn new(process: |&Bot<BufferedWriter<TcpStream>, TcpStream>, &str, &str, &[&str]|:'a -> IoResult<()>) -> IoResult<Bot<'a, BufferedWriter<TcpStream>, TcpStream>> {
         let config = try!(Config::load());
-        let conn = try!(connect(config.server.as_slice(), config.port));
+        let conn = try!(Connection::connect(config.server.as_slice(), config.port));
         Ok(Bot {
-            conn: conn,
+            conn: RefCell::new(conn),
             config: config,
             process: RefCell::new(process),
             chanlists: HashMap::new(),
@@ -33,31 +33,31 @@ impl<'a> Bot<'a> {
     }
 
     pub fn send_nick(&self, nick: &str) -> IoResult<()> {
-        send(&self.conn, Message::new(None, "NICK", [nick]))
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "NICK", [nick]))
     }
 
     pub fn send_user(&self, username: &str, real_name: &str) -> IoResult<()> {
-        send(&self.conn, Message::new(None, "USER", [username, "0", "*", real_name]))
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "USER", [username, "0", "*", real_name]))
     }
 
     pub fn send_join(&self, chan: &str) -> IoResult<()> {
-        send(&self.conn, Message::new(None, "JOIN", [chan.as_slice()]))
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "JOIN", [chan.as_slice()]))
     }
 
     pub fn send_mode(&self, chan: &str, mode: &str) -> IoResult<()> {
-        send(&self.conn, Message::new(None, "MODE", [chan.as_slice(), mode.as_slice()]))
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "MODE", [chan.as_slice(), mode.as_slice()]))
     }
 
     pub fn send_topic(&self, chan: &str, topic: &str) -> IoResult<()> {
-        send(&self.conn, Message::new(None, "TOPIC", [chan.as_slice(), topic.as_slice()]))
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "TOPIC", [chan.as_slice(), topic.as_slice()]))
     }
 
     pub fn send_invite(&self, person: &str, chan: &str) -> IoResult<()> {
-        send(&self.conn, Message::new(None, "INVITE", [person.as_slice(), chan.as_slice()]))
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "INVITE", [person.as_slice(), chan.as_slice()]))
     }
 
     pub fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()> {
-        send(&self.conn, Message::new(None, "PRIVMSG", [chan.as_slice(), msg.as_slice()]))
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "PRIVMSG", [chan.as_slice(), msg.as_slice()]))
     }
 
     pub fn identify(&self) -> IoResult<()> {
@@ -66,8 +66,8 @@ impl<'a> Bot<'a> {
     }
 
     pub fn output(&mut self) -> IoResult<()> {
-        let mut reader = match self.conn {
-            TcpConn(ref tcp) => BufferedReader::new(tcp.clone()),
+        let mut reader = match self.conn.borrow_mut().deref_mut() {
+            &Conn(_, ref recv) => BufferedReader::new(recv.clone()),
         };
         for line in reader.lines() {
             match line {
@@ -85,7 +85,7 @@ impl<'a> Bot<'a> {
     fn handle_command(&mut self, source: &str, command: &str, args: &[&str]) -> IoResult<()> {
         match (command, args) {
             ("PING", [msg]) => {
-                try!(send(&self.conn, Message::new(None, "PONG", [msg])));
+                try!(Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "PONG", [msg])));
             },
             ("376", _) => { // End of MOTD
                 for chan in self.config.channels.iter() {
