@@ -8,19 +8,19 @@ use std::collections::HashMap;
 use std::io::{BufferedReader, BufferedWriter, InvalidInput, IoError, IoResult, TcpStream};
 use std::vec::Vec;
 use conn::{Conn, Connection};
-use data::{Config, Message};
+use data::{Config, IrcReader, IrcWriter, Message};
 
 pub mod conn;
 pub mod data;
 
-pub struct Bot<'a, T, U> where T: Writer + Sized + 'static, U: Reader + Sized + Clone + 'static {
+pub struct Bot<'a, T, U> where T: IrcWriter, U: IrcReader {
     pub conn: RefCell<Connection<T, U>>,
     pub config: Config,
     process: RefCell<|&Bot<T, U>, &str, &str, &[&str]|:'a -> IoResult<()>>,
     pub chanlists: HashMap<String, Vec<String>>,
 }
 
-impl<'a, T, U> Bot<'a, T, U> where T: Writer + Sized + 'static, U: Buffer + Sized + Clone + 'static  {
+impl<'a, T, U> Bot<'a, T, U> where T: IrcWriter, U: IrcReader {
     pub fn new(process: |&Bot<BufferedWriter<TcpStream>, TcpStream>, &str, &str, &[&str]|:'a -> IoResult<()>) -> IoResult<Bot<'a, BufferedWriter<TcpStream>, TcpStream>> {
         let config = try!(Config::load());
         let conn = try!(Connection::connect(config.server.as_slice(), config.port));

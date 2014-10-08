@@ -2,6 +2,11 @@ use std::io::fs::File;
 use std::io::{InvalidInput, IoError, IoResult};
 use serialize::json::{decode};
 
+pub trait IrcWriter: Writer + Sized + 'static {}
+impl<T> IrcWriter for T where T: Writer + Sized + 'static {}
+pub trait IrcReader: Reader + Sized + Clone + 'static {}
+impl<T> IrcReader for T where T: Reader + Sized + Clone + 'static {}
+
 pub struct Message<'a> {
     pub source: Option<&'a str>,
     pub command: &'a str,
