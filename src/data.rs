@@ -7,6 +7,8 @@ impl<T> IrcWriter for T where T: Writer + Sized + 'static {}
 pub trait IrcReader: Reader + Sized + Clone + 'static {}
 impl<T> IrcReader for T where T: Reader + Sized + Clone + 'static {}
 
+
+#[deriving(Show, PartialEq)]
 pub struct Message<'a> {
     pub source: Option<&'a str>,
     pub command: &'a str,
@@ -48,5 +50,33 @@ impl Config {
 
     pub fn is_owner(&self, nickname: &str) -> bool {
         self.owners.as_slice().contains(&String::from_str(nickname))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{Config, Message};
+
+    #[test]
+    fn new_message() {
+        let args = ["flare.to.ca.fyrechat.net"];
+        let m = Message::new(None, "PING", args);
+        assert_eq!(m, Message {
+            source: None,
+            command: "PING",
+            args: args,
+        });
+    }
+
+    #[test]
+    fn load_config() {
+        assert!(Config::load().is_ok());
+    }
+
+    #[test]
+    fn is_owner() {
+        let cfg = Config::load().unwrap();
+        assert!(cfg.is_owner("test"));
+        assert!(!cfg.is_owner("test2"));
     }
 }

@@ -52,9 +52,9 @@ fn parse_args(line: &str) -> Vec<&str> {
 #[cfg(test)]
 mod test {
     use super::{process, parse_args};
-    
+
     #[test]
-    fn process_line_test() {
+    fn process_line() {
         let res = process(":flare.to.ca.fyrechat.net 353 pickles = #pickles :pickles awe\r\n").unwrap();
         let (source, command, args) = res;
         assert_eq!(source, "flare.to.ca.fyrechat.net");
@@ -69,7 +69,7 @@ mod test {
     }
 
     #[test]
-    fn process_args_test() {
+    fn process_args() {
         let res = parse_args("PRIVMSG #vana :hi");
         assert_eq!(res, vec!["#vana", "hi"])
     }
