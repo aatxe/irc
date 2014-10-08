@@ -33,8 +33,7 @@ pub struct IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     pub chanlists: HashMap<String, Vec<String>>,
 }
 
-
-impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
+impl<'a> IrcBot<'a, BufferedWriter<TcpStream>, TcpStream> {
     pub fn new(process: |&IrcBot<BufferedWriter<TcpStream>, TcpStream>, &str, &str, &[&str]|:'a -> IoResult<()>) -> IoResult<IrcBot<'a, BufferedWriter<TcpStream>, TcpStream>> {
         let config = try!(Config::load());
         let conn = try!(Connection::connect(config.server.as_slice(), config.port));
@@ -45,7 +44,65 @@ impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
             chanlists: HashMap::new(),
         })
     }
+}
 
+impl<'a, T, U> Bot<'a> for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
+    fn send_nick(&self, nick: &str) -> IoResult<()> {
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "NICK", [nick]))
+    }
+
+    fn send_user(&self, username: &str, real_name: &str) -> IoResult<()> {
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "USER", [username, "0", "*", real_name]))
+    }
+
+    fn send_join(&self, chan: &str) -> IoResult<()> {
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "JOIN", [chan.as_slice()]))
+    }
+
+    fn send_mode(&self, chan: &str, mode: &str) -> IoResult<()> {
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "MODE", [chan.as_slice(), mode.as_slice()]))
+    }
+
+    fn send_topic(&self, chan: &str, topic: &str) -> IoResult<()> {
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "TOPIC", [chan.as_slice(), topic.as_slice()]))
+    }
+
+    fn send_invite(&self, person: &str, chan: &str) -> IoResult<()> {
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "INVITE", [person.as_slice(), chan.as_slice()]))
+    }
+
+    fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()> {
+        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "PRIVMSG", [chan.as_slice(), msg.as_slice()]))
+    }
+
+    fn identify(&self) -> IoResult<()> {
+        try!(self.send_nick(self.config.nickname.as_slice()));
+        self.send_user(self.config.username.as_slice(), self.config.realname.as_slice())
+    }
+
+    fn output(&mut self) -> IoResult<()> {
+        let mut reader = match self.conn.borrow_mut().deref_mut() {
+            &Conn(_, ref recv) => BufferedReader::new(recv.clone()),
+        };
+        for line in reader.lines() {
+            match line {
+                Ok(ln) => {
+                    let (source, command, args) = try!(process(ln.as_slice()));
+                    try!(self.handle_command(source, command, args.as_slice()));
+                    println!("{}", ln)
+                },
+                Err(e) => println!("Shit, you're fucked! {}", e),
+            }
+        }
+        Ok(())
+    }
+
+    fn config(&self) -> Config {
+        self.config.clone()
+    }
+}
+
+impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     fn handle_command(&mut self, source: &str, command: &str, args: &[&str]) -> IoResult<()> {
         match (command, args) {
             ("PING", [msg]) => {
@@ -108,63 +165,6 @@ impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
             },
         };
         Ok(())
-    }
-}
-
-
-impl<'a, T, U> Bot<'a> for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
-    fn send_nick(&self, nick: &str) -> IoResult<()> {
-        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "NICK", [nick]))
-    }
-
-    fn send_user(&self, username: &str, real_name: &str) -> IoResult<()> {
-        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "USER", [username, "0", "*", real_name]))
-    }
-
-    fn send_join(&self, chan: &str) -> IoResult<()> {
-        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "JOIN", [chan.as_slice()]))
-    }
-
-    fn send_mode(&self, chan: &str, mode: &str) -> IoResult<()> {
-        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "MODE", [chan.as_slice(), mode.as_slice()]))
-    }
-
-    fn send_topic(&self, chan: &str, topic: &str) -> IoResult<()> {
-        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "TOPIC", [chan.as_slice(), topic.as_slice()]))
-    }
-
-    fn send_invite(&self, person: &str, chan: &str) -> IoResult<()> {
-        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "INVITE", [person.as_slice(), chan.as_slice()]))
-    }
-
-    fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()> {
-        Connection::send(self.conn.borrow_mut().deref_mut(), Message::new(None, "PRIVMSG", [chan.as_slice(), msg.as_slice()]))
-    }
-
-    fn identify(&self) -> IoResult<()> {
-        try!(self.send_nick(self.config.nickname.as_slice()));
-        self.send_user(self.config.username.as_slice(), self.config.realname.as_slice())
-    }
-
-    fn output(&mut self) -> IoResult<()> {
-        let mut reader = match self.conn.borrow_mut().deref_mut() {
-            &Conn(_, ref recv) => BufferedReader::new(recv.clone()),
-        };
-        for line in reader.lines() {
-            match line {
-                Ok(ln) => {
-                    let (source, command, args) = try!(process(ln.as_slice()));
-                    try!(self.handle_command(source, command, args.as_slice()));
-                    println!("{}", ln)
-                },
-                Err(e) => println!("Shit, you're fucked! {}", e),
-            }
-        }
-        Ok(())
-    }
-
-    fn config(&self) -> Config {
-        self.config.clone()
     }
 }
 
