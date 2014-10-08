@@ -23,7 +23,7 @@ pub trait Bot<'a> {
     fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()>;
     fn identify(&self) -> IoResult<()>;
     fn output(&mut self) -> IoResult<()>;
-    fn config(&self) -> Config;
+    fn config(&self) -> &Config;
 }
 
 pub struct IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
@@ -97,8 +97,8 @@ impl<'a, T, U> Bot<'a> for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
         Ok(())
     }
 
-    fn config(&self) -> Config {
-        self.config.clone()
+    fn config(&self) -> &Config {
+        &self.config
     }
 }
 
