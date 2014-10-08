@@ -23,7 +23,7 @@ impl<'a> Message<'a> {
     }
 }
 
-#[deriving(Decodable)]
+#[deriving(Clone, Decodable)]
 pub struct Config {
     pub owners: Vec<String>,
     pub nickname: String,
