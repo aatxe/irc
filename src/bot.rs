@@ -68,7 +68,10 @@ impl<'a, T, U> Bot<'a> for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
                     try!(self.handle_command(source, command, args.as_slice()));
                     println!("{}", ln)
                 },
-                Err(e) => println!("Shit, you're fucked! {}", e),
+                Err(e) => {
+                    println!("Shit, you're fucked! {}", e);
+                    return Err(e)
+                },
             }
         }
         Ok(())
@@ -158,7 +161,7 @@ impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
 mod test {
     use Bot;
     use super::IrcBot;
-    use std::io::MemWriter;
+    use std::io::{BufReader, MemWriter};
     use std::io::util::NullReader;
     use conn::Connection;
 
