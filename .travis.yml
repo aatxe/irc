@@ -1,6 +1,6 @@
 language: rust
 script:
-  - mktestconfig.sh
+  - ./mktestconfig.sh
   - cargo build --verbose
   - cargo test --verbose
   - cargo doc --verbose
