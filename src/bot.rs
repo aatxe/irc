@@ -273,4 +273,53 @@ mod test {
         b.output().unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "JOIN :#test\r\nJOIN :#test2\r\n".as_bytes());
     }
+
+    #[test]
+    fn generate_user_list() {
+        let r = BufReader::new(":flare.to.ca.fyrechat.net 353 test @ #test :test test2 test3\r\n".as_bytes());
+        let w = MemWriter::new();
+        let c = Connection::new(w, r).unwrap();
+        let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.output().unwrap();
+        let vec_res = match b.chanlists.borrow_mut().find_mut(&String::from_str("#test")) {
+                Some(v) => Ok(v.clone()),
+                None => Err("Could not find vec for channel."),
+        };
+        assert!(vec_res.is_ok());
+        let vec = vec_res.unwrap();
+        assert_eq!(vec, vec![String::from_str("test"), String::from_str("test2"), String::from_str("test3")]);
+    }
+
+    #[test]
+    fn add_to_user_list() {
+        let r = BufReader::new(":flare.to.ca.fyrechat.net 353 test @ #test :test test2\r\n:test3!test@test JOIN :#test\r\n".as_bytes());
+        let w = MemWriter::new();
+        let c = Connection::new(w, r).unwrap();
+        let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.output().unwrap();
+        let vec_res = match b.chanlists.borrow_mut().find_mut(&String::from_str("#test")) {
+                Some(v) => Ok(v.clone()),
+                None => Err("Could not find vec for channel."),
+        };
+        assert!(vec_res.is_ok());
+        let vec = vec_res.unwrap();
+        assert_eq!(vec, vec![String::from_str("test"), String::from_str("test2"), String::from_str("test3")]);
+    }
+
+    #[test]
+    fn remove_from_user_list() {
+        let r = BufReader::new(":flare.to.ca.fyrechat.net 353 test @ #test :test test2 test3\r\n:test3!test@test PART #test :\r\n".as_bytes());
+        let w = MemWriter::new();
+        let c = Connection::new(w, r).unwrap();
+        let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.output().unwrap();
+        let vec_res = match b.chanlists.borrow_mut().find_mut(&String::from_str("#test")) {
+                Some(v) => Ok(v.clone()),
+                None => Err("Could not find vec for channel."),
+        };
+        assert!(vec_res.is_ok());
+        let vec = vec_res.unwrap();
+        // n.b. ordering is not guaranteed, this only ought to hold because we're removing the last user
+        assert_eq!(vec, vec![String::from_str("test"), String::from_str("test2")]);
+    }
 }
