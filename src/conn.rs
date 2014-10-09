@@ -30,7 +30,6 @@ impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
 
     pub fn send(&self, msg: Message) -> IoResult<()> {
         let mut send = msg.command.to_string();
-        send.push_str(" ");
         send.push_str(msg.args.init().connect(" ").as_slice());
         send.push_str(" :");
         send.push_str(*msg.args.last().unwrap());
@@ -40,5 +39,36 @@ impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
 
     pub fn reader<'a>(&'a self) -> RefMut<'a, U> {
         self.reader.borrow_mut()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::io::MemWriter;
+    use std::io::util::NullReader;
+    use data::Message;
+    use super::Connection;
+
+    #[test]
+    fn new_connection() {
+        let w = MemWriter::new();
+        assert!(Connection::new(w, NullReader).is_ok());
+    }
+
+    #[test]
+    fn send_internal() {
+        let w = MemWriter::new();
+        let c = Connection::new(w, NullReader).unwrap();
+        c.send_internal("string of text").unwrap();
+        assert_eq!(c.writer.borrow_mut().deref_mut().get_ref(), "string of text".as_bytes());
+    }
+
+    #[test]
+    fn send() {
+        let w = MemWriter::new();
+        let c = Connection::new(w, NullReader).unwrap();
+        let args = ["flare.to.ca.fyrechat.net"];
+        c.send(Message::new(None, "PING", args)).unwrap();
+        assert_eq!(c.writer.borrow_mut().deref_mut().get_ref(), "PING :flare.to.ca.fyrechat.net\r\n".as_bytes());
     }
 }
