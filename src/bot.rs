@@ -81,10 +81,9 @@ impl<'a, T, U> Bot<'a> for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
 
 impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     pub fn from_connection(conn: Connection<T, U>, process: |&IrcBot<T, U>, &str, &str, &[&str]|:'a -> IoResult<()>) -> IoResult<IrcBot<'a, T, U>> {
-        let config = try!(Config::load());
         Ok(IrcBot {
             conn: conn,
-            config: config,
+            config: try!(Config::load()),
             process: RefCell::new(process),
             chanlists: RefCell::new(HashMap::new()),
         })
@@ -152,5 +151,39 @@ impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
             },
         };
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use Bot;
+    use super::IrcBot;
+    use std::io::MemWriter;
+    use std::io::util::NullReader;
+    use conn::Connection;
+
+    #[test]
+    fn from_connection() {
+        let w = MemWriter::new();
+        let c = Connection::new(w, NullReader).unwrap();
+        assert!(IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).is_ok());
+    }
+
+    #[test]
+    fn send_nick() {
+        let w = MemWriter::new();
+        let c = Connection::new(w, NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_nick("test").unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "NICK :test\r\n".as_bytes());
+    }
+
+    #[test]
+    fn send_user() {
+        let w = MemWriter::new();
+        let c = Connection::new(w, NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_user("test", "Test").unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "USER test 0 * :Test\r\n".as_bytes());
     }
 }
