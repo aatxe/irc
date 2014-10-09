@@ -243,4 +243,34 @@ mod test {
         b.identify().unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "NICK :test\r\nUSER test 0 * :test\r\n".as_bytes());
     }
+
+    #[test]
+    fn ping_response() {
+        let r = BufReader::new(":embyr.tx.us.fyrechat.net PING :01R6\r\n".as_bytes());
+        let w = MemWriter::new();
+        let c = Connection::new(w, r).unwrap();
+        let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.output().unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "PONG :01R6\r\n".as_bytes());
+    }
+
+    #[test]
+    fn end_of_motd_response() {
+        let r = BufReader::new(":embyr.tx.us.fyrechat.net 376 test :End of /MOTD command.\r\n".as_bytes());
+        let w = MemWriter::new();
+        let c = Connection::new(w, r).unwrap();
+        let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.output().unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "JOIN :#test\r\nJOIN :#test2\r\n".as_bytes());
+    }
+
+    #[test]
+    fn missing_motd_response() {
+        let r = BufReader::new(":flare.to.ca.fyrechat.net 422 pickles :MOTD File is missing\r\n".as_bytes());
+        let w = MemWriter::new();
+        let c = Connection::new(w, r).unwrap();
+        let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.output().unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "JOIN :#test\r\nJOIN :#test2\r\n".as_bytes());
+    }
 }
