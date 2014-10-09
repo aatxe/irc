@@ -4,8 +4,8 @@ use serialize::json::{decode};
 
 pub trait IrcWriter: Writer + Sized + 'static {}
 impl<T> IrcWriter for T where T: Writer + Sized + 'static {}
-pub trait IrcReader: Reader + Sized + Clone + 'static {}
-impl<T> IrcReader for T where T: Reader + Sized + Clone + 'static {}
+pub trait IrcReader: Buffer + Sized + 'static {}
+impl<T> IrcReader for T where T: Buffer + Sized + 'static {}
 
 
 #[deriving(Show, PartialEq)]
