@@ -231,4 +231,13 @@ mod test {
         b.send_privmsg("#test", "This is a test message.").unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "PRIVMSG #test :This is a test message.\r\n".as_bytes());
     }
+
+    #[test]
+    fn identify() {
+        let w = MemWriter::new();
+        let c = Connection::new(w, NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.identify().unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "NICK :test\r\nUSER test 0 * :test\r\n".as_bytes());
+    }
 }
