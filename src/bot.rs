@@ -162,20 +162,18 @@ mod test {
     use Bot;
     use super::IrcBot;
     use std::io::{BufReader, MemWriter};
-    use std::io::util::NullReader;
+    use std::io::util::{NullReader, NullWriter};
     use conn::Connection;
 
     #[test]
     fn from_connection() {
-        let w = MemWriter::new();
-        let c = Connection::new(w, NullReader).unwrap();
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         assert!(IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).is_ok());
     }
 
     #[test]
     fn send_nick() {
-        let w = MemWriter::new();
-        let c = Connection::new(w, NullReader).unwrap();
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_nick("test").unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "NICK :test\r\n".as_bytes());
@@ -183,8 +181,7 @@ mod test {
 
     #[test]
     fn send_user() {
-        let w = MemWriter::new();
-        let c = Connection::new(w, NullReader).unwrap();
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_user("test", "Test").unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "USER test 0 * :Test\r\n".as_bytes());
@@ -192,8 +189,7 @@ mod test {
 
     #[test]
     fn send_join() {
-        let w = MemWriter::new();
-        let c = Connection::new(w, NullReader).unwrap();
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_join("#test").unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "JOIN :#test\r\n".as_bytes());
@@ -201,8 +197,7 @@ mod test {
 
     #[test]
     fn send_mode() {
-        let w = MemWriter::new();
-        let c = Connection::new(w, NullReader).unwrap();
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_mode("#test", "+i").unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "MODE #test :+i\r\n".as_bytes());
@@ -210,8 +205,7 @@ mod test {
 
     #[test]
     fn send_topic() {
-        let w = MemWriter::new();
-        let c = Connection::new(w, NullReader).unwrap();
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_topic("#test", "This is a test topic.").unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "TOPIC #test :This is a test topic.\r\n".as_bytes());
@@ -219,8 +213,7 @@ mod test {
 
     #[test]
     fn send_invite() {
-        let w = MemWriter::new();
-        let c = Connection::new(w, NullReader).unwrap();
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_invite("test2", "#test").unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "INVITE test2 :#test\r\n".as_bytes());
@@ -228,8 +221,7 @@ mod test {
 
     #[test]
     fn send_privmsg() {
-        let w = MemWriter::new();
-        let c = Connection::new(w, NullReader).unwrap();
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_privmsg("#test", "This is a test message.").unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "PRIVMSG #test :This is a test message.\r\n".as_bytes());
@@ -237,8 +229,7 @@ mod test {
 
     #[test]
     fn identify() {
-        let w = MemWriter::new();
-        let c = Connection::new(w, NullReader).unwrap();
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.identify().unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "NICK :test\r\nUSER test 0 * :test\r\n".as_bytes());
@@ -247,8 +238,7 @@ mod test {
     #[test]
     fn ping_response() {
         let r = BufReader::new(":embyr.tx.us.fyrechat.net PING :01R6\r\n".as_bytes());
-        let w = MemWriter::new();
-        let c = Connection::new(w, r).unwrap();
+        let c = Connection::new(MemWriter::new(), r).unwrap();
         let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.output().unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "PONG :01R6\r\n".as_bytes());
@@ -257,8 +247,7 @@ mod test {
     #[test]
     fn end_of_motd_response() {
         let r = BufReader::new(":embyr.tx.us.fyrechat.net 376 test :End of /MOTD command.\r\n".as_bytes());
-        let w = MemWriter::new();
-        let c = Connection::new(w, r).unwrap();
+        let c = Connection::new(MemWriter::new(), r).unwrap();
         let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.output().unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "JOIN :#test\r\nJOIN :#test2\r\n".as_bytes());
@@ -267,8 +256,7 @@ mod test {
     #[test]
     fn missing_motd_response() {
         let r = BufReader::new(":flare.to.ca.fyrechat.net 422 pickles :MOTD File is missing\r\n".as_bytes());
-        let w = MemWriter::new();
-        let c = Connection::new(w, r).unwrap();
+        let c = Connection::new(MemWriter::new(), r).unwrap();
         let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.output().unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "JOIN :#test\r\nJOIN :#test2\r\n".as_bytes());
@@ -277,8 +265,7 @@ mod test {
     #[test]
     fn generate_user_list() {
         let r = BufReader::new(":flare.to.ca.fyrechat.net 353 test @ #test :test test2 test3\r\n".as_bytes());
-        let w = MemWriter::new();
-        let c = Connection::new(w, r).unwrap();
+        let c = Connection::new(NullWriter, r).unwrap();
         let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.output().unwrap();
         let vec_res = match b.chanlists.borrow_mut().find_mut(&String::from_str("#test")) {
@@ -293,8 +280,7 @@ mod test {
     #[test]
     fn add_to_user_list() {
         let r = BufReader::new(":flare.to.ca.fyrechat.net 353 test @ #test :test test2\r\n:test3!test@test JOIN :#test\r\n".as_bytes());
-        let w = MemWriter::new();
-        let c = Connection::new(w, r).unwrap();
+        let c = Connection::new(NullWriter, r).unwrap();
         let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.output().unwrap();
         let vec_res = match b.chanlists.borrow_mut().find_mut(&String::from_str("#test")) {
@@ -309,8 +295,7 @@ mod test {
     #[test]
     fn remove_from_user_list() {
         let r = BufReader::new(":flare.to.ca.fyrechat.net 353 test @ #test :test test2 test3\r\n:test3!test@test PART #test :\r\n".as_bytes());
-        let w = MemWriter::new();
-        let c = Connection::new(w, r).unwrap();
+        let c = Connection::new(NullWriter, r).unwrap();
         let mut b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.output().unwrap();
         let vec_res = match b.chanlists.borrow_mut().find_mut(&String::from_str("#test")) {
