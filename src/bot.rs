@@ -186,4 +186,49 @@ mod test {
         b.send_user("test", "Test").unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "USER test 0 * :Test\r\n".as_bytes());
     }
+
+    #[test]
+    fn send_join() {
+        let w = MemWriter::new();
+        let c = Connection::new(w, NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_join("#test").unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "JOIN :#test\r\n".as_bytes());
+    }
+
+    #[test]
+    fn send_mode() {
+        let w = MemWriter::new();
+        let c = Connection::new(w, NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_mode("#test", "+i").unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "MODE #test :+i\r\n".as_bytes());
+    }
+
+    #[test]
+    fn send_topic() {
+        let w = MemWriter::new();
+        let c = Connection::new(w, NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_topic("#test", "This is a test topic.").unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "TOPIC #test :This is a test topic.\r\n".as_bytes());
+    }
+
+    #[test]
+    fn send_invite() {
+        let w = MemWriter::new();
+        let c = Connection::new(w, NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_invite("test2", "#test").unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "INVITE test2 :#test\r\n".as_bytes());
+    }
+
+    #[test]
+    fn send_privmsg() {
+        let w = MemWriter::new();
+        let c = Connection::new(w, NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_privmsg("#test", "This is a test message.").unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "PRIVMSG #test :This is a test message.\r\n".as_bytes());
+    }
 }
