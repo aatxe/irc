@@ -1,5 +1,6 @@
 language: rust
 script:
+  - chmod +x mktestconfig.sh
   - ./mktestconfig.sh
   - cargo build --verbose
   - cargo test --verbose
