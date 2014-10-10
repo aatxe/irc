@@ -58,22 +58,19 @@ mod test {
 
     #[test]
     fn new_connection() {
-        let w = MemWriter::new();
-        assert!(Connection::new(w, NullReader).is_ok());
+        assert!(Connection::new(MemWriter::new(), NullReader).is_ok());
     }
 
     #[test]
     fn send_internal() {
-        let w = MemWriter::new();
-        let c = Connection::new(w, NullReader).unwrap();
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         c.send_internal("string of text").unwrap();
         assert_eq!(c.writer().deref_mut().get_ref(), "string of text".as_bytes());
     }
 
     #[test]
     fn send() {
-        let w = MemWriter::new();
-        let c = Connection::new(w, NullReader).unwrap();
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let args = ["flare.to.ca.fyrechat.net"];
         c.send(Message::new(None, "PING", args)).unwrap();
         assert_eq!(c.writer().deref_mut().get_ref(), "PING :flare.to.ca.fyrechat.net\r\n".as_bytes());
