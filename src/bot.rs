@@ -51,7 +51,10 @@ impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     }
 
     fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "PRIVMSG", [chan.as_slice(), msg.as_slice()]))
+        for line in msg.split_str("\r\n") {
+            try!(self.conn.send(Message::new(None, "PRIVMSG", [chan.as_slice(), line.as_slice()])));
+        }
+        Ok(())
     }
 
     fn identify(&self) -> IoResult<()> {
@@ -225,6 +228,17 @@ mod test {
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_privmsg("#test", "This is a test message.").unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "PRIVMSG #test :This is a test message.\r\n".as_bytes());
+    }
+
+    #[test]
+    fn send_privmsg_multiline() {
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_privmsg("#test", "This is a test message.\r\nIt has two lines.").unwrap();
+        let mut exp = String::from_str("PRIVMSG #test :This is a test message.\r\n");
+        exp.push_str("PRIVMSG #test :It has two lines.\r\n");
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), exp.as_bytes());
+
     }
 
     #[test]
