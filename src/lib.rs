@@ -10,7 +10,7 @@ pub mod bot;
 pub mod conn;
 pub mod data;
 
-pub trait Bot<'a> {
+pub trait Bot {
     fn send_nick(&self, nick: &str) -> IoResult<()>;
     fn send_user(&self, username: &str, real_name: &str) -> IoResult<()>;
     fn send_join(&self, chan: &str) -> IoResult<()>;

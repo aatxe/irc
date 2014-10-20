@@ -25,7 +25,7 @@ impl<'a> IrcBot<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
     }
 }
 
-impl<'a, T, U> Bot<'a> for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
+impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     fn send_nick(&self, nick: &str) -> IoResult<()> {
         self.conn.send(Message::new(None, "NICK", [nick]))
     }
