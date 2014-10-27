@@ -18,6 +18,7 @@ pub trait Bot {
     fn send_topic(&self, chan: &str, topic: &str) -> IoResult<()>;
     fn send_invite(&self, person: &str, chan: &str) -> IoResult<()>;
     fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()>;
+    fn send_kick(&self, chan: &str, user: &str, msg: &str) -> IoResult<()>;
     fn identify(&self) -> IoResult<()>;
     fn output(&mut self) -> IoResult<()>;
     fn config(&self) -> &Config;

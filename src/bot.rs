@@ -50,6 +50,10 @@ impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
         self.conn.send(Message::new(None, "INVITE", [person.as_slice(), chan.as_slice()]))
     }
 
+    fn send_kick(&self, chan: &str, user: &str, msg: &str) -> IoResult<()> {
+        self.conn.send(Message::new(None, "KICK", [chan.as_slice(), user.as_slice(), msg.as_slice()]))
+    }
+
     fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()> {
         for line in msg.split_str("\r\n") {
             try!(self.conn.send(Message::new(None, "PRIVMSG", [chan.as_slice(), line.as_slice()])));
@@ -220,6 +224,14 @@ mod test {
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_invite("test2", "#test").unwrap();
         assert_eq!(b.conn.writer().deref_mut().get_ref(), "INVITE test2 :#test\r\n".as_bytes());
+    }
+
+    #[test]
+    fn send_kick() {
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_kick("#test", "test2", "Goodbye.").unwrap();
+        assert_eq!(b.conn.writer().deref_mut().get_ref(), "KICK #test test2 :Goodbye.\r\n".as_bytes());
     }
 
     #[test]
