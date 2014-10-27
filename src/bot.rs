@@ -76,7 +76,7 @@ impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
                     println!("{}", ln)
                 },
                 Err(e) => {
-                    println!("Shit, you're fucked! {}", e);
+                    println!("{}", e);
                     return Err(e)
                 },
             }
