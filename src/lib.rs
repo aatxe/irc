@@ -1,4 +1,6 @@
+#![feature(if_let)]
 #![feature(phase)]
+#![feature(slicing_syntax)]
 extern crate regex;
 #[phase(plugin)] extern crate regex_macros;
 extern crate serialize;
@@ -22,6 +24,7 @@ pub trait Bot {
     fn identify(&self) -> IoResult<()>;
     fn output(&mut self) -> IoResult<()>;
     fn config(&self) -> &Config;
+    fn get_users(&self, chan: &str) -> Option<Vec<data::User>>;
 }
 
 fn process(msg: &str) -> IoResult<(&str, &str, Vec<&str>)> {

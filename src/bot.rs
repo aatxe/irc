@@ -3,13 +3,13 @@ use std::collections::HashMap;
 use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 use {Bot, process};
 use conn::Connection;
-use data::{Config, IrcReader, IrcWriter, Message};
+use data::{Config, IrcReader, IrcWriter, Message, User};
 
 pub struct IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     pub conn: Connection<T, U>,
     pub config: Config,
     process: RefCell<|&IrcBot<T, U>, &str, &str, &[&str]|:'a -> IoResult<()>>,
-    pub chanlists: RefCell<HashMap<String, Vec<String>>>,
+    chanlists: RefCell<HashMap<String, Vec<User>>>,
 }
 
 impl<'a> IrcBot<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
@@ -87,6 +87,10 @@ impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     fn config(&self) -> &Config {
         &self.config
     }
+
+    fn get_users(&self, chan: &str) -> Option<Vec<User>> {
+        self.chanlists.borrow_mut().find_copy(&chan.into_string())
+    }
 }
 
 impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
@@ -118,42 +122,29 @@ impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
                 for user in users.split_str(" ") {
                     if !match self.chanlists.borrow_mut().find_mut(&String::from_str(chan)) {
                         Some(vec) => {
-                            vec.push(String::from_str(user));
+                            vec.push(User::new(user));
                             true
                         },
                         None => false,
                     } {
-                        self.chanlists.borrow_mut().insert(String::from_str(chan), vec!(String::from_str(user)));
+                        self.chanlists.borrow_mut().insert(String::from_str(chan), vec!(User::new(user)));
                     }
                 }
             },
             ("JOIN", [chan]) => {
-                match self.chanlists.borrow_mut().find_mut(&String::from_str(chan)) {
-                    Some(vec) => {
-                        match source.find('!') {
-                            Some(i) => vec.push(String::from_str(source.slice_to(i))),
-                            None => (),
-                        };
-                    },
-                    None => (),
+                if let Some(vec) = self.chanlists.borrow_mut().find_mut(&String::from_str(chan)) {
+                    if let Some(i) = source.find('!') {
+                        vec.push(User::new(source[..i]))
+                    }
                 }
             },
             ("PART", [chan, _]) => {
-                match self.chanlists.borrow_mut().find_mut(&String::from_str(chan)) {
-                    Some(vec) => {
-                        match source.find('!') {
-                            Some(i) => {
-                                match vec.as_slice().position_elem(&String::from_str(source.slice_to(i))) {
-                                    Some(n) => {
-                                        vec.swap_remove(n);
-                                    },
-                                    None => (),
-                                };
-                            },
-                            None => (),
-                        };
-                    },
-                    None => (),
+                if let Some(vec) = self.chanlists.borrow_mut().find_mut(&String::from_str(chan)) {
+                    if let Some(i) = source.find('!') {
+                        if let Some(n) = vec.as_slice().position_elem(&User::new(source[..i])) {
+                            vec.swap_remove(n);
+                        }
+                    }
                 }
             },
             _ => {
@@ -171,7 +162,7 @@ mod test {
     use std::io::{BufReader, MemWriter};
     use std::io::util::{NullReader, NullWriter};
     use conn::Connection;
-    use data::IrcReader;
+    use data::{IrcReader, User};
 
     fn data<U>(conn: Connection<MemWriter, U>) -> String where U: IrcReader {
         String::from_utf8(conn.writer().deref_mut().get_ref().to_vec()).unwrap()
@@ -305,7 +296,7 @@ mod test {
         };
         assert!(vec_res.is_ok());
         let vec = vec_res.unwrap();
-        assert_eq!(vec, vec![String::from_str("test"), String::from_str("test2"), String::from_str("test3")]);
+        assert_eq!(vec, vec![User::new("test"), User::new("test2"), User::new("test3")]);
     }
 
     #[test]
@@ -320,7 +311,7 @@ mod test {
         };
         assert!(vec_res.is_ok());
         let vec = vec_res.unwrap();
-        assert_eq!(vec, vec![String::from_str("test"), String::from_str("test2"), String::from_str("test3")]);
+        assert_eq!(vec, vec![User::new("test"), User::new("test2"), User::new("test3")]);
     }
 
     #[test]
@@ -336,6 +327,6 @@ mod test {
         assert!(vec_res.is_ok());
         let vec = vec_res.unwrap();
         // n.b. ordering is not guaranteed, this only ought to hold because we're removing the last user
-        assert_eq!(vec, vec![String::from_str("test"), String::from_str("test2")]);
+        assert_eq!(vec, vec![User::new("test"), User::new("test2")]);
     }
 }

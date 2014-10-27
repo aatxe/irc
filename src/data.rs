@@ -7,6 +7,48 @@ impl<T> IrcWriter for T where T: Writer + Sized + 'static {}
 pub trait IrcReader: Buffer + Sized + 'static {}
 impl<T> IrcReader for T where T: Buffer + Sized + 'static {}
 
+#[deriving(PartialEq, Clone, Show)]
+pub struct User {
+    name: String,
+    access_level: AccessLevel,
+}
+
+impl User {
+    pub fn new(name: &str) -> User {
+        let rank = AccessLevel::from_str(name);
+        User {
+            name: if let Member = rank {
+                name.into_string()
+            } else {
+                name[1..].into_string()
+            },
+            access_level: rank,
+        }
+    }
+}
+
+#[deriving(PartialEq, Clone, Show)]
+pub enum AccessLevel {
+    Owner,
+    Admin,
+    Oper,
+    HalfOp,
+    Voice,
+    Member,
+}
+
+impl AccessLevel {
+    pub fn from_str(s: &str) -> AccessLevel {
+        match s.char_at(0) {
+            '~' => Owner,
+            '&' => Admin,
+            '@' => Oper,
+            '%' => HalfOp,
+            '+' => Voice,
+             _  => Member,
+        }
+    }
+}
 
 #[deriving(Show, PartialEq)]
 pub struct Message<'a> {
