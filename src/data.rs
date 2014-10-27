@@ -39,13 +39,15 @@ pub enum AccessLevel {
 
 impl AccessLevel {
     pub fn from_str(s: &str) -> AccessLevel {
-        match s.char_at(0) {
-            '~' => Owner,
-            '&' => Admin,
-            '@' => Oper,
-            '%' => HalfOp,
-            '+' => Voice,
-             _  => Member,
+        if s.len() == 0 { Member } else {
+            match s.char_at(0) {
+                '~' => Owner,
+                '&' => Admin,
+                '@' => Oper,
+                '%' => HalfOp,
+                '+' => Voice,
+                 _  => Member,
+            }
         }
     }
 }
