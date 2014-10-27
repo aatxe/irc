@@ -83,7 +83,7 @@ impl Config {
     pub fn load() -> IoResult<Config> {
         let mut file = try!(File::open(&Path::new("config.json")));
         let data = try!(file.read_to_string());
-        decode(data.as_slice()).map_err(|e| IoError {
+        decode(data[]).map_err(|e| IoError {
             kind: InvalidInput,
             desc: "Decoder error",
             detail: Some(e.to_string()),
@@ -91,7 +91,7 @@ impl Config {
     }
 
     pub fn is_owner(&self, nickname: &str) -> bool {
-        self.owners.as_slice().contains(&String::from_str(nickname))
+        self.owners[].contains(&String::from_str(nickname))
     }
 }
 

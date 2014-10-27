@@ -32,12 +32,12 @@ impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
         let mut send = msg.command.to_string();
         if msg.args.init().len() > 0 {
             send.push_str(" ");
-            send.push_str(msg.args.init().connect(" ").as_slice());
+            send.push_str(msg.args.init().connect(" ")[]);
         }
         send.push_str(" :");
         send.push_str(*msg.args.last().unwrap());
         send.push_str("\r\n");
-        self.send_internal(send.as_slice())
+        self.send_internal(send[])
     }
 
     pub fn writer<'a>(&'a self) -> RefMut<'a, T> {
@@ -54,7 +54,11 @@ mod test {
     use super::Connection;
     use std::io::MemWriter;
     use std::io::util::NullReader;
-    use data::Message;
+    use data::{IrcReader, Message};
+
+    fn data<U>(conn: Connection<MemWriter, U>) -> String where U: IrcReader {
+        String::from_utf8(conn.writer().deref_mut().get_ref().to_vec()).unwrap()
+    }
 
     #[test]
     fn new_connection() {
@@ -65,7 +69,7 @@ mod test {
     fn send_internal() {
         let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         c.send_internal("string of text").unwrap();
-        assert_eq!(c.writer().deref_mut().get_ref(), "string of text".as_bytes());
+        assert_eq!(data(c), format!("string of text"));
     }
 
     #[test]
@@ -73,6 +77,6 @@ mod test {
         let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let args = ["flare.to.ca.fyrechat.net"];
         c.send(Message::new(None, "PING", args)).unwrap();
-        assert_eq!(c.writer().deref_mut().get_ref(), "PING :flare.to.ca.fyrechat.net\r\n".as_bytes());
+        assert_eq!(data(c), format!("PING :flare.to.ca.fyrechat.net\r\n"));
     }
 }

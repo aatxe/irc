@@ -15,7 +15,7 @@ pub struct IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
 impl<'a> IrcBot<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
     pub fn new(process: |&IrcBot<BufferedWriter<TcpStream>, BufferedReader<TcpStream>>, &str, &str, &[&str]|:'a -> IoResult<()>) -> IoResult<IrcBot<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
         let config = try!(Config::load());
-        let conn = try!(Connection::connect(config.server.as_slice(), config.port));
+        let conn = try!(Connection::connect(config.server[], config.port));
         Ok(IrcBot {
             conn: conn,
             config: config,
@@ -35,35 +35,35 @@ impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     }
 
     fn send_join(&self, chan: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "JOIN", [chan.as_slice()]))
+        self.conn.send(Message::new(None, "JOIN", [chan[]]))
     }
 
     fn send_mode(&self, chan: &str, mode: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "MODE", [chan.as_slice(), mode.as_slice()]))
+        self.conn.send(Message::new(None, "MODE", [chan[], mode[]]))
     }
 
     fn send_topic(&self, chan: &str, topic: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "TOPIC", [chan.as_slice(), topic.as_slice()]))
+        self.conn.send(Message::new(None, "TOPIC", [chan[], topic[]]))
     }
 
     fn send_invite(&self, person: &str, chan: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "INVITE", [person.as_slice(), chan.as_slice()]))
+        self.conn.send(Message::new(None, "INVITE", [person[], chan[]]))
     }
 
     fn send_kick(&self, chan: &str, user: &str, msg: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "KICK", [chan.as_slice(), user.as_slice(), msg.as_slice()]))
+        self.conn.send(Message::new(None, "KICK", [chan[], user[], msg[]]))
     }
 
     fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()> {
         for line in msg.split_str("\r\n") {
-            try!(self.conn.send(Message::new(None, "PRIVMSG", [chan.as_slice(), line.as_slice()])));
+            try!(self.conn.send(Message::new(None, "PRIVMSG", [chan[], line[]])));
         }
         Ok(())
     }
 
     fn identify(&self) -> IoResult<()> {
-        try!(self.send_nick(self.config.nickname.as_slice()));
-        self.send_user(self.config.username.as_slice(), self.config.realname.as_slice())
+        try!(self.send_nick(self.config.nickname[]));
+        self.send_user(self.config.username[], self.config.realname[])
     }
 
     fn output(&mut self) -> IoResult<()> {
@@ -71,8 +71,8 @@ impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
         for line in reader.lines() {
             match line {
                 Ok(ln) => {
-                    let (source, command, args) = try!(process(ln.as_slice()));
-                    try!(self.handle_command(source, command, args.as_slice()));
+                    let (source, command, args) = try!(process(ln[]));
+                    try!(self.handle_command(source, command, args[]));
                     println!("{}", ln)
                 },
                 Err(e) => {
@@ -110,24 +110,21 @@ impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
             },
             ("376", _) => { // End of MOTD
                 for chan in self.config.channels.iter() {
-                    try!(self.send_join(chan.as_slice()));
+                    try!(self.send_join(chan[]));
                 }
             },
             ("422", _) => { // Missing MOTD
                 for chan in self.config.channels.iter() {
-                    try!(self.send_join(chan.as_slice()));
+                    try!(self.send_join(chan[]));
                 }
             },
             ("353", [_, _, chan, users]) => { // /NAMES
                 for user in users.split_str(" ") {
                     if !match self.chanlists.borrow_mut().find_mut(&String::from_str(chan)) {
-                        Some(vec) => {
-                            vec.push(User::new(user));
-                            true
-                        },
+                        Some(vec) => { vec.push(User::new(user)); true },
                         None => false,
                     } {
-                        self.chanlists.borrow_mut().insert(String::from_str(chan), vec!(User::new(user)));
+                        self.chanlists.borrow_mut().insert(chan.into_string(), vec!(User::new(user)));
                     }
                 }
             },
@@ -243,7 +240,7 @@ mod test {
         let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_privmsg("#test", "This is a test message.\r\nIt has two lines.").unwrap();
-        let mut exp = String::from_str("PRIVMSG #test :This is a test message.\r\n");
+        let mut exp = format!("PRIVMSG #test :This is a test message.\r\n");
         exp.push_str("PRIVMSG #test :It has two lines.\r\n");
         assert_eq!(data(b.conn), format!("{}", exp));
 
