@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::io::fs::File;
 use std::io::{InvalidInput, IoError, IoResult};
 use serialize::json::{decode};
@@ -79,6 +80,7 @@ pub struct Config {
     pub server: String,
     pub port: u16,
     pub channels: Vec<String>,
+    pub options: HashMap<String, String>,
 }
 
 impl Config {
