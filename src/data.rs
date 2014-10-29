@@ -58,14 +58,16 @@ pub struct Message<'a> {
     pub source: Option<&'a str>,
     pub command: &'a str,
     pub args: &'a [&'a str],
+    pub colon_flag: bool,
 }
 
 impl<'a> Message<'a> {
-    pub fn new(source: Option<&'a str>, command: &'a str, args: &'a [&'a str]) -> Message<'a> {
+    pub fn new(source: Option<&'a str>, command: &'a str, args: &'a [&'a str], colon_flag: bool) -> Message<'a> {
         Message {
             source: source,
             command: command,
             args: args,
+            colon_flag: colon_flag,
         }
     }
 }
@@ -106,11 +108,12 @@ mod test {
     #[test]
     fn new_message() {
         let args = ["flare.to.ca.fyrechat.net"];
-        let m = Message::new(None, "PING", args);
+        let m = Message::new(None, "PING", args, true);
         assert_eq!(m, Message {
             source: None,
             command: "PING",
             args: args,
+            colon_flag: true,
         });
     }
 

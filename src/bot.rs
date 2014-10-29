@@ -27,52 +27,52 @@ impl<'a> IrcBot<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
 
 impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     fn send_sanick(&self, old_nick: &str, new_nick: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "SANICK", [old_nick, new_nick]))
+        self.conn.send(Message::new(None, "SANICK", [old_nick, new_nick], false))
     }
 
     fn send_nick(&self, nick: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "NICK", [nick]))
+        self.conn.send(Message::new(None, "NICK", [nick], true))
     }
 
     fn send_user(&self, username: &str, real_name: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "USER", [username, "0", "*", real_name]))
+        self.conn.send(Message::new(None, "USER", [username, "0", "*", real_name], true))
     }
 
     fn send_join(&self, chan: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "JOIN", [chan]))
+        self.conn.send(Message::new(None, "JOIN", [chan], true))
     }
 
     fn send_samode(&self, target: &str, mode: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "SAMODE", [target, mode]))
+        self.conn.send(Message::new(None, "SAMODE", [target, mode], false))
     }
 
     fn send_mode(&self, target: &str, mode: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "MODE", [target, mode]))
+        self.conn.send(Message::new(None, "MODE", [target, mode], false))
     }
 
     fn send_oper(&self, name: &str, password: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "OPER", [name, password]))
+        self.conn.send(Message::new(None, "OPER", [name, password], false))
     }
 
     fn send_topic(&self, chan: &str, topic: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "TOPIC", [chan, topic]))
+        self.conn.send(Message::new(None, "TOPIC", [chan, topic], true))
     }
 
     fn send_invite(&self, person: &str, chan: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "INVITE", [person, chan]))
+        self.conn.send(Message::new(None, "INVITE", [person, chan], true))
     }
 
     fn send_kick(&self, chan: &str, user: &str, msg: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "KICK", [chan, user, msg]))
+        self.conn.send(Message::new(None, "KICK", [chan, user, msg], true))
     }
 
     fn send_kill(&self, nick: &str, msg: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "KILL", [nick, msg]))
+        self.conn.send(Message::new(None, "KILL", [nick, msg], true))
     }
 
     fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()> {
         for line in msg.split_str("\r\n") {
-            try!(self.conn.send(Message::new(None, "PRIVMSG", [chan, line])));
+            try!(self.conn.send(Message::new(None, "PRIVMSG", [chan, line], true)));
         }
         Ok(())
     }
@@ -122,7 +122,7 @@ impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     fn handle_command(&self, source: &str, command: &str, args: &[&str]) -> IoResult<()> {
         match (command, args) {
             ("PING", [msg]) => {
-                try!(self.conn.send(Message::new(None, "PONG", [msg])));
+                try!(self.conn.send(Message::new(None, "PONG", [msg], true)));
             },
             ("376", _) => { // End of MOTD
                 for chan in self.config.channels.iter() {
@@ -192,7 +192,7 @@ mod test {
         let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_sanick("test", "test2").unwrap();
-        assert_eq!(data(b.conn), format!("SANICK test :test2\r\n"));
+        assert_eq!(data(b.conn), format!("SANICK test test2\r\n"));
     }
 
     #[test]
@@ -224,7 +224,7 @@ mod test {
         let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_samode("#test", "+i").unwrap();
-        assert_eq!(data(b.conn), format!("SAMODE #test :+i\r\n"));
+        assert_eq!(data(b.conn), format!("SAMODE #test +i\r\n"));
     }
 
     #[test]
@@ -232,7 +232,7 @@ mod test {
         let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_mode("#test", "+i").unwrap();
-        assert_eq!(data(b.conn), format!("MODE #test :+i\r\n"));
+        assert_eq!(data(b.conn), format!("MODE #test +i\r\n"));
     }
 
     #[test]
@@ -240,7 +240,7 @@ mod test {
         let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_oper("test", "test").unwrap();
-        assert_eq!(data(b.conn), format!("OPER test :test\r\n"));
+        assert_eq!(data(b.conn), format!("OPER test test\r\n"));
     }
 
     #[test]

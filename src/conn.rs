@@ -34,7 +34,8 @@ impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
             send.push_str(" ");
             send.push_str(msg.args.init().connect(" ")[]);
         }
-        send.push_str(" :");
+        send.push_str(" ");
+        if msg.colon_flag { send.push_str(":") }
         send.push_str(*msg.args.last().unwrap());
         send.push_str("\r\n");
         self.send_internal(send[])
@@ -76,7 +77,7 @@ mod test {
     fn send() {
         let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let args = ["flare.to.ca.fyrechat.net"];
-        c.send(Message::new(None, "PING", args)).unwrap();
+        c.send(Message::new(None, "PING", args, true)).unwrap();
         assert_eq!(data(c), format!("PING :flare.to.ca.fyrechat.net\r\n"));
     }
 }
