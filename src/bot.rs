@@ -26,6 +26,10 @@ impl<'a> IrcBot<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
 }
 
 impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
+    fn send_sanick(&self, old_nick: &str, new_nick: &str) -> IoResult<()> {
+        self.conn.send(Message::new(None, "SANICK", [old_nick, new_nick]))
+    }
+
     fn send_nick(&self, nick: &str) -> IoResult<()> {
         self.conn.send(Message::new(None, "NICK", [nick]))
     }
@@ -35,32 +39,32 @@ impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     }
 
     fn send_join(&self, chan: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "JOIN", [chan[]]))
+        self.conn.send(Message::new(None, "JOIN", [chan]))
     }
 
     fn send_mode(&self, chan: &str, mode: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "MODE", [chan[], mode[]]))
+        self.conn.send(Message::new(None, "MODE", [chan, mode]))
     }
 
     fn send_oper(&self, name: &str, password: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "OPER", [name[], password[]]))
+        self.conn.send(Message::new(None, "OPER", [name, password]))
     }
 
     fn send_topic(&self, chan: &str, topic: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "TOPIC", [chan[], topic[]]))
+        self.conn.send(Message::new(None, "TOPIC", [chan, topic]))
     }
 
     fn send_invite(&self, person: &str, chan: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "INVITE", [person[], chan[]]))
+        self.conn.send(Message::new(None, "INVITE", [person, chan]))
     }
 
     fn send_kick(&self, chan: &str, user: &str, msg: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "KICK", [chan[], user[], msg[]]))
+        self.conn.send(Message::new(None, "KICK", [chan, user, msg]))
     }
 
     fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()> {
         for line in msg.split_str("\r\n") {
-            try!(self.conn.send(Message::new(None, "PRIVMSG", [chan[], line[]])));
+            try!(self.conn.send(Message::new(None, "PRIVMSG", [chan, line])));
         }
         Ok(())
     }
