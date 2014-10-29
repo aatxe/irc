@@ -147,7 +147,7 @@ impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
             ("JOIN", [chan]) => {
                 if let Some(vec) = self.chanlists.borrow_mut().find_mut(&String::from_str(chan)) {
                     if let Some(i) = source.find('!') {
-                        vec.push(User::new(source[..i]))
+                        vec.push(User::new(source[..i]));
                     }
                 }
             },
@@ -160,11 +160,9 @@ impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
                     }
                 }
             },
-            _ => {
-                try!((*self.process.borrow_mut().deref_mut())(self, source, command, args));
-            },
+            _ => (),
         };
-        Ok(())
+        (*self.process.borrow_mut().deref_mut())(self, source, command, args)
     }
 }
 
