@@ -62,6 +62,10 @@ impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
         self.conn.send(Message::new(None, "KICK", [chan, user, msg]))
     }
 
+    fn send_kill(&self, nick: &str, msg: &str) -> IoResult<()> {
+        self.conn.send(Message::new(None, "KILL", [nick, msg]))
+    }
+
     fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()> {
         for line in msg.split_str("\r\n") {
             try!(self.conn.send(Message::new(None, "PRIVMSG", [chan, line])));
@@ -249,6 +253,14 @@ mod test {
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_kick("#test", "test2", "Goodbye.").unwrap();
         assert_eq!(data(b.conn), format!("KICK #test test2 :Goodbye.\r\n"));
+    }
+
+    #[test]
+    fn send_kill() {
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_kill("test", "Goodbye.").unwrap();
+        assert_eq!(data(b.conn), format!("KILL test :Goodbye.\r\n"));
     }
 
     #[test]
