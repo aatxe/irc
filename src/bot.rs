@@ -180,6 +180,14 @@ mod test {
     }
 
     #[test]
+    fn send_sanick() {
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_sanick("test", "test2").unwrap();
+        assert_eq!(data(b.conn), format!("SANICK test :test2\r\n"));
+    }
+
+    #[test]
     fn send_nick() {
         let c = Connection::new(MemWriter::new(), NullReader).unwrap();
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
