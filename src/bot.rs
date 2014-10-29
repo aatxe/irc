@@ -42,6 +42,10 @@ impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
         self.conn.send(Message::new(None, "MODE", [chan[], mode[]]))
     }
 
+    fn send_oper(&self, name: &str, password: &str) -> IoResult<()> {
+        self.conn.send(Message::new(None, "OPER", [name[], password[]]))
+    }
+
     fn send_topic(&self, chan: &str, topic: &str) -> IoResult<()> {
         self.conn.send(Message::new(None, "TOPIC", [chan[], topic[]]))
     }
@@ -201,6 +205,14 @@ mod test {
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_mode("#test", "+i").unwrap();
         assert_eq!(data(b.conn), format!("MODE #test :+i\r\n"));
+    }
+
+    #[test]
+    fn send_oper() {
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_oper("test", "test").unwrap();
+        assert_eq!(data(b.conn), format!("OPER test :test\r\n"));
     }
 
     #[test]
