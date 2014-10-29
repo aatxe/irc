@@ -42,8 +42,12 @@ impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
         self.conn.send(Message::new(None, "JOIN", [chan]))
     }
 
-    fn send_mode(&self, chan: &str, mode: &str) -> IoResult<()> {
-        self.conn.send(Message::new(None, "MODE", [chan, mode]))
+    fn send_samode(&self, target: &str, mode: &str) -> IoResult<()> {
+        self.conn.send(Message::new(None, "SAMODE", [target, mode]))
+    }
+
+    fn send_mode(&self, target: &str, mode: &str) -> IoResult<()> {
+        self.conn.send(Message::new(None, "MODE", [target, mode]))
     }
 
     fn send_oper(&self, name: &str, password: &str) -> IoResult<()> {
@@ -213,6 +217,14 @@ mod test {
         let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
         b.send_join("#test").unwrap();
         assert_eq!(data(b.conn), format!("JOIN :#test\r\n"));
+    }
+
+    #[test]
+    fn send_samode() {
+        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
+        let b = IrcBot::from_connection(c, |_, _, _, _| { Ok(()) }).unwrap();
+        b.send_samode("#test", "+i").unwrap();
+        assert_eq!(data(b.conn), format!("SAMODE #test :+i\r\n"));
     }
 
     #[test]
