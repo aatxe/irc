@@ -86,8 +86,8 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load() -> IoResult<Config> {
-        let mut file = try!(File::open(&Path::new("config.json")));
+    pub fn load(path: &str) -> IoResult<Config> {
+        let mut file = try!(File::open(&Path::new(path)));
         let data = try!(file.read_to_string());
         decode(data[]).map_err(|e| IoError {
             kind: InvalidInput,
@@ -119,12 +119,12 @@ mod test {
 
     #[test]
     fn load_config() {
-        assert!(Config::load().is_ok());
+        assert!(Config::load("config.json").is_ok());
     }
 
     #[test]
     fn is_owner() {
-        let cfg = Config::load().unwrap();
+        let cfg = Config::load("config.json").unwrap();
         assert!(cfg.is_owner("test"));
         assert!(!cfg.is_owner("test2"));
     }
