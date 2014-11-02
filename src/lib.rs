@@ -3,12 +3,9 @@
 #![crate_type = "lib"]
 
 #![feature(if_let)]
-#![feature(phase)]
 #![feature(slicing_syntax)]
-extern crate regex;
-#[phase(plugin)] extern crate regex_macros;
 extern crate serialize;
 
-mod conn;
+    mod conn;
+pub mod data;
 pub mod server;
-mod utils;
