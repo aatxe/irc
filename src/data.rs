@@ -86,14 +86,18 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load(path: &str) -> IoResult<Config> {
-        let mut file = try!(File::open(&Path::new(path)));
+    pub fn load(path: Path) -> IoResult<Config> {
+        let mut file = try!(File::open(&path));
         let data = try!(file.read_to_string());
         decode(data[]).map_err(|e| IoError {
             kind: InvalidInput,
             desc: "Decoder error",
             detail: Some(e.to_string()),
         })
+    }
+
+    pub fn load_utf8(path: &str) -> IoResult<Config> {
+        Config::load(Path::new(path))
     }
 
     pub fn is_owner(&self, nickname: &str) -> bool {
@@ -119,12 +123,12 @@ mod test {
 
     #[test]
     fn load_config() {
-        assert!(Config::load("config.json").is_ok());
+        assert!(Config::load_utf8("config.json").is_ok());
     }
 
     #[test]
     fn is_owner() {
-        let cfg = Config::load("config.json").unwrap();
+        let cfg = Config::load_utf8("config.json").unwrap();
         assert!(cfg.is_owner("test"));
         assert!(!cfg.is_owner("test2"));
     }

@@ -14,7 +14,7 @@ pub struct IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
 
 impl<'a> IrcBot<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
     pub fn new(process: |&IrcBot<BufferedWriter<TcpStream>, BufferedReader<TcpStream>>, &str, &str, &[&str]|:'a -> IoResult<()>) -> IoResult<IrcBot<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
-        let config = try!(Config::load("config.json"));
+        let config = try!(Config::load_utf8("config.json"));
         let conn = try!(Connection::connect(config.server[], config.port));
         Ok(IrcBot {
             conn: conn,
@@ -123,7 +123,7 @@ impl<'a, T, U> IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
     pub fn from_connection(conn: Connection<T, U>, process: |&IrcBot<T, U>, &str, &str, &[&str]|:'a -> IoResult<()>) -> IoResult<IrcBot<'a, T, U>> {
         Ok(IrcBot {
             conn: conn,
-            config: try!(Config::load("config.json")),
+            config: try!(Config::load_utf8("config.json")),
             process: RefCell::new(process),
             chanlists: RefCell::new(HashMap::new()),
         })
