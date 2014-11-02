@@ -23,9 +23,9 @@ impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
         }
     }
 
-    pub fn send(&self, msg: Message) -> IoResult<()> {
+    pub fn send(&self, message: Message) -> IoResult<()> {
         let mut send = self.writer.lock();
-        try!(send.write_str(msg.into_string()[]));
+        try!(send.write_str(message.into_string()[]));
         send.flush()
     }
 
