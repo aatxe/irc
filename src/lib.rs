@@ -6,28 +6,14 @@ extern crate regex;
 extern crate serialize;
 
 use std::io::{InvalidInput, IoError, IoResult};
-use data::Config;
 
 pub mod bot;
 pub mod conn;
 pub mod data;
 
-pub trait Bot {
-    fn send_sanick(&self, old_nick: &str, new_nick: &str) -> IoResult<()>;
-    fn send_nick(&self, nick: &str) -> IoResult<()>;
-    fn send_user(&self, username: &str, real_name: &str) -> IoResult<()>;
-    fn send_join(&self, chan: &str) -> IoResult<()>;
-    fn send_samode(&self, target: &str, mode: &str) -> IoResult<()>;
-    fn send_mode(&self, target: &str, mode: &str) -> IoResult<()>;
-    fn send_oper(&self, name: &str, password: &str) -> IoResult<()>;
-    fn send_topic(&self, chan: &str, topic: &str) -> IoResult<()>;
-    fn send_invite(&self, person: &str, chan: &str) -> IoResult<()>;
-    fn send_privmsg(&self, chan: &str, msg: &str) -> IoResult<()>;
-    fn send_kick(&self, chan: &str, user: &str, msg: &str) -> IoResult<()>;
-    fn send_kill(&self, nick: &str, msg: &str) -> IoResult<()>;
-    fn identify(&self) -> IoResult<()>;
-    fn output(&mut self) -> IoResult<()>;
-    fn config(&self) -> &Config;
+pub trait Server<'a>: Iterator<data::Message> {
+    fn send(&self, message: data::Message) -> IoResult<()>;
+    fn config(&self) -> &data::Config;
     fn get_users(&self, chan: &str) -> Option<Vec<data::User>>;
 }
 

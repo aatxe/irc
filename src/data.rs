@@ -54,19 +54,19 @@ impl AccessLevel {
 }
 
 #[deriving(Show, PartialEq)]
-pub struct Message<'a> {
-    pub source: Option<&'a str>,
-    pub command: &'a str,
-    pub args: &'a [&'a str],
-    pub colon_flag: bool,
+pub struct Message {
+    pub source: Option<String>,
+    pub command: String,
+    pub args: Vec<String>,
+    pub colon_flag: Option<bool>,
 }
 
-impl<'a> Message<'a> {
-    pub fn new(source: Option<&'a str>, command: &'a str, args: &'a [&'a str], colon_flag: bool) -> Message<'a> {
+impl<'a> Message {
+    pub fn new(source: Option<&'a str>, command: &'a str, args: Vec<&'a str>, colon_flag: Option<bool>) -> Message {
         Message {
-            source: source,
-            command: command,
-            args: args,
+            source: source.map(|s: &str| s.into_string()),
+            command: command.into_string(),
+            args: args.into_iter().map(|s: &str| s.into_string()).collect(),
             colon_flag: colon_flag,
         }
     }
@@ -102,34 +102,5 @@ impl Config {
 
     pub fn is_owner(&self, nickname: &str) -> bool {
         self.owners[].contains(&String::from_str(nickname))
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::{Config, Message};
-
-    #[test]
-    fn new_message() {
-        let args = ["flare.to.ca.fyrechat.net"];
-        let m = Message::new(None, "PING", args, true);
-        assert_eq!(m, Message {
-            source: None,
-            command: "PING",
-            args: args,
-            colon_flag: true,
-        });
-    }
-
-    #[test]
-    fn load_config() {
-        assert!(Config::load_utf8("config.json").is_ok());
-    }
-
-    #[test]
-    fn is_owner() {
-        let cfg = Config::load_utf8("config.json").unwrap();
-        assert!(cfg.is_owner("test"));
-        assert!(!cfg.is_owner("test2"));
     }
 }

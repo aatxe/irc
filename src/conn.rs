@@ -35,8 +35,8 @@ impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
             send.push_str(msg.args.init().connect(" ")[]);
         }
         send.push_str(" ");
-        if msg.colon_flag { send.push_str(":") }
-        send.push_str(*msg.args.last().unwrap());
+        if msg.colon_flag.is_some() { send.push_str(":") }
+        send.push_str(msg.args.last().unwrap()[]);
         send.push_str("\r\n");
         self.send_internal(send[])
     }
@@ -47,37 +47,5 @@ impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
 
     pub fn reader<'a>(&'a self) -> RefMut<'a, U> {
         self.reader.borrow_mut()
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::Connection;
-    use std::io::MemWriter;
-    use std::io::util::NullReader;
-    use data::{IrcReader, Message};
-
-    fn data<U>(conn: Connection<MemWriter, U>) -> String where U: IrcReader {
-        String::from_utf8(conn.writer().deref_mut().get_ref().to_vec()).unwrap()
-    }
-
-    #[test]
-    fn new_connection() {
-        assert!(Connection::new(MemWriter::new(), NullReader).is_ok());
-    }
-
-    #[test]
-    fn send_internal() {
-        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
-        c.send_internal("string of text").unwrap();
-        assert_eq!(data(c), format!("string of text"));
-    }
-
-    #[test]
-    fn send() {
-        let c = Connection::new(MemWriter::new(), NullReader).unwrap();
-        let args = ["flare.to.ca.fyrechat.net"];
-        c.send(Message::new(None, "PING", args, true)).unwrap();
-        assert_eq!(data(c), format!("PING :flare.to.ca.fyrechat.net\r\n"));
     }
 }
