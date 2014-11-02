@@ -5,4 +5,5 @@ pub mod kinds {
     impl<T> IrcReader for T where T: Buffer + Sized + Send + 'static {}
 }
 
+pub mod config;
 pub mod message;
