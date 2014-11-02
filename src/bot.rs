@@ -23,6 +23,16 @@ impl<'a> IrcBot<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
             chanlists: RefCell::new(HashMap::new()),
         })
     }
+
+    pub fn new_with_config(config: Config, process: |&IrcBot<BufferedWriter<TcpStream>, BufferedReader<TcpStream>>, &str, &str, &[&str]|:'a -> IoResult<()>) -> IoResult<IrcBot<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
+        let conn = try!(Connection::connect(config.server[], config.port));
+        Ok(IrcBot {
+            conn: conn,
+            config: config,
+            process: RefCell::new(process),
+            chanlists: RefCell::new(HashMap::new()),
+        })
+    }
 }
 
 impl<'a, T, U> Bot for IrcBot<'a, T, U> where T: IrcWriter, U: IrcReader {
