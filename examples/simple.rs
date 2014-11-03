@@ -21,6 +21,6 @@ fn main() {
     let server = IrcServer::from_config(config).unwrap();
     identify(&server).unwrap();
     for message in server.iter() {
-        println!("{}", message);
+        print!("{}", message.into_string());
     }
 }
