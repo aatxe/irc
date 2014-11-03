@@ -2,7 +2,7 @@
 #![experimental]
 use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 use conn::Connection;
-use data::command::Command;
+use data::command::{Command, JOIN, PONG};
 use data::config::Config;
 use data::kinds::{IrcReader, IrcWriter};
 use data::message::Message;
@@ -73,10 +73,10 @@ impl<'a, T, U> IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
     /// Handles messages internally for basic bot functionality
     fn handle_message(&self, message: &Message) {
         if message.command[] == "PING" {
-            utils::send_pong(self, message.suffix.as_ref().unwrap()[]).unwrap();
+            self.send(PONG(message.suffix.as_ref().unwrap()[], None)).unwrap();
         } else if message.command[] == "376" || message.command[] == "422" {
             for chan in self.config.channels.iter() {
-                utils::send_join(self, chan[]).unwrap();
+                self.send(JOIN(chan[], None)).unwrap();
             }
         }
         /* TODO: implement more message handling */

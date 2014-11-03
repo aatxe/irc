@@ -5,7 +5,7 @@ extern crate irc;
 use std::collections::HashMap;
 use irc::data::config::Config;
 use irc::server::{IrcServer, Server};
-use irc::server::utils::{identify, send_privmsg};
+use irc::server::utils::Wrapper;
 
 fn main() {
     let config = Config {
@@ -19,14 +19,15 @@ fn main() {
         channels: vec!("#vana".into_string()),
         options: HashMap::new(),
     };
-    let server = IrcServer::from_config(config).unwrap();
-    identify(&server).unwrap();
+    let ircserver = IrcServer::from_config(config).unwrap();
+    let server = Wrapper::new(&ircserver);
+    server.identify().unwrap();
     for message in server.iter() {
         print!("{}", message.into_string());
         if message.command[] == "PRIVMSG" {
             if let Some(msg) = message.suffix {
                 if msg.contains("pickles") {
-                    send_privmsg(&server, message.args[0][], "Hi!").unwrap();
+                    server.send_privmsg(message.args[0][], "Hi!").unwrap();
                 }
             }
         }
