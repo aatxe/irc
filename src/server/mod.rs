@@ -7,6 +7,8 @@ use data::config::Config;
 use data::kinds::{IrcReader, IrcWriter};
 use data::message::Message;
 
+pub mod utils;
+
 /// Trait describing core Server functionality
 #[experimental]
 pub trait Server<'a, T, U> {
