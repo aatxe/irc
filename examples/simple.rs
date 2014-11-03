@@ -19,8 +19,8 @@ fn main() {
         channels: vec!("#vana".into_string()),
         options: HashMap::new(),
     };
-    let ircserver = IrcServer::from_config(config).unwrap();
-    let server = Wrapper::new(&ircserver);
+    let irc_server = IrcServer::from_config(config).unwrap();
+    let server = Wrapper::new(&irc_server);
     server.identify().unwrap();
     for message in server.iter() {
         print!("{}", message.into_string());

@@ -71,6 +71,7 @@ impl<'a, T, U> IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
     }
 
     /// Handles messages internally for basic bot functionality
+    #[experimental]
     fn handle_message(&self, message: &Message) {
         if message.command[] == "PING" {
             self.send(PONG(message.suffix.as_ref().unwrap()[], None)).unwrap();
