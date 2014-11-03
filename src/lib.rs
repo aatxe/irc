@@ -7,6 +7,6 @@
 #![feature(slicing_syntax)]
 extern crate serialize;
 
-    mod conn;
+pub mod conn;
 pub mod data;
 pub mod server;

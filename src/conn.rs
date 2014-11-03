@@ -1,6 +1,6 @@
 //! Thread-safe connections on any IrcWriters and IrcReaders
 #![experimental]
-use std::sync::Mutex;
+use std::sync::{Mutex, MutexGuard};
 use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 use data::kinds::{IrcWriter, IrcReader};
 use data::message::Message;
@@ -43,5 +43,11 @@ impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
     #[experimental]
     pub fn recv(&self) -> IoResult<String> {
         self.reader.lock().read_line()
+    }
+
+    /// Acquires the Writer lock
+    #[experimental]
+    pub fn writer<'a>(&'a self) -> MutexGuard<'a, T> {
+        self.writer.lock()
     }
 }

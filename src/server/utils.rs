@@ -62,7 +62,10 @@ impl<'a, T, U> Wrapper<'a, T, U> where T: IrcWriter, U: IrcReader {
     /// Sends a message to the specified target
     #[experimental]
     pub fn send_privmsg(&self, target: &str, message: &str) -> IoResult<()> {
-        self.server.send(PRIVMSG(target, message))
+        for line in message.split_str("\r\n") {
+            try!(self.server.send(PRIVMSG(target, line)))
+        }
+        Ok(())
     }
 
     /// Kills the target with the provided message

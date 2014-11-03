@@ -70,6 +70,11 @@ impl<'a, T, U> IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
         })
     }
 
+    /// Gets a reference to the IRC server's connection
+    pub fn conn(&self) -> &Connection<T, U> {
+        &self.conn
+    }
+
     /// Handles messages internally for basic bot functionality
     #[experimental]
     fn handle_message(&self, message: &Message) {
