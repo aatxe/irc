@@ -229,6 +229,20 @@ impl<'a> Command<'a> {
     /// Converts a Message into a Command
     #[stable]
     pub fn from_message(m: &'a Message) -> IoResult<Command<'a>> {
+        /* FIXME: Re-write this using match as so:
+            if let "PASS" = m.command[] {
+                match m.suffix {
+                    Some(ref suffix) => {
+                        if m.args.len() != 0 { return Err(invalid_input()) }
+                        PASS(suffix[])
+                    },
+                    None => {
+                        if m.args.len() != 1 { return Err(invalid_input()) }
+                        PASS(m.args[0][])
+                    }
+                }
+            }
+        */
         Ok(if let "PASS" = m.command[] {
             if m.suffix.is_some() {
                 if m.args.len() != 0 { return Err(invalid_input()) }
