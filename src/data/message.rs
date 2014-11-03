@@ -57,27 +57,27 @@ impl FromStr for Message {
         let mut state = s.clone();
         if s.len() == 0 { return None }
         let prefix = if state.starts_with(":") {
-            let prefix = state.find(' ').map(|i| s[1..i]);
-            state = state.find(' ').map_or("", |i| s[i..]);
+            let prefix = state.find(' ').map(|i| state[1..i]);
+            state = state.find(' ').map_or("", |i| state[i+1..]);
             prefix
         } else {
             None
         };
         let suffix = if state.contains(":") {
-            let suffix = state.find(':').map(|i| s[i..]);
-            state = state.find(':').map_or("", |i| s[..i]);
+            let suffix = state.find(':').map(|i| state[i..state.len()-1]);
+            state = state.find(':').map_or("", |i| state[..i]);
             suffix
         } else {
             None
         };
-        let command = match state.find(' ').map(|i| s[..i]) {
+        let command = match state.find(' ').map(|i| state[..i]) {
             Some(cmd) => {
-                state = state.find(' ').map_or("", |i| s[i..]);
+                state = state.find(' ').map_or("", |i| state[i+1..]);
                 cmd
             }
             _ => return None
         };
-        let args: Vec<_> = state.splitn(14, ' ').collect();
+        let args: Vec<_> = state.splitn(14, ' ').filter(|s| s.len() != 0).collect();
         Some(Message::new(prefix, command, if args.len() > 0 { Some(args) } else { None }, suffix))
     }
 }
