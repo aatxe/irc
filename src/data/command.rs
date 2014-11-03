@@ -1,101 +1,104 @@
+//! Enumeration of all available client commands
+#![stable]
 use std::io::{InvalidInput, IoError, IoResult};
 use data::message::Message;
 
-/// List of all client commands as defined in RFC 2812.
+/// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812)
+#[stable]
 #[deriving(Show, PartialEq)]
 pub enum Command {
     // 3.1 Connection Registration
-    /// PASS <password>
+    /// PASS password
     PASS(String),
-    /// NICK <nickname>
+    /// NICK nickname
     NICK(String),
-    /// USER <user> <mode> * <realname>
+    /// USER user mode * realname
     USER(String, String, String),
-    /// OPER <name> <password>
+    /// OPER name password
     OPER(String, String),
-    /// MODE <nickname> <modes>
-    /// MODE <channel> <modes> [<modeparams>]
+    /// MODE nickname modes
+    /// MODE channel modes [modeparams]
     MODE(String, String, Option<String>),
-    /// SERVICE <nickname> <reserved> <distribution> <type> <reserved> <info>
+    /// SERVICE nickname reserved distribution type reserved info
     SERVICE(String, String, String, String, String, String),
-    /// QUIT <Quit Message>
+    /// QUIT Quit Message
     QUIT(Option<String>),
-    /// SQUIT <server> <comment>
+    /// SQUIT server comment
     SQUIT(String, String),
 
     // 3.2 Channel operations
-    /// JOIN <chanlist> [<chankeys>]
+    /// JOIN chanlist [chankeys]
     JOIN(String, Option<String>),
-    /// PART <chanlist> [<Part Message>]
+    /// PART chanlist [Part Message]
     PART(String, Option<String>),
     // MODE is already defined.
     // MODE(String, String, Option<String>),
-    /// TOPIC <channel> [<topic>]
+    /// TOPIC channel [topic]
     TOPIC(String, Option<String>),
-    /// NAMES [<chanlist> [<target>]]
+    /// NAMES [chanlist [target]]
     NAMES(Option<String>, Option<String>),
-    /// LIST [<chanlist> [<target>]]
+    /// LIST [chanlist [target]]
     LIST(Option<String>, Option<String>),
-    /// INVITE <nickname> <channel>
+    /// INVITE nickname channel
     INVITE(String, String),
-    /// KICK <chanlist> <userlist> [<comment>]
+    /// KICK chanlist userlist [comment]
     KICK(String, String, Option<String>),
 
     // 3.3 Sending messages
-    /// PRIVMSG <msgtarget> <text to be sent>
+    /// PRIVMSG msgtarget text to be sent
     PRIVMSG(String, String),
-    /// NOTICE <msgtarget> <text>
+    /// NOTICE msgtarget text
     NOTICE(String, String),
 
     // 3.4 Server queries and commands
-    /// MOTD [<target>]
+    /// MOTD [target]
     MOTD(Option<String>),
-    /// LUSERS [<mask> [<target>]]
+    /// LUSERS [mask [target]]
     LUSERS(Option<String>, Option<String>),
-    /// VERSION [<target>]
+    /// VERSION [target]
     VERSION(Option<String>),
-    /// STATS [<query> [<target>]]
+    /// STATS [query [target]]
     STATS(Option<String>, Option<String>),
-    /// LINKS [[<remote server>] <server mask>]
+    /// LINKS [[remote server] server mask]
     LINKS(Option<String>, Option<String>),
-    /// TIME [<target>]
+    /// TIME [target]
     TIME(Option<String>),
-    /// CONNECT <target server> <port> [<remote server>]
+    /// CONNECT target server port [remote server]
     CONNECT(String, String, Option<String>),
-    /// TRACE [<target>]
+    /// TRACE [target]
     TRACE(Option<String>),
-    /// ADMIN [<target>]
+    /// ADMIN [target]
     ADMIN(Option<String>),
-    /// INFO [<target>]
+    /// INFO [target]
     INFO(Option<String>),
 
     // 3.5 Service Query and Commands
-    /// SERVLIST [<mask> [<type>]]
+    /// SERVLIST [mask [type]]
     SERVLIST(Option<String>, Option<String>),
-    /// SQUERY <servicename> <text>
+    /// SQUERY servicename text
     SQUERY(String, String),
 
     // 3.6 User based queries
-    /// WHO [<mask> ["o"]]
+    /// WHO [mask ["o"]]
     WHO(Option<String>, Option<bool>),
-    /// WHOIS [<target>] <masklist>
+    /// WHOIS [target] masklist
     WHOIS(Option<String>, String),
-    /// WHOWAS <nicklist> [<count> [<target>]]
+    /// WHOWAS nicklist [count [target]]
     WHOWAS(String, Option<String>, Option<String>),
 
     // 3.7 Miscellaneous messages
-    /// KILL <nickname> <comment>
+    /// KILL nickname comment
     KILL(String, String),
-    /// PING <server1> [<server2>]
+    /// PING server1 [server2]
     PING(String, Option<String>),
-    /// PONG <server> [<server2>]
+    /// PONG server [server2]
     PONG(String, Option<String>),
-    /// ERROR <error message>
+    /// ERROR error message
     ERROR(String),
 
 
     // 4 Optional Features
-    /// AWAY [<text>]
+    /// AWAY [text]
     AWAY(Option<String>),
     /// REHASH
     REHASH,
@@ -103,31 +106,33 @@ pub enum Command {
     DIE,
     /// RESTART
     RESTART,
-    /// SUMMON <user> [<target> [<channel>]]
+    /// SUMMON user [target [channel]]
     SUMMON(String, Option<String>, Option<String>),
-    /// USERS [<target>]
+    /// USERS [target]
     USERS(Option<String>),
-    /// WALLOPS <Text to be sent>
+    /// WALLOPS Text to be sent
     WALLOPS(String),
-    /// USERHOST <space-separated nicklist>
+    /// USERHOST space-separated nicklist
     USERHOST(Vec<String>),
-    /// ISON <space-separated nicklist>
+    /// ISON space-separated nicklist
     ISON(Vec<String>),
 
     // Non-RFC commands from InspIRCd
-    /// SAJOIN <nickname> <channel>
+    /// SAJOIN nickname channel
     SAJOIN(String, String),
-    /// SAMODE <target> <modes> [<modeparams>]
+    /// SAMODE target modes [modeparams]
     SAMODE(String, String, Option<String>),
-    /// SANICK <old nickname> <new nickname>
+    /// SANICK old nickname new nickname
     SANICK(String, String),
-    /// SAPART <nickname> <reason>
+    /// SAPART nickname reason
     SAPART(String, String),
-    /// SAQUIT <nickname> <reason>
+    /// SAQUIT nickname reason
     SAQUIT(String, String),
 }
 
 impl Command {
+    /// Converts a Command into a Message
+    #[stable]
     pub fn to_message(self) -> Message {
         match self {
             PASS(p) => Message::new(None, "PASS", None, Some(p[])),
@@ -221,6 +226,8 @@ impl Command {
         }
     }
 
+    /// Converts a Message into a Command
+    #[stable]
     pub fn from_message(m: Message) -> IoResult<Command> {
         Ok(if let "PASS" = m.command[] {
             if m.suffix.is_some() {
@@ -738,6 +745,8 @@ impl Command {
     }
 }
 
+/// Produces an invalid_input IoError
+#[stable]
 fn invalid_input() -> IoError {
     IoError {
         kind: InvalidInput,
