@@ -1,11 +1,12 @@
 use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 use conn::Connection;
+use data::command::Command;
 use data::config::Config;
 use data::kinds::{IrcReader, IrcWriter};
 use data::message::Message;
 
 pub trait Server<'a, T, U> {
-    fn send(&self, _: Message) -> IoResult<()>;
+    fn send(&self, _: Command) -> IoResult<()>;
     fn iter(&'a self) -> ServerIterator<'a, T, U>;
 }
 
@@ -26,8 +27,8 @@ impl<'a> IrcServer<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
 }
 
 impl<'a, T, U> Server<'a, T, U> for IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader{
-    fn send(&self, message: Message) -> IoResult<()> {
-        self.conn.send(message)
+    fn send(&self, command: Command) -> IoResult<()> {
+        self.conn.send(command.to_message())
     }
 
     fn iter(&'a self) -> ServerIterator<'a, T, U> {
