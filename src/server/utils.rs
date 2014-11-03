@@ -73,8 +73,12 @@ impl<'a, T, U> Wrapper<'a, T, U> where T: IrcWriter, U: IrcReader {
 
     /// Changes the mode of the target
     #[experimental]
-    pub fn send_samode(&self, target: &'a str, mode: &'a str, modeparams: Option<&'a str>) -> IoResult<()> {
-        self.server.send(SAMODE(target, mode, modeparams))
+    pub fn send_samode(&self, target: &str, mode: &str, modeparams: &str) -> IoResult<()> {
+        self.server.send(SAMODE(target, mode, if modeparams.len() == 0 {
+            None
+        } else {
+            Some(modeparams)
+        }))
     }
 
     /// Forces a user to change from the old nickname to the new nickname
