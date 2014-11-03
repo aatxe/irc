@@ -72,8 +72,7 @@ impl<'a, T, U> IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
 
     fn handle_message(&self, message: &Message) {
         if message.command[] == "PING" {
-            self.send(PONG(message.args[0][], None)).unwrap();
-            println!("PING! PONG!");
+            self.send(PONG(message.suffix.as_ref().unwrap()[], None)).unwrap();
         }
         /* TODO: implement more message handling */
     }

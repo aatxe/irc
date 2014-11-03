@@ -48,6 +48,7 @@ impl Message {
             ret.push_str(" :");
             ret.push_str(suffix[]);
         }
+        ret.push_str("\r\n");
         ret
     }
 }
