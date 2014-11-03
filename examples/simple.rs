@@ -2,9 +2,9 @@
 extern crate irc;
 
 use std::collections::HashMap;
-use irc::Server;
-use irc::bot::IrcServer;
-use irc::data::{Config, Message};
+use irc::data::config::Config;
+use irc::server::{IrcServer, Server};
+use irc::server::utils::identify;
 
 fn main() {
     let config = Config {
@@ -18,10 +18,9 @@ fn main() {
         channels: vec!("#vana".into_string()),
         options: HashMap::new(),
     };
-    let mut server = IrcServer::new_with_config(config).unwrap();
-    server.send(Message::new(None, "NICK", vec!["pickles"], None)).unwrap();
-    server.send(Message::new(None, "USER", vec!["pickles", "0", "*", "pickles"], None)).unwrap();
-    for message in server {
-        println!("RCV: {}", message);
+    let server = IrcServer::from_config(config).unwrap();
+    identify(&server).unwrap();
+    for message in server.iter() {
+        print!("{}", message.into_string());
     }
 }

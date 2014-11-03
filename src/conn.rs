@@ -1,51 +1,47 @@
-use std::cell::{RefCell, RefMut};
-use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream, Writer};
-use data::{IrcReader, IrcWriter, Message};
+//! Thread-safe connections on any IrcWriters and IrcReaders
+#![experimental]
+use std::sync::Mutex;
+use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
+use data::kinds::{IrcWriter, IrcReader};
+use data::message::Message;
 
+/// A thread-safe connection
+#[experimental]
 pub struct Connection<T, U> where T: IrcWriter, U: IrcReader {
-    writer: RefCell<T>,
-    reader: RefCell<U>,
+    writer: Mutex<T>,
+    reader: Mutex<U>,
 }
 
 impl Connection<BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
+    /// Creates a thread-safe TCP connection to the specified server
+    #[experimental]
     pub fn connect(host: &str, port: u16) -> IoResult<Connection<BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
         let socket = try!(TcpStream::connect(host, port));
-        Connection::new(BufferedWriter::new(socket.clone()), BufferedReader::new(socket.clone()))
+        Ok(Connection::new(BufferedWriter::new(socket.clone()), BufferedReader::new(socket)))
     }
 }
 
 impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
-    pub fn new(writer: T, reader: U) -> IoResult<Connection<T, U>> {
-        Ok(Connection {
-            writer: RefCell::new(writer),
-            reader: RefCell::new(reader),
-        })
+    /// Creates a new connection from any arbitrary IrcWriter and IrcReader
+    #[experimental]
+    pub fn new(writer: T, reader: U) -> Connection<T, U> {
+        Connection {
+            writer: Mutex::new(writer),
+            reader: Mutex::new(reader),
+        }
     }
 
-    fn send_internal(&self, msg: &str) -> IoResult<()> {
-        let mut send = self.writer.borrow_mut();
-        try!(send.write_str(msg));
+    /// Sends a Message over this connection
+    #[experimental]
+    pub fn send(&self, message: Message) -> IoResult<()> {
+        let mut send = self.writer.lock();
+        try!(send.write_str(message.into_string()[]));
         send.flush()
     }
 
-    pub fn send(&self, msg: Message) -> IoResult<()> {
-        let mut send = msg.command.to_string();
-        if msg.args.init().len() > 0 {
-            send.push_str(" ");
-            send.push_str(msg.args.init().connect(" ")[]);
-        }
-        send.push_str(" ");
-        if msg.colon_flag.is_some() { send.push_str(":") }
-        send.push_str(msg.args.last().unwrap()[]);
-        send.push_str("\r\n");
-        self.send_internal(send[])
-    }
-
-    pub fn writer<'a>(&'a self) -> RefMut<'a, T> {
-        self.writer.borrow_mut()
-    }
-
-    pub fn reader<'a>(&'a self) -> RefMut<'a, U> {
-        self.reader.borrow_mut()
+    /// Receives a single line from this connection
+    #[experimental]
+    pub fn recv(&self) -> IoResult<String> {
+        self.reader.lock().read_line()
     }
 }
