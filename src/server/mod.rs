@@ -30,15 +30,19 @@ pub struct IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
 }
 
 impl<'a> IrcServer<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
-    /// Creates a new IRC Server connection from the specified configuration, connecting immediately.
+    /// Creates a new IRC Server connection from the configuration at the specified path, connecting immediately.
     #[experimental]
     pub fn new(config: &str) -> IoResult<IrcServer<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
         let config = try!(Config::load_utf8(config));
         let conn = try!(Connection::connect(config.server[], config.port));
-        Ok(IrcServer {
-            conn: conn,
-            config: config
-        })
+        IrcServer::from_connection(config, conn)
+    }
+
+    /// Creates a new IRC server connection from the specified configuration, connecting immediately.
+    #[experimental]
+    pub fn from_config(config: Config) -> IoResult<IrcServer<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
+        let conn = try!(Connection::connect(config.server[], config.port));
+        IrcServer::from_connection(config, conn)
     }
 }
 
@@ -59,10 +63,10 @@ impl<'a, T, U> Server<'a, T, U> for IrcServer<'a, T, U> where T: IrcWriter, U: I
 impl<'a, T, U> IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
     /// Creates an IRC server from the specified configuration, and any arbitrary Connection
     #[experimental]
-    pub fn from_connection(config: &str, conn: Connection<T, U>) -> IoResult<IrcServer<'a, T, U>> {
+    pub fn from_connection(config: Config, conn: Connection<T, U>) -> IoResult<IrcServer<'a, T, U>> {
         Ok(IrcServer {
             conn: conn,
-            config: try!(Config::load_utf8(config))
+            config: config
         })
     }
 }
