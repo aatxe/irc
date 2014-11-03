@@ -1,10 +1,11 @@
+#![feature(if_let)]
 #![feature(slicing_syntax)]
 extern crate irc;
 
 use std::collections::HashMap;
 use irc::data::config::Config;
 use irc::server::{IrcServer, Server};
-use irc::server::utils::identify;
+use irc::server::utils::{identify, send_privmsg};
 
 fn main() {
     let config = Config {
@@ -22,5 +23,12 @@ fn main() {
     identify(&server).unwrap();
     for message in server.iter() {
         print!("{}", message.into_string());
+        if message.command[] == "PRIVMSG" {
+            if let Some(msg) = message.suffix {
+                if msg.contains("pickles") {
+                    send_privmsg(&server, message.args[0][], "Hi!").unwrap();
+                }
+            }
+        }
     }
 }
