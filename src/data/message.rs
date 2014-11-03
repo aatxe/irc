@@ -64,7 +64,7 @@ impl FromStr for Message {
             None
         };
         let suffix = if state.contains(":") {
-            let suffix = state.find(':').map(|i| state[i+1..state.len()-1]);
+            let suffix = state.find(':').map(|i| state[i+1..state.len()-2]);
             state = state.find(':').map_or("", |i| state[..i]);
             suffix
         } else {

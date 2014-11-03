@@ -2,7 +2,7 @@
 #![experimental]
 use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 use conn::Connection;
-use data::command::Command;
+use data::command::{Command, PONG};
 use data::config::Config;
 use data::kinds::{IrcReader, IrcWriter};
 use data::message::Message;
@@ -69,6 +69,14 @@ impl<'a, T, U> IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
             config: config
         })
     }
+
+    fn handle_message(&self, message: &Message) {
+        if message.command[] == "PING" {
+            self.send(PONG(message.args[0][], None)).unwrap();
+            println!("PING! PONG!");
+        }
+        /* TODO: implement more message handling */
+    }
 }
 
 /// An Iterator over an IrcServer's incoming Messages
@@ -92,7 +100,11 @@ impl<'a, T, U> Iterator<Message> for ServerIterator<'a, T, U> where T: IrcWriter
         let line = self.server.conn.recv();
         match line {
             Err(_) => None,
-            Ok(msg) => from_str(msg[])
+            Ok(msg) => {
+                let message = from_str(msg[]);
+                self.server.handle_message(message.as_ref().unwrap());
+                message
+            }
         }
     }
 }
