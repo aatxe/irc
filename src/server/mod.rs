@@ -86,7 +86,9 @@ impl<'a, T, U> ServerIterator<'a, T, U> where T: IrcWriter, U: IrcReader {
 impl<'a, T, U> Iterator<Message> for ServerIterator<'a, T, U> where T: IrcWriter, U: IrcReader {
     fn next(&mut self) -> Option<Message> {
         let line = self.server.conn.recv();
-        if let Err(_) = line { return None }
-        from_str(line.unwrap()[])
+        match line {
+            Err(_) => None,
+            Ok(msg) => from_str(msg[])
+        }
     }
 }

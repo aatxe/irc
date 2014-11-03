@@ -70,11 +70,12 @@ impl FromStr for Message {
         } else {
             None
         };
-        let command = if let Some(cmd) = state.find(' ').map(|i| s[..i]) {
-            state = state.find(' ').map_or("", |i| s[i..]);
-            cmd
-        } else {
-            return None
+        let command = match state.find(' ').map(|i| s[..i]) {
+            Some(cmd) => {
+                state = state.find(' ').map_or("", |i| s[i..]);
+                cmd
+            }
+            _ => return None
         };
         let args: Vec<_> = state.splitn(14, ' ').collect();
         Some(Message::new(prefix, command, if args.len() > 0 { Some(args) } else { None }, suffix))
