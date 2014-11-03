@@ -1,6 +1,10 @@
 //! Data related to IRC functionality
 #![experimental]
 
+pub use data::config::Config;
+pub use data::message::Message;
+pub use data::command::Command;
+
 pub mod kinds {
     //! Trait definitions of appropriate Writers and Buffers for use with this library
     #![unstable]
