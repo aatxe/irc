@@ -2,7 +2,8 @@
 #![experimental]
 
 use std::io::IoResult;
-use data::command::{Command, JOIN, KILL, NICK, OPER, PONG, PRIVMSG, SAMODE, SANICK, USER};
+use data::command::{Command, INVITE, JOIN, KILL, MODE, NICK, KICK};
+use data::command::{OPER, PONG, PRIVMSG, SAMODE, SANICK, TOPIC, USER};
 use data::config::Config;
 use data::kinds::{IrcReader, IrcWriter};
 use server::{Server, ServerIterator};
@@ -68,13 +69,43 @@ impl<'a, T, U> Wrapper<'a, T, U> where T: IrcWriter, U: IrcReader {
         Ok(())
     }
 
+    /// Sets the topic of a channel or requests the current one
+    #[experimental]
+    pub fn send_topic(&self, channel: &str, topic: &str) -> IoResult<()> {
+        self.server.send(TOPIC(channel, if topic.len() == 0 {
+            None
+        } else {
+            Some(topic)
+        }))
+    }
+
     /// Kills the target with the provided message
     #[experimental]
     pub fn send_kill(&self, target: &str, message: &str) -> IoResult<()> {
         self.server.send(KILL(target, message))
     }
 
+    /// Kicks the listed nicknames from the listed channels with a comment
+    #[experimental]
+    pub fn send_kick(&self, chanlist: &str, nicklist: &str, message: &str) -> IoResult<()> {
+        self.server.send(KICK(chanlist, nicklist, if message.len() == 0 {
+            None
+        } else {
+            Some(message)
+        }))
+    }
+
     /// Changes the mode of the target
+    #[experimental]
+    pub fn send_mode(&self, target: &str, mode: &str, modeparams: &str) -> IoResult<()> {
+        self.server.send(MODE(target, mode, if modeparams.len() == 0 {
+            None
+        } else {
+            Some(modeparams)
+        }))
+    }
+
+    /// Changes the mode of the target by force
     #[experimental]
     pub fn send_samode(&self, target: &str, mode: &str, modeparams: &str) -> IoResult<()> {
         self.server.send(SAMODE(target, mode, if modeparams.len() == 0 {
@@ -88,5 +119,11 @@ impl<'a, T, U> Wrapper<'a, T, U> where T: IrcWriter, U: IrcReader {
     #[experimental]
     pub fn send_sanick(&self, old_nick: &str, new_nick: &str) -> IoResult<()> {
         self.server.send(SANICK(old_nick, new_nick))
+    }
+
+    /// Invites a user to the specified channel
+    #[experimental]
+    pub fn send_invite(&self, nick: &str, chan: &str) -> IoResult<()> {
+        self.server.send(INVITE(nick, chan))
     }
 }
