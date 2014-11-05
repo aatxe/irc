@@ -51,3 +51,25 @@ impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
         self.writer.lock()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::Connection;
+    use std::io::{MemReader, MemWriter};
+    use std::io::util::{NullReader, NullWriter};
+    use data::message::Message;
+
+    #[test]
+    fn send() {
+        let conn = Connection::new(MemWriter::new(), NullReader);
+        assert!(conn.send(Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("Testing!"))).is_ok());
+        let data = String::from_utf8(conn.writer().get_ref().to_vec()).unwrap();
+        assert_eq!(data[], "PRIVMSG test :Testing!\r\n");
+    }
+
+    #[test]
+    fn recv() {
+        let conn = Connection::new(NullWriter, MemReader::new("PRIVMSG test :Testing!\r\n".as_bytes().to_vec()));
+        assert_eq!(conn.recv().unwrap()[], "PRIVMSG test :Testing!\r\n");
+    }
+}

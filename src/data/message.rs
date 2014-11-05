@@ -82,3 +82,55 @@ impl FromStr for Message {
         Some(Message::new(prefix, command, if args.len() > 0 { Some(args) } else { None }, suffix))
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::Message;
+
+    #[test]
+    fn new() {
+        let message = Message {
+            prefix: None,
+            command: format!("PRIVMSG"),
+            args: vec![format!("test")],
+            suffix: Some(format!("Testing!")),
+        };
+        assert_eq!(Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("Testing!")), message);
+    }
+
+    #[test]
+    fn into_string() {
+        let message = Message {
+            prefix: None,
+            command: format!("PRIVMSG"),
+            args: vec![format!("test")],
+            suffix: Some(format!("Testing!")),
+        };
+        assert_eq!(message.into_string()[], "PRIVMSG test :Testing!\r\n");
+        let message = Message {
+            prefix: Some(format!("test!test@test")),
+            command: format!("PRIVMSG"),
+            args: vec![format!("test")],
+            suffix: Some(format!("Still testing!")),
+        };
+        assert_eq!(message.into_string()[], ":test!test@test PRIVMSG test :Still testing!\r\n");
+    }
+
+    #[test]
+    fn from_string() {
+        let message = Message {
+            prefix: None,
+            command: format!("PRIVMSG"),
+            args: vec![format!("test")],
+            suffix: Some(format!("Testing!")),
+        };
+        assert_eq!(from_str("PRIVMSG test :Testing!\r\n"), Some(message));
+        let message = Message {
+            prefix: Some(format!("test!test@test")),
+            command: format!("PRIVMSG"),
+            args: vec![format!("test")],
+            suffix: Some(format!("Still testing!")),
+        };
+        assert_eq!(from_str(":test!test@test PRIVMSG test :Still testing!\r\n"), Some(message));
+    }
+}
