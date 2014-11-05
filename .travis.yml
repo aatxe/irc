@@ -1,3 +1,6 @@
+env:
+  global:
+    - secure: TeFqb814EQDoPAE7ZSb6pzjx+TdC5cCxTn2reN+DO30eTGG04Rs92bOfoj2QhZPIL8eVlNvq5GjXXF53xFGS4gnzZPTaylBNcIJiM54BAXjgQAv2FXUKEs/vvc6T4lKY0fzzc151e5UhmkmYgCbKAqm5HSfi9WlPqLti8k9YbDw=
 language: rust
 script:
   - chmod +x mktestconfig.sh
@@ -12,3 +15,5 @@ notifications:
     template:
       - "%{repository_slug}/%{branch} (%{commit} - %{author}): %{message}"
     skip_join: true
+after_script:
+  - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
