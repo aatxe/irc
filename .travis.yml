@@ -16,4 +16,5 @@ notifications:
       - "%{repository_slug}/%{branch} (%{commit} - %{author}): %{message}"
     skip_join: true
 after_script:
+  - cp -r target/doc doc
   - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
