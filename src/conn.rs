@@ -16,7 +16,7 @@ impl Connection<BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
     /// Creates a thread-safe TCP connection to the specified server
     #[experimental]
     pub fn connect(host: &str, port: u16) -> IoResult<Connection<BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
-        let socket = try!(TcpStream::connect(host, port));
+        let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
         Ok(Connection::new(BufferedWriter::new(socket.clone()), BufferedReader::new(socket)))
     }
 }
