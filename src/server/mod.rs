@@ -9,23 +9,23 @@ use data::message::Message;
 
 pub mod utils;
 
-/// Trait describing core Server functionality
+/// Trait describing core Server functionality.
 #[experimental]
 pub trait Server<'a, T, U> {
-    /// Gets the configuration being used with this Server
+    /// Gets the configuration being used with this Server.
     fn config(&self) -> &Config;
-    /// Sends a Command to this Server
+    /// Sends a Command to this Server.
     fn send(&self, _: Command) -> IoResult<()>;
-    /// Gets an Iterator over Messages received by this Server
+    /// Gets an Iterator over Messages received by this Server.
     fn iter(&'a self) -> ServerIterator<'a, T, U>;
 }
 
-/// A thread-safe implementation of an IRC Server connection
+/// A thread-safe implementation of an IRC Server connection.
 #[experimental]
 pub struct IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
-    /// The thread-safe IRC connection
+    /// The thread-safe IRC connection.
     conn: Connection<T, U>,
-    /// The configuration used with this connection
+    /// The configuration used with this connection.
     config: Config
 }
 
@@ -61,7 +61,7 @@ impl<'a, T, U> Server<'a, T, U> for IrcServer<'a, T, U> where T: IrcWriter, U: I
 }
 
 impl<'a, T, U> IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
-    /// Creates an IRC server from the specified configuration, and any arbitrary Connection
+    /// Creates an IRC server from the specified configuration, and any arbitrary Connection.
     #[experimental]
     pub fn from_connection(config: Config, conn: Connection<T, U>) -> IrcServer<'a, T, U> {
         IrcServer {
@@ -70,12 +70,12 @@ impl<'a, T, U> IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
         }
     }
 
-    /// Gets a reference to the IRC server's connection
+    /// Gets a reference to the IRC server's connection.
     pub fn conn(&self) -> &Connection<T, U> {
         &self.conn
     }
 
-    /// Handles messages internally for basic bot functionality
+    /// Handles messages internally for basic bot functionality.
     #[experimental]
     fn handle_message(&self, message: &Message) {
         if message.command[] == "PING" {
@@ -89,14 +89,14 @@ impl<'a, T, U> IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
     }
 }
 
-/// An Iterator over an IrcServer's incoming Messages
+/// An Iterator over an IrcServer's incoming Messages.
 #[experimental]
 pub struct ServerIterator<'a, T, U> where T: IrcWriter, U: IrcReader {
     pub server: &'a IrcServer<'a, T, U>
 }
 
 impl<'a, T, U> ServerIterator<'a, T, U> where T: IrcWriter, U: IrcReader {
-    /// Creates a new ServerIterator for the desired IrcServer
+    /// Creates a new ServerIterator for the desired IrcServer.
     #[experimental]
     pub fn new(server: &'a IrcServer<'a, T, U>) -> ServerIterator<'a, T, U> {
         ServerIterator {

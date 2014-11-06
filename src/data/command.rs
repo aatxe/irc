@@ -1,9 +1,9 @@
-//! Enumeration of all available client commands
+//! Enumeration of all available client commands.
 #![stable]
 use std::io::{InvalidInput, IoError, IoResult};
 use data::message::Message;
 
-/// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812)
+/// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812).
 #[stable]
 #[deriving(Show, PartialEq)]
 pub enum Command<'a> {
@@ -131,7 +131,7 @@ pub enum Command<'a> {
 }
 
 impl<'a> Command<'a> {
-    /// Converts a Command into a Message
+    /// Converts a Command into a Message.
     #[stable]
     pub fn to_message(self) -> Message {
         match self {
@@ -226,7 +226,7 @@ impl<'a> Command<'a> {
         }
     }
 
-    /// Converts a Message into a Command
+    /// Converts a Message into a Command.
     #[stable]
     pub fn from_message(m: &'a Message) -> IoResult<Command<'a>> {
         /* FIXME: Re-write this using match as so:
@@ -757,7 +757,7 @@ impl<'a> Command<'a> {
     }
 }
 
-/// Produces an invalid_input IoError
+/// Produces an invalid_input IoError.
 #[stable]
 fn invalid_input() -> IoError {
     IoError {

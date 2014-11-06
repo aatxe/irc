@@ -1,24 +1,24 @@
-//! Messages to and from the server
+//! Messages to and from the server.
 #![experimental]
 use std::from_str::FromStr;
 
-/// IRC Message data
+/// IRC Message data.
 #[experimental]
 #[deriving(Clone, PartialEq, Show)]
 pub struct Message {
-    /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812)
+    /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
     pub prefix: Option<String>,
-    /// The IRC command as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812)
+    /// The IRC command as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
     pub command: String,
-    /// The command arguments
+    /// The command arguments.
     pub args: Vec<String>,
-    /// The message suffix as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812)
+    /// The message suffix as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
     /// This is the only part of the message that is allowed to contain spaces.
     pub suffix: Option<String>,
 }
 
 impl Message {
-    /// Creates a new Message
+    /// Creates a new Message.
     #[experimental]
     pub fn new(prefix: Option<&str>, command: &str, args: Option<Vec<&str>>, suffix: Option<&str>)
         -> Message {
@@ -30,7 +30,7 @@ impl Message {
         }
     }
 
-    /// Converts a Message into a String according to the IRC protocol
+    /// Converts a Message into a String according to the IRC protocol.
     #[experimental]
     pub fn into_string(&self) -> String {
         let mut ret = String::new();

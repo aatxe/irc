@@ -1,11 +1,11 @@
-//! Thread-safe connections on any IrcWriters and IrcReaders
+//! Thread-safe connections on any IrcWriters and IrcReaders.
 #![experimental]
 use std::sync::{Mutex, MutexGuard};
 use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 use data::kinds::{IrcWriter, IrcReader};
 use data::message::Message;
 
-/// A thread-safe connection
+/// A thread-safe connection.
 #[experimental]
 pub struct Connection<T, U> where T: IrcWriter, U: IrcReader {
     writer: Mutex<T>,
@@ -13,7 +13,7 @@ pub struct Connection<T, U> where T: IrcWriter, U: IrcReader {
 }
 
 impl Connection<BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
-    /// Creates a thread-safe TCP connection to the specified server
+    /// Creates a thread-safe TCP connection to the specified server.
     #[experimental]
     pub fn connect(host: &str, port: u16) -> IoResult<Connection<BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
         let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
@@ -22,7 +22,7 @@ impl Connection<BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
 }
 
 impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
-    /// Creates a new connection from any arbitrary IrcWriter and IrcReader
+    /// Creates a new connection from any arbitrary IrcWriter and IrcReader.
     #[experimental]
     pub fn new(writer: T, reader: U) -> Connection<T, U> {
         Connection {
@@ -31,7 +31,7 @@ impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
         }
     }
 
-    /// Sends a Message over this connection
+    /// Sends a Message over this connection.
     #[experimental]
     pub fn send(&self, message: Message) -> IoResult<()> {
         let mut send = self.writer.lock();
@@ -39,13 +39,13 @@ impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
         send.flush()
     }
 
-    /// Receives a single line from this connection
+    /// Receives a single line from this connection.
     #[experimental]
     pub fn recv(&self) -> IoResult<String> {
         self.reader.lock().read_line()
     }
 
-    /// Acquires the Writer lock
+    /// Acquires the Writer lock.
     #[experimental]
     pub fn writer<'a>(&'a self) -> MutexGuard<'a, T> {
         self.writer.lock()
