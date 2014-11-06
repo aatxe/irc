@@ -118,3 +118,34 @@ impl<'a, T, U> Iterator<Message> for ServerIterator<'a, T, U> where T: IrcWriter
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::{IrcServer, Server};
+    use std::collections::HashMap;
+    use std::io::MemReader;
+    use std::io::util::NullWriter;
+    use conn::Connection;
+    use data::Config;
+
+    #[test]
+    fn iterator() {
+        let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n:test!test@test JOIN #test\r\n";
+        let server = IrcServer::from_connection(Config {
+            owners: vec![format!("test")],
+            nickname: format!("test"),
+            username: format!("test"),
+            realname: format!("test"),
+            password: String::new(),
+            server: format!("irc.test.net"),
+            port: 6667,
+            channels: vec![format!("#test"), format!("#test2")],
+            options: HashMap::new(),
+        }, Connection::new(NullWriter, MemReader::new(exp.as_bytes().to_vec()))).unwrap();
+        let mut messages = String::new();
+        for message in server.iter() {
+            messages.push_str(message.into_string()[]);
+        }
+        assert_eq!(messages[], exp);
+    }
+}

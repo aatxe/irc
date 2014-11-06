@@ -78,6 +78,7 @@ impl FromStr for Message {
             }
             _ => return None
         };
+        if suffix.is_none() { state = state[..state.len() - 2] }
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| s.len() != 0).collect();
         Some(Message::new(prefix, command, if args.len() > 0 { Some(args) } else { None }, suffix))
     }
