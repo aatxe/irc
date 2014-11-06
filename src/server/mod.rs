@@ -35,14 +35,14 @@ impl<'a> IrcServer<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
     pub fn new(config: &str) -> IoResult<IrcServer<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
         let config = try!(Config::load_utf8(config));
         let conn = try!(Connection::connect(config.server[], config.port));
-        IrcServer::from_connection(config, conn)
+        Ok(IrcServer::from_connection(config, conn))
     }
 
     /// Creates a new IRC server connection from the specified configuration, connecting immediately.
     #[experimental]
     pub fn from_config(config: Config) -> IoResult<IrcServer<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
         let conn = try!(Connection::connect(config.server[], config.port));
-        IrcServer::from_connection(config, conn)
+        Ok(IrcServer::from_connection(config, conn))
     }
 }
 
@@ -63,11 +63,11 @@ impl<'a, T, U> Server<'a, T, U> for IrcServer<'a, T, U> where T: IrcWriter, U: I
 impl<'a, T, U> IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
     /// Creates an IRC server from the specified configuration, and any arbitrary Connection
     #[experimental]
-    pub fn from_connection(config: Config, conn: Connection<T, U>) -> IoResult<IrcServer<'a, T, U>> {
-        Ok(IrcServer {
+    pub fn from_connection(config: Config, conn: Connection<T, U>) -> IrcServer<'a, T, U> {
+        IrcServer {
             conn: conn,
             config: config
-        })
+        }
     }
 
     /// Gets a reference to the IRC server's connection
@@ -152,7 +152,7 @@ mod test {
     fn iterator() {
         let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n:test!test@test JOIN #test\r\n";
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullWriter, MemReader::new(exp.as_bytes().to_vec()))).unwrap();
+                     Connection::new(NullWriter, MemReader::new(exp.as_bytes().to_vec())));
         let mut messages = String::new();
         for message in server.iter() {
             messages.push_str(message.into_string()[]);
@@ -164,7 +164,7 @@ mod test {
     fn handle_message() {
         let value = "PING :irc.test.net\r\n:irc.test.net 376 test :End of /MOTD command.\r\n";
         let server = IrcServer::from_connection(test_config(),
-            Connection::new(MemWriter::new(), MemReader::new(value.as_bytes().to_vec()))).unwrap();
+                     Connection::new(MemWriter::new(), MemReader::new(value.as_bytes().to_vec())));
         for message in server.iter() {
             println!("{}", message);
         }
@@ -175,7 +175,7 @@ mod test {
     #[test]
     fn send() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader)).unwrap();
+                     Connection::new(MemWriter::new(), NullReader));
         assert!(server.send(PRIVMSG("#test", "Hi there!")).is_ok());
         assert_eq!(get_server_value(server)[],
         "PRIVMSG #test :Hi there!\r\n");
