@@ -123,15 +123,15 @@ impl<'a, T, U> Iterator<Message> for ServerIterator<'a, T, U> where T: IrcWriter
 mod test {
     use super::{IrcServer, Server};
     use std::collections::HashMap;
-    use std::io::MemReader;
-    use std::io::util::NullWriter;
+    use std::io::{MemReader, MemWriter};
+    use std::io::util::{NullReader, NullWriter};
     use conn::Connection;
     use data::Config;
+    use data::command::PRIVMSG;
+    use data::kinds::IrcReader;
 
-    #[test]
-    fn iterator() {
-        let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n:test!test@test JOIN #test\r\n";
-        let server = IrcServer::from_connection(Config {
+    fn test_config() -> Config {
+        Config {
             owners: vec![format!("test")],
             nickname: format!("test"),
             username: format!("test"),
@@ -141,11 +141,43 @@ mod test {
             port: 6667,
             channels: vec![format!("#test"), format!("#test2")],
             options: HashMap::new(),
-        }, Connection::new(NullWriter, MemReader::new(exp.as_bytes().to_vec()))).unwrap();
+        }
+    }
+
+    fn get_server_value<U>(server: IrcServer<MemWriter, U>) -> String where U: IrcReader {
+        String::from_utf8(server.conn().writer().get_ref().to_vec()).unwrap()
+    }
+
+    #[test]
+    fn iterator() {
+        let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n:test!test@test JOIN #test\r\n";
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(NullWriter, MemReader::new(exp.as_bytes().to_vec()))).unwrap();
         let mut messages = String::new();
         for message in server.iter() {
             messages.push_str(message.into_string()[]);
         }
         assert_eq!(messages[], exp);
+    }
+
+    #[test]
+    fn handle_message() {
+        let value = "PING :irc.test.net\r\n:irc.test.net 376 test :End of /MOTD command.\r\n";
+        let server = IrcServer::from_connection(test_config(),
+            Connection::new(MemWriter::new(), MemReader::new(value.as_bytes().to_vec()))).unwrap();
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(get_server_value(server)[],
+        "PONG :irc.test.net\r\nJOIN #test\r\nJOIN #test2\r\n");
+    }
+
+    #[test]
+    fn send() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader)).unwrap();
+        assert!(server.send(PRIVMSG("#test", "Hi there!")).is_ok());
+        assert_eq!(get_server_value(server)[],
+        "PRIVMSG #test :Hi there!\r\n");
     }
 }
