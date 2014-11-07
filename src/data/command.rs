@@ -229,413 +229,468 @@ impl<'a> Command<'a> {
     /// Converts a Message into a Command.
     #[stable]
     pub fn from_message(m: &'a Message) -> IoResult<Command<'a>> {
-        /* FIXME: Re-write this using match as so:
-            if let "PASS" = m.command[] {
-                match m.suffix {
-                    Some(ref suffix) => {
-                        if m.args.len() != 0 { return Err(invalid_input()) }
-                        PASS(suffix[])
-                    },
-                    None => {
-                        if m.args.len() != 1 { return Err(invalid_input()) }
-                        PASS(m.args[0][])
-                    }
+        Ok(if let "PASS" = m.command[] {
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 0 { return Err(invalid_input()) }
+                    PASS(suffix[])
+                },
+                None => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    PASS(m.args[0][])
                 }
             }
-        */
-        Ok(if let "PASS" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 0 { return Err(invalid_input()) }
-                PASS(m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 1 { return Err(invalid_input()) }
-                PASS(m.args[0][])
-            }
         } else if let "NICK" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 0 { return Err(invalid_input()) }
-                NICK(m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 1 { return Err(invalid_input()) }
-                NICK(m.args[0][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 0 { return Err(invalid_input()) }
+                    NICK(suffix[])
+                },
+                None => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    NICK(m.args[0][])
+                }
             }
         } else if let "USER" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 2 { return Err(invalid_input()) }
-                USER(m.args[0][], m.args[1][], m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 3 { return Err(invalid_input()) }
-                USER(m.args[0][], m.args[1][], m.args[2][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    USER(m.args[0][], m.args[1][], suffix[])
+                },
+                None => {
+                    if m.args.len() != 3 { return Err(invalid_input()) }
+                    USER(m.args[0][], m.args[1][], m.args[2][])
+                }
             }
         } else if let "OPER" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 1 { return Err(invalid_input()) }
-                OPER(m.args[0][], m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 2 { return Err(invalid_input()) }
-                OPER(m.args[0][], m.args[1][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    OPER(m.args[0][], suffix[])
+                },
+                None => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    OPER(m.args[0][], m.args[1][])
+                }
             }
         } else if let "MODE" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 2 { return Err(invalid_input()) }
-                MODE(m.args[0][], m.args[1][], Some(m.suffix.as_ref().unwrap()[]))
-            } else if m.args.len() == 3 {
-                MODE(m.args[0][], m.args[1][], Some(m.args[2][]))
-            } else if m.args.len() == 2 {
-                MODE(m.args[0][], m.args[1][], None)
-            } else {
-                return Err(invalid_input())
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    MODE(m.args[0][], m.args[1][], Some(suffix[]))
+                }
+                None => if m.args.len() == 3 {
+                    MODE(m.args[0][], m.args[1][], Some(m.args[2][]))
+                } else if m.args.len() == 2 {
+                    MODE(m.args[0][], m.args[1][], None)
+                } else {
+                    return Err(invalid_input())
+                }
             }
         } else if let "SERVICE" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 5 { return Err(invalid_input()) }
-                SERVICE(m.args[0][], m.args[1][], m.args[2][], m.args[3][], m.args[4][], m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 6 { return Err(invalid_input()) }
-                SERVICE(m.args[0][], m.args[1][], m.args[2][], m.args[3][], m.args[4][], m.args[5][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 5 { return Err(invalid_input()) }
+                    SERVICE(m.args[0][], m.args[1][], m.args[2][], m.args[3][], m.args[4][], suffix[])
+                },
+                None => {
+                    if m.args.len() != 6 { return Err(invalid_input()) }
+                    SERVICE(m.args[0][], m.args[1][], m.args[2][], m.args[3][], m.args[4][], m.args[5][])
+                }
             }
         } else if let "QUIT" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
-            if m.suffix.is_some() {
-                QUIT(Some(m.suffix.as_ref().unwrap()[]))
-            } else {
-                QUIT(None)
+            match m.suffix {
+                Some(ref suffix) => QUIT(Some(suffix[])),
+                None => QUIT(None)
             }
         } else if let "SQUIT" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 1 { return Err(invalid_input()) }
-                SQUIT(m.args[0][], m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 2 { return Err(invalid_input()) }
-                SQUIT(m.args[0][], m.args[1][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    SQUIT(m.args[0][], suffix[])
+                },
+                None => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    SQUIT(m.args[0][], m.args[1][])
+                }
             }
         } else if let "JOIN" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    JOIN(m.suffix.as_ref().unwrap()[], None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    JOIN(suffix[], None)
                 } else if m.args.len() == 1 {
-                    JOIN(m.args[0][], Some(m.suffix.as_ref().unwrap()[]))
+                    JOIN(m.args[0][], Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 1 {
+                    JOIN(m.args[0][], None)
+                } else if m.args.len() == 2 {
+                    JOIN(m.args[0][], Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 1 {
-                JOIN(m.args[0][], None)
-            } else if m.args.len() == 2 {
-                JOIN(m.args[0][], Some(m.args[1][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "PART" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    PART(m.suffix.as_ref().unwrap()[], None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    PART(suffix[], None)
                 } else if m.args.len() == 1 {
-                    PART(m.args[0][], Some(m.suffix.as_ref().unwrap()[]))
+                    PART(m.args[0][], Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 1 {
+                    PART(m.args[0][], None)
+                } else if m.args.len() == 2 {
+                    PART(m.args[0][], Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 1 {
-                PART(m.args[0][], None)
-            } else if m.args.len() == 2 {
-                PART(m.args[0][], Some(m.args[1][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "TOPIC" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    TOPIC(m.suffix.as_ref().unwrap()[], None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    TOPIC(suffix[], None)
                 } else if m.args.len() == 1 {
-                    TOPIC(m.args[0][], Some(m.suffix.as_ref().unwrap()[]))
+                    TOPIC(m.args[0][], Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 1 {
+                    TOPIC(m.args[0][], None)
+                } else if m.args.len() == 2 {
+                    TOPIC(m.args[0][], Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 1 {
-                TOPIC(m.args[0][], None)
-            } else if m.args.len() == 2 {
-                TOPIC(m.args[0][], Some(m.args[1][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "NAMES" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    NAMES(Some(m.suffix.as_ref().unwrap()[]), None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    NAMES(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    NAMES(Some(m.args[0][]), Some(m.suffix.as_ref().unwrap()[]))
+                    NAMES(Some(m.args[0][]), Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 0 {
+                    NAMES(None, None)
+                } else if m.args.len() == 1 {
+                    NAMES(Some(m.args[0][]), None)
+                } else if m.args.len() == 2 {
+                    NAMES(Some(m.args[0][]), Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 0 {
-                NAMES(None, None)
-            } else if m.args.len() == 1 {
-                NAMES(Some(m.args[0][]), None)
-            } else if m.args.len() == 2 {
-                NAMES(Some(m.args[0][]), Some(m.args[1][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "LIST" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    LIST(Some(m.suffix.as_ref().unwrap()[]), None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    LIST(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    LIST(Some(m.args[0][]), Some(m.suffix.as_ref().unwrap()[]))
+                    LIST(Some(m.args[0][]), Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 0 {
+                    LIST(None, None)
+                } else if m.args.len() == 1 {
+                    LIST(Some(m.args[0][]), None)
+                } else if m.args.len() == 2 {
+                    LIST(Some(m.args[0][]), Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 0 {
-                LIST(None, None)
-            } else if m.args.len() == 1 {
-                LIST(Some(m.args[0][]), None)
-            } else if m.args.len() == 2 {
-                LIST(Some(m.args[0][]), Some(m.args[1][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "INVITE" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 1 { return Err(invalid_input()) }
-                INVITE(m.args[0][], m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 2 { return Err(invalid_input()) }
-                INVITE(m.args[0][], m.args[1][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    INVITE(m.args[0][], suffix[])
+                },
+                None => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    INVITE(m.args[0][], m.args[1][])
+                }
             }
         } else if let "KICK" = m.command[] {
-            if m.args.len() != 2 { return Err(invalid_input()) }
-            KICK(m.args[0][], m.args[1][], m.suffix.as_ref().map(|s| s[]))
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    KICK(m.args[0][], m.args[1][], Some(suffix[]))
+                },
+                None => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    KICK(m.args[0][], m.args[1][], None)
+                },
+            }
         } else if let "PRIVMSG" = m.command[] {
-            if !m.suffix.is_some() || m.args.len() != 1 { return Err(invalid_input()) }
-            PRIVMSG(m.args[0][], m.suffix.as_ref().unwrap()[])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    PRIVMSG(m.args[0][], suffix[])
+                },
+                None => return Err(invalid_input())
+            }
         } else if let "NOTICE" = m.command[] {
-            if !m.suffix.is_some() || m.args.len() != 1 { return Err(invalid_input()) }
-            NOTICE(m.args[0][], m.suffix.as_ref().unwrap()[])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    NOTICE(m.args[0][], suffix[])
+                },
+                None => return Err(invalid_input())
+            }
         } else if let "MOTD" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
-            if m.suffix.is_some() {
-                MOTD(Some(m.suffix.as_ref().unwrap()[]))
-            } else {
-                MOTD(None)
+            match m.suffix {
+                Some(ref suffix) => MOTD(Some(suffix[])),
+                None => MOTD(None)
             }
         } else if let "LUSERS" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    LUSERS(Some(m.suffix.as_ref().unwrap()[]), None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    LUSERS(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    LUSERS(Some(m.args[0][]), Some(m.suffix.as_ref().unwrap()[]))
+                    LUSERS(Some(m.args[0][]), Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 0 {
+                    LUSERS(None, None)
+                } else if m.args.len() == 1 {
+                    LUSERS(Some(m.args[0][]), None)
+                } else if m.args.len() == 2 {
+                    LUSERS(Some(m.args[0][]), Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 0 {
-                LUSERS(None, None)
-            } else if m.args.len() == 1 {
-                LUSERS(Some(m.args[0][]), None)
-            } else if m.args.len() == 2 {
-                LUSERS(Some(m.args[0][]), Some(m.args[1][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "VERSION" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
-            if m.suffix.is_some() {
-                VERSION(Some(m.suffix.as_ref().unwrap()[]))
-            } else {
-                VERSION(None)
+            match m.suffix {
+                Some(ref suffix) => VERSION(Some(suffix[])),
+                None => VERSION(None)
             }
         } else if let "STATS" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    STATS(Some(m.suffix.as_ref().unwrap()[]), None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    STATS(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    STATS(Some(m.args[0][]), Some(m.suffix.as_ref().unwrap()[]))
+                    STATS(Some(m.args[0][]), Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 0 {
+                    STATS(None, None)
+                } else if m.args.len() == 1 {
+                    STATS(Some(m.args[0][]), None)
+                } else if m.args.len() == 2 {
+                    STATS(Some(m.args[0][]), Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 0 {
-                STATS(None, None)
-            } else if m.args.len() == 1 {
-                STATS(Some(m.args[0][]), None)
-            } else if m.args.len() == 2 {
-                STATS(Some(m.args[0][]), Some(m.args[1][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "LINKS" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    LINKS(None, Some(m.suffix.as_ref().unwrap()[]))
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    LINKS(None, Some(suffix[]))
                 } else if m.args.len() == 1 {
-                    LINKS(Some(m.args[0][]), Some(m.suffix.as_ref().unwrap()[]))
+                    LINKS(Some(m.args[0][]), Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 0 {
+                    LINKS(None, None)
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 0 {
-                LINKS(None, None)
-            } else {
-                return Err(invalid_input())
             }
         } else if let "TIME" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
-            if m.suffix.is_some() {
-                TIME(Some(m.suffix.as_ref().unwrap()[]))
-            } else {
-                TIME(None)
+            match m.suffix {
+                Some(ref suffix) => TIME(Some(suffix[])),
+                None => TIME(None)
             }
         } else if let "CONNECT" = m.command[] {
-            if m.args.len() != 2 { return Err(invalid_input()) }
-            CONNECT(m.args[0][], m.args[1][], m.suffix.as_ref().map(|s| s[]))
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    CONNECT(m.args[0][], m.args[1][], Some(suffix[]))
+                },
+                None => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    CONNECT(m.args[0][], m.args[1][], None)
+                }
+            }
         } else if let "TRACE" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
-            if m.suffix.is_some() {
-                TRACE(Some(m.suffix.as_ref().unwrap()[]))
-            } else {
-                TRACE(None)
+            match m.suffix {
+                Some(ref suffix) => TRACE(Some(suffix[])),
+                None => TRACE(None)
             }
         } else if let "ADMIN" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
-            if m.suffix.is_some() {
-                TIME(Some(m.suffix.as_ref().unwrap()[]))
-            } else {
-                TIME(None)
+            match m.suffix {
+                Some(ref suffix) => ADMIN(Some(suffix[])),
+                None => ADMIN(None)
             }
         } else if let "INFO" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
-            if m.suffix.is_some() {
-                TIME(Some(m.suffix.as_ref().unwrap()[]))
-            } else {
-                TIME(None)
+            match m.suffix {
+                Some(ref suffix) => INFO(Some(suffix[])),
+                None => INFO(None)
             }
         } else if let "SERVLIST" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    SERVLIST(Some(m.suffix.as_ref().unwrap()[]), None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    SERVLIST(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    SERVLIST(Some(m.args[0][]), Some(m.suffix.as_ref().unwrap()[]))
+                    SERVLIST(Some(m.args[0][]), Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 0 {
+                    SERVLIST(None, None)
+                } else if m.args.len() == 1 {
+                    SERVLIST(Some(m.args[0][]), None)
+                } else if m.args.len() == 2 {
+                    SERVLIST(Some(m.args[0][]), Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 0 {
-                SERVLIST(None, None)
-            } else if m.args.len() == 1 {
-                SERVLIST(Some(m.args[0][]), None)
-            } else if m.args.len() == 2 {
-                SERVLIST(Some(m.args[0][]), Some(m.args[1][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "SQUERY" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 1 { return Err(invalid_input()) }
-                SQUERY(m.args[0][], m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 2 { return Err(invalid_input()) }
-                SQUERY(m.args[0][], m.args[1][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    SQUERY(m.args[0][], suffix[])
+                },
+                None => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    SQUERY(m.args[0][], m.args[1][])
+                }
             }
         } else if let "WHO" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    WHO(Some(m.suffix.as_ref().unwrap()[]), None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    WHO(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    WHO(Some(m.args[0][]), Some(m.suffix.as_ref().unwrap()[] == "o"))
+                    WHO(Some(m.args[0][]), Some(suffix[] == "o"))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 0 {
+                    WHO(None, None)
+                } else if m.args.len() == 1 {
+                    WHO(Some(m.args[0][]), None)
+                } else if m.args.len() == 2 {
+                    WHO(Some(m.args[0][]), Some(m.args[1][] == "o"))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 0 {
-                WHO(None, None)
-            } else if m.args.len() == 1 {
-                WHO(Some(m.args[0][]), None)
-            } else if m.args.len() == 2 {
-                WHO(Some(m.args[0][]), Some(m.args[1][] == "o"))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "WHOIS" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    WHOIS(None, m.suffix.as_ref().unwrap()[])
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    WHOIS(None, suffix[])
                 } else if m.args.len() == 1 {
-                    WHOIS(Some(m.args[0][]), m.suffix.as_ref().unwrap()[])
+                    WHOIS(Some(m.args[0][]), suffix[])
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 1 {
+                    WHOIS(None, m.args[0][])
+                } else if m.args.len() == 2 {
+                    WHOIS(Some(m.args[0][]), m.args[1][])
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 1 {
-                WHOIS(None, m.args[0][])
-            } else if m.args.len() == 2 {
-                WHOIS(Some(m.args[0][]), m.args[1][])
-            } else {
-                return Err(invalid_input())
             }
         } else if let "WHOWAS" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    WHOWAS(m.suffix.as_ref().unwrap()[], None, None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    WHOWAS(suffix[], None, None)
                 } else if m.args.len() == 1 {
-                    WHOWAS(m.args[0][], None, Some(m.suffix.as_ref().unwrap()[]))
+                    WHOWAS(m.args[0][], None, Some(suffix[]))
                 } else if m.args.len() == 2 {
-                    WHOWAS(m.args[0][], Some(m.args[1][]), Some(m.suffix.as_ref().unwrap()[]))
+                    WHOWAS(m.args[0][], Some(m.args[1][]), Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 1 {
+                    WHOWAS(m.args[0][], None, None)
+                } else if m.args.len() == 2 {
+                    WHOWAS(m.args[0][], None, Some(m.args[1][]))
+                } else if m.args.len() == 3 {
+                    WHOWAS(m.args[0][], Some(m.args[1][]), Some(m.args[2][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 1 {
-                WHOWAS(m.args[0][], None, None)
-            } else if m.args.len() == 2 {
-                WHOWAS(m.args[0][], None, Some(m.args[1][]))
-            } else if m.args.len() == 3 {
-                WHOWAS(m.args[0][], Some(m.args[1][]), Some(m.args[2][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "KILL" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 1 { return Err(invalid_input()) }
-                KILL(m.args[0][], m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 2 { return Err(invalid_input()) }
-                KILL(m.args[0][], m.args[1][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    KILL(m.args[0][], suffix[])
+                },
+                None => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    KILL(m.args[0][], m.args[1][])
+                }
             }
         } else if let "PING" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    PING(m.suffix.as_ref().unwrap()[], None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    PING(suffix[], None)
                 } else if m.args.len() == 1 {
-                    PING(m.args[0][], Some(m.suffix.as_ref().unwrap()[]))
+                    PING(m.args[0][], Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 1 {
+                    PING(m.args[0][], None)
+                } else if m.args.len() == 2 {
+                    PING(m.args[0][], Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 1 {
-                PING(m.args[0][], None)
-            } else if m.args.len() == 2 {
-                PING(m.args[0][], Some(m.args[1][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "PONG" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    PONG(m.suffix.as_ref().unwrap()[], None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    PONG(suffix[], None)
                 } else if m.args.len() == 1 {
-                    PONG(m.args[0][], Some(m.suffix.as_ref().unwrap()[]))
+                    PONG(m.args[0][], Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 1 {
+                    PONG(m.args[0][], None)
+                } else if m.args.len() == 2 {
+                    PONG(m.args[0][], Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 1 {
-                PONG(m.args[0][], None)
-            } else if m.args.len() == 2 {
-                PONG(m.args[0][], Some(m.args[1][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "ERROR" = m.command[] {
-            if m.suffix.is_some() && m.args.len() == 0 {
-                ERROR(m.suffix.as_ref().unwrap()[])
-            } else {
-                return Err(invalid_input())
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    ERROR(suffix[])
+                } else {
+                    return Err(invalid_input())
+                },
+                None => return Err(invalid_input())
             }
         } else if let "AWAY" = m.command[] {
-            if m.args.len() == 0 {
-                AWAY(m.suffix.as_ref().map(|s| s[]))
-            } else {
-                return Err(invalid_input())
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    AWAY(Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => return Err(invalid_input())
             }
         } else if let "REHASH" = m.command[] {
             if m.args.len() == 0 {
@@ -656,40 +711,47 @@ impl<'a> Command<'a> {
                 return Err(invalid_input())
             }
         } else if let "SUMMON" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 0 {
-                    SUMMON(m.suffix.as_ref().unwrap()[], None, None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    SUMMON(suffix[], None, None)
                 } else if m.args.len() == 1 {
-                    SUMMON(m.args[0][], Some(m.suffix.as_ref().unwrap()[]), None)
+                    SUMMON(m.args[0][], Some(suffix[]), None)
                 } else if m.args.len() == 2 {
-                    SUMMON(m.args[0][], Some(m.args[1][]), Some(m.suffix.as_ref().unwrap()[]))
+                    SUMMON(m.args[0][], Some(m.args[1][]), Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 1 {
+                    SUMMON(m.args[0][], None, None)
+                } else if m.args.len() == 2 {
+                    SUMMON(m.args[0][], Some(m.args[1][]), None)
+                } else if m.args.len() == 3 {
+                    SUMMON(m.args[0][], Some(m.args[1][]), Some(m.args[2][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 1 {
-                SUMMON(m.args[0][], None, None)
-            } else if m.args.len() == 2 {
-                SUMMON(m.args[0][], Some(m.args[1][]), None)
-            } else if m.args.len() == 3 {
-                SUMMON(m.args[0][], Some(m.args[1][]), Some(m.args[2][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "USERS" = m.command[] {
-            if m.args.len() == 0 {
-                USERS(m.suffix.as_ref().map(|s| s[]))
-            } else if m.args.len() == 1 {
-                USERS(Some(m.args[0][]))
-            } else {
-                return Err(invalid_input())
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 0 { return Err(invalid_input()) }
+                    USERS(Some(suffix[]))
+                },
+                None => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    USERS(Some(m.args[0][]))
+                }
             }
         } else if let "WALLOPS" = m.command[] {
-            if m.suffix.is_some() && m.args.len() == 0 {
-                WALLOPS(m.suffix.as_ref().unwrap()[])
-            } else if m.args.len() == 1 {
-                WALLOPS(m.args[0][])
-            } else {
-                return Err(invalid_input())
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 0 { return Err(invalid_input()) }
+                    WALLOPS(suffix[])
+                },
+                None => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    WALLOPS(m.args[0][])
+                }
             }
         } else if let "USERHOST" = m.command[] {
             if m.suffix.is_none() {
@@ -704,52 +766,65 @@ impl<'a> Command<'a> {
                 return Err(invalid_input())
             }
         } else if let "SAJOIN" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 1 { return Err(invalid_input()) }
-                SAJOIN(m.args[0][], m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 2 { return Err(invalid_input()) }
-                SAJOIN(m.args[0][], m.args[1][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    SAJOIN(m.args[0][], suffix[])
+                },
+                None => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    SAJOIN(m.args[0][], m.args[1][])
+                }
             }
         } else if let "SAMODE" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() == 1 {
-                    SAMODE(m.args[0][], m.suffix.as_ref().unwrap()[], None)
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 1 {
+                    SAMODE(m.args[0][], suffix[], None)
                 } else if m.args.len() == 2 {
-                    SAMODE(m.args[0][], m.args[1][], Some(m.suffix.as_ref().unwrap()[]))
+                    SAMODE(m.args[0][], m.args[1][], Some(suffix[]))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 2 {
+                    SAMODE(m.args[0][], m.args[1][], None)
+                } else if m.args.len() == 3 {
+                    SAMODE(m.args[0][], m.args[1][], Some(m.args[2][]))
                 } else {
                     return Err(invalid_input())
                 }
-            } else if m.args.len() == 2 {
-                SAMODE(m.args[0][], m.args[1][], None)
-            } else if m.args.len() == 3 {
-                SAMODE(m.args[0][], m.args[1][], Some(m.args[2][]))
-            } else {
-                return Err(invalid_input())
             }
         } else if let "SANICK" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 1 { return Err(invalid_input()) }
-                SANICK(m.args[0][], m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 2 { return Err(invalid_input()) }
-                SANICK(m.args[0][], m.args[1][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    SANICK(m.args[0][], suffix[])
+                },
+                None => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    SANICK(m.args[0][], m.args[1][])
+                }
             }
         } else if let "SAPART" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 1 { return Err(invalid_input()) }
-                SAPART(m.args[0][], m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 2 { return Err(invalid_input()) }
-                SAPART(m.args[0][], m.args[1][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    SAPART(m.args[0][], suffix[])
+                },
+                None => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    SAPART(m.args[0][], m.args[1][])
+                }
             }
         } else if let "SAQUIT" = m.command[] {
-            if m.suffix.is_some() {
-                if m.args.len() != 1 { return Err(invalid_input()) }
-                SAQUIT(m.args[0][], m.suffix.as_ref().unwrap()[])
-            } else {
-                if m.args.len() != 2 { return Err(invalid_input()) }
-                SAQUIT(m.args[0][], m.args[1][])
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    SAQUIT(m.args[0][], suffix[])
+                },
+                None => {
+                    if m.args.len() != 2 { return Err(invalid_input()) }
+                    SAQUIT(m.args[0][], m.args[1][])
+                }
             }
         } else {
             return Err(invalid_input())
