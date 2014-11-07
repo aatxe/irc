@@ -1,6 +1,7 @@
 //! A simple, thread-safe IRC client library.
 #![crate_name = "irc"]
 #![crate_type = "lib"]
+#![license = "Public Domain"]
 #![unstable]
 
 #![feature(if_let)]
