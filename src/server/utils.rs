@@ -131,3 +131,205 @@ impl<'a, T, U> Wrapper<'a, T, U> where T: IrcWriter, U: IrcReader {
         self.server.send(INVITE(nick, chan))
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::Wrapper;
+    use std::io::MemWriter;
+    use std::io::util::NullReader;
+    use conn::Connection;
+    use server::IrcServer;
+    use server::test::{get_server_value, test_config};
+
+    #[test]
+    fn identify() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.identify().unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "NICK :test\r\nUSER test 0 * :test\r\n");
+    }
+
+    #[test]
+    fn send_pong() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_pong("irc.test.net").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "PONG :irc.test.net\r\n");
+    }
+
+    #[test]
+    fn send_join() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_join("#test,#test2,#test3").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "JOIN #test,#test2,#test3\r\n");
+    }
+
+    #[test]
+    fn send_oper() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_oper("test", "test").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "OPER test :test\r\n");
+    }
+
+    #[test]
+    fn send_privmsg() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_privmsg("#test", "Hi, everybody!").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "PRIVMSG #test :Hi, everybody!\r\n");
+    }
+
+    #[test]
+    fn send_topic_no_topic() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_topic("#test", "").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "TOPIC #test\r\n");
+    }
+
+    #[test]
+    fn send_topic() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_topic("#test", "Testing stuff.").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "TOPIC #test :Testing stuff.\r\n");
+    }
+
+    #[test]
+    fn send_kill() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_kill("test", "Testing kills.").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "KILL test :Testing kills.\r\n");
+    }
+
+    #[test]
+    fn send_kick_no_message() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_kick("#test", "test", "").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "KICK #test test\r\n");
+    }
+
+    #[test]
+    fn send_kick() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_kick("#test", "test", "Testing kicks.").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "KICK #test test :Testing kicks.\r\n");
+    }
+
+    #[test]
+    fn send_mode_no_modeparams() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_mode("#test", "+i", "").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "MODE #test +i\r\n");
+    }
+
+    #[test]
+    fn send_mode() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_mode("#test", "+o", "test").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "MODE #test +o test\r\n");
+    }
+
+    #[test]
+    fn send_samode_no_modeparams() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_samode("#test", "+i", "").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "SAMODE #test +i\r\n");
+    }
+
+    #[test]
+    fn send_samode() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_samode("#test", "+o", "test").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "SAMODE #test +o test\r\n");
+    }
+
+    #[test]
+    fn send_sanick() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_sanick("test", "test2").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "SANICK test test2\r\n");
+    }
+
+    #[test]
+    fn send_invite() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(MemWriter::new(), NullReader));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_invite("test", "#test").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "INVITE test #test\r\n");
+    }
+}

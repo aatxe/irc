@@ -130,7 +130,7 @@ mod test {
     use data::command::PRIVMSG;
     use data::kinds::IrcReader;
 
-    fn test_config() -> Config {
+    pub fn test_config() -> Config {
         Config {
             owners: vec![format!("test")],
             nickname: format!("test"),
@@ -144,7 +144,7 @@ mod test {
         }
     }
 
-    fn get_server_value<U>(server: IrcServer<MemWriter, U>) -> String where U: IrcReader {
+    pub fn get_server_value<U>(server: IrcServer<MemWriter, U>) -> String where U: IrcReader {
         String::from_utf8(server.conn().writer().get_ref().to_vec()).unwrap()
     }
 
