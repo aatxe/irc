@@ -1,7 +1,7 @@
 //! Interface for working with IRC Servers
 #![experimental]
-use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
-use conn::Connection;
+use std::io::{BufferedReader, BufferedWriter, IoResult};
+use conn::{Connection, NetStream};
 use data::command::{Command, JOIN, PONG};
 use data::config::Config;
 use data::kinds::{IrcReader, IrcWriter};
@@ -29,20 +29,28 @@ pub struct IrcServer<'a, T, U> where T: IrcWriter, U: IrcReader {
     config: Config
 }
 
-impl<'a> IrcServer<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
+impl<'a> IrcServer<'a, BufferedWriter<NetStream>, BufferedReader<NetStream>> {
     /// Creates a new IRC Server connection from the configuration at the specified path, connecting immediately.
     #[experimental]
-    pub fn new(config: &str) -> IoResult<IrcServer<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
+    pub fn new(config: &str) -> IoResult<IrcServer<'a, BufferedWriter<NetStream>, BufferedReader<NetStream>>> {
         let config = try!(Config::load_utf8(config));
-        let conn = try!(Connection::connect(config.server[], config.port));
-        Ok(IrcServer::from_connection(config, conn))
+        let conn = try!(if config.use_ssl {
+            Connection::connect_ssl(config.server[], config.port)
+        } else {
+            Connection::connect(config.server[], config.port)
+        });
+        Ok(IrcServer { config: config, conn: conn })
     }
 
     /// Creates a new IRC server connection from the specified configuration, connecting immediately.
     #[experimental]
-    pub fn from_config(config: Config) -> IoResult<IrcServer<'a, BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
-        let conn = try!(Connection::connect(config.server[], config.port));
-        Ok(IrcServer::from_connection(config, conn))
+    pub fn from_config(config: Config) -> IoResult<IrcServer<'a, BufferedWriter<NetStream>, BufferedReader<NetStream>>> {
+        let conn = try!(if config.use_ssl {
+            Connection::connect_ssl(config.server[], config.port)
+        } else {
+            Connection::connect(config.server[], config.port)
+        });
+        Ok(IrcServer { config: config, conn: conn })
     }
 }
 
@@ -139,6 +147,7 @@ mod test {
             password: String::new(),
             server: format!("irc.test.net"),
             port: 6667,
+            use_ssl: false,
             channels: vec![format!("#test"), format!("#test2")],
             options: HashMap::new(),
         }

@@ -1,1 +1,1 @@
-echo "{\"owners\": [\"test\"],\"nickname\": \"test\",\"username\": \"test\",\"realname\": \"test\",\"password\": \"\",\"server\": \"irc.test.net\",\"port\": 6667,\"channels\": [\"#test\", \"#test2\"],\"options\": {}}" > config.json
+echo "{\"owners\": [\"test\"],\"nickname\": \"test\",\"username\": \"test\",\"realname\": \"test\",\"password\": \"\",\"server\": \"irc.test.net\",\"port\": 6667,\"use_ssl\": false,\"channels\": [\"#test\", \"#test2\"],\"options\": {}}" > config.json

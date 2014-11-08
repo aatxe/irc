@@ -9,3 +9,12 @@ keywords = ["irc", "client", "thread-safe"]
 documentation = "http://www.rust-ci.org/aaronweiss74/irc/doc/irc/"
 repository = "https://github.com/aaronweiss74/irc"
 readme = "README.md"
+
+[features]
+
+ssl = ["openssl"]
+
+[dependencies.openssl]
+
+git = "https://github.com/sfackler/rust-openssl.git"
+optional = true

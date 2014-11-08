@@ -23,6 +23,8 @@ pub struct Config {
     pub server: String,
     /// The port to connect on.
     pub port: u16,
+    /// Whether or not to use SSL.
+    pub use_ssl: bool,
     /// A list of channels to join on connection.
     pub channels: Vec<String>,
     /// A map of additional options to be stored in config.
@@ -70,6 +72,7 @@ mod test {
             password: String::new(),
             server: format!("irc.test.net"),
             port: 6667,
+            use_ssl: false,
             channels: vec![format!("#test"), format!("#test2")],
             options: HashMap::new(),
         };
@@ -86,6 +89,7 @@ mod test {
             password: String::new(),
             server: format!("irc.test.net"),
             port: 6667,
+            use_ssl: false,
             channels: vec![format!("#test"), format!("#test2")],
             options: HashMap::new(),
         };
@@ -102,6 +106,7 @@ mod test {
             password: String::new(),
             server: format!("irc.test.net"),
             port: 6667,
+            use_ssl: false,
             channels: Vec::new(),
             options: HashMap::new(),
         };

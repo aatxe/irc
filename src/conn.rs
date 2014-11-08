@@ -2,8 +2,11 @@
 #![experimental]
 use std::sync::{Mutex, MutexGuard};
 use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
+#[cfg(feature = "ssl")] use std::io::{IoError, OtherIoError};
 use data::kinds::{IrcWriter, IrcReader};
 use data::message::Message;
+#[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslStream, Tlsv1};
+#[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
 
 /// A thread-safe connection.
 #[experimental]
@@ -15,9 +18,74 @@ pub struct Connection<T, U> where T: IrcWriter, U: IrcReader {
 impl Connection<BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
     /// Creates a thread-safe TCP connection to the specified server.
     #[experimental]
-    pub fn connect(host: &str, port: u16) -> IoResult<Connection<BufferedWriter<TcpStream>, BufferedReader<TcpStream>>> {
+    pub fn connect(host: &str, port: u16) -> IoResult<Connection<BufferedWriter<NetStream>, BufferedReader<NetStream>>> {
         let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
-        Ok(Connection::new(BufferedWriter::new(socket.clone()), BufferedReader::new(socket)))
+        Ok(Connection::new(BufferedWriter::new(UnsecuredTcpStream(socket.clone())),
+                           BufferedReader::new(UnsecuredTcpStream(socket))))
+    }
+
+    /// Creates a thread-safe TCP connection to the specified server over SSL.
+    /// If the library is compiled without SSL support, this method panics.
+    #[experimental]
+    #[cfg(feature = "ssl")]
+    pub fn connect_ssl(host: &str, port: u16) -> IoResult<Connection<BufferedWriter<NetStream>, BufferedReader<NetStream>>> {
+        let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
+        let ssl = try!(ssl_to_io(SslContext::new(Tlsv1)));
+        let input = try!(ssl_to_io(SslStream::new(&ssl, socket.clone())));
+        let output = try!(ssl_to_io(SslStream::new(&ssl, socket)));
+        Ok(Connection::new(BufferedWriter::new(SslTcpStream(input)),
+                           BufferedReader::new(SslTcpStream(output))))
+    }
+
+    /// Creates a thread-safe TCP connection to the specified server over SSL.
+    /// If the library is compiled without SSL support, this method panics.
+    #[experimental]
+    #[cfg(not(feature = "ssl"))]
+    pub fn connect_ssl(host: &str, port: u16) -> IoResult<Connection<BufferedWriter<NetStream>, BufferedReader<NetStream>>> {
+        panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
+    }
+}
+
+/// An abstraction over different networked streams.
+#[experimental]
+pub enum NetStream {
+    /// An unsecured TcpStream.
+    UnsecuredTcpStream(TcpStream),
+    /// An SSL-secured TcpStream.
+    /// This is only available when compiled with SSL support.
+    #[cfg(feature = "ssl")]
+    SslTcpStream(SslStream<TcpStream>),
+}
+
+impl Reader for NetStream {
+    fn read(&mut self, buf: &mut [u8]) -> IoResult<uint> {
+        match self {
+            &UnsecuredTcpStream(ref mut stream) => stream.read(buf),
+            #[cfg(feature = "ssl")]
+            &SslTcpStream(ref mut stream) => stream.read(buf),
+        }
+    }
+}
+
+impl Writer for NetStream {
+    fn write(&mut self, buf: &[u8]) -> IoResult<()> {
+        match self {
+            &UnsecuredTcpStream(ref mut stream) => stream.write(buf),
+            #[cfg(feature = "ssl")]
+            &SslTcpStream(ref mut stream) => stream.write(buf),
+        }
+    }
+}
+
+#[cfg(feature = "ssl")]
+fn ssl_to_io<T>(res: Result<T, SslError>) -> IoResult<T> {
+    match res {
+        Ok(x) => Ok(x),
+        Err(e) => Err(IoError {
+            kind: OtherIoError,
+            desc: "An SSL error occurred.",
+            detail: Some(format!("{}", e)),
+        }),
     }
 }
 

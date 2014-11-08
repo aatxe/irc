@@ -15,8 +15,8 @@ fn main() {
         realname: "pickles".into_string(),
         password: "".into_string(),
         server: "irc.fyrechat.net".into_string(),
-        port: 6667,
-        use_ssl: false,
+        port: 6697,
+        use_ssl: true,
         channels: vec!("#vana".into_string()),
         options: HashMap::new(),
     };
