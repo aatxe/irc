@@ -2,4 +2,10 @@
 
 name = "irc"
 version = "0.0.1"
+description = "A simple, thread-safe IRC client library."
 authors = ["Aaron Weiss <aaronweiss74@gmail.com>"]
+license = "Public Domain"
+keywords = ["irc", "client", "thread-safe"]
+documentation = "http://www.rust-ci.org/aaronweiss74/irc/doc/irc/"
+repository = "https://github.com/aaronweiss74/irc"
+readme = "README.md"
