@@ -1,48 +1,57 @@
 //! Thread-safe connections on any IrcWriters and IrcReaders.
 #![experimental]
 use std::sync::{Mutex, MutexGuard};
-use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
+use std::io::{BufferedStream, IoResult, MemWriter, TcpStream};
 #[cfg(feature = "ssl")] use std::io::{IoError, OtherIoError};
-use data::kinds::{IrcWriter, IrcReader};
+use data::kinds::{IrcReader, IrcStream, IrcWriter};
 use data::message::Message;
 #[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslStream, Tlsv1};
 #[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
 
 /// A thread-safe connection.
 #[experimental]
-pub struct Connection<T, U> where T: IrcWriter, U: IrcReader {
-    writer: Mutex<T>,
-    reader: Mutex<U>,
+pub struct Connection<T> where T: IrcStream {
+    stream: Mutex<T>
 }
 
-impl Connection<BufferedWriter<TcpStream>, BufferedReader<TcpStream>> {
+impl Connection<BufferedStream<TcpStream>> {
     /// Creates a thread-safe TCP connection to the specified server.
     #[experimental]
-    pub fn connect(host: &str, port: u16) -> IoResult<Connection<BufferedWriter<NetStream>, BufferedReader<NetStream>>> {
+    pub fn connect(host: &str, port: u16) -> IoResult<Connection<BufferedStream<NetStream>>> {
         let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
-        Ok(Connection::new(BufferedWriter::new(UnsecuredTcpStream(socket.clone())),
-                           BufferedReader::new(UnsecuredTcpStream(socket))))
+        Ok(Connection::new(BufferedStream::new(UnsecuredTcpStream(socket))))
     }
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
     /// If the library is compiled without SSL support, this method panics.
     #[experimental]
     #[cfg(feature = "ssl")]
-    pub fn connect_ssl(host: &str, port: u16) -> IoResult<Connection<BufferedWriter<NetStream>, BufferedReader<NetStream>>> {
+    pub fn connect_ssl(host: &str, port: u16) -> IoResult<Connection<BufferedStream<NetStream>>> {
         let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
         let ssl = try!(ssl_to_io(SslContext::new(Tlsv1)));
-        let input = try!(ssl_to_io(SslStream::new(&ssl, socket.clone())));
-        let output = try!(ssl_to_io(SslStream::new(&ssl, socket)));
-        Ok(Connection::new(BufferedWriter::new(SslTcpStream(input)),
-                           BufferedReader::new(SslTcpStream(output))))
+        let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
+        Ok(Connection::new(BufferedStream::new(SslTcpStream(ssl_socket))))
     }
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
     /// If the library is compiled without SSL support, this method panics.
     #[experimental]
     #[cfg(not(feature = "ssl"))]
-    pub fn connect_ssl(host: &str, port: u16) -> IoResult<Connection<BufferedWriter<NetStream>, BufferedReader<NetStream>>> {
+    pub fn connect_ssl(host: &str, port: u16) -> IoResult<Connection<BufferedStream<NetStream>>> {
         panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
+    }
+}
+
+/// Converts a Result<T, SslError> into an IoResult<T>.
+#[cfg(feature = "ssl")]
+fn ssl_to_io<T>(res: Result<T, SslError>) -> IoResult<T> {
+    match res {
+        Ok(x) => Ok(x),
+        Err(e) => Err(IoError {
+            kind: OtherIoError,
+            desc: "An SSL error occurred.",
+            detail: Some(format!("{}", e)),
+        }),
     }
 }
 
@@ -77,67 +86,99 @@ impl Writer for NetStream {
     }
 }
 
-#[cfg(feature = "ssl")]
-fn ssl_to_io<T>(res: Result<T, SslError>) -> IoResult<T> {
-    match res {
-        Ok(x) => Ok(x),
-        Err(e) => Err(IoError {
-            kind: OtherIoError,
-            desc: "An SSL error occurred.",
-            detail: Some(format!("{}", e)),
-        }),
-    }
-}
-
-impl<T, U> Connection<T, U> where T: IrcWriter, U: IrcReader {
-    /// Creates a new connection from any arbitrary IrcWriter and IrcReader.
+impl<T: IrcStream> Connection<T> {
+    /// Creates a new connection from any arbitrary IrcStream.
     #[experimental]
-    pub fn new(writer: T, reader: U) -> Connection<T, U> {
+    pub fn new(stream: T) -> Connection<T> {
         Connection {
-            writer: Mutex::new(writer),
-            reader: Mutex::new(reader),
+            stream: Mutex::new(stream),
         }
     }
 
     /// Sends a Message over this connection.
     #[experimental]
     pub fn send(&self, message: Message) -> IoResult<()> {
-        let mut send = self.writer.lock();
-        try!(send.write_str(message.into_string()[]));
-        send.flush()
+        let mut stream = self.stream.lock();
+        try!(stream.write_str(message.into_string()[]));
+        stream.flush()
     }
 
     /// Receives a single line from this connection.
     #[experimental]
     pub fn recv(&self) -> IoResult<String> {
-        self.reader.lock().read_line()
+        self.stream.lock().read_line()
     }
 
-    /// Acquires the Writer lock.
+    /// Acquires the Stream lock.
     #[experimental]
-    pub fn writer<'a>(&'a self) -> MutexGuard<'a, T> {
-        self.writer.lock()
+    pub fn stream<'a>(&'a self) -> MutexGuard<'a, T> {
+        self.stream.lock()
+    }
+}
+
+/// An IrcStream built from an IrcWriter and an IrcReader.
+#[experimental]
+pub struct IoStream<T: IrcWriter, U: IrcReader> {
+    writer: T,
+    reader: U,
+}
+
+impl<T: IrcWriter, U: IrcReader> IoStream<T, U> {
+    /// Creates a new IoStream from the given IrcWriter and IrcReader.
+    #[experimental]
+    pub fn new(writer: T, reader: U) -> IoStream<T, U> {
+        IoStream { writer: writer, reader: reader }
+    }
+}
+
+impl<U: IrcReader> IoStream<MemWriter, U> {
+    pub fn value(&self) -> Vec<u8> {
+        self.writer.get_ref().to_vec()
+    }
+}
+
+impl<T: IrcWriter, U: IrcReader> Buffer for IoStream<T, U> {
+    fn fill_buf<'a>(&'a mut self) -> IoResult<&'a [u8]> {
+        self.reader.fill_buf()
+    }
+
+    fn consume(&mut self, amt: uint) {
+        self.reader.consume(amt)
+    }
+}
+
+impl<T: IrcWriter, U: IrcReader> Reader for IoStream<T, U> {
+    fn read(&mut self, buf: &mut [u8]) -> IoResult<uint> {
+        self.reader.read(buf)
+    }
+}
+
+impl<T: IrcWriter, U: IrcReader> Writer for IoStream<T, U> {
+    fn write(&mut self, buf: &[u8]) -> IoResult<()> {
+        self.writer.write(buf)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::Connection;
+    use super::{Connection, IoStream};
     use std::io::{MemReader, MemWriter};
     use std::io::util::{NullReader, NullWriter};
     use data::message::Message;
 
     #[test]
     fn send() {
-        let conn = Connection::new(MemWriter::new(), NullReader);
+        let conn = Connection::new(IoStream::new(MemWriter::new(), NullReader));
         assert!(conn.send(Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("Testing!"))).is_ok());
-        let data = String::from_utf8(conn.writer().get_ref().to_vec()).unwrap();
+        let data = String::from_utf8(conn.stream().value()).unwrap();
         assert_eq!(data[], "PRIVMSG test :Testing!\r\n");
     }
 
     #[test]
     fn recv() {
-        let conn = Connection::new(NullWriter, MemReader::new("PRIVMSG test :Testing!\r\n".as_bytes().to_vec()));
+        let conn = Connection::new(IoStream::new(
+            NullWriter, MemReader::new("PRIVMSG test :Testing!\r\n".as_bytes().to_vec())
+        ));
         assert_eq!(conn.recv().unwrap()[], "PRIVMSG test :Testing!\r\n");
     }
 }

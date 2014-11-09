@@ -5,16 +5,16 @@ use std::io::IoResult;
 use data::command::{Command, INVITE, JOIN, KILL, MODE, NICK, KICK};
 use data::command::{OPER, PONG, PRIVMSG, SAMODE, SANICK, TOPIC, USER};
 use data::config::Config;
-use data::kinds::{IrcReader, IrcWriter};
+use data::kinds::IrcStream;
 use server::{Server, ServerIterator};
 
 /// Functionality-providing wrapper for Server.
 #[experimental]
-pub struct Wrapper<'a, T, U> where T: IrcWriter, U: IrcReader {
-    server: &'a Server<'a, T, U> + 'a
+pub struct Wrapper<'a, T> where T: IrcStream {
+    server: &'a Server<'a, T> + 'a
 }
 
-impl<'a, T, U> Server<'a, T, U> for Wrapper<'a, T, U> where T: IrcWriter, U: IrcReader {
+impl<'a, T> Server<'a, T> for Wrapper<'a, T> where T: IrcStream {
     fn config(&self) -> &Config {
         self.server.config()
     }
@@ -23,15 +23,15 @@ impl<'a, T, U> Server<'a, T, U> for Wrapper<'a, T, U> where T: IrcWriter, U: Irc
         self.server.send(command)
     }
 
-    fn iter(&'a self) -> ServerIterator<'a, T, U> {
+    fn iter(&'a self) -> ServerIterator<'a, T> {
         self.server.iter()
     }
 }
 
-impl<'a, T, U> Wrapper<'a, T, U> where T: IrcWriter, U: IrcReader {
+impl<'a, T> Wrapper<'a, T> where T: IrcStream {
     /// Creates a new Wrapper from the given Server.
     #[experimental]
-    pub fn new(server: &'a Server<'a, T, U>) -> Wrapper<'a, T, U> {
+    pub fn new(server: &'a Server<'a, T>) -> Wrapper<'a, T> {
         Wrapper { server: server }
     }
 
@@ -137,14 +137,14 @@ mod test {
     use super::Wrapper;
     use std::io::MemWriter;
     use std::io::util::NullReader;
-    use conn::Connection;
+    use conn::{Connection, IoStream};
     use server::IrcServer;
     use server::test::{get_server_value, test_config};
 
     #[test]
     fn identify() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.identify().unwrap();
@@ -156,7 +156,7 @@ mod test {
     #[test]
     fn send_pong() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_pong("irc.test.net").unwrap();
@@ -168,7 +168,7 @@ mod test {
     #[test]
     fn send_join() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_join("#test,#test2,#test3").unwrap();
@@ -180,7 +180,7 @@ mod test {
     #[test]
     fn send_oper() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_oper("test", "test").unwrap();
@@ -192,7 +192,7 @@ mod test {
     #[test]
     fn send_privmsg() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_privmsg("#test", "Hi, everybody!").unwrap();
@@ -204,7 +204,7 @@ mod test {
     #[test]
     fn send_topic_no_topic() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_topic("#test", "").unwrap();
@@ -216,7 +216,7 @@ mod test {
     #[test]
     fn send_topic() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_topic("#test", "Testing stuff.").unwrap();
@@ -228,7 +228,7 @@ mod test {
     #[test]
     fn send_kill() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_kill("test", "Testing kills.").unwrap();
@@ -240,7 +240,7 @@ mod test {
     #[test]
     fn send_kick_no_message() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_kick("#test", "test", "").unwrap();
@@ -252,7 +252,7 @@ mod test {
     #[test]
     fn send_kick() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_kick("#test", "test", "Testing kicks.").unwrap();
@@ -264,7 +264,7 @@ mod test {
     #[test]
     fn send_mode_no_modeparams() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_mode("#test", "+i", "").unwrap();
@@ -276,7 +276,7 @@ mod test {
     #[test]
     fn send_mode() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_mode("#test", "+o", "test").unwrap();
@@ -288,7 +288,7 @@ mod test {
     #[test]
     fn send_samode_no_modeparams() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_samode("#test", "+i", "").unwrap();
@@ -300,7 +300,7 @@ mod test {
     #[test]
     fn send_samode() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_samode("#test", "+o", "test").unwrap();
@@ -312,7 +312,7 @@ mod test {
     #[test]
     fn send_sanick() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_sanick("test", "test2").unwrap();
@@ -324,7 +324,7 @@ mod test {
     #[test]
     fn send_invite() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(MemWriter::new(), NullReader));
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_invite("test", "#test").unwrap();

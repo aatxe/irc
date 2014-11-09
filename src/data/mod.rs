@@ -17,6 +17,10 @@ pub mod kinds {
     #[unstable]
     pub trait IrcReader: Buffer + Sized + Send + 'static {}
     impl<T> IrcReader for T where T: Buffer + Sized + Send + 'static {}
+    /// Trait describing all possible Streams for this library.
+    #[unstable]
+    pub trait IrcStream: IrcWriter + IrcReader {}
+    impl<T> IrcStream for T where T: IrcWriter + IrcReader {}
 }
 
 pub mod command;
