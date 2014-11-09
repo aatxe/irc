@@ -1,5 +1,5 @@
 //! Data related to IRC functionality.
-#![experimental]
+#![unstable]
 
 pub use data::config::Config;
 pub use data::message::Message;

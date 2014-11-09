@@ -1,4 +1,4 @@
-//! Thread-safe connections on any IrcWriters and IrcReaders.
+//! Thread-safe connections on IrcStreams.
 #![experimental]
 use std::sync::{Mutex, MutexGuard};
 use std::io::{BufferedStream, IoResult, MemWriter, TcpStream};

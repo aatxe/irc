@@ -24,6 +24,7 @@ pub struct Config {
     /// The port to connect on.
     pub port: u16,
     /// Whether or not to use SSL.
+    /// Bots will automatically panic if this is enabled without SSL support.
     pub use_ssl: bool,
     /// A list of channels to join on connection.
     pub channels: Vec<String>,
