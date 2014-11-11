@@ -1,9 +1,10 @@
 //! Data related to IRC functionality.
 #![unstable]
 
+pub use data::command::Command;
 pub use data::config::Config;
 pub use data::message::Message;
-pub use data::command::Command;
+pub use data::user::User;
 
 pub mod kinds {
     //! Trait definitions of appropriate Writers and Buffers for use with this library.
@@ -26,3 +27,4 @@ pub mod kinds {
 pub mod command;
 pub mod config;
 pub mod message;
+pub mod user;

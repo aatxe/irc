@@ -1,11 +1,14 @@
 //! Interface for working with IRC Servers
 #![experimental]
+use std::collections::HashMap;
 use std::io::{BufferedStream, IoResult};
+use std::sync::Mutex;
 use conn::{Connection, NetStream};
 use data::command::{Command, JOIN, PONG};
 use data::config::Config;
 use data::kinds::IrcStream;
 use data::message::Message;
+use data::user::User;
 
 pub mod utils;
 
@@ -26,7 +29,9 @@ pub struct IrcServer<'a, T> where T: IrcStream {
     /// The thread-safe IRC connection.
     conn: Connection<T>,
     /// The configuration used with this connection.
-    config: Config
+    config: Config,
+    /// A thread-safe map of channels to the list of users in them.
+    chanlists: Mutex<HashMap<String, Vec<User>>>,
 }
 
 impl<'a> IrcServer<'a, BufferedStream<NetStream>> {
@@ -39,7 +44,7 @@ impl<'a> IrcServer<'a, BufferedStream<NetStream>> {
         } else {
             Connection::connect(config.server[], config.port)
         });
-        Ok(IrcServer { config: config, conn: conn })
+        Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()) })
     }
 
     /// Creates a new IRC server connection from the specified configuration, connecting immediately.
@@ -50,7 +55,7 @@ impl<'a> IrcServer<'a, BufferedStream<NetStream>> {
         } else {
             Connection::connect(config.server[], config.port)
         });
-        Ok(IrcServer { config: config, conn: conn })
+        Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()) })
     }
 }
 
@@ -72,10 +77,7 @@ impl<'a, T> IrcServer<'a, T> where T: IrcStream {
     /// Creates an IRC server from the specified configuration, and any arbitrary Connection.
     #[experimental]
     pub fn from_connection(config: Config, conn: Connection<T>) -> IrcServer<'a, T> {
-        IrcServer {
-            conn: conn,
-            config: config
-        }
+        IrcServer { conn: conn, config: config, chanlists: Mutex::new(HashMap::new()) }
     }
 
     /// Gets a reference to the IRC server's connection.
@@ -92,7 +94,39 @@ impl<'a, T> IrcServer<'a, T> where T: IrcStream {
             for chan in self.config.channels.iter() {
                 self.send(JOIN(chan[], None)).unwrap();
             }
-        }
+        } /* FIXME: it's not really clear why this stuff is broken. 
+        else if message.command[] == "353" { // /NAMES
+            if let Some(users) = message.suffix.clone() {
+                if let [_, _, ref chan] = message.args[] {
+                    for user in users.split_str(" ") {
+                        if match self.chanlists.lock().get_mut(chan) {
+                            Some(vec) => { vec.push(User::new(user)); false },
+                            None => true,
+                        } {
+                            self.chanlists.lock().insert(chan.clone(), vec!(User::new(user)));
+                        }
+                    }
+                }
+            }
+        } else if message.command[] == "JOIN" || message.command[] == "PART" {
+            let chan = match message.suffix {
+                Some(ref suffix) => suffix[],
+                None => message.args[0][],
+            };
+            if let Some(vec) = self.chanlists.lock().get_mut(&String::from_str(chan)) {
+                if let Some(ref source) = message.suffix {
+                    if let Some(i) = source.find('!') {
+                        if message.command[] == "JOIN" {
+                            vec.push(User::new(source[..i]));
+                        } else {
+                            if let Some(n) = vec.as_slice().position_elem(&User::new(source[..i])) {
+                                vec.swap_remove(n);
+                            }
+                        }
+                    }
+                }
+            }
+        } */
         /* TODO: implement more message handling */
     }
 }
