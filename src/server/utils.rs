@@ -2,9 +2,9 @@
 #![experimental]
 
 use std::io::IoResult;
-use data::command::{Command, INVITE, JOIN, KILL, MODE, NICK, KICK};
+use data::{Command, Config, User};
+use data::command::{INVITE, JOIN, KILL, MODE, NICK, KICK};
 use data::command::{OPER, PONG, PRIVMSG, SAMODE, SANICK, TOPIC, USER};
-use data::config::Config;
 use data::kinds::IrcStream;
 use server::{Server, ServerIterator};
 
@@ -25,6 +25,10 @@ impl<'a, T> Server<'a, T> for Wrapper<'a, T> where T: IrcStream {
 
     fn iter(&'a self) -> ServerIterator<'a, T> {
         self.server.iter()
+    }
+
+    fn list_users(&self, chan: &str) -> Option<Vec<User>> {
+        self.server.list_users(chan)
     }
 }
 

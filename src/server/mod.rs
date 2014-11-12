@@ -21,6 +21,8 @@ pub trait Server<'a, T> {
     fn send(&self, _: Command) -> IoResult<()>;
     /// Gets an Iterator over Messages received by this Server.
     fn iter(&'a self) -> ServerIterator<'a, T>;
+    /// Gets a list of Users in the specified channel.
+    fn list_users(&self, _: &str) -> Option<Vec<User>>;
 }
 
 /// A thread-safe implementation of an IRC Server connection.
@@ -71,6 +73,10 @@ impl<'a, T> Server<'a, T> for IrcServer<'a, T> where T: IrcStream {
     fn iter(&'a self) -> ServerIterator<'a, T> {
         ServerIterator::new(self)
     }
+
+    fn list_users(&self, chan: &str) -> Option<Vec<User>> {
+        self.chanlists.lock().find_copy(&chan.into_string())
+    }
 }
 
 impl<'a, T> IrcServer<'a, T> where T: IrcStream {
@@ -94,7 +100,7 @@ impl<'a, T> IrcServer<'a, T> where T: IrcStream {
             for chan in self.config.channels.iter() {
                 self.send(JOIN(chan[], None)).unwrap();
             }
-        } /* FIXME: it's not really clear why this stuff is broken. 
+        }
         else if message.command[] == "353" { // /NAMES
             if let Some(users) = message.suffix.clone() {
                 if let [_, _, ref chan] = message.args[] {
@@ -114,7 +120,7 @@ impl<'a, T> IrcServer<'a, T> where T: IrcStream {
                 None => message.args[0][],
             };
             if let Some(vec) = self.chanlists.lock().get_mut(&String::from_str(chan)) {
-                if let Some(ref source) = message.suffix {
+                if let Some(ref source) = message.prefix {
                     if let Some(i) = source.find('!') {
                         if message.command[] == "JOIN" {
                             vec.push(User::new(source[..i]));
@@ -126,8 +132,13 @@ impl<'a, T> IrcServer<'a, T> where T: IrcStream {
                     }
                 }
             }
-        } */
-        /* TODO: implement more message handling */
+        } else if let ("MODE", [ref chan, ref mode, ref user]) = (message.command[], message.args[]) {
+            if let Some(vec) = self.chanlists.lock().get_mut(chan) {
+                if let Some(n) = vec.as_slice().position_elem(&User::new(user[])) {
+                    vec[n].update_access_level(mode[]);
+                }
+            }
+        }
     }
 }
 
@@ -168,7 +179,7 @@ mod test {
     use std::io::{MemReader, MemWriter};
     use std::io::util::{NullReader, NullWriter};
     use conn::{Connection, IoStream};
-    use data::Config;
+    use data::{Config, User};
     use data::command::PRIVMSG;
     use data::kinds::IrcReader;
 
@@ -222,5 +233,55 @@ mod test {
         assert!(server.send(PRIVMSG("#test", "Hi there!")).is_ok());
         assert_eq!(get_server_value(server)[],
         "PRIVMSG #test :Hi there!\r\n");
+    }
+
+    #[test]
+    fn user_tracking_names() {
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(server.list_users("#test").unwrap(),
+        vec![User::new("test"), User::new("~owner"), User::new("&admin")])
+    }
+
+    #[test]
+    fn user_tracking_names_join() {
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n:test2!test@test JOIN #test\r\n";
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(server.list_users("#test").unwrap(),
+        vec![User::new("test"), User::new("~owner"), User::new("&admin"), User::new("test2")])
+    }
+
+    #[test]
+    fn user_tracking_names_part() {
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n:owner!test@test PART #test\r\n";
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(server.list_users("#test").unwrap(),
+        vec![User::new("test"), User::new("&admin")])
+    }
+
+    #[test]
+    fn user_tracking_names_mode() {
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n:test!test@test MODE #test +o test\r\n";
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(server.list_users("#test").unwrap(),
+        vec![User::new("@test"), User::new("~owner"), User::new("&admin")]);
+        assert_eq!(server.list_users("#test").unwrap()[0].access_level(),
+        User::new("@test").access_level());
     }
 }
