@@ -151,7 +151,7 @@ pub struct ServerIterator<'a, T> where T: IrcStream {
 impl<'a, T> ServerIterator<'a, T> where T: IrcStream {
     /// Creates a new ServerIterator for the desired IrcServer.
     #[experimental]
-    pub fn new(server: &'a IrcServer<T>) -> ServerIterator<'a, T> {
+    pub fn new(server: &IrcServer<T>) -> ServerIterator<T> {
         ServerIterator {
             server: server
         }
