@@ -27,7 +27,7 @@ pub trait Server<'a, T> {
 
 /// A thread-safe implementation of an IRC Server connection.
 #[experimental]
-pub struct IrcServer<'a, T> where T: IrcStream {
+pub struct IrcServer<T> where T: IrcStream {
     /// The thread-safe IRC connection.
     conn: Connection<T>,
     /// The configuration used with this connection.
@@ -36,10 +36,10 @@ pub struct IrcServer<'a, T> where T: IrcStream {
     chanlists: Mutex<HashMap<String, Vec<User>>>,
 }
 
-impl<'a> IrcServer<'a, BufferedStream<NetStream>> {
+impl IrcServer<BufferedStream<NetStream>> {
     /// Creates a new IRC Server connection from the configuration at the specified path, connecting immediately.
     #[experimental]
-    pub fn new(config: &str) -> IoResult<IrcServer<'a, BufferedStream<NetStream>>> {
+    pub fn new(config: &str) -> IoResult<IrcServer<BufferedStream<NetStream>>> {
         let config = try!(Config::load_utf8(config));
         let conn = try!(if config.use_ssl {
             Connection::connect_ssl(config.server[], config.port)
@@ -51,7 +51,7 @@ impl<'a> IrcServer<'a, BufferedStream<NetStream>> {
 
     /// Creates a new IRC server connection from the specified configuration, connecting immediately.
     #[experimental]
-    pub fn from_config(config: Config) -> IoResult<IrcServer<'a, BufferedStream<NetStream>>> {
+    pub fn from_config(config: Config) -> IoResult<IrcServer<BufferedStream<NetStream>>> {
         let conn = try!(if config.use_ssl {
             Connection::connect_ssl(config.server[], config.port)
         } else {
@@ -61,7 +61,7 @@ impl<'a> IrcServer<'a, BufferedStream<NetStream>> {
     }
 }
 
-impl<'a, T> Server<'a, T> for IrcServer<'a, T> where T: IrcStream {
+impl<'a, T> Server<'a, T> for IrcServer<T> where T: IrcStream {
     fn config(&self) -> &Config {
         &self.config
     }
@@ -79,10 +79,10 @@ impl<'a, T> Server<'a, T> for IrcServer<'a, T> where T: IrcStream {
     }
 }
 
-impl<'a, T> IrcServer<'a, T> where T: IrcStream {
+impl<T> IrcServer<T> where T: IrcStream {
     /// Creates an IRC server from the specified configuration, and any arbitrary Connection.
     #[experimental]
-    pub fn from_connection(config: Config, conn: Connection<T>) -> IrcServer<'a, T> {
+    pub fn from_connection(config: Config, conn: Connection<T>) -> IrcServer<T> {
         IrcServer { conn: conn, config: config, chanlists: Mutex::new(HashMap::new()) }
     }
 
@@ -145,13 +145,13 @@ impl<'a, T> IrcServer<'a, T> where T: IrcStream {
 /// An Iterator over an IrcServer's incoming Messages.
 #[experimental]
 pub struct ServerIterator<'a, T> where T: IrcStream {
-    pub server: &'a IrcServer<'a, T>
+    pub server: &'a IrcServer<T>
 }
 
 impl<'a, T> ServerIterator<'a, T> where T: IrcStream {
     /// Creates a new ServerIterator for the desired IrcServer.
     #[experimental]
-    pub fn new(server: &'a IrcServer<'a, T>) -> ServerIterator<'a, T> {
+    pub fn new(server: &'a IrcServer<T>) -> ServerIterator<'a, T> {
         ServerIterator {
             server: server
         }
