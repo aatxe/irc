@@ -89,7 +89,8 @@ impl FromStr for AccessLevel {
 
 #[cfg(test)]
 mod test {
-    use super::{AccessLevel, Admin, HalfOp, Member, Oper, Owner, User, Voice};
+    use super::{AccessLevel, User};
+    use super::AccessLevel::{Admin, HalfOp, Member, Oper, Owner, Voice};
 
     #[test]
     fn access_level_from_str() {

@@ -35,7 +35,8 @@ pub struct IrcServer<T> where T: IrcStream {
 }
 
 impl IrcServer<BufferedStream<NetStream>> {
-    /// Creates a new IRC Server connection from the configuration at the specified path, connecting immediately.
+    /// Creates a new IRC Server connection from the configuration at the specified path, connecting
+    /// immediately.
     #[experimental]
     pub fn new(config: &str) -> IoResult<IrcServer<BufferedStream<NetStream>>> {
         let config = try!(Config::load_utf8(config));
@@ -47,7 +48,8 @@ impl IrcServer<BufferedStream<NetStream>> {
         Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()) })
     }
 
-    /// Creates a new IRC server connection from the specified configuration, connecting immediately.
+    /// Creates a new IRC server connection from the specified configuration, connecting
+    /// immediately.
     #[experimental]
     pub fn from_config(config: Config) -> IoResult<IrcServer<BufferedStream<NetStream>>> {
         let conn = try!(if config.use_ssl {
@@ -91,17 +93,17 @@ impl<T> IrcServer<T> where T: IrcStream {
 
     /// Handles messages internally for basic bot functionality.
     #[experimental]
-    fn handle_message(&self, message: &Message) {
-        if message.command[] == "PING" {
-            self.send(PONG(message.suffix.as_ref().unwrap()[], None)).unwrap();
-        } else if message.command[] == "376" || message.command[] == "422" {
+    fn handle_message(&self, msg: &Message) {
+        if msg.command[] == "PING" {
+            self.send(PONG(msg.suffix.as_ref().unwrap()[], None)).unwrap();
+        } else if msg.command[] == "376" || msg.command[] == "422" {
             for chan in self.config.channels.iter() {
                 self.send(JOIN(chan[], None)).unwrap();
             }
         }
-        else if message.command[] == "353" { // /NAMES
-            if let Some(users) = message.suffix.clone() {
-                if let [_, _, ref chan] = message.args[] {
+        else if msg.command[] == "353" { // /NAMES
+            if let Some(users) = msg.suffix.clone() {
+                if let [_, _, ref chan] = msg.args[] {
                     for user in users.split_str(" ") {
                         if match self.chanlists.lock().get_mut(chan) {
                             Some(vec) => { vec.push(User::new(user)); false },
@@ -112,15 +114,15 @@ impl<T> IrcServer<T> where T: IrcStream {
                     }
                 }
             }
-        } else if message.command[] == "JOIN" || message.command[] == "PART" {
-            let chan = match message.suffix {
+        } else if msg.command[] == "JOIN" || msg.command[] == "PART" {
+            let chan = match msg.suffix {
                 Some(ref suffix) => suffix[],
-                None => message.args[0][],
+                None => msg.args[0][],
             };
             if let Some(vec) = self.chanlists.lock().get_mut(&String::from_str(chan)) {
-                if let Some(ref source) = message.prefix {
+                if let Some(ref source) = msg.prefix {
                     if let Some(i) = source.find('!') {
-                        if message.command[] == "JOIN" {
+                        if msg.command[] == "JOIN" {
                             vec.push(User::new(source[..i]));
                         } else {
                             if let Some(n) = vec.as_slice().position_elem(&User::new(source[..i])) {
@@ -130,7 +132,7 @@ impl<T> IrcServer<T> where T: IrcStream {
                     }
                 }
             }
-        } else if let ("MODE", [ref chan, ref mode, ref user]) = (message.command[], message.args[]) {
+        } else if let ("MODE", [ref chan, ref mode, ref user]) = (msg.command[], msg.args[]) {
             if let Some(vec) = self.chanlists.lock().get_mut(chan) {
                 if let Some(n) = vec.as_slice().position_elem(&User::new(user[])) {
                     vec[n].update_access_level(mode[]);
@@ -178,7 +180,7 @@ mod test {
     use std::io::util::{NullReader, NullWriter};
     use conn::{Connection, IoStream};
     use data::{Config, User};
-    use data::command::PRIVMSG;
+    use data::command::Command::PRIVMSG;
     use data::kinds::IrcReader;
 
     pub fn test_config() -> Config {
@@ -196,15 +198,18 @@ mod test {
         }
     }
 
-    pub fn get_server_value<U>(server: IrcServer<IoStream<MemWriter, U>>) -> String where U: IrcReader {
+    pub fn get_server_value<U>(server: IrcServer<IoStream<MemWriter, U>>) -> String
+        where U: IrcReader {
         String::from_utf8(server.conn().stream().value()).unwrap()
     }
 
     #[test]
     fn iterator() {
-        let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n:test!test@test JOIN #test\r\n";
-        let server = IrcServer::from_connection(test_config(),
-                     Connection::new(IoStream::new(NullWriter, MemReader::new(exp.as_bytes().to_vec()))));
+        let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n\
+                   :test!test@test JOIN #test\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            IoStream::new(NullWriter, MemReader::new(exp.as_bytes().to_vec()))
+        ));
         let mut messages = String::new();
         for message in server.iter() {
             messages.push_str(message.into_string()[]);
@@ -215,8 +220,9 @@ mod test {
     #[test]
     fn handle_message() {
         let value = "PING :irc.test.net\r\n:irc.test.net 376 test :End of /MOTD command.\r\n";
-        let server = IrcServer::from_connection(test_config(),
-                     Connection::new(IoStream::new(MemWriter::new(), MemReader::new(value.as_bytes().to_vec()))));
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            IoStream::new(MemWriter::new(), MemReader::new(value.as_bytes().to_vec()))
+        ));
         for message in server.iter() {
             println!("{}", message);
         }
@@ -226,8 +232,9 @@ mod test {
 
     #[test]
     fn send() {
-        let server = IrcServer::from_connection(test_config(),
-                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            IoStream::new(MemWriter::new(), NullReader)
+        ));
         assert!(server.send(PRIVMSG("#test", "Hi there!")).is_ok());
         assert_eq!(get_server_value(server)[],
         "PRIVMSG #test :Hi there!\r\n");
@@ -236,8 +243,9 @@ mod test {
     #[test]
     fn user_tracking_names() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
-        let server = IrcServer::from_connection(test_config(),
-                     Connection::new(IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))));
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))
+        ));
         for message in server.iter() {
             println!("{}", message);
         }
@@ -247,9 +255,11 @@ mod test {
 
     #[test]
     fn user_tracking_names_join() {
-        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n:test2!test@test JOIN #test\r\n";
-        let server = IrcServer::from_connection(test_config(),
-                     Connection::new(IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))));
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
+                     :test2!test@test JOIN #test\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))
+        ));
         for message in server.iter() {
             println!("{}", message);
         }
@@ -259,9 +269,11 @@ mod test {
 
     #[test]
     fn user_tracking_names_part() {
-        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n:owner!test@test PART #test\r\n";
-        let server = IrcServer::from_connection(test_config(),
-                     Connection::new(IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))));
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
+                     :owner!test@test PART #test\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))
+        ));
         for message in server.iter() {
             println!("{}", message);
         }
@@ -271,9 +283,11 @@ mod test {
 
     #[test]
     fn user_tracking_names_mode() {
-        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n:test!test@test MODE #test +o test\r\n";
-        let server = IrcServer::from_connection(test_config(),
-                     Connection::new(IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))));
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
+                     :test!test@test MODE #test +o test\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            IoStream::new(NullWriter, MemReader::new(value.as_bytes().to_vec()))
+        ));
         for message in server.iter() {
             println!("{}", message);
         }

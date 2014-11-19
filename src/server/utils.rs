@@ -43,7 +43,8 @@ impl<'a, T> Wrapper<'a, T> where T: IrcStream {
     #[experimental]
     pub fn identify(&self) -> IoResult<()> {
         try!(self.server.send(NICK(self.server.config().nickname[])));
-        self.server.send(USER(self.server.config().username[], "0", self.server.config().realname[]))
+        self.server.send(USER(self.server.config().username[], "0",
+                              self.server.config().realname[]))
     }
 
     /// Sends a PONG with the specified message.

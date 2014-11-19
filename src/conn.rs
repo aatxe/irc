@@ -169,7 +169,9 @@ mod test {
     #[test]
     fn send() {
         let conn = Connection::new(IoStream::new(MemWriter::new(), NullReader));
-        assert!(conn.send(Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("Testing!"))).is_ok());
+        assert!(conn.send(
+            Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("Testing!"))
+        ).is_ok());
         let data = String::from_utf8(conn.stream().value()).unwrap();
         assert_eq!(data[], "PRIVMSG test :Testing!\r\n");
     }
