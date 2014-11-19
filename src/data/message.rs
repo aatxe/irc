@@ -1,6 +1,6 @@
 //! Messages to and from the server.
 #![experimental]
-use std::from_str::FromStr;
+use std::str::FromStr;
 
 /// IRC Message data.
 #[experimental]

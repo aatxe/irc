@@ -3,8 +3,8 @@
 
 use std::io::IoResult;
 use data::{Command, Config, User};
-use data::command::{INVITE, JOIN, KILL, MODE, NICK, KICK};
-use data::command::{OPER, PONG, PRIVMSG, SAMODE, SANICK, TOPIC, USER};
+use data::command::Command::{INVITE, JOIN, KILL, MODE, NICK, KICK};
+use data::command::Command::{OPER, PONG, PRIVMSG, SAMODE, SANICK, TOPIC, USER};
 use data::kinds::IrcStream;
 use server::{Server, ServerIterator};
 

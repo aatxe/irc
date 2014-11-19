@@ -135,94 +135,103 @@ impl<'a> Command<'a> {
     #[stable]
     pub fn to_message(self) -> Message {
         match self {
-            PASS(p) => Message::new(None, "PASS", None, Some(p)),
-            NICK(n) => Message::new(None, "NICK", None, Some(n)),
-            USER(u, m, r) => Message::new(None, "USER", Some(vec![u, m, "*"]), Some(r)),
-            OPER(u, p) => Message::new(None, "OPER", Some(vec![u]), Some(p)),
-            MODE(t, m, Some(p)) => Message::new(None, "MODE", Some(vec![t, m, p]), None),
-            MODE(t, m, None) => Message::new(None, "MODE", Some(vec![t, m]), None),
-            SERVICE(n, r, d, t, re, i) => Message::new(None, "SERVICE",
-                                          Some(vec![n, r, d, t, re]), Some(i)),
-            QUIT(Some(m)) => Message::new(None, "QUIT", None, Some(m)),
-            QUIT(None) => Message::new(None, "QUIT", None, None),
-            SQUIT(s, c) => Message::new(None, "SQUIT", Some(vec![s]), Some(c)),
-            JOIN(c, Some(k)) => Message::new(None, "JOIN", Some(vec![c, k]), None),
-            JOIN(c, None) => Message::new(None, "JOIN", Some(vec![c]), None),
-            PART(c, Some(m)) => Message::new(None, "PART", Some(vec![c]), Some(m)),
-            PART(c, None) => Message::new(None, "PART", Some(vec![c]), None),
-            TOPIC(c, Some(t)) => Message::new(None, "TOPIC", Some(vec![c]), Some(t)),
-            TOPIC(c, None) => Message::new(None, "TOPIC", Some(vec![c]), None),
-            NAMES(Some(c), Some(t)) => Message::new(None, "NAMES", Some(vec![c]), Some(t)),
-            NAMES(Some(c), None) => Message::new(None, "NAMES", Some(vec![c]), None),
-            NAMES(None, _) => Message::new(None, "NAMES", None, None),
-            LIST(Some(c), Some(t)) => Message::new(None, "LIST", Some(vec![c]), Some(t)),
-            LIST(Some(c), None) => Message::new(None, "LIST", Some(vec![c]), None),
-            LIST(None, _) => Message::new(None, "LIST", None, None),
-            INVITE(n, c) => Message::new(None, "INVITE", Some(vec![n, c]), None),
-            KICK(c, n, Some(r)) => Message::new(None, "KICK", Some(vec![c, n]), Some(r)),
-            KICK(c, n, None) => Message::new(None, "KICK", Some(vec![c, n]), None),
-            PRIVMSG(t, m) => Message::new(None, "PRIVMSG", Some(vec![t]), Some(m)),
-            NOTICE(t, m) => Message::new(None, "NOTICE", Some(vec![t]), Some(m)),
-            MOTD(Some(t)) => Message::new(None, "MOTD", None, Some(t)),
-            MOTD(None) => Message::new(None, "MOTD", None, None),
-            LUSERS(Some(m), Some(t)) => Message::new(None, "LUSERS", Some(vec![m]), Some(t)),
-            LUSERS(Some(m), None) => Message::new(None, "LUSERS", Some(vec![m]), None),
-            LUSERS(None, _) => Message::new(None, "LUSERS", None, None),
-            VERSION(Some(t)) => Message::new(None, "VERSION", None, Some(t)),
-            VERSION(None) => Message::new(None, "VERSION", None, None),
-            STATS(Some(q), Some(t)) => Message::new(None, "STATS", Some(vec![q]), Some(t)),
-            STATS(Some(q), None) => Message::new(None, "STATS", Some(vec![q]), None),
-            STATS(None, _) => Message::new(None, "STATS", None, None),
-            LINKS(Some(r), Some(s)) => Message::new(None, "LINKS", Some(vec![r]), Some(s)),
-            LINKS(None, Some(s)) => Message::new(None, "LINKS", None, Some(s)),
-            LINKS(_, None) => Message::new(None, "LINKS", None, None),
-            TIME(Some(t)) => Message::new(None, "TIME", None, Some(t)),
-            TIME(None) => Message::new(None, "TIME", None, None),
-            CONNECT(t, p, Some(r)) => Message::new(None, "CONNECT", Some(vec![t, p]), Some(r)),
-            CONNECT(t, p, None) => Message::new(None, "CONNECT", Some(vec![t, p]), None),
-            TRACE(Some(t)) => Message::new(None, "TRACE", None, Some(t)),
-            TRACE(None) => Message::new(None, "TRACE", None, None),
-            ADMIN(Some(t)) => Message::new(None, "ADMIN", None, Some(t)),
-            ADMIN(None) => Message::new(None, "ADMIN", None, None),
-            INFO(Some(t)) => Message::new(None, "INFO", None, Some(t)),
-            INFO(None) => Message::new(None, "INFO", None, None),
-            SERVLIST(Some(m), Some(t)) => Message::new(None, "SERVLIST", Some(vec![m]), Some(t)),
-            SERVLIST(Some(m), None) => Message::new(None, "SERVLIST", Some(vec![m]), None),
-            SERVLIST(None, _) => Message::new(None, "SERVLIST", None, None),
-            SQUERY(s, t) => Message::new(None, "SQUERY", Some(vec![s, t]), None),
-            WHO(Some(s), Some(true)) => Message::new(None, "WHO", Some(vec![s, "o"]), None),
-            WHO(Some(s), _) => Message::new(None, "WHO", Some(vec![s]), None),
-            WHO(None, _) => Message::new(None, "WHO", None, None),
-            WHOIS(Some(t), m) => Message::new(None, "WHOIS", Some(vec![t, m]), None),
-            WHOIS(None, m) => Message::new(None, "WHOIS", Some(vec![m]), None),
-            WHOWAS(n, Some(c), Some(t)) => Message::new(None, "WHOWAS", Some(vec![n, c]), Some(t)),
-            WHOWAS(n, Some(c), None) => Message::new(None, "WHOWAS", Some(vec![n, c]), None),
-            WHOWAS(n, None, _) => Message::new(None, "WHOWAS", Some(vec![n]), None),
-            KILL(n, c) => Message::new(None, "KILL", Some(vec![n]), Some(c)),
-            PING(s, Some(t)) => Message::new(None, "PING", Some(vec![s]), Some(t)),
-            PING(s, None) => Message::new(None, "PING", None, Some(s)),
-            PONG(s, Some(t)) => Message::new(None, "PONG", Some(vec![s]), Some(t)),
-            PONG(s, None) => Message::new(None, "PONG", None, Some(s)),
-            ERROR(m) => Message::new(None, "ERROR", None, Some(m)),
-            AWAY(Some(m)) => Message::new(None, "AWAY", None, Some(m)),
-            AWAY(None) => Message::new(None, "AWAY", None, None),
-            REHASH => Message::new(None, "REHASH", None, None),
-            DIE => Message::new(None, "DIE", None, None),
-            RESTART => Message::new(None, "RESTART", None, None),
-            SUMMON(u, Some(t), Some(c)) => Message::new(None, "SUMMON", Some(vec![u, t]), Some(c)),
-            SUMMON(u, Some(t), None) => Message::new(None, "SUMMON", Some(vec![u, t]), None),
-            SUMMON(u, None, _) => Message::new(None, "SUMMON", Some(vec![u]), None),
-            USERS(Some(t)) => Message::new(None, "USERS", None, Some(t)),
-            USERS(None) => Message::new(None, "USERS", None, None),
-            WALLOPS(t) => Message::new(None, "WALLOPS", None, Some(t)),
-            USERHOST(u) => Message::new(None, "USERHOST", Some(u), None),
-            ISON(u) => Message::new(None, "ISON", Some(u), None),
-            SAJOIN(n, c) => Message::new(None, "SAJOIN", Some(vec![n, c]), None),
-            SAMODE(t, m, Some(p)) => Message::new(None, "SAMODE", Some(vec![t, m, p]), None),
-            SAMODE(t, m, None) => Message::new(None, "SAMODE", Some(vec![t, m]), None),
-            SANICK(o, n) => Message::new(None, "SANICK", Some(vec![o, n]), None),
-            SAPART(c, r) => Message::new(None, "SAPART", Some(vec![c]), Some(r)),
-            SAQUIT(c, r) => Message::new(None, "SAQUIT", Some(vec![c]), Some(r)),
+            Command::PASS(p) => Message::new(None, "PASS", None, Some(p)),
+            Command::NICK(n) => Message::new(None, "NICK", None, Some(n)),
+            Command::USER(u, m, r) => Message::new(None, "USER", Some(vec![u, m, "*"]), Some(r)),
+            Command::OPER(u, p) => Message::new(None, "OPER", Some(vec![u]), Some(p)),
+            Command::MODE(t, m, Some(p)) => Message::new(None, "MODE", Some(vec![t, m, p]), None),
+            Command::MODE(t, m, None) => Message::new(None, "MODE", Some(vec![t, m]), None),
+            Command::SERVICE(n, r, d, t, re, i) => Message::new(None, "SERVICE",
+                                                   Some(vec![n, r, d, t, re]), Some(i)),
+            Command::QUIT(Some(m)) => Message::new(None, "QUIT", None, Some(m)),
+            Command::QUIT(None) => Message::new(None, "QUIT", None, None),
+            Command::SQUIT(s, c) => Message::new(None, "SQUIT", Some(vec![s]), Some(c)),
+            Command::JOIN(c, Some(k)) => Message::new(None, "JOIN", Some(vec![c, k]), None),
+            Command::JOIN(c, None) => Message::new(None, "JOIN", Some(vec![c]), None),
+            Command::PART(c, Some(m)) => Message::new(None, "PART", Some(vec![c]), Some(m)),
+            Command::PART(c, None) => Message::new(None, "PART", Some(vec![c]), None),
+            Command::TOPIC(c, Some(t)) => Message::new(None, "TOPIC", Some(vec![c]), Some(t)),
+            Command::TOPIC(c, None) => Message::new(None, "TOPIC", Some(vec![c]), None),
+            Command::NAMES(Some(c), Some(t)) => Message::new(None, "NAMES", Some(vec![c]), Some(t)),
+            Command::NAMES(Some(c), None) => Message::new(None, "NAMES", Some(vec![c]), None),
+            Command::NAMES(None, _) => Message::new(None, "NAMES", None, None),
+            Command::LIST(Some(c), Some(t)) => Message::new(None, "LIST", Some(vec![c]), Some(t)),
+            Command::LIST(Some(c), None) => Message::new(None, "LIST", Some(vec![c]), None),
+            Command::LIST(None, _) => Message::new(None, "LIST", None, None),
+            Command::INVITE(n, c) => Message::new(None, "INVITE", Some(vec![n, c]), None),
+            Command::KICK(c, n, Some(r)) => Message::new(None, "KICK", Some(vec![c, n]), Some(r)),
+            Command::KICK(c, n, None) => Message::new(None, "KICK", Some(vec![c, n]), None),
+            Command::PRIVMSG(t, m) => Message::new(None, "PRIVMSG", Some(vec![t]), Some(m)),
+            Command::NOTICE(t, m) => Message::new(None, "NOTICE", Some(vec![t]), Some(m)),
+            Command::MOTD(Some(t)) => Message::new(None, "MOTD", None, Some(t)),
+            Command::MOTD(None) => Message::new(None, "MOTD", None, None),
+            Command::LUSERS(Some(m), Some(t)) => Message::new(None, "LUSERS", Some(vec![m]),
+                                                 Some(t)),
+            Command::LUSERS(Some(m), None) => Message::new(None, "LUSERS", Some(vec![m]), None),
+            Command::LUSERS(None, _) => Message::new(None, "LUSERS", None, None),
+            Command::VERSION(Some(t)) => Message::new(None, "VERSION", None, Some(t)),
+            Command::VERSION(None) => Message::new(None, "VERSION", None, None),
+            Command::STATS(Some(q), Some(t)) => Message::new(None, "STATS", Some(vec![q]), Some(t)),
+            Command::STATS(Some(q), None) => Message::new(None, "STATS", Some(vec![q]), None),
+            Command::STATS(None, _) => Message::new(None, "STATS", None, None),
+            Command::LINKS(Some(r), Some(s)) => Message::new(None, "LINKS", Some(vec![r]), Some(s)),
+            Command::LINKS(None, Some(s)) => Message::new(None, "LINKS", None, Some(s)),
+            Command::LINKS(_, None) => Message::new(None, "LINKS", None, None),
+            Command::TIME(Some(t)) => Message::new(None, "TIME", None, Some(t)),
+            Command::TIME(None) => Message::new(None, "TIME", None, None),
+            Command::CONNECT(t, p, Some(r)) => Message::new(None, "CONNECT", Some(vec![t, p]),
+                                               Some(r)),
+            Command::CONNECT(t, p, None) => Message::new(None, "CONNECT", Some(vec![t, p]), None),
+            Command::TRACE(Some(t)) => Message::new(None, "TRACE", None, Some(t)),
+            Command::TRACE(None) => Message::new(None, "TRACE", None, None),
+            Command::ADMIN(Some(t)) => Message::new(None, "ADMIN", None, Some(t)),
+            Command::ADMIN(None) => Message::new(None, "ADMIN", None, None),
+            Command::INFO(Some(t)) => Message::new(None, "INFO", None, Some(t)),
+            Command::INFO(None) => Message::new(None, "INFO", None, None),
+            Command::SERVLIST(Some(m), Some(t)) => Message::new(None, "SERVLIST", Some(vec![m]),
+                                                   Some(t)),
+            Command::SERVLIST(Some(m), None) => Message::new(None, "SERVLIST", Some(vec![m]), None),
+            Command::SERVLIST(None, _) => Message::new(None, "SERVLIST", None, None),
+            Command::SQUERY(s, t) => Message::new(None, "SQUERY", Some(vec![s, t]), None),
+            Command::WHO(Some(s), Some(true)) => Message::new(None, "WHO", Some(vec![s, "o"]),
+                                                 None),
+            Command::WHO(Some(s), _) => Message::new(None, "WHO", Some(vec![s]), None),
+            Command::WHO(None, _) => Message::new(None, "WHO", None, None),
+            Command::WHOIS(Some(t), m) => Message::new(None, "WHOIS", Some(vec![t, m]), None),
+            Command::WHOIS(None, m) => Message::new(None, "WHOIS", Some(vec![m]), None),
+            Command::WHOWAS(n, Some(c), Some(t)) => Message::new(None, "WHOWAS", Some(vec![n, c]),
+                                                    Some(t)),
+            Command::WHOWAS(n, Some(c), None) => Message::new(None, "WHOWAS", Some(vec![n, c]),
+                                                 None),
+            Command::WHOWAS(n, None, _) => Message::new(None, "WHOWAS", Some(vec![n]), None),
+            Command::KILL(n, c) => Message::new(None, "KILL", Some(vec![n]), Some(c)),
+            Command::PING(s, Some(t)) => Message::new(None, "PING", Some(vec![s]), Some(t)),
+            Command::PING(s, None) => Message::new(None, "PING", None, Some(s)),
+            Command::PONG(s, Some(t)) => Message::new(None, "PONG", Some(vec![s]), Some(t)),
+            Command::PONG(s, None) => Message::new(None, "PONG", None, Some(s)),
+            Command::ERROR(m) => Message::new(None, "ERROR", None, Some(m)),
+            Command::AWAY(Some(m)) => Message::new(None, "AWAY", None, Some(m)),
+            Command::AWAY(None) => Message::new(None, "AWAY", None, None),
+            Command::REHASH => Message::new(None, "REHASH", None, None),
+            Command::DIE => Message::new(None, "DIE", None, None),
+            Command::RESTART => Message::new(None, "RESTART", None, None),
+            Command::SUMMON(u, Some(t), Some(c)) => Message::new(None, "SUMMON", Some(vec![u, t]),
+                                                    Some(c)),
+            Command::SUMMON(u, Some(t), None) => Message::new(None, "SUMMON", Some(vec![u, t]),
+                                                 None),
+            Command::SUMMON(u, None, _) => Message::new(None, "SUMMON", Some(vec![u]), None),
+            Command::USERS(Some(t)) => Message::new(None, "USERS", None, Some(t)),
+            Command::USERS(None) => Message::new(None, "USERS", None, None),
+            Command::WALLOPS(t) => Message::new(None, "WALLOPS", None, Some(t)),
+            Command::USERHOST(u) => Message::new(None, "USERHOST", Some(u), None),
+            Command::ISON(u) => Message::new(None, "ISON", Some(u), None),
+            Command::SAJOIN(n, c) => Message::new(None, "SAJOIN", Some(vec![n, c]), None),
+            Command::SAMODE(t, m, Some(p)) => Message::new(None, "SAMODE", Some(vec![t, m, p]),
+                                              None),
+            Command::SAMODE(t, m, None) => Message::new(None, "SAMODE", Some(vec![t, m]), None),
+            Command::SANICK(o, n) => Message::new(None, "SANICK", Some(vec![o, n]), None),
+            Command::SAPART(c, r) => Message::new(None, "SAPART", Some(vec![c]), Some(r)),
+            Command::SAQUIT(c, r) => Message::new(None, "SAQUIT", Some(vec![c]), Some(r)),
         }
     }
 
@@ -233,56 +242,56 @@ impl<'a> Command<'a> {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 0 { return Err(invalid_input()) }
-                    PASS(suffix[])
+                    Command::PASS(suffix[])
                 },
                 None => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    PASS(m.args[0][])
+                    Command::PASS(m.args[0][])
                 }
             }
         } else if let "NICK" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 0 { return Err(invalid_input()) }
-                    NICK(suffix[])
+                    Command::NICK(suffix[])
                 },
                 None => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    NICK(m.args[0][])
+                    Command::NICK(m.args[0][])
                 }
             }
         } else if let "USER" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    USER(m.args[0][], m.args[1][], suffix[])
+                    Command::USER(m.args[0][], m.args[1][], suffix[])
                 },
                 None => {
                     if m.args.len() != 3 { return Err(invalid_input()) }
-                    USER(m.args[0][], m.args[1][], m.args[2][])
+                    Command::USER(m.args[0][], m.args[1][], m.args[2][])
                 }
             }
         } else if let "OPER" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    OPER(m.args[0][], suffix[])
+                    Command::OPER(m.args[0][], suffix[])
                 },
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    OPER(m.args[0][], m.args[1][])
+                    Command::OPER(m.args[0][], m.args[1][])
                 }
             }
         } else if let "MODE" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    MODE(m.args[0][], m.args[1][], Some(suffix[]))
+                    Command::MODE(m.args[0][], m.args[1][], Some(suffix[]))
                 }
                 None => if m.args.len() == 3 {
-                    MODE(m.args[0][], m.args[1][], Some(m.args[2][]))
+                    Command::MODE(m.args[0][], m.args[1][], Some(m.args[2][]))
                 } else if m.args.len() == 2 {
-                    MODE(m.args[0][], m.args[1][], None)
+                    Command::MODE(m.args[0][], m.args[1][], None)
                 } else {
                     return Err(invalid_input())
                 }
@@ -291,43 +300,45 @@ impl<'a> Command<'a> {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 5 { return Err(invalid_input()) }
-                    SERVICE(m.args[0][], m.args[1][], m.args[2][], m.args[3][], m.args[4][], suffix[])
+                    Command::SERVICE(m.args[0][], m.args[1][], m.args[2][], m.args[3][],
+                                     m.args[4][], suffix[])
                 },
                 None => {
                     if m.args.len() != 6 { return Err(invalid_input()) }
-                    SERVICE(m.args[0][], m.args[1][], m.args[2][], m.args[3][], m.args[4][], m.args[5][])
+                    Command::SERVICE(m.args[0][], m.args[1][], m.args[2][], m.args[3][],
+                                     m.args[4][], m.args[5][])
                 }
             }
         } else if let "QUIT" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
             match m.suffix {
-                Some(ref suffix) => QUIT(Some(suffix[])),
-                None => QUIT(None)
+                Some(ref suffix) => Command::QUIT(Some(suffix[])),
+                None => Command::QUIT(None)
             }
         } else if let "SQUIT" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    SQUIT(m.args[0][], suffix[])
+                    Command::SQUIT(m.args[0][], suffix[])
                 },
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    SQUIT(m.args[0][], m.args[1][])
+                    Command::SQUIT(m.args[0][], m.args[1][])
                 }
             }
         } else if let "JOIN" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    JOIN(suffix[], None)
+                    Command::JOIN(suffix[], None)
                 } else if m.args.len() == 1 {
-                    JOIN(m.args[0][], Some(suffix[]))
+                    Command::JOIN(m.args[0][], Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 1 {
-                    JOIN(m.args[0][], None)
+                    Command::JOIN(m.args[0][], None)
                 } else if m.args.len() == 2 {
-                    JOIN(m.args[0][], Some(m.args[1][]))
+                    Command::JOIN(m.args[0][], Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -335,16 +346,16 @@ impl<'a> Command<'a> {
         } else if let "PART" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    PART(suffix[], None)
+                    Command::PART(suffix[], None)
                 } else if m.args.len() == 1 {
-                    PART(m.args[0][], Some(suffix[]))
+                    Command::PART(m.args[0][], Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 1 {
-                    PART(m.args[0][], None)
+                    Command::PART(m.args[0][], None)
                 } else if m.args.len() == 2 {
-                    PART(m.args[0][], Some(m.args[1][]))
+                    Command::PART(m.args[0][], Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -352,16 +363,16 @@ impl<'a> Command<'a> {
         } else if let "TOPIC" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    TOPIC(suffix[], None)
+                    Command::TOPIC(suffix[], None)
                 } else if m.args.len() == 1 {
-                    TOPIC(m.args[0][], Some(suffix[]))
+                    Command::TOPIC(m.args[0][], Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 1 {
-                    TOPIC(m.args[0][], None)
+                    Command::TOPIC(m.args[0][], None)
                 } else if m.args.len() == 2 {
-                    TOPIC(m.args[0][], Some(m.args[1][]))
+                    Command::TOPIC(m.args[0][], Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -369,18 +380,18 @@ impl<'a> Command<'a> {
         } else if let "NAMES" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    NAMES(Some(suffix[]), None)
+                    Command::NAMES(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    NAMES(Some(m.args[0][]), Some(suffix[]))
+                    Command::NAMES(Some(m.args[0][]), Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 0 {
-                    NAMES(None, None)
+                    Command::NAMES(None, None)
                 } else if m.args.len() == 1 {
-                    NAMES(Some(m.args[0][]), None)
+                    Command::NAMES(Some(m.args[0][]), None)
                 } else if m.args.len() == 2 {
-                    NAMES(Some(m.args[0][]), Some(m.args[1][]))
+                    Command::NAMES(Some(m.args[0][]), Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -388,18 +399,18 @@ impl<'a> Command<'a> {
         } else if let "LIST" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    LIST(Some(suffix[]), None)
+                    Command::LIST(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    LIST(Some(m.args[0][]), Some(suffix[]))
+                    Command::LIST(Some(m.args[0][]), Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 0 {
-                    LIST(None, None)
+                    Command::LIST(None, None)
                 } else if m.args.len() == 1 {
-                    LIST(Some(m.args[0][]), None)
+                    Command::LIST(Some(m.args[0][]), None)
                 } else if m.args.len() == 2 {
-                    LIST(Some(m.args[0][]), Some(m.args[1][]))
+                    Command::LIST(Some(m.args[0][]), Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -408,29 +419,29 @@ impl<'a> Command<'a> {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    INVITE(m.args[0][], suffix[])
+                    Command::INVITE(m.args[0][], suffix[])
                 },
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    INVITE(m.args[0][], m.args[1][])
+                    Command::INVITE(m.args[0][], m.args[1][])
                 }
             }
         } else if let "KICK" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    KICK(m.args[0][], m.args[1][], Some(suffix[]))
+                    Command::KICK(m.args[0][], m.args[1][], Some(suffix[]))
                 },
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    KICK(m.args[0][], m.args[1][], None)
+                    Command::KICK(m.args[0][], m.args[1][], None)
                 },
             }
         } else if let "PRIVMSG" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    PRIVMSG(m.args[0][], suffix[])
+                    Command::PRIVMSG(m.args[0][], suffix[])
                 },
                 None => return Err(invalid_input())
             }
@@ -438,31 +449,31 @@ impl<'a> Command<'a> {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    NOTICE(m.args[0][], suffix[])
+                    Command::NOTICE(m.args[0][], suffix[])
                 },
                 None => return Err(invalid_input())
             }
         } else if let "MOTD" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
             match m.suffix {
-                Some(ref suffix) => MOTD(Some(suffix[])),
-                None => MOTD(None)
+                Some(ref suffix) => Command::MOTD(Some(suffix[])),
+                None => Command::MOTD(None)
             }
         } else if let "LUSERS" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    LUSERS(Some(suffix[]), None)
+                    Command::LUSERS(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    LUSERS(Some(m.args[0][]), Some(suffix[]))
+                    Command::LUSERS(Some(m.args[0][]), Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 0 {
-                    LUSERS(None, None)
+                    Command::LUSERS(None, None)
                 } else if m.args.len() == 1 {
-                    LUSERS(Some(m.args[0][]), None)
+                    Command::LUSERS(Some(m.args[0][]), None)
                 } else if m.args.len() == 2 {
-                    LUSERS(Some(m.args[0][]), Some(m.args[1][]))
+                    Command::LUSERS(Some(m.args[0][]), Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -470,24 +481,24 @@ impl<'a> Command<'a> {
         } else if let "VERSION" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
             match m.suffix {
-                Some(ref suffix) => VERSION(Some(suffix[])),
-                None => VERSION(None)
+                Some(ref suffix) => Command::VERSION(Some(suffix[])),
+                None => Command::VERSION(None)
             }
         } else if let "STATS" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    STATS(Some(suffix[]), None)
+                    Command::STATS(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    STATS(Some(m.args[0][]), Some(suffix[]))
+                    Command::STATS(Some(m.args[0][]), Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 0 {
-                    STATS(None, None)
+                    Command::STATS(None, None)
                 } else if m.args.len() == 1 {
-                    STATS(Some(m.args[0][]), None)
+                    Command::STATS(Some(m.args[0][]), None)
                 } else if m.args.len() == 2 {
-                    STATS(Some(m.args[0][]), Some(m.args[1][]))
+                    Command::STATS(Some(m.args[0][]), Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -495,14 +506,14 @@ impl<'a> Command<'a> {
         } else if let "LINKS" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    LINKS(None, Some(suffix[]))
+                    Command::LINKS(None, Some(suffix[]))
                 } else if m.args.len() == 1 {
-                    LINKS(Some(m.args[0][]), Some(suffix[]))
+                    Command::LINKS(Some(m.args[0][]), Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 0 {
-                    LINKS(None, None)
+                    Command::LINKS(None, None)
                 } else {
                     return Err(invalid_input())
                 }
@@ -510,53 +521,53 @@ impl<'a> Command<'a> {
         } else if let "TIME" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
             match m.suffix {
-                Some(ref suffix) => TIME(Some(suffix[])),
-                None => TIME(None)
+                Some(ref suffix) => Command::TIME(Some(suffix[])),
+                None => Command::TIME(None)
             }
         } else if let "CONNECT" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    CONNECT(m.args[0][], m.args[1][], Some(suffix[]))
+                    Command::CONNECT(m.args[0][], m.args[1][], Some(suffix[]))
                 },
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    CONNECT(m.args[0][], m.args[1][], None)
+                    Command::CONNECT(m.args[0][], m.args[1][], None)
                 }
             }
         } else if let "TRACE" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
             match m.suffix {
-                Some(ref suffix) => TRACE(Some(suffix[])),
-                None => TRACE(None)
+                Some(ref suffix) => Command::TRACE(Some(suffix[])),
+                None => Command::TRACE(None)
             }
         } else if let "ADMIN" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
             match m.suffix {
-                Some(ref suffix) => ADMIN(Some(suffix[])),
-                None => ADMIN(None)
+                Some(ref suffix) => Command::ADMIN(Some(suffix[])),
+                None => Command::ADMIN(None)
             }
         } else if let "INFO" = m.command[] {
             if m.args.len() != 0 { return Err(invalid_input()) }
             match m.suffix {
-                Some(ref suffix) => INFO(Some(suffix[])),
-                None => INFO(None)
+                Some(ref suffix) => Command::INFO(Some(suffix[])),
+                None => Command::INFO(None)
             }
         } else if let "SERVLIST" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    SERVLIST(Some(suffix[]), None)
+                    Command::SERVLIST(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    SERVLIST(Some(m.args[0][]), Some(suffix[]))
+                    Command::SERVLIST(Some(m.args[0][]), Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 0 {
-                    SERVLIST(None, None)
+                    Command::SERVLIST(None, None)
                 } else if m.args.len() == 1 {
-                    SERVLIST(Some(m.args[0][]), None)
+                    Command::SERVLIST(Some(m.args[0][]), None)
                 } else if m.args.len() == 2 {
-                    SERVLIST(Some(m.args[0][]), Some(m.args[1][]))
+                    Command::SERVLIST(Some(m.args[0][]), Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -565,28 +576,28 @@ impl<'a> Command<'a> {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    SQUERY(m.args[0][], suffix[])
+                    Command::SQUERY(m.args[0][], suffix[])
                 },
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    SQUERY(m.args[0][], m.args[1][])
+                    Command::SQUERY(m.args[0][], m.args[1][])
                 }
             }
         } else if let "WHO" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    WHO(Some(suffix[]), None)
+                    Command::WHO(Some(suffix[]), None)
                 } else if m.args.len() == 1 {
-                    WHO(Some(m.args[0][]), Some(suffix[] == "o"))
+                    Command::WHO(Some(m.args[0][]), Some(suffix[] == "o"))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 0 {
-                    WHO(None, None)
+                    Command::WHO(None, None)
                 } else if m.args.len() == 1 {
-                    WHO(Some(m.args[0][]), None)
+                    Command::WHO(Some(m.args[0][]), None)
                 } else if m.args.len() == 2 {
-                    WHO(Some(m.args[0][]), Some(m.args[1][] == "o"))
+                    Command::WHO(Some(m.args[0][]), Some(m.args[1][] == "o"))
                 } else {
                     return Err(invalid_input())
                 }
@@ -594,16 +605,16 @@ impl<'a> Command<'a> {
         } else if let "WHOIS" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    WHOIS(None, suffix[])
+                    Command::WHOIS(None, suffix[])
                 } else if m.args.len() == 1 {
-                    WHOIS(Some(m.args[0][]), suffix[])
+                    Command::WHOIS(Some(m.args[0][]), suffix[])
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 1 {
-                    WHOIS(None, m.args[0][])
+                    Command::WHOIS(None, m.args[0][])
                 } else if m.args.len() == 2 {
-                    WHOIS(Some(m.args[0][]), m.args[1][])
+                    Command::WHOIS(Some(m.args[0][]), m.args[1][])
                 } else {
                     return Err(invalid_input())
                 }
@@ -611,20 +622,20 @@ impl<'a> Command<'a> {
         } else if let "WHOWAS" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    WHOWAS(suffix[], None, None)
+                    Command::WHOWAS(suffix[], None, None)
                 } else if m.args.len() == 1 {
-                    WHOWAS(m.args[0][], None, Some(suffix[]))
+                    Command::WHOWAS(m.args[0][], None, Some(suffix[]))
                 } else if m.args.len() == 2 {
-                    WHOWAS(m.args[0][], Some(m.args[1][]), Some(suffix[]))
+                    Command::WHOWAS(m.args[0][], Some(m.args[1][]), Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 1 {
-                    WHOWAS(m.args[0][], None, None)
+                    Command::WHOWAS(m.args[0][], None, None)
                 } else if m.args.len() == 2 {
-                    WHOWAS(m.args[0][], None, Some(m.args[1][]))
+                    Command::WHOWAS(m.args[0][], None, Some(m.args[1][]))
                 } else if m.args.len() == 3 {
-                    WHOWAS(m.args[0][], Some(m.args[1][]), Some(m.args[2][]))
+                    Command::WHOWAS(m.args[0][], Some(m.args[1][]), Some(m.args[2][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -633,26 +644,26 @@ impl<'a> Command<'a> {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    KILL(m.args[0][], suffix[])
+                    Command::KILL(m.args[0][], suffix[])
                 },
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    KILL(m.args[0][], m.args[1][])
+                    Command::KILL(m.args[0][], m.args[1][])
                 }
             }
         } else if let "PING" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    PING(suffix[], None)
+                    Command::PING(suffix[], None)
                 } else if m.args.len() == 1 {
-                    PING(m.args[0][], Some(suffix[]))
+                    Command::PING(m.args[0][], Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 1 {
-                    PING(m.args[0][], None)
+                    Command::PING(m.args[0][], None)
                 } else if m.args.len() == 2 {
-                    PING(m.args[0][], Some(m.args[1][]))
+                    Command::PING(m.args[0][], Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -660,16 +671,16 @@ impl<'a> Command<'a> {
         } else if let "PONG" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    PONG(suffix[], None)
+                    Command::PONG(suffix[], None)
                 } else if m.args.len() == 1 {
-                    PONG(m.args[0][], Some(suffix[]))
+                    Command::PONG(m.args[0][], Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 1 {
-                    PONG(m.args[0][], None)
+                    Command::PONG(m.args[0][], None)
                 } else if m.args.len() == 2 {
-                    PONG(m.args[0][], Some(m.args[1][]))
+                    Command::PONG(m.args[0][], Some(m.args[1][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -677,7 +688,7 @@ impl<'a> Command<'a> {
         } else if let "ERROR" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    ERROR(suffix[])
+                    Command::ERROR(suffix[])
                 } else {
                     return Err(invalid_input())
                 },
@@ -686,7 +697,7 @@ impl<'a> Command<'a> {
         } else if let "AWAY" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    AWAY(Some(suffix[]))
+                    Command::AWAY(Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
@@ -694,39 +705,39 @@ impl<'a> Command<'a> {
             }
         } else if let "REHASH" = m.command[] {
             if m.args.len() == 0 {
-                REHASH
+                Command::REHASH
             } else {
                 return Err(invalid_input())
             }
         } else if let "DIE" = m.command[] {
             if m.args.len() == 0 {
-                DIE
+                Command::DIE
             } else {
                 return Err(invalid_input())
             }
         } else if let "RESTART" = m.command[] {
             if m.args.len() == 0 {
-                RESTART
+                Command::RESTART
             } else {
                 return Err(invalid_input())
             }
         } else if let "SUMMON" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    SUMMON(suffix[], None, None)
+                    Command::SUMMON(suffix[], None, None)
                 } else if m.args.len() == 1 {
-                    SUMMON(m.args[0][], Some(suffix[]), None)
+                    Command::SUMMON(m.args[0][], Some(suffix[]), None)
                 } else if m.args.len() == 2 {
-                    SUMMON(m.args[0][], Some(m.args[1][]), Some(suffix[]))
+                    Command::SUMMON(m.args[0][], Some(m.args[1][]), Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 1 {
-                    SUMMON(m.args[0][], None, None)
+                    Command::SUMMON(m.args[0][], None, None)
                 } else if m.args.len() == 2 {
-                    SUMMON(m.args[0][], Some(m.args[1][]), None)
+                    Command::SUMMON(m.args[0][], Some(m.args[1][]), None)
                 } else if m.args.len() == 3 {
-                    SUMMON(m.args[0][], Some(m.args[1][]), Some(m.args[2][]))
+                    Command::SUMMON(m.args[0][], Some(m.args[1][]), Some(m.args[2][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -735,33 +746,33 @@ impl<'a> Command<'a> {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 0 { return Err(invalid_input()) }
-                    USERS(Some(suffix[]))
+                    Command::USERS(Some(suffix[]))
                 },
                 None => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    USERS(Some(m.args[0][]))
+                    Command::USERS(Some(m.args[0][]))
                 }
             }
         } else if let "WALLOPS" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 0 { return Err(invalid_input()) }
-                    WALLOPS(suffix[])
+                    Command::WALLOPS(suffix[])
                 },
                 None => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    WALLOPS(m.args[0][])
+                    Command::WALLOPS(m.args[0][])
                 }
             }
         } else if let "USERHOST" = m.command[] {
             if m.suffix.is_none() {
-                USERHOST(m.args.iter().map(|s| s[]).collect())
+                Command::USERHOST(m.args.iter().map(|s| s[]).collect())
             } else {
                 return Err(invalid_input())
             }
         } else if let "ISON" = m.command[] {
             if m.suffix.is_none() {
-                USERHOST(m.args.iter().map(|s| s[]).collect())
+                Command::USERHOST(m.args.iter().map(|s| s[]).collect())
             } else {
                 return Err(invalid_input())
             }
@@ -769,26 +780,26 @@ impl<'a> Command<'a> {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    SAJOIN(m.args[0][], suffix[])
+                    Command::SAJOIN(m.args[0][], suffix[])
                 },
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    SAJOIN(m.args[0][], m.args[1][])
+                    Command::SAJOIN(m.args[0][], m.args[1][])
                 }
             }
         } else if let "SAMODE" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 1 {
-                    SAMODE(m.args[0][], suffix[], None)
+                    Command::SAMODE(m.args[0][], suffix[], None)
                 } else if m.args.len() == 2 {
-                    SAMODE(m.args[0][], m.args[1][], Some(suffix[]))
+                    Command::SAMODE(m.args[0][], m.args[1][], Some(suffix[]))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 2 {
-                    SAMODE(m.args[0][], m.args[1][], None)
+                    Command::SAMODE(m.args[0][], m.args[1][], None)
                 } else if m.args.len() == 3 {
-                    SAMODE(m.args[0][], m.args[1][], Some(m.args[2][]))
+                    Command::SAMODE(m.args[0][], m.args[1][], Some(m.args[2][]))
                 } else {
                     return Err(invalid_input())
                 }
@@ -797,33 +808,33 @@ impl<'a> Command<'a> {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    SANICK(m.args[0][], suffix[])
+                    Command::SANICK(m.args[0][], suffix[])
                 },
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    SANICK(m.args[0][], m.args[1][])
+                    Command::SANICK(m.args[0][], m.args[1][])
                 }
             }
         } else if let "SAPART" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    SAPART(m.args[0][], suffix[])
+                    Command::SAPART(m.args[0][], suffix[])
                 },
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    SAPART(m.args[0][], m.args[1][])
+                    Command::SAPART(m.args[0][], m.args[1][])
                 }
             }
         } else if let "SAQUIT" = m.command[] {
             match m.suffix {
                 Some(ref suffix) => {
                     if m.args.len() != 1 { return Err(invalid_input()) }
-                    SAQUIT(m.args[0][], suffix[])
+                    Command::SAQUIT(m.args[0][], suffix[])
                 },
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
-                    SAQUIT(m.args[0][], m.args[1][])
+                    Command::SAQUIT(m.args[0][], m.args[1][])
                 }
             }
         } else {

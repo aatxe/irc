@@ -4,11 +4,9 @@ use std::collections::HashMap;
 use std::io::{BufferedStream, IoResult};
 use std::sync::Mutex;
 use conn::{Connection, NetStream};
-use data::command::{Command, JOIN, PONG};
-use data::config::Config;
+use data::command::Command::{JOIN, PONG};
+use data::{Command, Config, Message, User};
 use data::kinds::IrcStream;
-use data::message::Message;
-use data::user::User;
 
 pub mod utils;
 
@@ -75,7 +73,7 @@ impl<'a, T> Server<'a, T> for IrcServer<T> where T: IrcStream {
     }
 
     fn list_users(&self, chan: &str) -> Option<Vec<User>> {
-        self.chanlists.lock().find_copy(&chan.into_string())
+        self.chanlists.lock().get(&chan.into_string()).cloned()
     }
 }
 

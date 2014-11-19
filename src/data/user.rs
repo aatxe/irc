@@ -1,5 +1,5 @@
 //! Data for tracking user information.
-use std::from_str::FromStr;
+use std::str::FromStr;
 
 /// IRC User data.
 #[deriving(Clone, Show)]
@@ -17,7 +17,7 @@ impl User {
     pub fn new(name: &str) -> User {
         let rank = from_str(name);
         User {
-            name: if let Some(Member) = rank {
+            name: if let Some(AccessLevel::Member) = rank {
                 name.into_string()
             } else {
                 name[1..].into_string()
@@ -34,16 +34,16 @@ impl User {
     /// Updates the user's access level.
     pub fn update_access_level(&mut self, mode: &str) {
         self.access_level = match mode {
-            "+q" => Owner,
-            "-q" => Member,
-            "+a" => Admin,
-            "-a" => Member,
-            "+o" => Oper,
-            "-o" => Member,
-            "+h" => HalfOp,
-            "-h" => Member,
-            "+v" => Voice,
-            "-v" => Member,
+            "+q" => AccessLevel::Owner,
+            "-q" => AccessLevel::Member,
+            "+a" => AccessLevel::Admin,
+            "-a" => AccessLevel::Member,
+            "+o" => AccessLevel::Oper,
+            "-o" => AccessLevel::Member,
+            "+h" => AccessLevel::HalfOp,
+            "-h" => AccessLevel::Member,
+            "+v" => AccessLevel::Voice,
+            "-v" => AccessLevel::Member,
             _ => self.access_level,
         }
     }
@@ -74,14 +74,14 @@ pub enum AccessLevel {
 
 impl FromStr for AccessLevel {
     fn from_str(s: &str) -> Option<AccessLevel> {
-        if s.len() == 0 { Some(Member) } else {
+        if s.len() == 0 { Some(AccessLevel::Member) } else {
             Some(match s.char_at(0) {
-                '~' => Owner,
-                '&' => Admin,
-                '@' => Oper,
-                '%' => HalfOp,
-                '+' => Voice,
-                 _  => Member,
+                '~' => AccessLevel::Owner,
+                '&' => AccessLevel::Admin,
+                '@' => AccessLevel::Oper,
+                '%' => AccessLevel::HalfOp,
+                '+' => AccessLevel::Voice,
+                 _  => AccessLevel::Member,
             })
         }
     }

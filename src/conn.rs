@@ -19,7 +19,7 @@ impl Connection<BufferedStream<TcpStream>> {
     #[experimental]
     pub fn connect(host: &str, port: u16) -> IoResult<Connection<BufferedStream<NetStream>>> {
         let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
-        Ok(Connection::new(BufferedStream::new(UnsecuredTcpStream(socket))))
+        Ok(Connection::new(BufferedStream::new(NetStream::UnsecuredTcpStream(socket))))
     }
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
@@ -30,7 +30,7 @@ impl Connection<BufferedStream<TcpStream>> {
         let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
         let ssl = try!(ssl_to_io(SslContext::new(Tlsv1)));
         let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
-        Ok(Connection::new(BufferedStream::new(SslTcpStream(ssl_socket))))
+        Ok(Connection::new(BufferedStream::new(NetStream::SslTcpStream(ssl_socket))))
     }
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
@@ -69,9 +69,9 @@ pub enum NetStream {
 impl Reader for NetStream {
     fn read(&mut self, buf: &mut [u8]) -> IoResult<uint> {
         match self {
-            &UnsecuredTcpStream(ref mut stream) => stream.read(buf),
+            &NetStream::UnsecuredTcpStream(ref mut stream) => stream.read(buf),
             #[cfg(feature = "ssl")]
-            &SslTcpStream(ref mut stream) => stream.read(buf),
+            &NetStream::SslTcpStream(ref mut stream) => stream.read(buf),
         }
     }
 }
@@ -79,9 +79,9 @@ impl Reader for NetStream {
 impl Writer for NetStream {
     fn write(&mut self, buf: &[u8]) -> IoResult<()> {
         match self {
-            &UnsecuredTcpStream(ref mut stream) => stream.write(buf),
+            &NetStream::UnsecuredTcpStream(ref mut stream) => stream.write(buf),
             #[cfg(feature = "ssl")]
-            &SslTcpStream(ref mut stream) => stream.write(buf),
+            &NetStream::SslTcpStream(ref mut stream) => stream.write(buf),
         }
     }
 }
