@@ -3,7 +3,7 @@
 
 use std::io::IoResult;
 use data::{Command, Config, User};
-use data::command::Command::{INVITE, JOIN, KILL, MODE, NICK, KICK};
+use data::command::Command::{INVITE, JOIN, KILL, MODE, NICK, NOTICE, KICK};
 use data::command::Command::{OPER, PONG, PRIVMSG, SAMODE, SANICK, TOPIC, USER};
 use data::kinds::IrcStream;
 use server::{Server, ServerIterator};
@@ -70,6 +70,15 @@ impl<'a, T> Wrapper<'a, T> where T: IrcStream {
     pub fn send_privmsg(&self, target: &str, message: &str) -> IoResult<()> {
         for line in message.split_str("\r\n") {
             try!(self.server.send(PRIVMSG(target, line)))
+        }
+        Ok(())
+    }
+
+    /// Sends a notice to the specified target.
+    #[experimental]
+    pub fn send_notice(&self, target: &str, message: &str) -> IoResult<()> {
+        for line in message.split_str("\r\n") {
+            try!(self.server.send(NOTICE(target, line)))
         }
         Ok(())
     }
@@ -204,6 +213,18 @@ mod test {
         }
         assert_eq!(get_server_value(server)[],
         "PRIVMSG #test :Hi, everybody!\r\n");
+    }
+
+    #[test]
+    fn send_notice() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(IoStream::new(MemWriter::new(), NullReader)));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_notice("#test", "Hi, everybody!").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "NOTICE #test :Hi, everybody!\r\n");
     }
 
     #[test]
