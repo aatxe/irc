@@ -1,10 +1,10 @@
 [package]
 
 name = "irc"
-version = "0.0.1"
+version = "1.0.0"
 description = "A simple, thread-safe IRC client library."
 authors = ["Aaron Weiss <aaronweiss74@gmail.com>"]
-license = "Public Domain"
+license = "Unlicense"
 keywords = ["irc", "client", "thread-safe"]
 documentation = "http://www.rust-ci.org/aaronweiss74/irc/doc/irc/"
 repository = "https://github.com/aaronweiss74/irc"
@@ -16,5 +16,5 @@ ssl = ["openssl"]
 
 [dependencies.openssl]
 
-git = "https://github.com/sfackler/rust-openssl.git"
+openssl = "~1.0.0"
 optional = true
