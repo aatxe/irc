@@ -4,8 +4,7 @@
 #![license = "Public Domain"]
 #![unstable]
 
-#![feature(if_let)]
-#![feature(slicing_syntax)]
+#![feature(if_let, slicing_syntax)]
 extern crate serialize;
 #[cfg(feature = "ssl")] extern crate openssl;
 
