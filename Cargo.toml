@@ -16,5 +16,5 @@ ssl = ["openssl"]
 
 [dependencies.openssl]
 
-openssl = "~1.0.0"
+openssl = "~0.0.2"
 optional = true
