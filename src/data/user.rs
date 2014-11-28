@@ -26,6 +26,11 @@ impl User {
         }
     }
 
+    /// Gets the nickname of the user.
+    pub fn get_name(&self) -> &str {
+        self.name[]
+    }
+
     /// Gets the user's access level.
     pub fn access_level(&self) -> AccessLevel {
         self.access_level
