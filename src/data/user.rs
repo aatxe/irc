@@ -120,6 +120,18 @@ mod test {
     }
 
     #[test]
+    fn get_name() {
+        let user = User::new("~owner");
+        assert_eq!(user.get_name(), "owner");
+    }
+
+    #[test]
+    fn access_level() {
+        let user = User::new("~owner");
+        assert_eq!(user.access_level(), Owner);
+    }
+
+    #[test]
     fn update_user_rank() {
         let mut user = User::new("user");
         assert_eq!(user.access_level, Member);
