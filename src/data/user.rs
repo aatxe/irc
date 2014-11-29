@@ -1,7 +1,9 @@
 //! Data for tracking user information.
+#![unstable]
 use std::str::FromStr;
 
 /// IRC User data.
+#[unstable]
 #[deriving(Clone, Show)]
 pub struct User {
     /// The user's nickname.
@@ -14,6 +16,7 @@ pub struct User {
 
 impl User {
     /// Creates a new User.
+    #[stable]
     pub fn new(name: &str) -> User {
         let rank = from_str(name);
         User {
@@ -27,16 +30,19 @@ impl User {
     }
 
     /// Gets the nickname of the user.
+    #[stable]
     pub fn get_name(&self) -> &str {
         self.name[]
     }
 
     /// Gets the user's access level.
+    #[experimental]
     pub fn access_level(&self) -> AccessLevel {
         self.access_level
     }
 
     /// Updates the user's access level.
+    #[unstable]
     pub fn update_access_level(&mut self, mode: &str) {
         self.access_level = match mode {
             "+q" => AccessLevel::Owner,
@@ -61,6 +67,7 @@ impl PartialEq for User {
 }
 
 /// The user's access level.
+#[stable]
 #[deriving(PartialEq, Clone, Show)]
 pub enum AccessLevel {
     /// The channel owner (~).
