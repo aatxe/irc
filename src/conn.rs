@@ -18,7 +18,23 @@ impl Connection<BufferedStream<TcpStream>> {
     /// Creates a thread-safe TCP connection to the specified server.
     #[experimental]
     pub fn connect(host: &str, port: u16) -> IoResult<Connection<BufferedStream<NetStream>>> {
-        let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
+        Connection::connect_internal(host, port, None)
+    }
+
+    /// Creates a thread-safe TCP connection to the specified server with a given timeout in 
+    /// milliseconds.
+    #[experimental]
+    pub fn connect_with_timeout(host: &str, port: u16, timeout_ms: u64) 
+        -> IoResult<Connection<BufferedStream<NetStream>>> {   
+        Connection::connect_internal(host, port, Some(timeout_ms))
+    }
+
+    /// Creates a thread-safe TCP connection with an optional timeout.
+    #[experimental]
+    fn connect_internal(host: &str, port: u16, timeout_ms: Option<u64>) 
+    -> IoResult<Connection<BufferedStream<NetStream>>> {  
+        let mut socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
+        socket.set_timeout(timeout_ms);
         Ok(Connection::new(BufferedStream::new(NetStream::UnsecuredTcpStream(socket))))
     }
 
@@ -27,10 +43,14 @@ impl Connection<BufferedStream<TcpStream>> {
     #[experimental]
     #[cfg(feature = "ssl")]
     pub fn connect_ssl(host: &str, port: u16) -> IoResult<Connection<BufferedStream<NetStream>>> {
-        let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
-        let ssl = try!(ssl_to_io(SslContext::new(Tlsv1)));
-        let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
-        Ok(Connection::new(BufferedStream::new(NetStream::SslTcpStream(ssl_socket))))
+        Connection::connect_ssl_internal(host, port, None)
+    }
+
+    #[experimental]
+    #[cfg(feature = "ssl")]
+    pub fn connect_ssl_with_timeout(host: &str, port: u16, timeout_ms: u64)
+        -> IoResult<Connection<BufferedStream<NetStream>>> {
+        Connection::connect_ssl_internal(host, port, Some(timeout_ms))
     }
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
@@ -39,6 +59,18 @@ impl Connection<BufferedStream<TcpStream>> {
     #[cfg(not(feature = "ssl"))]
     pub fn connect_ssl(host: &str, port: u16) -> IoResult<Connection<BufferedStream<NetStream>>> {
         panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
+    }
+
+    /// Creates a thread-safe TCP connection over SSL with an optional timeout.
+    #[experimental]
+    #[cfg(feature = "ssl")]
+    fn connect_ssl_internal(host: &str, port: u16, timeout_ms: Option<u64>)
+    -> IoResult<Connection<BufferedStream<NetStream>>> {
+        let mut socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
+        socket.set_timeout(timeout_ms);
+        let ssl = try!(ssl_to_io(SslContext::new(Tlsv1)));
+        let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
+        Ok(Connection::new(BufferedStream::new(NetStream::SslTcpStream(ssl_socket))))
     }
 }
 

@@ -35,17 +35,19 @@ pub struct IrcServer<T> where T: IrcStream {
 }
 
 impl IrcServer<BufferedStream<NetStream>> {
-    /// Creates a new IRC Server connection from the configuration at the specified path, connecting
-    /// immediately.
+    /// Creates a new IRC Server connection from the configuration at the specified path, 
+    /// connecting immediately.
     #[experimental]
     pub fn new(config: &str) -> IoResult<IrcServer<BufferedStream<NetStream>>> {
-        let config = try!(Config::load_utf8(config));
-        let conn = try!(if config.use_ssl {
-            Connection::connect_ssl(config.server[], config.port)
-        } else {
-            Connection::connect(config.server[], config.port)
-        });
-        Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()) })
+        IrcServer::from_config(try!(Config::load_utf8(config)))
+    }
+
+    /// Creates a new IRC server connection from the configuration at the specified path with the
+    /// specified timeout in milliseconds, connecting immediately.
+    #[experimental]
+    pub fn with_timeout(config: &str, timeout_ms: u64) 
+        -> IoResult<IrcServer<BufferedStream<NetStream>>> {
+        IrcServer::from_config_with_timeout(try!(Config::load_utf8(config)), timeout_ms)    
     }
 
     /// Creates a new IRC server connection from the specified configuration, connecting
@@ -59,6 +61,20 @@ impl IrcServer<BufferedStream<NetStream>> {
         });
         Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()) })
     }
+
+    /// Creates a new IRC server connection from the specified configuration with the specified 
+    /// timeout in milliseconds, connecting immediately.
+    #[experimental]
+    pub fn from_config_with_timeout(config: Config, timeout_ms: u64) 
+        -> IoResult<IrcServer<BufferedStream<NetStream>>> {
+        let conn = try!(if config.use_ssl {
+            Connection::connect_ssl_with_timeout(config.server[], config.port, timeout_ms)
+        } else {
+            Connection::connect_with_timeout(config.server[], config.port, timeout_ms)
+        });
+        Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()) })
+    }
+
 }
 
 impl<'a, T> Server<'a, T> for IrcServer<T> where T: IrcStream {
