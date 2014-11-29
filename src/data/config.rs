@@ -56,6 +56,13 @@ impl Config {
     pub fn is_owner(&self, nickname: &str) -> bool {
         self.owners[].contains(&String::from_str(nickname))
     }
+
+    /// Looks up the specified string in the options map.
+    /// This uses indexing, and thus panics when the string is not present.
+    #[experimental]
+    pub fn get_option(&self, option: &str) -> &str {
+        self.options[option.into_string()][]
+    }
 }
 
 #[cfg(test)]
@@ -114,5 +121,26 @@ mod test {
         assert!(cfg.is_owner("test"));
         assert!(cfg.is_owner("test2"));
         assert!(!cfg.is_owner("test3"));
+    }
+
+    #[test]
+    fn get_option() {
+         let cfg = Config {
+            owners: vec![format!("test")],
+            nickname: format!("test"),
+            username: format!("test"),
+            realname: format!("test"),
+            password: String::new(),
+            server: format!("irc.test.net"),
+            port: 6667,
+            use_ssl: false,
+            channels: vec![format!("#test"), format!("#test2")],
+            options: {
+                let mut map = HashMap::new();
+                map.insert(format!("testing"), format!("test"));
+                map
+            },
+        };
+        assert_eq!(cfg.get_option("testing"), "test");
     }
 }
