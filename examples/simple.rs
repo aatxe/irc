@@ -21,7 +21,8 @@ fn main() {
         options: HashMap::new(),
     };
     let irc_server = IrcServer::from_config(config).unwrap();
-    let server = Wrapper::new(&irc_server);
+    // The wrapper provides us with methods like send_privmsg(...) and identify(...)
+    let server = Wrapper::new(&irc_server);     
     server.identify().unwrap();
     for message in server.iter() {
         print!("{}", message.into_string());

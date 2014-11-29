@@ -3,6 +3,7 @@
 extern crate irc;
 
 use std::collections::HashMap;
+use std::sync::Arc;
 use irc::data::config::Config;
 use irc::server::{IrcServer, Server};
 use irc::server::utils::Wrapper;
@@ -15,23 +16,21 @@ fn main() {
         realname: "pickles".into_string(),
         password: "".into_string(),
         server: "irc.fyrechat.net".into_string(),
-        port: 6697,
-        use_ssl: true,
+        port: 6667,
+        use_ssl: false,
         channels: vec!("#vana".into_string()),
         options: HashMap::new(),
     };
-    let irc_server = IrcServer::from_config(config).unwrap();
+    let irc_server = Arc::new(IrcServer::from_config(config).unwrap());
     // The wrapper provides us with methods like send_privmsg(...) and identify(...)
-    let server = Wrapper::new(&irc_server);
+    let server = Wrapper::new(&*irc_server);
     server.identify().unwrap();
-    for message in server.iter() {
-        print!("{}", message.into_string());
-        if message.command[] == "PRIVMSG" {
-            if let Some(msg) = message.suffix {
-                if msg.contains("pickles") {
-                    server.send_privmsg(message.args[0][], "Hi!").unwrap();
-                }
-            }
+    let server = irc_server.clone();
+    // We won't use a wrapper here because we don't need the added functionality.
+    spawn(proc() { 
+        for msg in server.iter() {
+            print!("{}", msg.into_string());
         }
-    }
+    });
 }
+
