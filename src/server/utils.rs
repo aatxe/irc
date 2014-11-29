@@ -9,6 +9,7 @@ use data::kinds::IrcStream;
 use server::{Server, ServerIterator};
 
 /// Functionality-providing wrapper for Server.
+/// Wrappers are currently not thread-safe, and should be created per-thread, as needed.
 #[experimental]
 pub struct Wrapper<'a, T> where T: IrcStream {
     server: &'a (Server<'a, T> + 'a)
