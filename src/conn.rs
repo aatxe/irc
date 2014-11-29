@@ -56,7 +56,7 @@ impl Connection<BufferedStream<TcpStream>> {
     /// Panics because SSL support was not included at compilation.
     #[experimental]
     #[cfg(not(feature = "ssl"))]
-    fn connect_ssl_internal(host: &str, port: u16, timeout_ms: Option<u64>) 
+    fn connect_ssl_internal(host: &str, port: u16, _: Option<u64>) 
     -> IoResult<Connection<BufferedStream<NetStream>>> {
         panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
     }
