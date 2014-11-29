@@ -41,23 +41,23 @@ impl Connection<BufferedStream<TcpStream>> {
     /// Creates a thread-safe TCP connection to the specified server over SSL.
     /// If the library is compiled without SSL support, this method panics.
     #[experimental]
-    #[cfg(feature = "ssl")]
     pub fn connect_ssl(host: &str, port: u16) -> IoResult<Connection<BufferedStream<NetStream>>> {
         Connection::connect_ssl_internal(host, port, None)
     }
 
+    /// Creates a thread-safe TCP connection to the specificed server over SSL with a given timeout
+    /// in milliseconds. If the library is compiled without SSL support, this method panics.
     #[experimental]
-    #[cfg(feature = "ssl")]
     pub fn connect_ssl_with_timeout(host: &str, port: u16, timeout_ms: u64)
         -> IoResult<Connection<BufferedStream<NetStream>>> {
         Connection::connect_ssl_internal(host, port, Some(timeout_ms))
     }
 
-    /// Creates a thread-safe TCP connection to the specified server over SSL.
-    /// If the library is compiled without SSL support, this method panics.
+    /// Panics because SSL support was not included at compilation.
     #[experimental]
     #[cfg(not(feature = "ssl"))]
-    pub fn connect_ssl(host: &str, port: u16) -> IoResult<Connection<BufferedStream<NetStream>>> {
+    fn connect_ssl_internal(host: &str, port: u16, timeout_ms: Option<u64>) 
+    -> IoResult<Connection<BufferedStream<NetStream>>> {
         panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
     }
 
