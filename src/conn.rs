@@ -144,7 +144,7 @@ fn ssl_to_io<T>(res: Result<T, SslError>) -> IoResult<T> {
     match res {
         Ok(x) => Ok(x),
         Err(e) => Err(IoError {
-            kind: OtherIoError,
+            kind: IoErrorKind::OtherIoError,
             desc: "An SSL error occurred.",
             detail: Some(format!("{}", e)),
         }),
