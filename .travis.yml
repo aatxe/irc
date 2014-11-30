@@ -6,11 +6,11 @@ script:
   - chmod +x mktestconfig.sh
   - ./mktestconfig.sh
   - cargo build --verbose
-  - cargo build --verbose --features ssl
+  - cargo build --verbose --features "encode ssl"
   - cargo test --verbose
-  - cargo test --verbose --features ssl
+  - cargo test --verbose --features "encode ssl"
   - cargo doc --verbose
-  - cargo doc --verbose --features ssl
+  - cargo doc --verbose --features "encode ssl"
 notifications:
   irc:
     channels:
