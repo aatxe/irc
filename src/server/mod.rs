@@ -63,7 +63,8 @@ impl IrcServer<BufferedStream<NetStream>> {
     }
 
     /// Creates a new IRC server connection from the specified configuration with the specified 
-    /// timeout in milliseconds, connecting immediately.
+    /// timeout in milliseconds, connecting
+    /// immediately.
     #[experimental]
     pub fn from_config_with_timeout(config: Config, timeout_ms: u64) 
         -> IoResult<IrcServer<BufferedStream<NetStream>>> {
@@ -83,7 +84,7 @@ impl<'a, T> Server<'a, T> for IrcServer<T> where T: IrcStream {
     }
 
     fn send(&self, command: Command) -> IoResult<()> {
-        self.conn.send(command.to_message())
+        self.conn.send(command.to_message(), self.config.encoding[])
     }
 
     fn iter(&'a self) -> ServerIterator<'a, T> {
@@ -176,7 +177,7 @@ impl<'a, T> ServerIterator<'a, T> where T: IrcStream {
 
 impl<'a, T> Iterator<Message> for ServerIterator<'a, T> where T: IrcStream {
     fn next(&mut self) -> Option<Message> {
-        let line = self.server.conn.recv();
+        let line = self.server.conn.recv(self.server.config.encoding[]);
         match line {
             Err(_) => None,
             Ok(msg) => {
@@ -209,6 +210,7 @@ mod test {
             server: format!("irc.test.net"),
             port: 6667,
             use_ssl: false,
+            encoding: format!("UTF-8"),
             channels: vec![format!("#test"), format!("#test2")],
             options: HashMap::new(),
         }

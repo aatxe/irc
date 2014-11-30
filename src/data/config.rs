@@ -26,6 +26,9 @@ pub struct Config {
     /// Whether or not to use SSL.
     /// Bots will automatically panic if this is enabled without SSL support.
     pub use_ssl: bool,
+    /// The encoding type used for this connection.
+    /// This is typically UTF-8, but could be something else.
+    pub encoding: String,
     /// A list of channels to join on connection.
     pub channels: Vec<String>,
     /// A map of additional options to be stored in config.
@@ -81,6 +84,7 @@ mod test {
             server: format!("irc.test.net"),
             port: 6667,
             use_ssl: false,
+            encoding: format!("UTF-8"),
             channels: vec![format!("#test"), format!("#test2")],
             options: HashMap::new(),
         };
@@ -98,6 +102,7 @@ mod test {
             server: format!("irc.test.net"),
             port: 6667,
             use_ssl: false,
+            encoding: format!("UTF-8"),
             channels: vec![format!("#test"), format!("#test2")],
             options: HashMap::new(),
         };
@@ -115,6 +120,7 @@ mod test {
             server: format!("irc.test.net"),
             port: 6667,
             use_ssl: false,
+            encoding: format!("UTF-8"),
             channels: Vec::new(),
             options: HashMap::new(),
         };
@@ -134,6 +140,7 @@ mod test {
             server: format!("irc.test.net"),
             port: 6667,
             use_ssl: false,
+            encoding: format!("UTF-8"),
             channels: vec![format!("#test"), format!("#test2")],
             options: {
                 let mut map = HashMap::new();

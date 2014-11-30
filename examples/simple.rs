@@ -17,6 +17,7 @@ fn main() {
         server: "irc.fyrechat.net".into_string(),
         port: 6667,
         use_ssl: false,
+        encoding: format!("UTF-8"),
         channels: vec!("#vana".into_string()),
         options: HashMap::new(),
     };
