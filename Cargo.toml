@@ -12,11 +12,13 @@ readme = "README.md"
 
 [features]
 
+encode = ["encoding"]
 ssl = ["openssl"]
 
 [dependencies.encoding]
 
 encoding = "~0.2.4"
+optional = true
 
 [dependencies.openssl]
 

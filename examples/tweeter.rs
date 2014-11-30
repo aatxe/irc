@@ -10,19 +10,7 @@ use irc::server::{IrcServer, Server};
 use irc::server::utils::Wrapper;
 
 fn main() {
-    let config = Config {
-        owners: vec!("awe".into_string()),
-        nickname: "tweeter".into_string(),
-        username: "tweeter".into_string(),
-        realname: "tweeter".into_string(),
-        password: "".into_string(),
-        server: "irc.fyrechat.net".into_string(),
-        port: 6667,
-        use_ssl: false,
-        encoding: format!("UTF-8"),
-        channels: vec!("#vana".into_string()),
-        options: HashMap::new(),
-    };
+    let config = config();
     let irc_server = Arc::new(IrcServer::from_config_with_timeout(config, 10 * 1000).unwrap());
     let irc_server2 = irc_server.clone();
     // The wrapper provides us with methods like send_privmsg(...) and identify(...)
@@ -46,3 +34,35 @@ fn main() {
     }
 }
 
+#[cfg(feature = "encode")]
+fn config() -> Config {
+    Config {
+        owners: vec!("awe".into_string()),
+        nickname: "pickles".into_string(),
+        username: "pickles".into_string(),
+        realname: "pickles".into_string(),
+        password: "".into_string(),
+        server: "irc.fyrechat.net".into_string(),
+        port: 6667,
+        use_ssl: false,
+        encoding: format!("UTF-8"),
+        channels: vec!("#vana".into_string()),
+        options: HashMap::new(),
+    }
+}
+
+#[cfg(not(feature = "encode"))]
+fn config() -> Config {
+    Config {
+        owners: vec!("awe".into_string()),
+        nickname: "pickles".into_string(),
+        username: "pickles".into_string(),
+        realname: "pickles".into_string(),
+        password: "".into_string(),
+        server: "irc.fyrechat.net".into_string(),
+        port: 6667,
+        use_ssl: false,
+        channels: vec!("#vana".into_string()),
+        options: HashMap::new(),
+    }
+}

@@ -1,9 +1,10 @@
 //! Thread-safe connections on IrcStreams.
 #![experimental]
 use std::sync::{Mutex, MutexGuard};
-use std::io::{BufferedStream, IoError, IoErrorKind, IoResult, MemWriter, TcpStream};
-use encoding::{DecoderTrap, EncoderTrap, Encoding};
-use encoding::label::encoding_from_whatwg_label;
+use std::io::{BufferedStream, IoResult, MemWriter, TcpStream};
+#[cfg(any(feature = "encode", feature = "ssl"))] use std::io::{IoError, IoErrorKind};
+#[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
+#[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
 use data::kinds::{IrcReader, IrcStream, IrcWriter};
 use data::message::Message;
 #[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslStream, Tlsv1};
@@ -86,6 +87,7 @@ impl<T: IrcStream> Connection<T> {
 
     /// Sends a Message over this connection.
     #[experimental]
+    #[cfg(feature = "encode")]
     pub fn send(&self, message: Message, encoding: &str) -> IoResult<()> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
@@ -108,8 +110,18 @@ impl<T: IrcStream> Connection<T> {
         stream.flush()
     }
 
+    /// Sends a message over this connection.
+    #[experimental]
+    #[cfg(not(feature = "encode"))]
+    pub fn send(&self, message: Message) -> IoResult<()> {
+        let mut stream = self.stream.lock();
+        try!(stream.write_str(message.into_string()[]));
+        stream.flush()
+    }
+
     /// Receives a single line from this connection.
     #[experimental]
+    #[cfg(feature = "encoding")]
     pub fn recv(&self, encoding: &str) -> IoResult<String> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
@@ -129,6 +141,13 @@ impl<T: IrcStream> Connection<T> {
                 })
             }
         )
+    }
+
+    /// Receives a single line from this connection.
+    #[experimental]
+    #[cfg(not(feature = "encoding"))]
+    pub fn recv(&self) -> IoResult<String> {
+        self.stream.lock().read_line()
     }
 
     /// Acquires the Stream lock.
@@ -231,10 +250,22 @@ mod test {
     use std::io::{MemReader, MemWriter};
     use std::io::util::{NullReader, NullWriter};
     use data::message::Message;
-    use encoding::{DecoderTrap, Encoding};
-    use encoding::all::ISO_8859_15;
+    #[cfg(feature = "encode")] use encoding::{DecoderTrap, Encoding};
+    #[cfg(feature = "encode")] use encoding::all::ISO_8859_15;
 
     #[test]
+    #[cfg(not(feature = "encode"))]
+    fn send() {
+        let conn = Connection::new(IoStream::new(MemWriter::new(), NullReader));
+        assert!(conn.send(
+            Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("Testing!"))
+        ).is_ok());
+        let data = String::from_utf8(conn.stream().value()).unwrap();
+        assert_eq!(data[], "PRIVMSG test :Testing!\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "encode")]
     fn send_utf8() {
         let conn = Connection::new(IoStream::new(MemWriter::new(), NullReader));
         assert!(conn.send(
@@ -245,11 +276,22 @@ mod test {
     }
 
     #[test]
+    #[cfg(feature = "encode")]
     fn send_iso885915() {
 
     }
 
     #[test]
+    #[cfg(not(feature = "encode"))]
+    fn recv() {
+        let conn = Connection::new(IoStream::new(
+            NullWriter, MemReader::new("PRIVMSG test :Testing!\r\n".as_bytes().to_vec())
+        ));
+        assert_eq!(conn.recv().unwrap()[], "PRIVMSG test :Testing!\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "encode")]
     fn recv_utf8() {
         let conn = Connection::new(IoStream::new(
             NullWriter, MemReader::new(b"PRIVMSG test :Testing!\r\n".to_vec())
@@ -258,6 +300,7 @@ mod test {
     }
 
     #[test]
+    #[cfg(feature = "encode")]
     fn recv_iso885915() {
         let conn = Connection::new(IoStream::new(
             NullWriter, MemReader::new({

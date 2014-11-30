@@ -83,8 +83,14 @@ impl<'a, T> Server<'a, T> for IrcServer<T> where T: IrcStream {
         &self.config
     }
 
+    #[cfg(feature = "encode")]
     fn send(&self, command: Command) -> IoResult<()> {
         self.conn.send(command.to_message(), self.config.encoding[])
+    }
+
+    #[cfg(not(feature = "encode"))]
+    fn send(&self, command: Command) -> IoResult<()> {
+        self.conn.send(command.to_message())
     }
 
     fn iter(&'a self) -> ServerIterator<'a, T> {
@@ -173,12 +179,23 @@ impl<'a, T> ServerIterator<'a, T> where T: IrcStream {
             server: server
         }
     }
+
+    /// Gets the next line from the connection.
+    #[cfg(feature = "encode")]
+    fn get_next_line(&self) -> IoResult<String> {
+        self.server.conn.recv(self.server.config.encoding[])
+    }
+
+    /// Gets the next line from the connection.
+    #[cfg(not(feature = "encode"))]
+    fn get_next_line(&self) -> IoResult<String> {
+        self.server.conn.recv()
+    }
 }
 
 impl<'a, T> Iterator<Message> for ServerIterator<'a, T> where T: IrcStream {
     fn next(&mut self) -> Option<Message> {
-        let line = self.server.conn.recv(self.server.config.encoding[]);
-        match line {
+        match self.get_next_line() {
             Err(_) => None,
             Ok(msg) => {
                 let message = from_str(msg[]);
@@ -200,6 +217,7 @@ mod test {
     use data::command::Command::PRIVMSG;
     use data::kinds::IrcReader;
 
+    #[cfg(feature = "encode")]
     pub fn test_config() -> Config {
         Config {
             owners: vec![format!("test")],
@@ -215,6 +233,23 @@ mod test {
             options: HashMap::new(),
         }
     }
+
+    #[cfg(not(feature = "encode"))]
+    pub fn test_config() -> Config {
+        Config {
+            owners: vec![format!("test")],
+            nickname: format!("test"),
+            username: format!("test"),
+            realname: format!("test"),
+            password: String::new(),
+            server: format!("irc.test.net"),
+            port: 6667,
+            use_ssl: false,
+            channels: vec![format!("#test"), format!("#test2")],
+            options: HashMap::new(),
+        }
+    }
+
 
     pub fn get_server_value<U>(server: IrcServer<IoStream<MemWriter, U>>) -> String
         where U: IrcReader {

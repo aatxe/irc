@@ -5,7 +5,7 @@
 #![unstable]
 
 #![feature(if_let, slicing_syntax)]
-extern crate encoding;
+#[cfg(feature = "encode")] extern crate encoding;
 extern crate serialize;
 #[cfg(feature = "ssl")] extern crate openssl;
 

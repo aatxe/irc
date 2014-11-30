@@ -28,6 +28,7 @@ pub struct Config {
     pub use_ssl: bool,
     /// The encoding type used for this connection.
     /// This is typically UTF-8, but could be something else.
+    #[cfg(feature = "encoding")]
     pub encoding: String,
     /// A list of channels to join on connection.
     pub channels: Vec<String>,
@@ -74,6 +75,7 @@ mod test {
     use std::collections::HashMap;
 
     #[test]
+    #[cfg(feature = "encode")]
     fn load() {
         let cfg = Config {
             owners: vec![format!("test")],
@@ -92,6 +94,25 @@ mod test {
     }
 
     #[test]
+    #[cfg(not(feature = "encode"))]
+    fn load() {
+        let cfg = Config {
+            owners: vec![format!("test")],
+            nickname: format!("test"),
+            username: format!("test"),
+            realname: format!("test"),
+            password: String::new(),
+            server: format!("irc.test.net"),
+            port: 6667,
+            use_ssl: false,
+            channels: vec![format!("#test"), format!("#test2")],
+            options: HashMap::new(),
+        };
+        assert_eq!(Config::load(Path::new("config.json")), Ok(cfg));
+    }
+
+    #[test]
+    #[cfg(feature = "encode")]
     fn load_utf8() {
         let cfg = Config {
             owners: vec![format!("test")],
@@ -110,6 +131,26 @@ mod test {
     }
 
     #[test]
+    #[cfg(not(feature = "encode"))]
+    fn load_utf8() {
+        let cfg = Config {
+            owners: vec![format!("test")],
+            nickname: format!("test"),
+            username: format!("test"),
+            realname: format!("test"),
+            password: String::new(),
+            server: format!("irc.test.net"),
+            port: 6667,
+            use_ssl: false,
+            channels: vec![format!("#test"), format!("#test2")],
+            options: HashMap::new(),
+        };
+        assert_eq!(Config::load_utf8("config.json"), Ok(cfg));
+    }
+
+
+    #[test]
+    #[cfg(feature = "encode")]
     fn is_owner() {
         let cfg = Config {
             owners: vec![format!("test"), format!("test2")],
@@ -130,6 +171,27 @@ mod test {
     }
 
     #[test]
+    #[cfg(not(feature = "encode"))]
+    fn is_owner() {
+        let cfg = Config {
+            owners: vec![format!("test"), format!("test2")],
+            nickname: format!("test"),
+            username: format!("test"),
+            realname: format!("test"),
+            password: String::new(),
+            server: format!("irc.test.net"),
+            port: 6667,
+            use_ssl: false,
+            channels: vec![format!("#test"), format!("#test2")],
+            options: HashMap::new(),
+        };
+        assert!(cfg.is_owner("test"));
+        assert!(cfg.is_owner("test2"));
+        assert!(!cfg.is_owner("test3"));
+    }
+
+    #[test]
+    #[cfg(feature = "encode")]
     fn get_option() {
          let cfg = Config {
             owners: vec![format!("test")],
@@ -141,6 +203,28 @@ mod test {
             port: 6667,
             use_ssl: false,
             encoding: format!("UTF-8"),
+            channels: vec![format!("#test"), format!("#test2")],
+            options: {
+                let mut map = HashMap::new();
+                map.insert(format!("testing"), format!("test"));
+                map
+            },
+        };
+        assert_eq!(cfg.get_option("testing"), "test");
+    }
+
+    #[test]
+    #[cfg(not(feature = "encode"))]
+    fn get_option() {
+         let cfg = Config {
+            owners: vec![format!("test")],
+            nickname: format!("test"),
+            username: format!("test"),
+            realname: format!("test"),
+            password: String::new(),
+            server: format!("irc.test.net"),
+            port: 6667,
+            use_ssl: false,
             channels: vec![format!("#test"), format!("#test2")],
             options: {
                 let mut map = HashMap::new();
