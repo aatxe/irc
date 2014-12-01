@@ -225,7 +225,7 @@ mod test {
     use std::io::util::{NullReader, NullWriter};
     use data::message::Message;
     #[cfg(feature = "encode")] use encoding::{DecoderTrap, Encoding};
-    #[cfg(feature = "encode")] use encoding::all::ISO_8859_15;
+    #[cfg(feature = "encode")] use encoding::all::{ISO_8859_15, UTF_8};
 
     #[test]
     #[cfg(not(feature = "encode"))]
@@ -243,16 +243,21 @@ mod test {
     fn send_utf8() {
         let conn = Connection::new(NullReader, MemWriter::new());
         assert!(conn.send(
-            Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("€ŠšŽžŒœŸ")), "l9"
+            Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("€ŠšŽžŒœŸ")), "UTF-8"
         ).is_ok());
-        let data = ISO_8859_15.decode(conn.stream().value()[], DecoderTrap::Strict).unwrap();
-        assert_eq!(data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
+        let data = UTF_8.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
+        assert_eq!(data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");  
     }
 
     #[test]
     #[cfg(feature = "encode")]
     fn send_iso885915() {
-
+        let conn = Connection::new(NullReader, MemWriter::new());
+        assert!(conn.send(
+            Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("€ŠšŽžŒœŸ")), "l9"
+        ).is_ok());
+        let data = ISO_8859_15.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
+        assert_eq!(data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 
     #[test]
