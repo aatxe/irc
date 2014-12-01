@@ -315,3 +315,24 @@ impl FromStr for Response {
         }   
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::Response;
+
+    #[test]
+    fn from_message() {
+        assert_eq!(Response::from_message(
+            &from_str(":irc.test.net 353 test = #test :test\r\n").unwrap()
+        ).unwrap(), Response::RPL_NAMREPLY);
+        assert_eq!(Response::from_message(
+            &from_str(":irc.test.net 433 <nick> :Nickname is already in use\r\n").unwrap()
+        ).unwrap(), Response::ERR_NICKNAMEINUSE);
+    }
+
+    #[test]
+    fn is_error() {
+        assert!(!Response::RPL_NAMREPLY.is_error())
+        assert!(Response::ERR_NICKNAMEINUSE.is_error())
+    }
+}

@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use std::io::{BufferedStream, IoResult};
 use std::sync::Mutex;
 use conn::{Connection, NetStream};
-use data::command::Command::{JOIN, PONG};
-use data::{Command, Config, Message, User};
+use data::{Command, Config, Message, Response, User};
+use data::Command::{JOIN, PONG};
 use data::kinds::IrcStream;
 
 pub mod utils;
@@ -124,7 +124,7 @@ impl<T> IrcServer<T> where T: IrcStream {
                 self.send(JOIN(chan[], None)).unwrap();
             }
         }
-        else if msg.command[] == "353" { // /NAMES
+        else if let Some(Response::RPL_NAMREPLY) = Response::from_message(msg) {
             if let Some(users) = msg.suffix.clone() {
                 if let [_, _, ref chan] = msg.args[] {
                     for user in users.split_str(" ") {
