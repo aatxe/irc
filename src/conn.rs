@@ -1,25 +1,29 @@
 //! Thread-safe connections on IrcStreams.
 #![experimental]
 use std::sync::{Mutex, MutexGuard};
-use std::io::{BufferedStream, IoResult, MemWriter, TcpStream};
+use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 #[cfg(any(feature = "encode", feature = "ssl"))] use std::io::{IoError, IoErrorKind};
 #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
 #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
-use data::kinds::{IrcReader, IrcStream, IrcWriter};
+use data::kinds::{IrcReader, IrcWriter};
 use data::message::Message;
 #[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslStream, Tlsv1};
 #[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
 
 /// A thread-safe connection.
 #[experimental]
-pub struct Connection<T> where T: IrcStream {
-    stream: Mutex<T>
+pub struct Connection<T: IrcReader, U: IrcWriter> {
+    reader: Mutex<T>,
+    writer: Mutex<U>,
 }
 
-impl Connection<BufferedStream<TcpStream>> {
+/// A Connection over a buffered NetStream.
+pub type NetConnection = Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>>;
+
+impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Creates a thread-safe TCP connection to the specified server.
     #[experimental]
-    pub fn connect(host: &str, port: u16) -> IoResult<Connection<BufferedStream<NetStream>>> {
+    pub fn connect(host: &str, port: u16) -> IoResult<NetConnection> {
         Connection::connect_internal(host, port, None)
     }
 
@@ -27,23 +31,26 @@ impl Connection<BufferedStream<TcpStream>> {
     /// milliseconds.
     #[experimental]
     pub fn connect_with_timeout(host: &str, port: u16, timeout_ms: u64) 
-        -> IoResult<Connection<BufferedStream<NetStream>>> {   
+        -> IoResult<NetConnection> {   
         Connection::connect_internal(host, port, Some(timeout_ms))
     }
 
     /// Creates a thread-safe TCP connection with an optional timeout.
     #[experimental]
     fn connect_internal(host: &str, port: u16, timeout_ms: Option<u64>) 
-    -> IoResult<Connection<BufferedStream<NetStream>>> {  
+    -> IoResult<NetConnection> {  
         let mut socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
         socket.set_timeout(timeout_ms);
-        Ok(Connection::new(BufferedStream::new(NetStream::UnsecuredTcpStream(socket))))
+        Ok(Connection::new(
+            BufferedReader::new(NetStream::UnsecuredTcpStream(socket.clone())),
+            BufferedWriter::new(NetStream::UnsecuredTcpStream(socket))
+        ))
     }
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
     /// If the library is compiled without SSL support, this method panics.
     #[experimental]
-    pub fn connect_ssl(host: &str, port: u16) -> IoResult<Connection<BufferedStream<NetStream>>> {
+    pub fn connect_ssl(host: &str, port: u16) -> IoResult<NetConnection> {
         Connection::connect_ssl_internal(host, port, None)
     }
 
@@ -51,7 +58,7 @@ impl Connection<BufferedStream<TcpStream>> {
     /// in milliseconds. If the library is compiled without SSL support, this method panics.
     #[experimental]
     pub fn connect_ssl_with_timeout(host: &str, port: u16, timeout_ms: u64)
-        -> IoResult<Connection<BufferedStream<NetStream>>> {
+        -> IoResult<NetConnection> {
         Connection::connect_ssl_internal(host, port, Some(timeout_ms))
     }
 
@@ -59,7 +66,7 @@ impl Connection<BufferedStream<TcpStream>> {
     #[experimental]
     #[cfg(not(feature = "ssl"))]
     fn connect_ssl_internal(host: &str, port: u16, _: Option<u64>) 
-    -> IoResult<Connection<BufferedStream<NetStream>>> {
+    -> IoResult<NetConnection> {
         panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
     }
 
@@ -67,21 +74,25 @@ impl Connection<BufferedStream<TcpStream>> {
     #[experimental]
     #[cfg(feature = "ssl")]
     fn connect_ssl_internal(host: &str, port: u16, timeout_ms: Option<u64>)
-    -> IoResult<Connection<BufferedStream<NetStream>>> {
+    -> IoResult<NetConnection> {
         let mut socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
         socket.set_timeout(timeout_ms);
         let ssl = try!(ssl_to_io(SslContext::new(Tlsv1)));
         let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
-        Ok(Connection::new(BufferedStream::new(NetStream::SslTcpStream(ssl_socket))))
+        Ok(Connection::new(
+            BufferedReader::new(NetStream::SslTcpStream(ssl_socket.clone())),
+            BufferedWriter::new(NetStream::SslTcpSteram(ssl_socket)),
+        ))
     }
 }
 
-impl<T: IrcStream> Connection<T> {
-    /// Creates a new connection from any arbitrary IrcStream.
+impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
+    /// Creates a new connection from an IrcReader and an IrcWriter.
     #[experimental]
-    pub fn new(stream: T) -> Connection<T> {
+    pub fn new(reader: T, writer: U) -> Connection<T, U> {
         Connection {
-            stream: Mutex::new(stream),
+            reader: Mutex::new(reader),
+            writer: Mutex::new(writer),
         }
     }
 
@@ -105,18 +116,18 @@ impl<T: IrcStream> Connection<T> {
                 detail: Some(format!("Failed to decode {} as {}.", data, encoding.name())),
             })
         };
-        let mut stream = self.stream.lock();
-        try!(stream.write(data[]));
-        stream.flush()
+        let mut writer = self.writer.lock();
+        try!(writer.write(data[]));
+        writer.flush()
     }
 
     /// Sends a message over this connection.
     #[experimental]
     #[cfg(not(feature = "encode"))]
     pub fn send(&self, message: Message) -> IoResult<()> {
-        let mut stream = self.stream.lock();
-        try!(stream.write_str(message.into_string()[]));
-        stream.flush()
+        let mut writer = self.writer.lock();
+        try!(writer.write_str(message.into_string()[]));
+        writer.flush()
     }
 
     /// Receives a single line from this connection.
@@ -131,7 +142,7 @@ impl<T: IrcStream> Connection<T> {
                 detail: Some(format!("Invalid decoder: {}", encoding))
             })
         };
-        self.stream.lock().read_until(b'\n').and_then(|line|
+        self.reader.lock().read_until(b'\n').and_then(|line|
             match encoding.decode(line[], DecoderTrap::Strict) {
                 Ok(data) => Ok(data),
                 Err(data) => Err(IoError {
@@ -147,13 +158,19 @@ impl<T: IrcStream> Connection<T> {
     #[experimental]
     #[cfg(not(feature = "encoding"))]
     pub fn recv(&self) -> IoResult<String> {
-        self.stream.lock().read_line()
+        self.reader.lock().read_line()
     }
 
-    /// Acquires the Stream lock.
+    /// Acquires the Reader lock.
     #[experimental]
-    pub fn stream<'a>(&'a self) -> MutexGuard<'a, T> {
-        self.stream.lock()
+    pub fn reader<'a>(&'a self) -> MutexGuard<'a, T> {
+        self.reader.lock()
+    }
+    
+    /// Acquires the Writer lock.
+    #[experimental]
+    pub fn writer<'a>(&'a self) -> MutexGuard<'a, U> {
+        self.writer.lock()
     }
 }
 
@@ -201,53 +218,9 @@ impl Writer for NetStream {
     }
 }
 
-/// An IrcStream built from an IrcWriter and an IrcReader.
-#[experimental]
-pub struct IoStream<T: IrcWriter, U: IrcReader> {
-    writer: T,
-    reader: U,
-}
-
-impl<T: IrcWriter, U: IrcReader> IoStream<T, U> {
-    /// Creates a new IoStream from the given IrcWriter and IrcReader.
-    #[experimental]
-    pub fn new(writer: T, reader: U) -> IoStream<T, U> {
-        IoStream { writer: writer, reader: reader }
-    }
-}
-
-impl<U: IrcReader> IoStream<MemWriter, U> {
-    /// Gets the data contained in the MemWriter from this stream.
-    pub fn value(&self) -> Vec<u8> {
-        self.writer.get_ref().to_vec()
-    }
-}
-
-impl<T: IrcWriter, U: IrcReader> Buffer for IoStream<T, U> {
-    fn fill_buf<'a>(&'a mut self) -> IoResult<&'a [u8]> {
-        self.reader.fill_buf()
-    }
-
-    fn consume(&mut self, amt: uint) {
-        self.reader.consume(amt)
-    }
-}
-
-impl<T: IrcWriter, U: IrcReader> Reader for IoStream<T, U> {
-    fn read(&mut self, buf: &mut [u8]) -> IoResult<uint> {
-        self.reader.read(buf)
-    }
-}
-
-impl<T: IrcWriter, U: IrcReader> Writer for IoStream<T, U> {
-    fn write(&mut self, buf: &[u8]) -> IoResult<()> {
-        self.writer.write(buf)
-    }
-}
-
 #[cfg(test)]
 mod test {
-    use super::{Connection, IoStream};
+    use super::Connection;
     use std::io::{MemReader, MemWriter};
     use std::io::util::{NullReader, NullWriter};
     use data::message::Message;
@@ -257,18 +230,18 @@ mod test {
     #[test]
     #[cfg(not(feature = "encode"))]
     fn send() {
-        let conn = Connection::new(IoStream::new(MemWriter::new(), NullReader));
+        let conn = Connection::new(NullReader, MemWriter::new());
         assert!(conn.send(
             Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("Testing!"))
         ).is_ok());
-        let data = String::from_utf8(conn.stream().value()).unwrap();
+        let data = String::from_utf8(conn.writer().get_ref().to_vec()).unwrap();
         assert_eq!(data[], "PRIVMSG test :Testing!\r\n");
     }
 
     #[test]
     #[cfg(feature = "encode")]
     fn send_utf8() {
-        let conn = Connection::new(IoStream::new(MemWriter::new(), NullReader));
+        let conn = Connection::new(NullReader, MemWriter::new());
         assert!(conn.send(
             Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("€ŠšŽžŒœŸ")), "l9"
         ).is_ok());
@@ -285,33 +258,33 @@ mod test {
     #[test]
     #[cfg(not(feature = "encode"))]
     fn recv() {
-        let conn = Connection::new(IoStream::new(
-            NullWriter, MemReader::new("PRIVMSG test :Testing!\r\n".as_bytes().to_vec())
-        ));
+        let conn = Connection::new(
+            MemReader::new("PRIVMSG test :Testing!\r\n".as_bytes().to_vec()), NullWriter
+        );
         assert_eq!(conn.recv().unwrap()[], "PRIVMSG test :Testing!\r\n");
     }
 
     #[test]
     #[cfg(feature = "encode")]
     fn recv_utf8() {
-        let conn = Connection::new(IoStream::new(
-            NullWriter, MemReader::new(b"PRIVMSG test :Testing!\r\n".to_vec())
-        ));
+        let conn = Connection::new(
+            MemReader::new(b"PRIVMSG test :Testing!\r\n".to_vec()), NullWriter
+        );
         assert_eq!(conn.recv("UTF-8").unwrap()[], "PRIVMSG test :Testing!\r\n");
     }
 
     #[test]
     #[cfg(feature = "encode")]
     fn recv_iso885915() {
-        let conn = Connection::new(IoStream::new(
-            NullWriter, MemReader::new({
+        let conn = Connection::new(
+            MemReader::new({
                 let mut vec = Vec::new();
                 vec.push_all(b"PRIVMSG test :");
                 vec.push_all(&[0xA4, 0xA6, 0xA8, 0xB4, 0xB8, 0xBC, 0xBD, 0xBE]);
                 vec.push_all(b"\r\n");
                 vec
-            })
-        ));
+            }), NullWriter
+        );
         assert_eq!(conn.recv("l9").unwrap()[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 }
