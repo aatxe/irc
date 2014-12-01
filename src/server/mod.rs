@@ -117,26 +117,29 @@ impl<T> IrcServer<T> where T: IrcStream {
     /// Handles messages internally for basic bot functionality.
     #[experimental]
     fn handle_message(&self, msg: &Message) {
-        if msg.command[] == "PING" {
-            self.send(PONG(msg.suffix.as_ref().unwrap()[], None)).unwrap();
-        } else if msg.command[] == "376" || msg.command[] == "422" {
-            for chan in self.config.channels.iter() {
-                self.send(JOIN(chan[], None)).unwrap();
-            }
-        }
-        else if let Some(Response::RPL_NAMREPLY) = Response::from_message(msg) {
-            if let Some(users) = msg.suffix.clone() {
-                if let [_, _, ref chan] = msg.args[] {
-                    for user in users.split_str(" ") {
-                        if match self.chanlists.lock().get_mut(chan) {
-                            Some(vec) => { vec.push(User::new(user)); false },
-                            None => true,
-                        } {
-                            self.chanlists.lock().insert(chan.clone(), vec!(User::new(user)));
+        if let Some(resp) = Response::from_message(msg) {
+            if resp == Response::RPL_NAMREPLY {
+                if let Some(users) = msg.suffix.clone() {
+                    if let [_, _, ref chan] = msg.args[] {
+                        for user in users.split_str(" ") {
+                            if match self.chanlists.lock().get_mut(chan) {
+                                Some(vec) => { vec.push(User::new(user)); false },
+                                None => true,
+                            } {
+                                self.chanlists.lock().insert(chan.clone(), vec!(User::new(user)));
+                            }
                         }
                     }
                 }
+            } else if resp == Response::RPL_ENDOFMOTD || resp == Response::ERR_NOMOTD {
+                for chan in self.config.channels.iter() {
+                    self.send(JOIN(chan[], None)).unwrap();
+                }
             }
+            return
+        }
+        if msg.command[] == "PING" {
+            self.send(PONG(msg.suffix.as_ref().unwrap()[], None)).unwrap();
         } else if msg.command[] == "JOIN" || msg.command[] == "PART" {
             let chan = match msg.suffix {
                 Some(ref suffix) => suffix[],
