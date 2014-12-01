@@ -168,7 +168,7 @@ impl<T> IrcServer<T> where T: IrcStream {
 /// An Iterator over an IrcServer's incoming Messages.
 #[experimental]
 pub struct ServerIterator<'a, T> where T: IrcStream {
-    pub server: &'a IrcServer<T>
+    server: &'a IrcServer<T>
 }
 
 impl<'a, T> ServerIterator<'a, T> where T: IrcStream {

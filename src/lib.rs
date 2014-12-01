@@ -3,6 +3,7 @@
 #![crate_type = "lib"]
 #![license = "Unlicense"]
 #![unstable]
+#![warn(missing_docs)]
 
 #![feature(if_let, slicing_syntax)]
 #[cfg(feature = "encode")] extern crate encoding;

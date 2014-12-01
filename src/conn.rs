@@ -217,6 +217,7 @@ impl<T: IrcWriter, U: IrcReader> IoStream<T, U> {
 }
 
 impl<U: IrcReader> IoStream<MemWriter, U> {
+    /// Gets the data contained in the MemWriter from this stream.
     pub fn value(&self) -> Vec<u8> {
         self.writer.get_ref().to_vec()
     }
