@@ -81,7 +81,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
         let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
         Ok(Connection::new(
             BufferedReader::new(NetStream::SslTcpStream(ssl_socket.clone())),
-            BufferedWriter::new(NetStream::SslTcpSteram(ssl_socket)),
+            BufferedWriter::new(NetStream::SslTcpStream(ssl_socket)),
         ))
     }
 }
