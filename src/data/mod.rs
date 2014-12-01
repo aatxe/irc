@@ -4,6 +4,7 @@
 pub use data::command::Command;
 pub use data::config::Config;
 pub use data::message::Message;
+pub use data::response::Response;
 pub use data::user::User;
 
 pub mod kinds {
@@ -27,4 +28,5 @@ pub mod kinds {
 pub mod command;
 pub mod config;
 pub mod message;
+pub mod response;
 pub mod user;
