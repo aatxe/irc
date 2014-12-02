@@ -1,5 +1,29 @@
 # irc [![Build Status](https://travis-ci.org/aaronweiss74/irc.svg?branch=master)](https://travis-ci.org/aaronweiss74/irc) #
-A thread-safe IRC library in Rust based on iterators. It's hopefully compliant with [RFC 2812](http://tools.ietf.org/html/rfc2812). You can find up-to-date, pre-made documentation online [here](http://www.rust-ci.org/aaronweiss74/irc/doc/irc/). It's probably worth noting that because of [this upstream issue](https://github.com/sfackler/rust-openssl/issues/6), reading and writing both block together. If this issue is resolved, this will be changed to have reading and writing be completely separate mutexes.
+A thread-safe IRC library in Rust based on iterators. It's hopefully compliant with 
+[RFC 2812](http://tools.ietf.org/html/rfc2812). You can find up-to-date, ready-to-use documentation
+ online [here](http://www.rust-ci.org/aaronweiss74/irc/doc/irc/). The documentation is generated 
+using both the SSL feature and the encode feature. Specifically, the signatures of 
+irc::conn::Connection::send(...) and irc::conn::Connection::recv(...) will be different by default.
+
+## Getting Started ##
+
+To start using this library with cargo, you can simply add `irc = "*"` to your dependencies to your
+Cargo.toml file. From there, you can look to the examples and the documentation to see how to
+proceed. Making a simple bot is easy though:
+
+```rust
+fn main() {
+    let irc_server = IrcServer::connect("config.json").unwrap();
+    let server = Wrapper::new(&irc_server);
+    server.identify().unwrap();
+    for message in server.iter() {
+        process(&server, message)
+    }
+}
+```
 
 ## Contributing ##
-Contributions to this library would be immensely appreciated. As this project is public domain, all prospective contributors must [sign the Contributor License Agreement](https://www.clahub.com/agreements/aaronweiss74/irc), a public domain dedication.
+Contributions to this library would be immensely appreciated. As this project is public domain, 
+all prospective contributors must 
+[sign the Contributor License Agreement](https://www.clahub.com/agreements/aaronweiss74/irc), a 
+public domain dedication.
