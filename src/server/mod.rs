@@ -339,7 +339,7 @@ mod test {
 
     #[test]
     fn user_tracking_names_mode() {
-        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
+        let value = ":irc.test.net 353 test = #test :+test ~owner &admin\r\n\
                      :test!test@test MODE #test +o test\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
             MemReader::new(value.as_bytes().to_vec()), NullWriter
@@ -349,7 +349,14 @@ mod test {
         }
         assert_eq!(server.list_users("#test").unwrap(),
         vec![User::new("@test"), User::new("~owner"), User::new("&admin")]);
-        assert_eq!(server.list_users("#test").unwrap()[0].access_level(),
-        User::new("@test").access_level());
+        let mut exp = User::new("@test");
+        exp.update_access_level("+v");
+        assert_eq!(server.list_users("#test").unwrap()[0].highest_access_level(),
+                   exp.highest_access_level());
+        // The following tests if the maintained user contains the same entries as what is expected
+        // but ignores the ordering of these entries.
+        let mut levels = server.list_users("#test").unwrap()[0].access_levels();
+        levels.retain(|l| exp.access_levels().contains(l));
+        assert_eq!(levels.len(), exp.access_levels().len()); 
     }
 }

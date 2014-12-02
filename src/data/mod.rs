@@ -5,7 +5,7 @@ pub use data::command::Command;
 pub use data::config::Config;
 pub use data::message::Message;
 pub use data::response::Response;
-pub use data::user::User;
+pub use data::user::{AccessLevel, User};
 
 pub mod kinds {
     //! Trait definitions of appropriate Writers and Buffers for use with this library.
