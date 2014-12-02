@@ -18,19 +18,23 @@ impl User {
     /// Creates a new User.
     #[stable]
     pub fn new(name: &str) -> User {
-        let rank = from_str(name);
+        let ranks: Vec<_> = AccessLevelIterator::new(name).collect();
         User {
-            name: if let Some(AccessLevel::Member) = rank {
-                name.into_string()
-            } else {
-                name[1..].into_string()
+            name: name[ranks.len()..].into_string(),
+            access_levels: { 
+                let mut ranks = ranks.clone();
+                ranks.push(AccessLevel::Member);
+                ranks
             },
-            highest_access_level: rank.unwrap(),
-            access_levels: if let Some(AccessLevel::Member) = rank {
-                vec![rank.unwrap()]
-            } else {
-                vec![rank.unwrap(), AccessLevel::Member]
-            }
+            highest_access_level: {
+                let mut max = AccessLevel::Member;
+                for rank in ranks.into_iter() {
+                    if rank > max {
+                        max = rank
+                    }
+                }
+                max
+            },
         }
     }
 
@@ -159,16 +163,36 @@ impl PartialOrd for AccessLevel {
 
 impl FromStr for AccessLevel {
     fn from_str(s: &str) -> Option<AccessLevel> {
-        if s.len() == 0 { Some(AccessLevel::Member) } else {
+        if s.len() == 0 { None } else {
             Some(match s.char_at(0) {
                 '~' => AccessLevel::Owner,
                 '&' => AccessLevel::Admin,
                 '@' => AccessLevel::Oper,
                 '%' => AccessLevel::HalfOp,
                 '+' => AccessLevel::Voice,
-                 _  => AccessLevel::Member,
+                 _  => return None,
             })
         }
+    }
+}
+
+struct AccessLevelIterator<'a> {
+    value: &'a str,
+}
+
+impl<'a> AccessLevelIterator<'a> {
+    pub fn new(value: &'a str) -> AccessLevelIterator<'a> {
+        AccessLevelIterator { value: value }
+    }
+}
+
+impl<'a> Iterator<AccessLevel> for AccessLevelIterator<'a> {
+    fn next(&mut self) -> Option<AccessLevel> {
+        let ret = from_str(self.value);
+        if self.value.len() > 0 {
+            self.value = self.value[1..];
+        }
+        ret
     }
 }
 
@@ -179,13 +203,13 @@ mod test {
 
     #[test]
     fn access_level_from_str() {
-        assert_eq!(from_str::<AccessLevel>("member").unwrap(), Member);
+        assert!(from_str::<AccessLevel>("member").is_none());
         assert_eq!(from_str::<AccessLevel>("~owner").unwrap(), Owner);
         assert_eq!(from_str::<AccessLevel>("&admin").unwrap(), Admin);
         assert_eq!(from_str::<AccessLevel>("@oper").unwrap(), Oper);
         assert_eq!(from_str::<AccessLevel>("%halfop").unwrap(), HalfOp);
         assert_eq!(from_str::<AccessLevel>("+voice").unwrap(), Voice);
-        assert_eq!(from_str::<AccessLevel>("").unwrap(), Member);
+        assert!(from_str::<AccessLevel>("").is_none());
     }
 
     #[test]
@@ -198,6 +222,21 @@ mod test {
         };
         assert_eq!(user, exp);
         assert_eq!(user.highest_access_level, exp.highest_access_level);
+        assert_eq!(user.access_levels, exp.access_levels);
+    }
+
+    #[test]
+    fn create_user_complex() {
+        let user = User::new("~&+user");
+        let exp = User {
+            name: format!("user"),
+            highest_access_level: Owner,
+            access_levels: vec![Owner, Admin, Voice, Member]
+        };
+        assert_eq!(user, exp);
+        assert_eq!(user.highest_access_level, exp.highest_access_level);
+        assert_eq!(user.access_levels, exp.access_levels);
+
     }
 
     #[test]
@@ -240,26 +279,21 @@ mod test {
 
     #[test]
     fn derank_user_in_full() {
-        let mut user = User::new("user");
-        user.update_access_level("+q");
-        user.update_access_level("+a");
-        user.update_access_level("+o");
-        user.update_access_level("+h");
-        user.update_access_level("+v");
+        let mut user = User::new("~&@%+user");
         assert_eq!(user.highest_access_level, Owner);
-        assert_eq!(user.access_levels, vec![Member, Owner, Admin, Oper, HalfOp, Voice]);
+        assert_eq!(user.access_levels, vec![Owner, Admin, Oper, HalfOp, Voice, Member]);
         user.update_access_level("-h");
         assert_eq!(user.highest_access_level, Owner);
-        assert_eq!(user.access_levels, vec![Member, Owner, Admin, Oper, Voice]);
+        assert_eq!(user.access_levels, vec![Owner, Admin, Oper, Member, Voice]);
         user.update_access_level("-q");
         assert_eq!(user.highest_access_level, Admin);
-        assert_eq!(user.access_levels, vec![Member, Voice, Admin, Oper]);
+        assert_eq!(user.access_levels, vec![Voice, Admin, Oper, Member]);
         user.update_access_level("-a");
         assert_eq!(user.highest_access_level, Oper);
-        assert_eq!(user.access_levels, vec![Member, Voice, Oper]);
+        assert_eq!(user.access_levels, vec![Voice, Member, Oper]);
         user.update_access_level("-o");
         assert_eq!(user.highest_access_level, Voice);
-        assert_eq!(user.access_levels, vec![Member, Voice]);
+        assert_eq!(user.access_levels, vec![Voice, Member]);
         user.update_access_level("-v");
         assert_eq!(user.highest_access_level, Member);
         assert_eq!(user.access_levels, vec![Member]);

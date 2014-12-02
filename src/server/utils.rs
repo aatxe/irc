@@ -3,8 +3,9 @@
 
 use std::io::IoResult;
 use data::{Command, Config, User};
-use data::command::Command::{INVITE, JOIN, KILL, MODE, NICK, NOTICE, KICK};
-use data::command::Command::{OPER, PONG, PRIVMSG, SAMODE, SANICK, TOPIC, USER};
+use data::Command::{CAP, INVITE, JOIN, KILL, MODE, NICK, NOTICE, KICK};
+use data::Command::{OPER, PONG, PRIVMSG, SAMODE, SANICK, TOPIC, USER};
+use data::command::CapSubCommand::{END, REQ};
 use data::kinds::{IrcReader, IrcWriter};
 use server::{Server, ServerIterator};
 
@@ -43,6 +44,9 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// Sends a NICK and USER to identify.
     #[experimental]
     pub fn identify(&self) -> IoResult<()> {
+        // We'll issue a CAP REQ for multi-prefix support to improve access level tracking.
+        try!(self.server.send(CAP(REQ, Some("multi-prefix"))));
+        try!(self.server.send(CAP(END, None))); // Then, send a CAP END to end the negotiation.
         try!(self.server.send(NICK(self.server.config().nickname[])));
         self.server.send(USER(self.server.config().username[], "0",
                               self.server.config().realname[]))
@@ -165,7 +169,7 @@ mod test {
             wrapper.identify().unwrap();
         }
         assert_eq!(get_server_value(server)[],
-        "NICK :test\r\nUSER test 0 * :test\r\n");
+        "CAP REQ :multi-prefix\r\nCAP END\r\nNICK :test\r\nUSER test 0 * :test\r\n");
     }
 
     #[test]
