@@ -11,7 +11,7 @@ use irc::server::utils::Wrapper;
 
 fn main() {
     let config = config();
-    let irc_server = Arc::new(IrcServer::from_config_with_timeout(config, 10 * 1000).unwrap());
+    let irc_server = Arc::new(IrcServer::from_config(config).unwrap());
     let irc_server2 = irc_server.clone();
     // The wrapper provides us with methods like send_privmsg(...) and identify(...)
     let server = Wrapper::new(&*irc_server);
@@ -26,8 +26,6 @@ fn main() {
             }
         }
     });
-    // Even though sending and reading both block, this will still be sent every ten seconds
-    // thanks to the timeout we have set for the server.
     loop {
         server.send_privmsg("#vana", "TWEET TWEET").unwrap();
         sleep(Duration::seconds(10))
