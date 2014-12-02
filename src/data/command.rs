@@ -1,9 +1,12 @@
 //! Enumeration of all available client commands.
 #![stable]
 use std::io::{InvalidInput, IoError, IoResult};
+use std::str::FromStr;
 use data::message::Message;
 
 /// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812).
+/// This also includes commands from the 
+/// [capabilities extension](https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01).
 #[stable]
 #[deriving(Show, PartialEq)]
 pub enum Command<'a> {
@@ -128,6 +131,10 @@ pub enum Command<'a> {
     SAPART(&'a str, &'a str),
     /// SAQUIT nickname reason
     SAQUIT(&'a str, &'a str),
+    
+    // Capabilities extension to IRCv3
+    /// CAP COMMAND [param]
+    CAP(CapSubCommand, Option<&'a str>),
 }
 
 impl<'a> Command<'a> {
@@ -232,6 +239,8 @@ impl<'a> Command<'a> {
             Command::SANICK(o, n) => Message::new(None, "SANICK", Some(vec![o, n]), None),
             Command::SAPART(c, r) => Message::new(None, "SAPART", Some(vec![c]), Some(r)),
             Command::SAQUIT(c, r) => Message::new(None, "SAQUIT", Some(vec![c]), Some(r)),
+
+            Command::CAP(s, p) => Message::new(None, "CAP", Some(vec![s.to_str()]), p),
         }
     }
 
@@ -837,9 +846,69 @@ impl<'a> Command<'a> {
                     Command::SAQUIT(m.args[0][], m.args[1][])
                 }
             }
+        } else if let "CAP" = m.command[] {
+            if m.args.len() != 1 { return Err(invalid_input()) }
+            if let Some(cmd) = from_str(m.args[0][]) {
+                match m.suffix {
+                    Some(ref suffix) => Command::CAP(cmd, Some(suffix[])),
+                    None => Command::CAP(cmd, None),
+                }
+            } else {
+                return Err(invalid_input())
+            }
         } else {
             return Err(invalid_input())
         })
+    }
+}
+
+/// A list of all of the subcommands for the capabilities extension.
+#[stable]
+#[deriving(Show, PartialEq)]
+pub enum CapSubCommand {
+    /// Requests a list of the server's capabilities.
+    LS,
+    /// Requests a list of the server's capabilities.
+    LIST,
+    /// Requests specific capabilities blindly.
+    REQ,
+    /// Acknowledges capabilities.
+    ACK,
+    /// Does not acknowledge certain capabilities.
+    NAK,
+    /// Requests that the server clears the capabilities of this client.
+    CLEAR,
+    /// Ends the capability negotiation before registration.
+    END
+}
+
+impl CapSubCommand {
+    /// Gets the string that corresponds to this subcommand.
+    pub fn to_str(&self) -> &str {
+        match self {
+            &CapSubCommand::LS    => "LS",
+            &CapSubCommand::LIST  => "LIST",
+            &CapSubCommand::REQ   => "REQ",
+            &CapSubCommand::ACK   => "ACK",
+            &CapSubCommand::NAK   => "NAK",
+            &CapSubCommand::CLEAR => "CLEAR",
+            &CapSubCommand::END   => "END",
+        }
+    }
+}
+
+impl FromStr for CapSubCommand { 
+    fn from_str(s: &str) -> Option<CapSubCommand> {
+        match s {
+            "LS"    => Some(CapSubCommand::LS),
+            "LIST"  => Some(CapSubCommand::LIST),
+            "REQ"   => Some(CapSubCommand::REQ),
+            "ACK"   => Some(CapSubCommand::ACK),
+            "NAK"   => Some(CapSubCommand::NAK),
+            "CLEAR" => Some(CapSubCommand::CLEAR),
+            "END"   => Some(CapSubCommand::END),
+            _       => None,
+        }
     }
 }
 
