@@ -7,7 +7,7 @@ use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
 use data::kinds::{IrcReader, IrcWriter};
 use data::message::Message;
-#[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslStream, Tlsv1};
+#[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslMethod, SslStream};
 #[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
 
 /// A thread-safe connection.
@@ -77,7 +77,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     -> IoResult<NetConnection> {
         let mut socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
         socket.set_timeout(timeout_ms);
-        let ssl = try!(ssl_to_io(SslContext::new(Tlsv1)));
+        let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Tlsv1)));
         let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
         Ok(Connection::new(
             BufferedReader::new(NetStream::SslTcpStream(ssl_socket.clone())),
