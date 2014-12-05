@@ -1,6 +1,6 @@
 env:
   global:
-    - secure: OB4CMylHbfEPn4znd2xx+99UxGw6M5caM8uNmdU28JwmOydYoZYDniIt5VBR6QrYhNKhbjvEIUZSJkevry3ElL4F18z6/K3WM7J2I/xqbNywRRZ8TJHy+sjk8SXlgivJEkyocrC1KkDF2Jh9SCT3eP0OnTIHSJJd2V0bRxcuvq8= 
+    - secure: Ykd7JchE6cvSNb5Ej6p5BfytzvWfW942PgCPyUwxDhfKnQoq8Ws4TISPu7RRbqL1Bje4vF3JTis/N9phJgcFhECizfLO4PvMoGcN8a7S+kLnJ/IXDaDwAQDrR3gl0Ean6Ly4prVFfw0nrzPRUacqtbJbVvSGvm1myrcATljvgFg=
 language: rust
 script:
   - chmod +x mktestconfig.sh
