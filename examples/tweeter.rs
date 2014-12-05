@@ -1,7 +1,7 @@
 #![feature(if_let, slicing_syntax)]
 extern crate irc;
 
-use std::collections::HashMap;
+use std::default::Default;
 use std::io::timer::sleep;
 use std::sync::Arc;
 use std::time::duration::Duration;
@@ -10,7 +10,12 @@ use irc::server::{IrcServer, Server};
 use irc::server::utils::Wrapper;
 
 fn main() {
-    let config = config();
+    let config = Config {
+        nickname: Some(format!("pickles")),
+        server: Some(format!("irc.fyrechat.net")),
+        channels: Some(vec![format!("#vana")]),
+        .. Default::default()
+    }; 
     let irc_server = Arc::new(IrcServer::from_config(config).unwrap());
     let irc_server2 = irc_server.clone();
     // The wrapper provides us with methods like send_privmsg(...) and identify(...)
@@ -29,38 +34,5 @@ fn main() {
     loop {
         server.send_privmsg("#vana", "TWEET TWEET").unwrap();
         sleep(Duration::seconds(10))
-    }
-}
-
-#[cfg(feature = "encode")]
-fn config() -> Config {
-    Config {
-        owners: vec!("awe".into_string()),
-        nickname: "pickles".into_string(),
-        username: "pickles".into_string(),
-        realname: "pickles".into_string(),
-        password: "".into_string(),
-        server: "irc.fyrechat.net".into_string(),
-        port: 6667,
-        use_ssl: false,
-        encoding: format!("UTF-8"),
-        channels: vec!("#vana".into_string()),
-        options: HashMap::new(),
-    }
-}
-
-#[cfg(not(feature = "encode"))]
-fn config() -> Config {
-    Config {
-        owners: vec!("awe".into_string()),
-        nickname: "pickles".into_string(),
-        username: "pickles".into_string(),
-        realname: "pickles".into_string(),
-        password: "".into_string(),
-        server: "irc.fyrechat.net".into_string(),
-        port: 6667,
-        use_ssl: false,
-        channels: vec!("#vana".into_string()),
-        options: HashMap::new(),
     }
 }

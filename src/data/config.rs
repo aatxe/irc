@@ -6,34 +6,33 @@ use std::io::{InvalidInput, IoError, IoResult};
 use serialize::json::decode;
 
 /// Configuration data.
-#[deriving(Clone, Decodable, PartialEq, Show)]
+#[deriving(Clone, Decodable, Default, PartialEq, Show)]
 #[unstable]
 pub struct Config {
     /// A list of the owners of the bot by nickname.
-    pub owners: Vec<String>,
+    pub owners: Option<Vec<String>>,
     /// The bot's nickname.
-    pub nickname: String,
+    pub nickname: Option<String>,
     /// The bot's username.
-    pub username: String,
+    pub username: Option<String>,
     /// The bot's real name.
-    pub realname: String,
+    pub realname: Option<String>,
     /// The bot's password.
-    pub password: String,
+    pub password: Option<String>,
     /// The server to connect to.
-    pub server: String,
+    pub server: Option<String>,
     /// The port to connect on.
-    pub port: u16,
+    pub port: Option<u16>,
     /// Whether or not to use SSL.
     /// Bots will automatically panic if this is enabled without SSL support.
-    pub use_ssl: bool,
+    pub use_ssl: Option<bool>,
     /// The encoding type used for this connection.
     /// This is typically UTF-8, but could be something else.
-    #[cfg(feature = "encoding")]
-    pub encoding: String,
+    pub encoding: Option<String>,
     /// A list of channels to join on connection.
-    pub channels: Vec<String>,
+    pub channels: Option<Vec<String>>,
     /// A map of additional options to be stored in config.
-    pub options: HashMap<String, String>,
+    pub options: Option<HashMap<String, String>>,
 }
 
 impl Config {
@@ -58,14 +57,81 @@ impl Config {
     /// Determines whether or not the nickname provided is the owner of the bot.
     #[stable]
     pub fn is_owner(&self, nickname: &str) -> bool {
-        self.owners[].contains(&String::from_str(nickname))
+        self.owners.as_ref().map(|o| o.contains(&String::from_str(nickname))).unwrap()
+    }
+
+    /// Gets the nickname specified in the configuration.
+    #[experimental]
+    pub fn nickname(&self) -> &str {
+        self.nickname.as_ref().map(|s| s[]).unwrap()
+    }
+
+    /// Gets the username specified in the configuration.
+    /// This defaults to the user's nickname when not specified.
+    #[experimental]
+    pub fn username(&self) -> &str {
+        self.username.as_ref().map(|s| s[]).unwrap_or(self.nickname())
+    }
+
+    /// Gets the real name specified in the configuration.
+    /// This defaults to the user's nickname when not specified.
+    #[experimental]
+    pub fn real_name(&self) -> &str {
+        self.realname.as_ref().map(|s| s[]).unwrap_or(self.nickname())
+    }
+
+    /// Gets the password specified in the configuration.
+    /// This defaults to a blank string when not specified.
+    #[experimental]
+    pub fn password(&self) -> &str {
+        self.password.as_ref().map(|s| s[]).unwrap_or("")
+    }
+
+    /// Gets the address of the server specified in the configuration.
+    /// This panics when not specified.
+    #[experimental]
+    pub fn server(&self) -> &str {
+        self.server.as_ref().map(|s| s[]).unwrap()
+    }
+
+    /// Gets the port of the server specified in the configuration.
+    /// This defaults to 6667 (or 6697 if use_ssl is specified as true) when not specified.
+    #[experimental]
+    pub fn port(&self) -> u16 {
+        self.port.as_ref().map(|p| *p).unwrap_or(if self.use_ssl() {
+            6697
+        } else {
+            6667
+        })
+    }
+
+    /// Gets whether or not to use SSL with this connection.
+    /// This defaults to false when not specified.
+    #[experimental]
+    pub fn use_ssl(&self) -> bool {
+        self.use_ssl.as_ref().map(|u| *u).unwrap_or(false)
+    }
+
+    /// Gets the encoding to use for this connection. This requires the encode feature to work.
+    /// This defaults to UTF-8 when not specified.
+    #[experimental]
+    pub fn encoding(&self) -> &str {
+        self.encoding.as_ref().map(|s| s[]).unwrap_or("UTF-8")
+    }
+
+    /// Gets the channels to join upon connection.
+    /// This defaults to an empty vector if it's not specified.
+    #[experimental]
+    pub fn channels(&self) -> Vec<&str> {
+        self.channels.as_ref().map(|v| v.iter().map(|s| s[]).collect()).unwrap_or(vec![])    
     }
 
     /// Looks up the specified string in the options map.
     /// This uses indexing, and thus panics when the string is not present.
+    /// This will also panic if used and there are no options.
     #[experimental]
     pub fn get_option(&self, option: &str) -> &str {
-        self.options[option.into_string()][]
+        self.options.as_ref().map(|o| o[option.into_string()][]).unwrap()
     }
 }
 
@@ -75,95 +141,56 @@ mod test {
     use std::collections::HashMap;
 
     #[test]
-    #[cfg(feature = "encode")]
     fn load() {
         let cfg = Config {
-            owners: vec![format!("test")],
-            nickname: format!("test"),
-            username: format!("test"),
-            realname: format!("test"),
-            password: String::new(),
-            server: format!("irc.test.net"),
-            port: 6667,
-            use_ssl: false,
-            encoding: format!("UTF-8"),
-            channels: vec![format!("#test"), format!("#test2")],
-            options: HashMap::new(),
+            owners: Some(vec![format!("test")]),
+            nickname: Some(format!("test")),
+            username: Some(format!("test")),
+            realname: Some(format!("test")),
+            password: Some(String::new()),
+            server: Some(format!("irc.test.net")),
+            port: Some(6667),
+            use_ssl: Some(false),
+            encoding: Some(format!("UTF-8")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            options: Some(HashMap::new()),
         };
         assert_eq!(Config::load(Path::new("config.json")), Ok(cfg));
     }
 
     #[test]
-    #[cfg(not(feature = "encode"))]
-    fn load() {
-        let cfg = Config {
-            owners: vec![format!("test")],
-            nickname: format!("test"),
-            username: format!("test"),
-            realname: format!("test"),
-            password: String::new(),
-            server: format!("irc.test.net"),
-            port: 6667,
-            use_ssl: false,
-            channels: vec![format!("#test"), format!("#test2")],
-            options: HashMap::new(),
-        };
-        assert_eq!(Config::load(Path::new("config.json")), Ok(cfg));
-    }
-
-    #[test]
-    #[cfg(feature = "encode")]
     fn load_utf8() {
         let cfg = Config {
-            owners: vec![format!("test")],
-            nickname: format!("test"),
-            username: format!("test"),
-            realname: format!("test"),
-            password: String::new(),
-            server: format!("irc.test.net"),
-            port: 6667,
-            use_ssl: false,
-            encoding: format!("UTF-8"),
-            channels: vec![format!("#test"), format!("#test2")],
-            options: HashMap::new(),
-        };
-        assert_eq!(Config::load_utf8("config.json"), Ok(cfg));
-    }
-
-    #[test]
-    #[cfg(not(feature = "encode"))]
-    fn load_utf8() {
-        let cfg = Config {
-            owners: vec![format!("test")],
-            nickname: format!("test"),
-            username: format!("test"),
-            realname: format!("test"),
-            password: String::new(),
-            server: format!("irc.test.net"),
-            port: 6667,
-            use_ssl: false,
-            channels: vec![format!("#test"), format!("#test2")],
-            options: HashMap::new(),
+            owners: Some(vec![format!("test")]),
+            nickname: Some(format!("test")),
+            username: Some(format!("test")),
+            realname: Some(format!("test")),
+            password: Some(String::new()),
+            server: Some(format!("irc.test.net")),
+            port: Some(6667),
+            use_ssl: Some(false),
+            encoding: Some(format!("UTF-8")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            options: Some(HashMap::new()),
         };
         assert_eq!(Config::load_utf8("config.json"), Ok(cfg));
     }
 
 
     #[test]
-    #[cfg(feature = "encode")]
     fn is_owner() {
         let cfg = Config {
-            owners: vec![format!("test"), format!("test2")],
-            nickname: format!("test"),
-            username: format!("test"),
-            realname: format!("test"),
-            password: String::new(),
-            server: format!("irc.test.net"),
-            port: 6667,
-            use_ssl: false,
-            encoding: format!("UTF-8"),
-            channels: Vec::new(),
-            options: HashMap::new(),
+            owners: Some(vec![format!("test"), format!("test2")]),
+            nickname: Some(format!("test")),
+            username: Some(format!("test")),
+            realname: Some(format!("test")),
+            password: Some(String::new()),
+            server: Some(format!("irc.test.net")),
+            port: Some(6667),
+            use_ssl: Some(false),
+            encoding: Some(format!("UTF-8")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            options: Some(HashMap::new()),
         };
         assert!(cfg.is_owner("test"));
         assert!(cfg.is_owner("test2"));
@@ -171,65 +198,22 @@ mod test {
     }
 
     #[test]
-    #[cfg(not(feature = "encode"))]
-    fn is_owner() {
+    fn get_option() {
         let cfg = Config {
-            owners: vec![format!("test"), format!("test2")],
-            nickname: format!("test"),
-            username: format!("test"),
-            realname: format!("test"),
-            password: String::new(),
-            server: format!("irc.test.net"),
-            port: 6667,
-            use_ssl: false,
-            channels: vec![format!("#test"), format!("#test2")],
-            options: HashMap::new(),
-        };
-        assert!(cfg.is_owner("test"));
-        assert!(cfg.is_owner("test2"));
-        assert!(!cfg.is_owner("test3"));
-    }
-
-    #[test]
-    #[cfg(feature = "encode")]
-    fn get_option() {
-         let cfg = Config {
-            owners: vec![format!("test")],
-            nickname: format!("test"),
-            username: format!("test"),
-            realname: format!("test"),
-            password: String::new(),
-            server: format!("irc.test.net"),
-            port: 6667,
-            use_ssl: false,
-            encoding: format!("UTF-8"),
-            channels: vec![format!("#test"), format!("#test2")],
+            owners: Some(vec![format!("test")]),
+            nickname: Some(format!("test")),
+            username: Some(format!("test")),
+            realname: Some(format!("test")),
+            password: Some(String::new()),
+            server: Some(format!("irc.test.net")),
+            port: Some(6667),
+            use_ssl: Some(false),
+            encoding: Some(format!("UTF-8")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
             options: {
                 let mut map = HashMap::new();
                 map.insert(format!("testing"), format!("test"));
-                map
-            },
-        };
-        assert_eq!(cfg.get_option("testing"), "test");
-    }
-
-    #[test]
-    #[cfg(not(feature = "encode"))]
-    fn get_option() {
-         let cfg = Config {
-            owners: vec![format!("test")],
-            nickname: format!("test"),
-            username: format!("test"),
-            realname: format!("test"),
-            password: String::new(),
-            server: format!("irc.test.net"),
-            port: 6667,
-            use_ssl: false,
-            channels: vec![format!("#test"), format!("#test2")],
-            options: {
-                let mut map = HashMap::new();
-                map.insert(format!("testing"), format!("test"));
-                map
+                Some(map)
             },
         };
         assert_eq!(cfg.get_option("testing"), "test");

@@ -47,9 +47,9 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
         // We'll issue a CAP REQ for multi-prefix support to improve access level tracking.
         try!(self.server.send(CAP(REQ, Some("multi-prefix"))));
         try!(self.server.send(CAP(END, None))); // Then, send a CAP END to end the negotiation.
-        try!(self.server.send(NICK(self.server.config().nickname[])));
-        self.server.send(USER(self.server.config().username[], "0",
-                              self.server.config().realname[]))
+        try!(self.server.send(NICK(self.server.config().nickname())));
+        self.server.send(USER(self.server.config().username(), "0",
+                              self.server.config().real_name()))
     }
 
     /// Sends a PONG with the specified message.

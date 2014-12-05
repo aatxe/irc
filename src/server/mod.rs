@@ -56,10 +56,10 @@ impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// immediately.
     #[experimental]
     pub fn from_config(config: Config) -> IoResult<NetIrcServer> {
-        let conn = try!(if config.use_ssl {
-            Connection::connect_ssl(config.server[], config.port)
+        let conn = try!(if config.use_ssl() {
+            Connection::connect_ssl(config.server(), config.port())
         } else {
-            Connection::connect(config.server[], config.port)
+            Connection::connect(config.server(), config.port())
         });
         Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()) })
     }
@@ -69,10 +69,10 @@ impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// immediately.
     #[experimental]
     pub fn from_config_with_timeout(config: Config, timeout_ms: u64) -> IoResult<NetIrcServer> {
-        let conn = try!(if config.use_ssl {
-            Connection::connect_ssl_with_timeout(config.server[], config.port, timeout_ms)
+        let conn = try!(if config.use_ssl() {
+            Connection::connect_ssl_with_timeout(config.server(), config.port(), timeout_ms)
         } else {
-            Connection::connect_with_timeout(config.server[], config.port, timeout_ms)
+            Connection::connect_with_timeout(config.server(), config.port(), timeout_ms)
         });
         Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()) })
     }
@@ -86,7 +86,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for IrcServer<T, U> {
 
     #[cfg(feature = "encode")]
     fn send(&self, command: Command) -> IoResult<()> {
-        self.conn.send(command.to_message(), self.config.encoding[])
+        self.conn.send(command.to_message(), self.config.encoding())
     }
 
     #[cfg(not(feature = "encode"))]
@@ -133,7 +133,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                     }
                 }
             } else if resp == Response::RPL_ENDOFMOTD || resp == Response::ERR_NOMOTD {
-                for chan in self.config.channels.iter() {
+                for chan in self.config.channels().into_iter() {
                     self.send(JOIN(chan[], None)).unwrap();
                 }
             }
@@ -187,7 +187,7 @@ impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
     /// Gets the next line from the connection.
     #[cfg(feature = "encode")]
     fn get_next_line(&self) -> IoResult<String> {
-        self.server.conn.recv(self.server.config.encoding[])
+        self.server.conn.recv(self.server.config.encoding())
     }
 
     /// Gets the next line from the connection.
@@ -213,7 +213,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Iterator<Message> for ServerIterator<'a, T,
 #[cfg(test)]
 mod test {
     use super::{IrcServer, Server};
-    use std::collections::HashMap;
+    use std::default::Default;
     use std::io::{MemReader, MemWriter};
     use std::io::util::{NullReader, NullWriter};
     use conn::Connection;
@@ -221,36 +221,13 @@ mod test {
     use data::command::Command::PRIVMSG;
     use data::kinds::IrcReader;
 
-    #[cfg(feature = "encode")]
     pub fn test_config() -> Config {
         Config {
-            owners: vec![format!("test")],
-            nickname: format!("test"),
-            username: format!("test"),
-            realname: format!("test"),
-            password: String::new(),
-            server: format!("irc.test.net"),
-            port: 6667,
-            use_ssl: false,
-            encoding: format!("UTF-8"),
-            channels: vec![format!("#test"), format!("#test2")],
-            options: HashMap::new(),
-        }
-    }
-
-    #[cfg(not(feature = "encode"))]
-    pub fn test_config() -> Config {
-        Config {
-            owners: vec![format!("test")],
-            nickname: format!("test"),
-            username: format!("test"),
-            realname: format!("test"),
-            password: String::new(),
-            server: format!("irc.test.net"),
-            port: 6667,
-            use_ssl: false,
-            channels: vec![format!("#test"), format!("#test2")],
-            options: HashMap::new(),
+            owners: Some(vec![format!("test")]),
+            nickname: Some(format!("test")),
+            server: Some(format!("irc.test.net")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            .. Default::default()
         }
     }
 
