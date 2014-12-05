@@ -6,7 +6,6 @@ script:
   - chmod +x mktestconfig.sh
   - ./mktestconfig.sh
   - cargo build --verbose
-  - rustdoc --test README.md -L target
   - cargo build --verbose --features "encode ssl"
   - cargo test --verbose
   - cargo test --verbose --features "encode ssl" 
