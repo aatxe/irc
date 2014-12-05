@@ -9,6 +9,7 @@ script:
   - cargo build --verbose --features "encode ssl"
   - cargo test --verbose
   - cargo test --verbose --features "encode ssl"
+  - rustdoc --test README.md -L target
   - cargo doc --verbose
   - cargo doc --verbose --features "encode ssl"
 notifications:

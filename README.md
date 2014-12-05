@@ -12,12 +12,17 @@ Cargo.toml file. From there, you can look to the examples and the documentation 
 proceed. Making a simple bot is easy though:
 
 ```rust
+extern crate irc;
+
+use irc::server::{IrcServer, Server};
+use irc::server::utils::Wrapper;
+
 fn main() {
-    let irc_server = IrcServer::connect("config.json").unwrap();
+    let irc_server = IrcServer::new("config.json").unwrap();
     let server = Wrapper::new(&irc_server);
     server.identify().unwrap();
     for message in server.iter() {
-        process(&server, message)
+        // Do message processing.
     }
 }
 ```

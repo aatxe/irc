@@ -139,6 +139,7 @@ impl Config {
 mod test {
     use super::Config;
     use std::collections::HashMap;
+    use std::default::Default;
 
     #[test]
     fn load() {
@@ -181,16 +182,7 @@ mod test {
     fn is_owner() {
         let cfg = Config {
             owners: Some(vec![format!("test"), format!("test2")]),
-            nickname: Some(format!("test")),
-            username: Some(format!("test")),
-            realname: Some(format!("test")),
-            password: Some(String::new()),
-            server: Some(format!("irc.test.net")),
-            port: Some(6667),
-            use_ssl: Some(false),
-            encoding: Some(format!("UTF-8")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
-            options: Some(HashMap::new()),
+            .. Default::default()
         };
         assert!(cfg.is_owner("test"));
         assert!(cfg.is_owner("test2"));
@@ -200,21 +192,12 @@ mod test {
     #[test]
     fn get_option() {
         let cfg = Config {
-            owners: Some(vec![format!("test")]),
-            nickname: Some(format!("test")),
-            username: Some(format!("test")),
-            realname: Some(format!("test")),
-            password: Some(String::new()),
-            server: Some(format!("irc.test.net")),
-            port: Some(6667),
-            use_ssl: Some(false),
-            encoding: Some(format!("UTF-8")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
             options: {
                 let mut map = HashMap::new();
                 map.insert(format!("testing"), format!("test"));
                 Some(map)
             },
+            .. Default::default()
         };
         assert_eq!(cfg.get_option("testing"), "test");
     }
