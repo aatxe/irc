@@ -13,6 +13,8 @@ pub struct Config {
     pub owners: Option<Vec<String>>,
     /// The bot's nickname.
     pub nickname: Option<String>,
+    /// Alternative nicknames for the bots, if the default is taken.
+    pub alt_nicks: Option<Vec<String>>,
     /// The bot's username.
     pub username: Option<String>,
     /// The bot's real name.
@@ -61,10 +63,19 @@ impl Config {
     }
 
     /// Gets the nickname specified in the configuration.
+    /// This will panic if not specified.
     #[experimental]
     pub fn nickname(&self) -> &str {
         self.nickname.as_ref().map(|s| s[]).unwrap()
     }
+
+    /// Gets the alternate nicknames specified in the configuration.
+    /// This defaults to an empty vector when not specified.
+    #[experimental]
+    pub fn get_alternate_nicknames(&self) -> Vec<&str> {
+        self.alt_nicks.as_ref().map(|v| v.iter().map(|s| s[]).collect()).unwrap_or(vec![])
+    }
+
 
     /// Gets the username specified in the configuration.
     /// This defaults to the user's nickname when not specified.
@@ -146,6 +157,7 @@ mod test {
         let cfg = Config {
             owners: Some(vec![format!("test")]),
             nickname: Some(format!("test")),
+            alt_nicks: None,
             username: Some(format!("test")),
             realname: Some(format!("test")),
             password: Some(String::new()),
@@ -164,6 +176,7 @@ mod test {
         let cfg = Config {
             owners: Some(vec![format!("test")]),
             nickname: Some(format!("test")),
+            alt_nicks: None,
             username: Some(format!("test")),
             realname: Some(format!("test")),
             password: Some(String::new()),

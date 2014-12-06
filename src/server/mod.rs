@@ -2,10 +2,10 @@
 #![experimental]
 use std::collections::HashMap;
 use std::io::{BufferedReader, BufferedWriter, IoResult};
-use std::sync::Mutex;
+use std::sync::{Mutex, RWLock};
 use conn::{Connection, NetStream};
 use data::{Command, Config, Message, Response, User};
-use data::Command::{JOIN, PONG};
+use data::Command::{JOIN, NICK, PONG};
 use data::kinds::{IrcReader, IrcWriter};
 
 pub mod utils;
@@ -32,6 +32,8 @@ pub struct IrcServer<T: IrcReader, U: IrcWriter> {
     config: Config,
     /// A thread-safe map of channels to the list of users in them.
     chanlists: Mutex<HashMap<String, Vec<User>>>,
+    /// A thread-safe index to track the current alternative nickname being used.
+    alt_nick_index: RWLock<uint>,
 }
 
 /// An IrcServer over a buffered NetStream.
@@ -61,7 +63,8 @@ impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
         } else {
             Connection::connect(config.server(), config.port())
         });
-        Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()) })
+        Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()),
+                       alt_nick_index: RWLock::new(0u) })
     }
 
     /// Creates a new IRC server connection from the specified configuration with the specified 
@@ -74,7 +77,8 @@ impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
         } else {
             Connection::connect_with_timeout(config.server(), config.port(), timeout_ms)
         });
-        Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()) })
+        Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()), 
+                       alt_nick_index: RWLock::new(0u) })
     }
 
 }
@@ -107,7 +111,8 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     /// Creates an IRC server from the specified configuration, and any arbitrary Connection.
     #[experimental]
     pub fn from_connection(config: Config, conn: Connection<T, U>) -> IrcServer<T, U> {
-        IrcServer { conn: conn, config: config, chanlists: Mutex::new(HashMap::new()) }
+        IrcServer { conn: conn, config: config, chanlists: Mutex::new(HashMap::new()),
+                    alt_nick_index: RWLock::new(0u) }
     }
 
     /// Gets a reference to the IRC server's connection.
@@ -135,6 +140,16 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
             } else if resp == Response::RPL_ENDOFMOTD || resp == Response::ERR_NOMOTD {
                 for chan in self.config.channels().into_iter() {
                     self.send(JOIN(chan[], None)).unwrap();
+                }
+            } else if resp == Response::ERR_NICKNAMEINUSE || 
+                      resp == Response::ERR_ERRONEOUSNICKNAME {
+                let alt_nicks = self.config.get_alternate_nicknames();
+                let mut index = self.alt_nick_index.write();
+                if *index.deref() >= alt_nicks.len() {
+                    panic!("All specified nicknames were in use.")
+                } else {
+                    self.send(NICK(alt_nicks[*index.deref()])).unwrap();
+                    *index.deref_mut() += 1;
                 }
             }
             return
@@ -225,6 +240,7 @@ mod test {
         Config {
             owners: Some(vec![format!("test")]),
             nickname: Some(format!("test")),
+            alt_nicks: Some(vec![format!("test2")]),
             server: Some(format!("irc.test.net")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             .. Default::default()
@@ -264,13 +280,37 @@ mod test {
     }
 
     #[test]
+    fn nickname_in_use() {
+        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+           MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+        ));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(get_server_value(server)[], "NICK :test2\r\n");
+    }
+
+    #[test]
+    #[should_fail]
+    fn ran_out_of_nicknames() {
+        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
+                     :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+           MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+        ));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+    }
+
+    #[test]
     fn send() {
         let server = IrcServer::from_connection(test_config(), Connection::new(
            NullReader, MemWriter::new()
         ));
         assert!(server.send(PRIVMSG("#test", "Hi there!")).is_ok());
-        assert_eq!(get_server_value(server)[],
-        "PRIVMSG #test :Hi there!\r\n");
+        assert_eq!(get_server_value(server)[], "PRIVMSG #test :Hi there!\r\n");
     }
 
     #[test]
