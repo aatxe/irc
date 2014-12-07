@@ -10,6 +10,7 @@ use irc::server::utils::Wrapper;
 fn main() {
     let config = Config {
         nickname: Some(format!("pickles")),
+        alt_nicks: Some(vec![format!("bananas"), format!("apples")]),
         server: Some(format!("irc.fyrechat.net")),
         channels: Some(vec![format!("#vana")]),
         .. Default::default()
