@@ -1,4 +1,3 @@
-#![feature(if_let)]
 #![feature(slicing_syntax)]
 extern crate irc;
 

@@ -292,7 +292,7 @@ mod test {
     }
 
     #[test]
-    #[should_fail]
+    #[should_fail(message = "All specified nicknames were in use.")]
     fn ran_out_of_nicknames() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
