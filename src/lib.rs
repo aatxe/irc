@@ -4,7 +4,7 @@
 #![unstable]
 #![warn(missing_docs)]
 
-#![feature(if_let, slicing_syntax)]
+#![feature(slicing_syntax)]
 #[cfg(feature = "encode")] extern crate encoding;
 extern crate serialize;
 #[cfg(feature = "ssl")] extern crate openssl;
