@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Config` struct in crate `irc`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Config">
+
+    <title>irc::data::config::Config - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>config</a></p><div class='block struct'><h2>Structs</h2><a class='struct current' href='struct.Config.html'>Config</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>config</a>::<wbr><a class='struct' href=''>Config</a><wbr><a class='stability Unstable' title=''>Unstable</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]
+            </a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-13772' href='../../../src/irc/data/config.rs.html#11-38'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Config {
+    pub owners: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;,
+    pub nickname: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+    pub alt_nicks: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;,
+    pub username: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+    pub realname: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+    pub password: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+    pub server: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+    pub port: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>&gt;,
+    pub use_ssl: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>&gt;,
+    pub encoding: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
+    pub channels: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;,
+    pub options: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html' title='std::collections::hash::map::HashMap'>HashMap</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;,
+}</pre><div class='docblock'><p>Configuration data.</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr><td id='structfield.owners'><a class='stability Unstable' title='Unstable'></a><code>owners</code></td><td><div class='docblock'><p>A list of the owners of the bot by nickname.</p>
+</div></td></tr><tr><td id='structfield.nickname'><a class='stability Unstable' title='Unstable'></a><code>nickname</code></td><td><div class='docblock'><p>The bot&#39;s nickname.</p>
+</div></td></tr><tr><td id='structfield.alt_nicks'><a class='stability Unstable' title='Unstable'></a><code>alt_nicks</code></td><td><div class='docblock'><p>Alternative nicknames for the bots, if the default is taken.</p>
+</div></td></tr><tr><td id='structfield.username'><a class='stability Unstable' title='Unstable'></a><code>username</code></td><td><div class='docblock'><p>The bot&#39;s username.</p>
+</div></td></tr><tr><td id='structfield.realname'><a class='stability Unstable' title='Unstable'></a><code>realname</code></td><td><div class='docblock'><p>The bot&#39;s real name.</p>
+</div></td></tr><tr><td id='structfield.password'><a class='stability Unstable' title='Unstable'></a><code>password</code></td><td><div class='docblock'><p>The bot&#39;s password.</p>
+</div></td></tr><tr><td id='structfield.server'><a class='stability Unstable' title='Unstable'></a><code>server</code></td><td><div class='docblock'><p>The server to connect to.</p>
+</div></td></tr><tr><td id='structfield.port'><a class='stability Unstable' title='Unstable'></a><code>port</code></td><td><div class='docblock'><p>The port to connect on.</p>
+</div></td></tr><tr><td id='structfield.use_ssl'><a class='stability Unstable' title='Unstable'></a><code>use_ssl</code></td><td><div class='docblock'><p>Whether or not to use SSL.
+Bots will automatically panic if this is enabled without SSL support.</p>
+</div></td></tr><tr><td id='structfield.encoding'><a class='stability Unstable' title='Unstable'></a><code>encoding</code></td><td><div class='docblock'><p>The encoding type used for this connection.
+This is typically UTF-8, but could be something else.</p>
+</div></td></tr><tr><td id='structfield.channels'><a class='stability Unstable' title='Unstable'></a><code>channels</code></td><td><div class='docblock'><p>A list of channels to join on connection.</p>
+</div></td></tr><tr><td id='structfield.options'><a class='stability Unstable' title='Unstable'></a><code>options</code></td><td><div class='docblock'><p>A map of additional options to be stored in config.</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl <a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a></code></h3><div class='impl-items'><h4 id='method.load' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.load' class='fnname'>load</a>(path: <a class='struct' href='http://doc.rust-lang.org/nightly/std/path/posix/struct.Path.html' title='std::path::posix::Path'>Path</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a>&gt;</code></h4>
+<div class='docblock'><p>Loads a JSON configuration from the desired path.</p>
+</div><h4 id='method.load_utf8' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.load_utf8' class='fnname'>load_utf8</a>(path: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a>&gt;</code></h4>
+<div class='docblock'><p>Loads a JSON configuration using the string as a UTF-8 path.</p>
+</div><h4 id='method.is_owner' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.is_owner' class='fnname'>is_owner</a>(&amp;self, nickname: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Determines whether or not the nickname provided is the owner of the bot.</p>
+</div><h4 id='method.nickname' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.nickname' class='fnname'>nickname</a>(&amp;self) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<div class='docblock'><p>Gets the nickname specified in the configuration.
+This will panic if not specified.</p>
+</div><h4 id='method.get_alternate_nicknames' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get_alternate_nicknames' class='fnname'>get_alternate_nicknames</a>(&amp;self) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;&amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h4>
+<div class='docblock'><p>Gets the alternate nicknames specified in the configuration.
+This defaults to an empty vector when not specified.</p>
+</div><h4 id='method.username' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.username' class='fnname'>username</a>(&amp;self) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<div class='docblock'><p>Gets the username specified in the configuration.
+This defaults to the user&#39;s nickname when not specified.</p>
+</div><h4 id='method.real_name' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.real_name' class='fnname'>real_name</a>(&amp;self) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<div class='docblock'><p>Gets the real name specified in the configuration.
+This defaults to the user&#39;s nickname when not specified.</p>
+</div><h4 id='method.password' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.password' class='fnname'>password</a>(&amp;self) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<div class='docblock'><p>Gets the password specified in the configuration.
+This defaults to a blank string when not specified.</p>
+</div><h4 id='method.server' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.server' class='fnname'>server</a>(&amp;self) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<div class='docblock'><p>Gets the address of the server specified in the configuration.
+This panics when not specified.</p>
+</div><h4 id='method.port' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.port' class='fnname'>port</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a></code></h4>
+<div class='docblock'><p>Gets the port of the server specified in the configuration.
+This defaults to 6667 (or 6697 if use_ssl is specified as true) when not specified.</p>
+</div><h4 id='method.use_ssl' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.use_ssl' class='fnname'>use_ssl</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Gets whether or not to use SSL with this connection.
+This defaults to false when not specified.</p>
+</div><h4 id='method.encoding' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.encoding' class='fnname'>encoding</a>(&amp;self) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<div class='docblock'><p>Gets the encoding to use for this connection. This requires the encode feature to work.
+This defaults to UTF-8 when not specified.</p>
+</div><h4 id='method.channels' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.channels' class='fnname'>channels</a>(&amp;self) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;&amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h4>
+<div class='docblock'><p>Gets the channels to join upon connection.
+This defaults to an empty vector if it&#39;s not specified.</p>
+</div><h4 id='method.get_option' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.get_option' class='fnname'>get_option</a>(&amp;self, option: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<div class='docblock'><p>Looks up the specified string in the options map.
+This uses indexing, and thus panics when the string is not present.
+This will also panic if used and there are no options.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a> for <a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><a class='stability Unstable' title='Unstable: I/O and core have yet to be reconciled'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Unstable' title='Unstable: Definition may change slightly after trait reform'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a></code></h3><div class='impl-items'><h4 id='method.default' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a></code></h4>
+</div><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl&lt;__D: <a class='trait' href='http://doc.rust-lang.org/nightly/serialize/serialize/trait.Decoder.html' title='serialize::serialize::Decoder'>Decoder</a>&lt;__E&gt;, __E&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/serialize/serialize/trait.Decodable.html' title='serialize::serialize::Decodable'>Decodable</a>&lt;__D, __E&gt; for <a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a></code></h3><div class='impl-items'><h4 id='method.decode' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.decode' class='fnname'>decode</a>(__arg_0: &amp;mut __D) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a>, __E&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><a class='stability Unstable' title='Unstable'></a><code>fn <a href='#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a></code></h4>
+<h4 id='method.clone_from' class='tymethod'><a class='stability Experimental' title='Experimental: this function is mostly unused'></a><code>fn <a href='#tymethod.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "irc";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

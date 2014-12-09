@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Wrapper` struct in crate `irc`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Wrapper">
+
+    <title>irc::server::utils::Wrapper - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>server</a>::<wbr><a href='index.html'>utils</a></p><div class='block struct'><h2>Structs</h2><a class='struct current' href='struct.Wrapper.html'>Wrapper</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>server</a>::<wbr><a href='index.html'>utils</a>::<wbr><a class='struct' href=''>Wrapper</a><wbr><a class='stability Experimental' title=''>Experimental</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]
+            </a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-28613' href='../../../src/irc/server/utils.rs.html#15-17'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Wrapper&lt;'a, T: <a class='trait' href='../../../irc/data/kinds/trait.IrcReader.html' title='irc::data::kinds::IrcReader'>IrcReader</a>, U: <a class='trait' href='../../../irc/data/kinds/trait.IrcWriter.html' title='irc::data::kinds::IrcWriter'>IrcWriter</a>&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>Functionality-providing wrapper for Server.
+Wrappers are currently not thread-safe, and should be created per-thread, as needed.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../../irc/data/kinds/trait.IrcReader.html' title='irc::data::kinds::IrcReader'>IrcReader</a>, U: <a class='trait' href='../../../irc/data/kinds/trait.IrcWriter.html' title='irc::data::kinds::IrcWriter'>IrcWriter</a>&gt; <a class='struct' href='../../../irc/server/utils/struct.Wrapper.html' title='irc::server::utils::Wrapper'>Wrapper</a>&lt;'a, T, U&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.new' class='fnname'>new</a>(server: &amp;'a <a class='trait' href='../../../irc/server/trait.Server.html' title='irc::server::Server'>Server</a>&lt;'a, T, U&gt;) -&gt; <a class='struct' href='../../../irc/server/utils/struct.Wrapper.html' title='irc::server::utils::Wrapper'>Wrapper</a>&lt;'a, T, U&gt;</code></h4>
+<div class='docblock'><p>Creates a new Wrapper from the given Server.</p>
+</div><h4 id='method.identify' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.identify' class='fnname'>identify</a>(&amp;self) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Sends a NICK and USER to identify.</p>
+</div><h4 id='method.send_pong' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_pong' class='fnname'>send_pong</a>(&amp;self, msg: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Sends a PONG with the specified message.</p>
+</div><h4 id='method.send_join' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_join' class='fnname'>send_join</a>(&amp;self, chanlist: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Joins the specified channel or chanlist.</p>
+</div><h4 id='method.send_oper' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_oper' class='fnname'>send_oper</a>(&amp;self, username: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, password: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Attempts to oper up using the specified username and password.</p>
+</div><h4 id='method.send_privmsg' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_privmsg' class='fnname'>send_privmsg</a>(&amp;self, target: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, message: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Sends a message to the specified target.</p>
+</div><h4 id='method.send_notice' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_notice' class='fnname'>send_notice</a>(&amp;self, target: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, message: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Sends a notice to the specified target.</p>
+</div><h4 id='method.send_topic' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_topic' class='fnname'>send_topic</a>(&amp;self, channel: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, topic: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Sets the topic of a channel or requests the current one.
+If <code>topic</code> is an empty string, it won&#39;t be included in the message.</p>
+</div><h4 id='method.send_kill' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_kill' class='fnname'>send_kill</a>(&amp;self, target: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, message: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Kills the target with the provided message.</p>
+</div><h4 id='method.send_kick' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_kick' class='fnname'>send_kick</a>(&amp;self, chanlist: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, nicklist: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, message: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Kicks the listed nicknames from the listed channels with a comment.
+If <code>message</code> is an empty string, it won&#39;t be included in the message.</p>
+</div><h4 id='method.send_mode' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_mode' class='fnname'>send_mode</a>(&amp;self, target: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, mode: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, modeparams: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Changes the mode of the target.
+If <code>modeparmas</code> is an empty string, it won&#39;t be included in the message.</p>
+</div><h4 id='method.send_samode' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_samode' class='fnname'>send_samode</a>(&amp;self, target: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, mode: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, modeparams: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Changes the mode of the target by force.
+If <code>modeparams</code> is an empty string, it won&#39;t be included in the message.</p>
+</div><h4 id='method.send_sanick' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_sanick' class='fnname'>send_sanick</a>(&amp;self, old_nick: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, new_nick: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Forces a user to change from the old nickname to the new nickname.</p>
+</div><h4 id='method.send_invite' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send_invite' class='fnname'>send_invite</a>(&amp;self, nick: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, chan: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Invites a user to the specified channel.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Experimental' title='Experimental'></a><code>impl&lt;'a, T: <a class='trait' href='../../../irc/data/kinds/trait.IrcReader.html' title='irc::data::kinds::IrcReader'>IrcReader</a>, U: <a class='trait' href='../../../irc/data/kinds/trait.IrcWriter.html' title='irc::data::kinds::IrcWriter'>IrcWriter</a>&gt; <a class='trait' href='../../../irc/server/trait.Server.html' title='irc::server::Server'>Server</a>&lt;'a, T, U&gt; for <a class='struct' href='../../../irc/server/utils/struct.Wrapper.html' title='irc::server::utils::Wrapper'>Wrapper</a>&lt;'a, T, U&gt;</code></h3><div class='impl-items'><h4 id='method.config' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.config' class='fnname'>config</a>(&amp;self) -&gt; &amp;<a class='struct' href='../../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a></code></h4>
+<h4 id='method.send' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.send' class='fnname'>send</a>(&amp;self, command: <a class='enum' href='../../../irc/data/command/enum.Command.html' title='irc::data::command::Command'>Command</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<h4 id='method.iter' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.iter' class='fnname'>iter</a>(&amp;'a self) -&gt; <a class='struct' href='../../../irc/server/struct.ServerIterator.html' title='irc::server::ServerIterator'>ServerIterator</a>&lt;'a, T, U&gt;</code></h4>
+<h4 id='method.list_users' class='method'><a class='stability Experimental' title='Experimental'></a><code>fn <a href='#method.list_users' class='fnname'>list_users</a>(&amp;self, chan: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../../irc/data/user/struct.User.html' title='irc::data::user::User'>User</a>&gt;&gt;</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "irc";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

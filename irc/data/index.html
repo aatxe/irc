@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `data` mod in crate `irc`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, data">
+
+    <title>irc::data - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../index.html'>irc</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../conn/index.html'>conn</a><a class='mod current' href='../data/index.html'>data</a><a class='mod ' href='../server/index.html'>server</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>irc</a>::<wbr><a class='mod' href=''>data</a><wbr><a class='stability Unstable' title=''>Unstable</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]
+            </a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-1024' href='../../src/irc/data/mod.rs.html#1-32'>[src]</a></span></h1>
+<div class='docblock'><p>Data related to IRC functionality.</p>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use data::command::<a class='enum' href='../../irc/data/command/enum.Command.html' title='irc::data::command::Command'>Command</a>;</code></td></tr><tr><td><code>pub use data::config::<a class='struct' href='../../irc/data/config/struct.Config.html' title='irc::data::config::Config'>Config</a>;</code></td></tr><tr><td><code>pub use data::message::<a class='struct' href='../../irc/data/message/struct.Message.html' title='irc::data::message::Message'>Message</a>;</code></td></tr><tr><td><code>pub use data::response::<a class='enum' href='../../irc/data/response/enum.Response.html' title='irc::data::response::Response'>Response</a>;</code></td></tr><tr><td><code>pub use data::user::{<a class='enum' href='../../irc/data/user/enum.AccessLevel.html' title='irc::data::user::AccessLevel'>AccessLevel</a>, <a class='struct' href='../../irc/data/user/struct.User.html' title='irc::data::user::User'>User</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Stable' title='Stable'></a><a class='mod' href='command/index.html'
+                               title='irc::data::command'>command</a></td>
+                        <td class='docblock short'><p>Enumeration of all available client commands.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Stable' title='Stable'></a><a class='mod' href='config/index.html'
+                               title='irc::data::config'>config</a></td>
+                        <td class='docblock short'><p>JSON configuration files using libserialize.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unstable' title='Unstable'></a><a class='mod' href='kinds/index.html'
+                               title='irc::data::kinds'>kinds</a></td>
+                        <td class='docblock short'><p>Trait definitions of appropriate Writers and Buffers for use with this library.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Experimental' title='Experimental'></a><a class='mod' href='message/index.html'
+                               title='irc::data::message'>message</a></td>
+                        <td class='docblock short'><p>Messages to and from the server.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unstable' title='Unstable'></a><a class='mod' href='response/index.html'
+                               title='irc::data::response'>response</a></td>
+                        <td class='docblock short'><p>Enumeration of all the possible server responses.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unstable' title='Unstable'></a><a class='mod' href='user/index.html'
+                               title='irc::data::user'>user</a></td>
+                        <td class='docblock short'><p>Data for tracking user information.</p>
+</td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "irc";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>
