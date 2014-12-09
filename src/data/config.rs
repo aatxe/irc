@@ -13,6 +13,8 @@ pub struct Config {
     pub owners: Option<Vec<String>>,
     /// The bot's nickname.
     pub nickname: Option<String>,
+    /// The bot's NICKSERV password.
+    pub nick_password: Option<String>,
     /// Alternative nicknames for the bots, if the default is taken.
     pub alt_nicks: Option<Vec<String>>,
     /// The bot's username.
@@ -67,6 +69,13 @@ impl Config {
     #[experimental]
     pub fn nickname(&self) -> &str {
         self.nickname.as_ref().map(|s| s[]).unwrap()
+    }
+
+    /// Gets the bot's nickserv password specified in the configuration.
+    /// This defaults to an empty string when not specified.
+    #[experimental]
+    pub fn nick_password(&self) -> &str {
+        self.nick_password.as_ref().map(|s| s[]).unwrap_or("")
     }
 
     /// Gets the alternate nicknames specified in the configuration.
@@ -157,6 +166,7 @@ mod test {
         let cfg = Config {
             owners: Some(vec![format!("test")]),
             nickname: Some(format!("test")),
+            nick_password: None,
             alt_nicks: None,
             username: Some(format!("test")),
             realname: Some(format!("test")),
@@ -176,6 +186,7 @@ mod test {
         let cfg = Config {
             owners: Some(vec![format!("test")]),
             nickname: Some(format!("test")),
+            nick_password: None,
             alt_nicks: None,
             username: Some(format!("test")),
             realname: Some(format!("test")),

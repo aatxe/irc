@@ -4,9 +4,10 @@ use std::io::{InvalidInput, IoError, IoResult};
 use std::str::FromStr;
 use data::message::Message;
 
-/// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812).
-/// This also includes commands from the 
+/// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This 
+/// also includes commands from the 
 /// [capabilities extension](https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01).
+/// Additionally, this includes some common additional commands from popular IRCds.
 #[stable]
 #[deriving(Show, PartialEq)]
 pub enum Command<'a> {
@@ -131,6 +132,18 @@ pub enum Command<'a> {
     SAPART(&'a str, &'a str),
     /// SAQUIT nickname reason
     SAQUIT(&'a str, &'a str),
+    /// NICKSERV :message
+    NICKSERV(&'a str),
+    /// CHANSERV :message
+    CHANSERV(&'a str),
+    /// OPERSERV :message
+    OPERSERV(&'a str),
+    /// BOTSERV :message
+    BOTSERV(&'a str),
+    /// HOSTSERV :message
+    HOSTSERV(&'a str),
+    /// MEMOSERV :message
+    MEMOSERV(&'a str),
     
     // Capabilities extension to IRCv3
     /// CAP COMMAND [param]
@@ -239,7 +252,12 @@ impl<'a> Command<'a> {
             Command::SANICK(o, n) => Message::new(None, "SANICK", Some(vec![o, n]), None),
             Command::SAPART(c, r) => Message::new(None, "SAPART", Some(vec![c]), Some(r)),
             Command::SAQUIT(c, r) => Message::new(None, "SAQUIT", Some(vec![c]), Some(r)),
-
+            Command::NICKSERV(m) => Message::new(None, "NICKSERV", None, Some(m)),
+            Command::CHANSERV(m) => Message::new(None, "CHANSERV", None, Some(m)),
+            Command::OPERSERV(m) => Message::new(None, "OPERSERV", None, Some(m)),
+            Command::BOTSERV(m) => Message::new(None, "BOTSERV", None, Some(m)),
+            Command::HOSTSERV(m) => Message::new(None, "HOSTSERV", None, Some(m)),
+            Command::MEMOSERV(m) => Message::new(None, "MEMOSERV", None, Some(m)),
             Command::CAP(s, p) => Message::new(None, "CAP", Some(vec![s.to_str()]), p),
         }
     }
@@ -844,6 +862,72 @@ impl<'a> Command<'a> {
                 None => {
                     if m.args.len() != 2 { return Err(invalid_input()) }
                     Command::SAQUIT(m.args[0][], m.args[1][])
+                }
+            }
+        } else if let "NICKSERV" = m.command[] {
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 0 { return Err(invalid_input()) }
+                    Command::NICKSERV(suffix[])
+                },
+                None => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    Command::NICKSERV(m.args[0][])
+                }
+            }
+        } else if let "CHANSERV" = m.command[] {
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 0 { return Err(invalid_input()) }
+                    Command::CHANSERV(suffix[])
+                },
+                None => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    Command::CHANSERV(m.args[0][])
+                }
+            }
+        } else if let "OPERSERV" = m.command[] {
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 0 { return Err(invalid_input()) }
+                    Command::OPERSERV(suffix[])
+                },
+                None => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    Command::OPERSERV(m.args[0][])
+                }
+            }
+        } else if let "BOTSERV" = m.command[] {
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 0 { return Err(invalid_input()) }
+                    Command::BOTSERV(suffix[])
+                },
+                None => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    Command::BOTSERV(m.args[0][])
+                }
+            }
+        } else if let "HOSTSERV" = m.command[] {
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 0 { return Err(invalid_input()) }
+                    Command::HOSTSERV(suffix[])
+                },
+                None => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    Command::HOSTSERV(m.args[0][])
+                }
+            }
+        } else if let "MEMOSERV" = m.command[] {
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 0 { return Err(invalid_input()) }
+                    Command::MEMOSERV(suffix[])
+                },
+                None => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    Command::MEMOSERV(m.args[0][])
                 }
             }
         } else if let "CAP" = m.command[] {
