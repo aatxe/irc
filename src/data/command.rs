@@ -132,17 +132,17 @@ pub enum Command<'a> {
     SAPART(&'a str, &'a str),
     /// SAQUIT nickname reason
     SAQUIT(&'a str, &'a str),
-    /// NICKSERV :message
+    /// NICKSERV message
     NICKSERV(&'a str),
-    /// CHANSERV :message
+    /// CHANSERV message
     CHANSERV(&'a str),
-    /// OPERSERV :message
+    /// OPERSERV message
     OPERSERV(&'a str),
-    /// BOTSERV :message
+    /// BOTSERV message
     BOTSERV(&'a str),
-    /// HOSTSERV :message
+    /// HOSTSERV message
     HOSTSERV(&'a str),
-    /// MEMOSERV :message
+    /// MEMOSERV message
     MEMOSERV(&'a str),
     
     // Capabilities extension to IRCv3
@@ -252,12 +252,12 @@ impl<'a> Command<'a> {
             Command::SANICK(o, n) => Message::new(None, "SANICK", Some(vec![o, n]), None),
             Command::SAPART(c, r) => Message::new(None, "SAPART", Some(vec![c]), Some(r)),
             Command::SAQUIT(c, r) => Message::new(None, "SAQUIT", Some(vec![c]), Some(r)),
-            Command::NICKSERV(m) => Message::new(None, "NICKSERV", None, Some(m)),
-            Command::CHANSERV(m) => Message::new(None, "CHANSERV", None, Some(m)),
-            Command::OPERSERV(m) => Message::new(None, "OPERSERV", None, Some(m)),
-            Command::BOTSERV(m) => Message::new(None, "BOTSERV", None, Some(m)),
-            Command::HOSTSERV(m) => Message::new(None, "HOSTSERV", None, Some(m)),
-            Command::MEMOSERV(m) => Message::new(None, "MEMOSERV", None, Some(m)),
+            Command::NICKSERV(m) => Message::new(None, "NICKSERV", Some(vec![m]), None),
+            Command::CHANSERV(m) => Message::new(None, "CHANSERV", Some(vec![m]), None),
+            Command::OPERSERV(m) => Message::new(None, "OPERSERV", Some(vec![m]), None),
+            Command::BOTSERV(m) => Message::new(None, "BOTSERV", Some(vec![m]), None),
+            Command::HOSTSERV(m) => Message::new(None, "HOSTSERV", Some(vec![m]), None),
+            Command::MEMOSERV(m) => Message::new(None, "MEMOSERV", Some(vec![m]), None),
             Command::CAP(s, p) => Message::new(None, "CAP", Some(vec![s.to_str()]), p),
         }
     }

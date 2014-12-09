@@ -138,11 +138,11 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                     }
                 }
             } else if resp == Response::RPL_ENDOFMOTD || resp == Response::ERR_NOMOTD {
+                self.send(NICKSERV(
+                        format!("IDENTIFY {}", self.config.nick_password())[]
+                )).unwrap();
                 for chan in self.config.channels().into_iter() {
                     self.send(JOIN(chan[], None)).unwrap();
-                    self.send(NICKSERV(
-                        format!("IDENTIFY {}", self.config.nick_password())[]
-                    )).unwrap();
                 }
             } else if resp == Response::ERR_NICKNAMEINUSE || 
                       resp == Response::ERR_ERRONEOUSNICKNAME {
