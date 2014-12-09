@@ -3,7 +3,7 @@
 
 use std::io::IoResult;
 use data::{Command, Config, User};
-use data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NICKSERV, NOTICE};
+use data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
 use data::Command::{OPER, PASS, PONG, PRIVMSG, SAMODE, SANICK, TOPIC, USER};
 use data::command::CapSubCommand::{END, REQ};
 use data::kinds::{IrcReader, IrcWriter};
@@ -53,11 +53,6 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
         try!(self.server.send(NICK(self.server.config().nickname())));
         try!(self.server.send(USER(self.server.config().username(), "0",
                               self.server.config().real_name())));
-        if self.server.config().nick_password() != "" {
-            try!(self.server.send(NICKSERV(
-                format!("IDENTIFY {}", self.server.config().nick_password())[]
-            )));
-        }
         Ok(())
     }
 
@@ -200,25 +195,6 @@ mod test {
         }
         assert_eq!(get_server_value(server)[], "CAP REQ :multi-prefix\r\nCAP END\r\n\
         PASS :password\r\nNICK :test\r\nUSER test 0 * :test\r\n");
-    }
-
-    #[test]
-    fn identify_with_nick_password() {
-        let server = IrcServer::from_config(Config {
-            owners: Some(vec![format!("test")]),
-            nickname: Some(format!("test")),
-            alt_nicks: Some(vec![format!("test2")]),
-            server: Some(format!("irc.test.net")),
-            nick_password: Some(format!("password")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
-            .. Default::default()
-        }, Connection::new(NullReader, MemWriter::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.identify().unwrap();
-        }
-        assert_eq!(get_server_value(server)[], "CAP REQ :multi-prefix\r\nCAP END\r\nNICK :test\r\n\
-                   USER test 0 * :test\r\nNICKSERV :IDENTIFY password\r\n");
     }
 
     #[test]

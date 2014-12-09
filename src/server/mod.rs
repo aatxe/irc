@@ -5,7 +5,7 @@ use std::io::{BufferedReader, BufferedWriter, IoResult};
 use std::sync::{Mutex, RWLock};
 use conn::{Connection, NetStream};
 use data::{Command, Config, Message, Response, User};
-use data::Command::{JOIN, NICK, PONG};
+use data::Command::{JOIN, NICK, NICKSERV, PONG};
 use data::kinds::{IrcReader, IrcWriter};
 
 pub mod utils;
@@ -140,6 +140,9 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
             } else if resp == Response::RPL_ENDOFMOTD || resp == Response::ERR_NOMOTD {
                 for chan in self.config.channels().into_iter() {
                     self.send(JOIN(chan[], None)).unwrap();
+                    self.send(NICKSERV(
+                        format!("IDENTIFY {}", self.config.nick_password())[]
+                    )).unwrap();
                 }
             } else if resp == Response::ERR_NICKNAMEINUSE || 
                       resp == Response::ERR_ERRONEOUSNICKNAME {
