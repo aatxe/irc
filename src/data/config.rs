@@ -19,12 +19,12 @@ pub struct Config {
     pub username: Option<String>,
     /// The bot's real name.
     pub realname: Option<String>,
-    /// The bot's password.
-    pub password: Option<String>,
     /// The server to connect to.
     pub server: Option<String>,
     /// The port to connect on.
     pub port: Option<u16>,
+    /// The password to connect to the server.
+    pub password: Option<String>,
     /// Whether or not to use SSL.
     /// Bots will automatically panic if this is enabled without SSL support.
     pub use_ssl: Option<bool>,
@@ -91,13 +91,6 @@ impl Config {
         self.realname.as_ref().map(|s| s[]).unwrap_or(self.nickname())
     }
 
-    /// Gets the password specified in the configuration.
-    /// This defaults to a blank string when not specified.
-    #[experimental]
-    pub fn password(&self) -> &str {
-        self.password.as_ref().map(|s| s[]).unwrap_or("")
-    }
-
     /// Gets the address of the server specified in the configuration.
     /// This panics when not specified.
     #[experimental]
@@ -114,6 +107,13 @@ impl Config {
         } else {
             6667
         })
+    }
+
+    /// Gets the server password specified in the configuration.
+    /// This defaults to a blank string when not specified.
+    #[experimental]
+    pub fn password(&self) -> &str {
+        self.password.as_ref().map(|s| s[]).unwrap_or("")
     }
 
     /// Gets whether or not to use SSL with this connection.
