@@ -138,9 +138,11 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                     }
                 }
             } else if resp == Response::RPL_ENDOFMOTD || resp == Response::ERR_NOMOTD {
-                self.send(NICKSERV(
+                if self.config.nick_password() != "" {
+                    self.send(NICKSERV(
                         format!("IDENTIFY {}", self.config.nick_password())[]
-                )).unwrap();
+                    )).unwrap();
+                }
                 for chan in self.config.channels().into_iter() {
                     self.send(JOIN(chan[], None)).unwrap();
                 }
@@ -250,7 +252,6 @@ mod test {
         }
     }
 
-
     pub fn get_server_value<T: IrcReader>(server: IrcServer<T, MemWriter>) -> String {
         String::from_utf8((*server.conn().writer().deref()).get_ref().to_vec()).unwrap()
     }
@@ -280,6 +281,23 @@ mod test {
         }
         assert_eq!(get_server_value(server)[],
         "PONG :irc.test.net\r\nJOIN #test\r\nJOIN #test2\r\n");
+    }
+
+    #[test]
+    fn handle_end_motd_with_nick_password() {
+        let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
+        let server = IrcServer::from_connection(Config {
+            nick_password: Some(format!("password")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            .. Default::default()
+        }, Connection::new(
+           MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+        ));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(get_server_value(server)[],
+        "NICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n");
     }
 
     #[test]
