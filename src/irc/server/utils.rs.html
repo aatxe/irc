@@ -406,14 +406,39 @@
 <span id='364'>364</span>
 <span id='365'>365</span>
 <span id='366'>366</span>
+<span id='367'>367</span>
+<span id='368'>368</span>
+<span id='369'>369</span>
+<span id='370'>370</span>
+<span id='371'>371</span>
+<span id='372'>372</span>
+<span id='373'>373</span>
+<span id='374'>374</span>
+<span id='375'>375</span>
+<span id='376'>376</span>
+<span id='377'>377</span>
+<span id='378'>378</span>
+<span id='379'>379</span>
+<span id='380'>380</span>
+<span id='381'>381</span>
+<span id='382'>382</span>
+<span id='383'>383</span>
+<span id='384'>384</span>
+<span id='385'>385</span>
+<span id='386'>386</span>
+<span id='387'>387</span>
+<span id='388'>388</span>
+<span id='389'>389</span>
+<span id='390'>390</span>
+<span id='391'>391</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Utilities and shortcuts for working with IRC servers.</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>IoResult</span>;
 <span class='kw'>use</span> <span class='ident'>data</span>::{<span class='ident'>Command</span>, <span class='ident'>Config</span>, <span class='ident'>User</span>};
-<span class='kw'>use</span> <span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>CAP</span>, <span class='ident'>INVITE</span>, <span class='ident'>JOIN</span>, <span class='ident'>KILL</span>, <span class='ident'>MODE</span>, <span class='ident'>NICK</span>, <span class='ident'>NOTICE</span>, <span class='ident'>KICK</span>};
-<span class='kw'>use</span> <span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>OPER</span>, <span class='ident'>PONG</span>, <span class='ident'>PRIVMSG</span>, <span class='ident'>SAMODE</span>, <span class='ident'>SANICK</span>, <span class='ident'>TOPIC</span>, <span class='ident'>USER</span>};
+<span class='kw'>use</span> <span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>CAP</span>, <span class='ident'>INVITE</span>, <span class='ident'>JOIN</span>, <span class='ident'>KICK</span>, <span class='ident'>KILL</span>, <span class='ident'>MODE</span>, <span class='ident'>NICK</span>, <span class='ident'>NOTICE</span>};
+<span class='kw'>use</span> <span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>OPER</span>, <span class='ident'>PASS</span>, <span class='ident'>PONG</span>, <span class='ident'>PRIVMSG</span>, <span class='ident'>SAMODE</span>, <span class='ident'>SANICK</span>, <span class='ident'>TOPIC</span>, <span class='ident'>USER</span>};
 <span class='kw'>use</span> <span class='ident'>data</span>::<span class='ident'>command</span>::<span class='ident'>CapSubCommand</span>::{<span class='ident'>END</span>, <span class='ident'>REQ</span>};
 <span class='kw'>use</span> <span class='ident'>data</span>::<span class='ident'>kinds</span>::{<span class='ident'>IrcReader</span>, <span class='ident'>IrcWriter</span>};
 <span class='kw'>use</span> <span class='ident'>server</span>::{<span class='ident'>Server</span>, <span class='ident'>ServerIterator</span>};
@@ -456,9 +481,13 @@
         <span class='comment'>// We&#39;ll issue a CAP REQ for multi-prefix support to improve access level tracking.</span>
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>CAP</span>(<span class='ident'>REQ</span>, <span class='prelude-val'>Some</span>(<span class='string'>&quot;multi-prefix&quot;</span>))));
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>CAP</span>(<span class='ident'>END</span>, <span class='prelude-val'>None</span>))); <span class='comment'>// Then, send a CAP END to end the negotiation.</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>password</span>() <span class='op'>!=</span> <span class='string'>&quot;&quot;</span> {
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>PASS</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>password</span>())));
+        }
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>NICK</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>nickname</span>())));
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>USER</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>username</span>(), <span class='string'>&quot;0&quot;</span>,
-                              <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>real_name</span>()))
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>USER</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>username</span>(), <span class='string'>&quot;0&quot;</span>,
+                              <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>real_name</span>())));
+        <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='doccomment'>/// Sends a PONG with the specified message.</span>
@@ -563,9 +592,11 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>Wrapper</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>default</span>::<span class='ident'>Default</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>MemWriter</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>util</span>::<span class='ident'>NullReader</span>;
     <span class='kw'>use</span> <span class='ident'>conn</span>::<span class='ident'>Connection</span>;
+    <span class='kw'>use</span> <span class='ident'>data</span>::<span class='ident'>Config</span>;
     <span class='kw'>use</span> <span class='ident'>server</span>::<span class='ident'>IrcServer</span>;
     <span class='kw'>use</span> <span class='ident'>server</span>::<span class='ident'>test</span>::{<span class='ident'>get_server_value</span>, <span class='ident'>test_config</span>};
 
@@ -579,6 +610,25 @@
         }
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
         <span class='string'>&quot;CAP REQ :multi-prefix\r\nCAP END\r\nNICK :test\r\nUSER test 0 * :test\r\n&quot;</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>identify_with_password</span>() {
+        <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>Config</span> {
+            <span class='ident'>owners</span>: <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)]),
+            <span class='ident'>nickname</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)),
+            <span class='ident'>alt_nicks</span>: <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test2&quot;</span>)]),
+            <span class='ident'>server</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;irc.test.net&quot;</span>)),
+            <span class='ident'>password</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;password&quot;</span>)),
+            <span class='ident'>channels</span>: <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;#test&quot;</span>), <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;#test2&quot;</span>)]),
+            .. <span class='ident'>Default</span>::<span class='ident'>default</span>()
+        }, <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+        {
+            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
+            <span class='ident'>wrapper</span>.<span class='ident'>identify</span>().<span class='ident'>unwrap</span>();
+        }
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[], <span class='string'>&quot;CAP REQ :multi-prefix\r\nCAP END\r\n\
+        PASS :password\r\nNICK :test\r\nUSER test 0 * :test\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>

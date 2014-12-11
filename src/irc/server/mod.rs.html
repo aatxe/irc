@@ -419,6 +419,27 @@
 <span id='377'>377</span>
 <span id='378'>378</span>
 <span id='379'>379</span>
+<span id='380'>380</span>
+<span id='381'>381</span>
+<span id='382'>382</span>
+<span id='383'>383</span>
+<span id='384'>384</span>
+<span id='385'>385</span>
+<span id='386'>386</span>
+<span id='387'>387</span>
+<span id='388'>388</span>
+<span id='389'>389</span>
+<span id='390'>390</span>
+<span id='391'>391</span>
+<span id='392'>392</span>
+<span id='393'>393</span>
+<span id='394'>394</span>
+<span id='395'>395</span>
+<span id='396'>396</span>
+<span id='397'>397</span>
+<span id='398'>398</span>
+<span id='399'>399</span>
+<span id='400'>400</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Interface for working with IRC Servers</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>experimental</span>]</span>
@@ -427,7 +448,7 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::{<span class='ident'>Mutex</span>, <span class='ident'>RWLock</span>};
 <span class='kw'>use</span> <span class='ident'>conn</span>::{<span class='ident'>Connection</span>, <span class='ident'>NetStream</span>};
 <span class='kw'>use</span> <span class='ident'>data</span>::{<span class='ident'>Command</span>, <span class='ident'>Config</span>, <span class='ident'>Message</span>, <span class='ident'>Response</span>, <span class='ident'>User</span>};
-<span class='kw'>use</span> <span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>JOIN</span>, <span class='ident'>NICK</span>, <span class='ident'>PONG</span>};
+<span class='kw'>use</span> <span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>JOIN</span>, <span class='ident'>NICK</span>, <span class='ident'>NICKSERV</span>, <span class='ident'>PONG</span>};
 <span class='kw'>use</span> <span class='ident'>data</span>::<span class='ident'>kinds</span>::{<span class='ident'>IrcReader</span>, <span class='ident'>IrcWriter</span>};
 
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>utils</span>;
@@ -560,6 +581,11 @@
                     }
                 }
             } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>resp</span> <span class='op'>==</span> <span class='ident'>Response</span>::<span class='ident'>RPL_ENDOFMOTD</span> <span class='op'>||</span> <span class='ident'>resp</span> <span class='op'>==</span> <span class='ident'>Response</span>::<span class='ident'>ERR_NOMOTD</span> {
+                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>nick_password</span>() <span class='op'>!=</span> <span class='string'>&quot;&quot;</span> {
+                    <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>NICKSERV</span>(
+                        <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;IDENTIFY {}&quot;</span>, <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>nick_password</span>())[]
+                    )).<span class='ident'>unwrap</span>();
+                }
                 <span class='kw'>for</span> <span class='ident'>chan</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>channels</span>().<span class='ident'>into_iter</span>() {
                     <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>JOIN</span>(<span class='ident'>chan</span>[], <span class='prelude-val'>None</span>)).<span class='ident'>unwrap</span>();
                 }
@@ -669,7 +695,6 @@
         }
     }
 
-
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_server_value</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>IrcReader</span><span class='op'>&gt;</span>(<span class='ident'>server</span>: <span class='ident'>IrcServer</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>MemWriter</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
         <span class='ident'>String</span>::<span class='ident'>from_utf8</span>((<span class='op'>*</span><span class='ident'>server</span>.<span class='ident'>conn</span>().<span class='ident'>writer</span>().<span class='ident'>deref</span>()).<span class='ident'>get_ref</span>().<span class='ident'>to_vec</span>()).<span class='ident'>unwrap</span>()
     }
@@ -699,6 +724,23 @@
         }
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
         <span class='string'>&quot;PONG :irc.test.net\r\nJOIN #test\r\nJOIN #test2\r\n&quot;</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>handle_end_motd_with_nick_password</span>() {
+        <span class='kw'>let</span> <span class='ident'>value</span> <span class='op'>=</span> <span class='string'>&quot;:irc.test.net 376 test :End of /MOTD command.\r\n&quot;</span>;
+        <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>Config</span> {
+            <span class='ident'>nick_password</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;password&quot;</span>)),
+            <span class='ident'>channels</span>: <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;#test&quot;</span>), <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;#test2&quot;</span>)]),
+            .. <span class='ident'>Default</span>::<span class='ident'>default</span>()
+        }, <span class='ident'>Connection</span>::<span class='ident'>new</span>(
+           <span class='ident'>MemReader</span>::<span class='ident'>new</span>(<span class='ident'>value</span>.<span class='ident'>as_bytes</span>().<span class='ident'>to_vec</span>()), <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()
+        ));
+        <span class='kw'>for</span> <span class='ident'>message</span> <span class='kw'>in</span> <span class='ident'>server</span>.<span class='ident'>iter</span>() {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>message</span>);
+        }
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
+        <span class='string'>&quot;NICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>

@@ -44,7 +44,7 @@
 <h1 class='fqn'><span class='in-band'>Enum <a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>command</a>::<wbr><a class='enum' href=''>Command</a><wbr><a class='stability Stable' title=''>Stable</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-1090' href='../../../src/irc/data/command.rs.html#12-138'>[src]</a></span></h1>
+        </span><a id='src-625' href='../../../src/irc/data/command.rs.html#13-151'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum Command&lt;'a&gt; {
     PASS(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
     NICK(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
@@ -96,10 +96,17 @@
     SANICK(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, &amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
     SAPART(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, &amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
     SAQUIT(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, &amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
+    NICKSERV(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
+    CHANSERV(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
+    OPERSERV(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
+    BOTSERV(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
+    HOSTSERV(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
+    MEMOSERV(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
     CAP(<a class='enum' href='../../../irc/data/command/enum.CapSubCommand.html' title='irc::data::command::CapSubCommand'>CapSubCommand</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;),
-}</pre><div class='docblock'><p>List of all client commands as defined in <a href="http://tools.ietf.org/html/rfc2812">RFC 2812</a>.
-This also includes commands from the 
-<a href="https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01">capabilities extension</a>.</p>
+}</pre><div class='docblock'><p>List of all client commands as defined in <a href="http://tools.ietf.org/html/rfc2812">RFC 2812</a>. This
+also includes commands from the 
+<a href="https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01">capabilities extension</a>.
+Additionally, this includes some common additional commands from popular IRCds.</p>
 </div><h2 class='variants'>Variants</h2>
 <table><tr><td id='variant.PASS'><a class='stability Unstable' title='Unstable'></a><code>PASS</code></td><td><div class='docblock'><p>PASS password</p>
 </div></td></tr><tr><td id='variant.NICK'><a class='stability Unstable' title='Unstable'></a><code>NICK</code></td><td><div class='docblock'><p>NICK nickname</p>
@@ -152,6 +159,12 @@ MODE channel modes [modeparams]</p>
 </div></td></tr><tr><td id='variant.SANICK'><a class='stability Unstable' title='Unstable'></a><code>SANICK</code></td><td><div class='docblock'><p>SANICK old nickname new nickname</p>
 </div></td></tr><tr><td id='variant.SAPART'><a class='stability Unstable' title='Unstable'></a><code>SAPART</code></td><td><div class='docblock'><p>SAPART nickname reason</p>
 </div></td></tr><tr><td id='variant.SAQUIT'><a class='stability Unstable' title='Unstable'></a><code>SAQUIT</code></td><td><div class='docblock'><p>SAQUIT nickname reason</p>
+</div></td></tr><tr><td id='variant.NICKSERV'><a class='stability Unstable' title='Unstable'></a><code>NICKSERV</code></td><td><div class='docblock'><p>NICKSERV message</p>
+</div></td></tr><tr><td id='variant.CHANSERV'><a class='stability Unstable' title='Unstable'></a><code>CHANSERV</code></td><td><div class='docblock'><p>CHANSERV message</p>
+</div></td></tr><tr><td id='variant.OPERSERV'><a class='stability Unstable' title='Unstable'></a><code>OPERSERV</code></td><td><div class='docblock'><p>OPERSERV message</p>
+</div></td></tr><tr><td id='variant.BOTSERV'><a class='stability Unstable' title='Unstable'></a><code>BOTSERV</code></td><td><div class='docblock'><p>BOTSERV message</p>
+</div></td></tr><tr><td id='variant.HOSTSERV'><a class='stability Unstable' title='Unstable'></a><code>HOSTSERV</code></td><td><div class='docblock'><p>HOSTSERV message</p>
+</div></td></tr><tr><td id='variant.MEMOSERV'><a class='stability Unstable' title='Unstable'></a><code>MEMOSERV</code></td><td><div class='docblock'><p>MEMOSERV message</p>
 </div></td></tr><tr><td id='variant.CAP'><a class='stability Unstable' title='Unstable'></a><code>CAP</code></td><td><div class='docblock'><p>CAP COMMAND [param]</p>
 </div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl&lt;'a&gt; <a class='enum' href='../../../irc/data/command/enum.Command.html' title='irc::data::command::Command'>Command</a>&lt;'a&gt;</code></h3><div class='impl-items'><h4 id='method.to_message' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.to_message' class='fnname'>to_message</a>(self) -&gt; <a class='struct' href='../../../irc/data/message/struct.Message.html' title='irc::data::message::Message'>Message</a></code></h4>
 <div class='docblock'><p>Converts a Command into a Message.</p>
