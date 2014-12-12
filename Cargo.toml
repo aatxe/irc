@@ -1,7 +1,7 @@
 [package]
 
 name = "irc"
-version = "0.5.3"
+version = "0.5.4"
 description = "A simple, thread-safe IRC client library."
 authors = ["Aaron Weiss <aaronweiss74@gmail.com>"]
 license = "Unlicense"
@@ -17,10 +17,10 @@ ssl = ["openssl"]
 
 [dependencies.encoding]
 
-encoding = "~0.2.5"
+encoding = "~0.2.6"
 optional = true
 
 [dependencies.openssl]
 
-openssl = "~0.2.2"
+openssl = "~0.2.3"
 optional = true
