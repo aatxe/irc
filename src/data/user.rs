@@ -123,6 +123,8 @@ pub enum AccessLevel {
     Member,
 }
 
+impl Copy for AccessLevel {}
+
 impl PartialOrd for AccessLevel {
     fn partial_cmp(&self, other: &AccessLevel) -> Option<Ordering> {
         if self == other { return Some(Equal) }

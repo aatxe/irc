@@ -306,6 +306,8 @@ impl Response {
     }
 }
 
+impl Copy for Response {}
+
 impl FromStr for Response {
     fn from_str(s: &str) -> Option<Response> {
         if let Some(respcode) = from_str(s) {
