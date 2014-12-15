@@ -107,7 +107,7 @@ impl PartialEq for User {
 
 /// The user's access level.
 #[stable]
-#[deriving(PartialEq, Clone, Show)]
+#[deriving(Copy, PartialEq, Clone, Show)]
 pub enum AccessLevel {
     /// The channel owner (~).
     Owner,
@@ -122,8 +122,6 @@ pub enum AccessLevel {
     /// A normal user,
     Member,
 }
-
-impl Copy for AccessLevel {}
 
 impl PartialOrd for AccessLevel {
     fn partial_cmp(&self, other: &AccessLevel) -> Option<Ordering> {

@@ -6,7 +6,7 @@ use data::message::Message;
 
 /// List of all server responses as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812).
 /// All commands are documented with their expected form from the RFC.
-#[deriving(Show, PartialEq, FromPrimitive)]
+#[deriving(Copy, Show, PartialEq, FromPrimitive)]
 #[repr(uint)]
 #[unstable]
 pub enum Response {
@@ -305,8 +305,6 @@ impl Response {
         *self as uint >= 400
     }
 }
-
-impl Copy for Response {}
 
 impl FromStr for Response {
     fn from_str(s: &str) -> Option<Response> {

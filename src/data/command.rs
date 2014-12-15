@@ -948,7 +948,7 @@ impl<'a> Command<'a> {
 
 /// A list of all of the subcommands for the capabilities extension.
 #[stable]
-#[deriving(Show, PartialEq)]
+#[deriving(Copy, Show, PartialEq)]
 pub enum CapSubCommand {
     /// Requests a list of the server's capabilities.
     LS,
