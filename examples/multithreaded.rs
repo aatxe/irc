@@ -20,7 +20,7 @@ fn main() {
     server.identify().unwrap();
     let server = irc_server.clone();
     // We won't use a wrapper here because we don't need the added functionality.
-    spawn(proc() { 
+    spawn(move || { 
         for msg in server.iter() {
             print!("{}", msg.into_string());
         }
