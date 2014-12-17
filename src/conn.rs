@@ -108,7 +108,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
                 detail: Some(format!("Invalid decoder: {}", encoding))
             })
         };
-        let data = match encoding.encode(message.into_string()[], EncoderTrap::Strict) {
+        let data = match encoding.encode(message.into_string()[], EncoderTrap::Replace) {
             Ok(data) => data,
             Err(data) => return Err(IoError {
                 kind: IoErrorKind::InvalidInput,
@@ -143,7 +143,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
             })
         };
         self.reader.lock().read_until(b'\n').and_then(|line|
-            match encoding.decode(line[], DecoderTrap::Strict) {
+            match encoding.decode(line[], DecoderTrap::Replace) {
                 Ok(data) => Ok(data),
                 Err(data) => Err(IoError {
                     kind: IoErrorKind::InvalidInput,
