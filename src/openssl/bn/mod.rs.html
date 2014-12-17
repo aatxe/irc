@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.2.2/src/bn/mod.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.2.5/src/bn/mod.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>mod.rs.html -- source</title>
@@ -543,6 +543,7 @@
 <span id='501'>501</span>
 <span id='502'>502</span>
 <span id='503'>503</span>
+<span id='504'>504</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>c_int</span>, <span class='ident'>c_ulong</span>, <span class='ident'>c_void</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::{<span class='ident'>fmt</span>, <span class='ident'>ptr</span>};
@@ -553,6 +554,7 @@
 
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>BigNum</span>(<span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>ffi</span>::<span class='ident'>BIGNUM</span>);
 
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Copy</span>)]</span>
 <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>RNGProperty</span> {
     <span class='ident'>MsbMaybeZero</span> <span class='op'>=</span> <span class='op'>-</span><span class='number'>1</span>,
@@ -952,45 +954,45 @@
     <span class='kw'>use</span> <span class='ident'>ffi</span>;
     <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>BigNum</span>};
 
-    <span class='kw'>impl</span> <span class='ident'>Add</span><span class='op'>&lt;</span><span class='ident'>BigNum</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BigNum</span> {
-        <span class='kw'>fn</span> <span class='ident'>add</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>oth</span>: <span class='kw-2'>&amp;</span><span class='ident'>BigNum</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
+    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Add</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span> {
+        <span class='kw'>fn</span> <span class='ident'>add</span>(<span class='self'>self</span>, <span class='ident'>oth</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
             <span class='self'>self</span>.<span class='ident'>checked_add</span>(<span class='ident'>oth</span>).<span class='ident'>unwrap</span>()
         }
     }
 
-    <span class='kw'>impl</span> <span class='ident'>Sub</span><span class='op'>&lt;</span><span class='ident'>BigNum</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BigNum</span> {
-        <span class='kw'>fn</span> <span class='ident'>sub</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>oth</span>: <span class='kw-2'>&amp;</span><span class='ident'>BigNum</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
+    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Sub</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span> {
+        <span class='kw'>fn</span> <span class='ident'>sub</span>(<span class='self'>self</span>, <span class='ident'>oth</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
             <span class='self'>self</span>.<span class='ident'>checked_sub</span>(<span class='ident'>oth</span>).<span class='ident'>unwrap</span>()
         }
     }
 
-    <span class='kw'>impl</span> <span class='ident'>Mul</span><span class='op'>&lt;</span><span class='ident'>BigNum</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BigNum</span> {
-        <span class='kw'>fn</span> <span class='ident'>mul</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>oth</span>: <span class='kw-2'>&amp;</span><span class='ident'>BigNum</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
+    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Mul</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span> {
+        <span class='kw'>fn</span> <span class='ident'>mul</span>(<span class='self'>self</span>, <span class='ident'>oth</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
             <span class='self'>self</span>.<span class='ident'>checked_mul</span>(<span class='ident'>oth</span>).<span class='ident'>unwrap</span>()
         }
     }
 
-    <span class='kw'>impl</span> <span class='ident'>Div</span><span class='op'>&lt;</span><span class='ident'>BigNum</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BigNum</span> {
-        <span class='kw'>fn</span> <span class='ident'>div</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>oth</span>: <span class='kw-2'>&amp;</span><span class='ident'>BigNum</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
+    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Div</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span> {
+        <span class='kw'>fn</span> <span class='ident'>div</span>(<span class='self'>self</span>, <span class='ident'>oth</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
             <span class='self'>self</span>.<span class='ident'>checked_div</span>(<span class='ident'>oth</span>).<span class='ident'>unwrap</span>()
         }
     }
 
-    <span class='kw'>impl</span> <span class='ident'>Rem</span><span class='op'>&lt;</span><span class='ident'>BigNum</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BigNum</span> {
-        <span class='kw'>fn</span> <span class='ident'>rem</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>oth</span>: <span class='kw-2'>&amp;</span><span class='ident'>BigNum</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
+    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Rem</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span> {
+        <span class='kw'>fn</span> <span class='ident'>rem</span>(<span class='self'>self</span>, <span class='ident'>oth</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
             <span class='self'>self</span>.<span class='ident'>checked_mod</span>(<span class='ident'>oth</span>).<span class='ident'>unwrap</span>()
         }
     }
 
-    <span class='kw'>impl</span> <span class='ident'>Shl</span><span class='op'>&lt;</span><span class='ident'>i32</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BigNum</span> {
-        <span class='kw'>fn</span> <span class='ident'>shl</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
-            <span class='self'>self</span>.<span class='ident'>checked_shl</span>(<span class='ident'>n</span>).<span class='ident'>unwrap</span>()
+    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Shl</span><span class='op'>&lt;</span><span class='ident'>i32</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span> {
+        <span class='kw'>fn</span> <span class='ident'>shl</span>(<span class='self'>self</span>, <span class='ident'>n</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
+            <span class='self'>self</span>.<span class='ident'>checked_shl</span>(<span class='kw-2'>&amp;</span><span class='ident'>n</span>).<span class='ident'>unwrap</span>()
         }
     }
 
-    <span class='kw'>impl</span> <span class='ident'>Shr</span><span class='op'>&lt;</span><span class='ident'>i32</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BigNum</span> {
-        <span class='kw'>fn</span> <span class='ident'>shr</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>n</span>: <span class='kw-2'>&amp;</span><span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
-            <span class='self'>self</span>.<span class='ident'>checked_shr</span>(<span class='ident'>n</span>).<span class='ident'>unwrap</span>()
+    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Shr</span><span class='op'>&lt;</span><span class='ident'>i32</span>, <span class='ident'>BigNum</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>BigNum</span> {
+        <span class='kw'>fn</span> <span class='ident'>shr</span>(<span class='self'>self</span>, <span class='ident'>n</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>BigNum</span> {
+            <span class='self'>self</span>.<span class='ident'>checked_shr</span>(<span class='kw-2'>&amp;</span><span class='ident'>n</span>).<span class='ident'>unwrap</span>()
         }
     }
 

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.5/src/codec/error.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.6/src/codec/error.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>error.rs.html -- source</title>
@@ -145,7 +145,7 @@
 <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
 
 <span class='doccomment'>/// An encoding that returns encoder/decoder error for every case.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ErrorEncoding</span>;
 
 <span class='kw'>impl</span> <span class='ident'>Encoding</span> <span class='kw'>for</span> <span class='ident'>ErrorEncoding</span> {
@@ -155,7 +155,7 @@
 }
 
 <span class='doccomment'>/// An encoder that always returns error.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ErrorEncoder</span>;
 
 <span class='kw'>impl</span> <span class='ident'>ErrorEncoder</span> {
@@ -181,7 +181,7 @@
 }
 
 <span class='doccomment'>/// A decoder that always returns error.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ErrorDecoder</span>;
 
 <span class='kw'>impl</span> <span class='ident'>ErrorDecoder</span> {
@@ -215,7 +215,7 @@
         <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;A&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
         <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;B&quot;</span>, <span class='string'>&quot;C&quot;</span>, []);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u00a0&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{a0}&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
     }
 

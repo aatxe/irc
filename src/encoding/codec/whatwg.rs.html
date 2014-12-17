@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.5/src/codec/whatwg.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.6/src/codec/whatwg.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>whatwg.rs.html -- source</title>
@@ -86,7 +86,7 @@
 
 <span class='doccomment'>/// Replacement encoding used to solve a particular attack vector due to mismatching server and</span>
 <span class='doccomment'>/// client supports for encodings. It is rarely useful outside.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>EncoderOnlyUTF8Encoding</span>;
 
 <span class='kw'>impl</span> <span class='ident'>Encoding</span> <span class='kw'>for</span> <span class='ident'>EncoderOnlyUTF8Encoding</span> {

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.2.2/src/crypto/pkey.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.2.5/src/crypto/pkey.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>pkey.rs.html -- source</title>
@@ -458,6 +458,8 @@
 <span id='416'>416</span>
 <span id='417'>417</span>
 <span id='418'>418</span>
+<span id='419'>419</span>
+<span id='420'>420</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>c_int</span>, <span class='ident'>c_uint</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
@@ -467,7 +469,7 @@
 <span class='kw'>use</span> <span class='ident'>ffi</span>;
 <span class='kw'>use</span> <span class='ident'>ssl</span>::<span class='ident'>error</span>::{<span class='ident'>SslError</span>, <span class='ident'>StreamError</span>};
 
-
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Copy</span>)]</span>
 <span class='kw'>enum</span> <span class='ident'>Parts</span> {
     <span class='ident'>Neither</span>,
     <span class='ident'>Public</span>,
@@ -475,6 +477,7 @@
 }
 
 <span class='doccomment'>/// Represents a role an asymmetric key might be appropriate for.</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Role</span> {
     <span class='ident'>Encrypt</span>,
     <span class='ident'>Decrypt</span>,
@@ -483,6 +486,7 @@
 }
 
 <span class='doccomment'>/// Type of encryption padding to use.</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>EncryptionPadding</span> {
     <span class='ident'>OAEP</span>,
     <span class='ident'>PKCS1v15</span>

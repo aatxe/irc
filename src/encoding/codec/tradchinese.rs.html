@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.5/src/codec/tradchinese.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.6/src/codec/tradchinese.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>tradchinese.rs.html -- source</title>
@@ -288,8 +288,6 @@
 <span id='246'>246</span>
 <span id='247'>247</span>
 <span id='248'>248</span>
-<span id='249'>249</span>
-<span id='250'>250</span>
 </pre><pre class='rust '>
 <span class='comment'>// This is a part of rust-encoding.</span>
 <span class='comment'>// Copyright (c) 2013-2014, Kang Seonghoon.</span>
@@ -315,7 +313,7 @@
  * This particular implementation of Big5 includes the widespread ETEN and HKSCS extensions,
  * but excludes less common extensions such as Big5+, Big-5E and Unicode-at-on.
  */</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>BigFive2003Encoding</span>;
 
 <span class='kw'>impl</span> <span class='ident'>Encoding</span> <span class='kw'>for</span> <span class='ident'>BigFive2003Encoding</span> {
@@ -326,7 +324,7 @@
 }
 
 <span class='doccomment'>/// An encoder for Big5-2003.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>BigFive2003Encoder</span>;
 
 <span class='kw'>impl</span> <span class='ident'>BigFive2003Encoder</span> {
@@ -341,7 +339,7 @@
         <span class='ident'>output</span>.<span class='ident'>writer_hint</span>(<span class='ident'>input</span>.<span class='ident'>len</span>());
 
         <span class='kw'>for</span> ((<span class='ident'>i</span>,<span class='ident'>j</span>), <span class='ident'>ch</span>) <span class='kw'>in</span> <span class='ident'>input</span>.<span class='ident'>index_iter</span>() {
-            <span class='kw'>if</span> <span class='ident'>ch</span> <span class='op'>&lt;</span> <span class='string'>&#39;\u0080&#39;</span> {
+            <span class='kw'>if</span> <span class='ident'>ch</span> <span class='op'>&lt;</span> <span class='string'>&#39;\u{80}&#39;</span> {
                 <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u8</span>);
             } <span class='kw'>else</span> {
                 <span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='ident'>index</span>::<span class='ident'>big5</span>::<span class='ident'>backward</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
@@ -368,7 +366,7 @@
 
 <span class='macro'>ascii_compatible_stateful_decoder</span><span class='macro'>!</span> {
     <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>&quot;A decoder for Big5-2003 with HKSCS-2008 extension.&quot;</span>]</span>
-    <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+    <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
     <span class='kw'>struct</span> <span class='ident'>BigFive2003HKSCS2008Decoder</span>;
 
     <span class='ident'>module</span> <span class='ident'>bigfive2003</span>;
@@ -402,10 +400,10 @@
                 <span class='kw'>let</span> <span class='ident'>backup</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>b</span> <span class='op'>&lt;</span> <span class='number'>0x80</span> {<span class='number'>1</span>} <span class='kw'>else</span> {<span class='number'>0</span>};
                 <span class='ident'>ctx</span>.<span class='ident'>backup_and_err</span>(<span class='ident'>backup</span>, <span class='string'>&quot;invalid sequence&quot;</span>)
             },
-            <span class='number'>0</span> <span class='comment'>/*index=1133*/</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit_str</span>(<span class='string'>&quot;\u00ca\u0304&quot;</span>),
-            <span class='number'>1</span> <span class='comment'>/*index=1135*/</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit_str</span>(<span class='string'>&quot;\u00ca\u030c&quot;</span>),
-            <span class='number'>2</span> <span class='comment'>/*index=1164*/</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit_str</span>(<span class='string'>&quot;\u00ea\u0304&quot;</span>),
-            <span class='number'>3</span> <span class='comment'>/*index=1166*/</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit_str</span>(<span class='string'>&quot;\u00ea\u030c&quot;</span>),
+            <span class='number'>0</span> <span class='comment'>/*index=1133*/</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit_str</span>(<span class='string'>&quot;\u{ca}\u{304}&quot;</span>),
+            <span class='number'>1</span> <span class='comment'>/*index=1135*/</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit_str</span>(<span class='string'>&quot;\u{ca}\u{30c}&quot;</span>),
+            <span class='number'>2</span> <span class='comment'>/*index=1164*/</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit_str</span>(<span class='string'>&quot;\u{ea}\u{304}&quot;</span>),
+            <span class='number'>3</span> <span class='comment'>/*index=1166*/</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit_str</span>(<span class='string'>&quot;\u{ea}\u{30c}&quot;</span>),
             <span class='ident'>ch</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='ident'>ch</span>),
         };
     }
@@ -418,8 +416,6 @@
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>range_inclusive</span>;
     <span class='kw'>use</span> <span class='ident'>testutils</span>;
     <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
-    <span class='kw'>use</span> <span class='ident'>types</span>::<span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span> <span class='kw'>as</span> <span class='ident'>DecodeStrict</span>;
-    <span class='kw'>use</span> <span class='ident'>types</span>::<span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span> <span class='kw'>as</span> <span class='ident'>EncodeStrict</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_encoder_valid</span>() {
@@ -427,19 +423,19 @@
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;A&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x41</span>]);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;BC&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x42</span>, <span class='number'>0x43</span>]);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u4e2d\u83ef\u6c11\u570b&quot;</span>, <span class='string'>&quot;&quot;</span>,
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{4e2d}\u{83ef}\u{6c11}\u{570b}&quot;</span>, <span class='string'>&quot;&quot;</span>,
                         [<span class='number'>0xa4</span>, <span class='number'>0xa4</span>, <span class='number'>0xb5</span>, <span class='number'>0xd8</span>, <span class='number'>0xa5</span>, <span class='number'>0xc1</span>, <span class='number'>0xb0</span>, <span class='number'>0xea</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;1\u20ac/m&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x31</span>, <span class='number'>0xa3</span>, <span class='number'>0xe1</span>, <span class='number'>0x2f</span>, <span class='number'>0x6d</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\uffed&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xf9</span>, <span class='number'>0xfe</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;1\u{20ac}/m&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x31</span>, <span class='number'>0xa3</span>, <span class='number'>0xe1</span>, <span class='number'>0x2f</span>, <span class='number'>0x6d</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{ffed}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xf9</span>, <span class='number'>0xfe</span>]);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_encoder_invalid</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>BigFive2003Encoding</span>.<span class='ident'>raw_encoder</span>();
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\uffff&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;?&quot;</span>, <span class='string'>&quot;\uffff&quot;</span>, <span class='string'>&quot;!&quot;</span>, [<span class='number'>0x3f</span>]);
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u3eec&quot;</span>, <span class='string'>&quot;\u4e00&quot;</span>, []); <span class='comment'>// HKSCS-2008 addition</span>
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{ffff}&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;?&quot;</span>, <span class='string'>&quot;\u{ffff}&quot;</span>, <span class='string'>&quot;!&quot;</span>, [<span class='number'>0x3f</span>]);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{3eec}&quot;</span>, <span class='string'>&quot;\u{4e00}&quot;</span>, []); <span class='comment'>// HKSCS-2008 addition</span>
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
     }
 
@@ -450,15 +446,15 @@
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x42</span>, <span class='number'>0x43</span>], [], <span class='string'>&quot;BC&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0xa4</span>, <span class='number'>0xb5</span>, <span class='number'>0xd8</span>, <span class='number'>0xa5</span>, <span class='number'>0xc1</span>, <span class='number'>0xb0</span>, <span class='number'>0xea</span>], [],
-                        <span class='string'>&quot;\u4e2d\u83ef\u6c11\u570b&quot;</span>);
+                        <span class='string'>&quot;\u{4e2d}\u{83ef}\u{6c11}\u{570b}&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0xa4</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0xb5</span>, <span class='number'>0xd8</span>], [<span class='number'>0xa5</span>], <span class='string'>&quot;\u4e2d\u83ef&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc1</span>, <span class='number'>0xb0</span>, <span class='number'>0xea</span>], [], <span class='string'>&quot;\u6c11\u570b&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x31</span>, <span class='number'>0xa3</span>, <span class='number'>0xe1</span>, <span class='number'>0x2f</span>, <span class='number'>0x6d</span>], [], <span class='string'>&quot;1\u20ac/m&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xf9</span>, <span class='number'>0xfe</span>], [], <span class='string'>&quot;\uffed&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x87</span>, <span class='number'>0x7e</span>], [], <span class='string'>&quot;\u3eec&quot;</span>); <span class='comment'>// HKSCS-2008 addition</span>
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0xb5</span>, <span class='number'>0xd8</span>], [<span class='number'>0xa5</span>], <span class='string'>&quot;\u{4e2d}\u{83ef}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc1</span>, <span class='number'>0xb0</span>, <span class='number'>0xea</span>], [], <span class='string'>&quot;\u{6c11}\u{570b}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x31</span>, <span class='number'>0xa3</span>, <span class='number'>0xe1</span>, <span class='number'>0x2f</span>, <span class='number'>0x6d</span>], [], <span class='string'>&quot;1\u{20ac}/m&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xf9</span>, <span class='number'>0xfe</span>], [], <span class='string'>&quot;\u{ffed}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x87</span>, <span class='number'>0x7e</span>], [], <span class='string'>&quot;\u{3eec}&quot;</span>); <span class='comment'>// HKSCS-2008 addition</span>
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x88</span>, <span class='number'>0x62</span>, <span class='number'>0x88</span>, <span class='number'>0x64</span>, <span class='number'>0x88</span>, <span class='number'>0xa3</span>, <span class='number'>0x88</span>, <span class='number'>0xa5</span>], [],
-                        <span class='string'>&quot;\u00ca\u0304\u00ca\u030c\u00ea\u0304\u00ea\u030c&quot;</span>); <span class='comment'>// two-byte mappings</span>
+                        <span class='string'>&quot;\u{ca}\u{304}\u{00ca}\u{30c}\u{ea}\u{304}\u{ea}\u{30c}&quot;</span>); <span class='comment'>// 2-byte output</span>
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
     }
 
@@ -516,9 +512,9 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_feed_after_finish</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>BigFive2003Encoding</span>.<span class='ident'>raw_decoder</span>();
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0x40</span>], [<span class='number'>0xa4</span>], <span class='string'>&quot;\u4e00&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0x40</span>], [<span class='number'>0xa4</span>], <span class='string'>&quot;\u{4e00}&quot;</span>);
         <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0x40</span>], [], <span class='string'>&quot;\u4e00&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0x40</span>], [], <span class='string'>&quot;\u{4e00}&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
     }
 
@@ -527,17 +523,17 @@
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>testutils</span>::<span class='ident'>TRADITIONAL_CHINESE_TEXT</span>;
         <span class='ident'>bencher</span>.<span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>u64</span>;
         <span class='ident'>bencher</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='ident'>test</span>::<span class='ident'>black_box</span>({
-            <span class='ident'>BigFive2003Encoding</span>.<span class='ident'>encode</span>(<span class='ident'>s</span>[], <span class='ident'>EncodeStrict</span>)
+            <span class='ident'>BigFive2003Encoding</span>.<span class='ident'>encode</span>(<span class='ident'>s</span>[], <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>)
         }))
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>bench_decode_short_text</span>(<span class='ident'>bencher</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>test</span>::<span class='ident'>Bencher</span>) {
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>BigFive2003Encoding</span>.<span class='ident'>encode</span>(<span class='ident'>testutils</span>::<span class='ident'>TRADITIONAL_CHINESE_TEXT</span>,
-                                           <span class='ident'>EncodeStrict</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
+                                           <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
         <span class='ident'>bencher</span>.<span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>u64</span>;
         <span class='ident'>bencher</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='ident'>test</span>::<span class='ident'>black_box</span>({
-            <span class='ident'>BigFive2003Encoding</span>.<span class='ident'>decode</span>(<span class='ident'>s</span>[], <span class='ident'>DecodeStrict</span>)
+            <span class='ident'>BigFive2003Encoding</span>.<span class='ident'>decode</span>(<span class='ident'>s</span>[], <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>)
         }))
     }
 }

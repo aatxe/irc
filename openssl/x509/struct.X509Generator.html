@@ -44,7 +44,7 @@
 <h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>openssl</a>::<wbr><a href='index.html'>x509</a>::<wbr><a class='struct' href=''>X509Generator</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-10638' href='../../src/openssl/x509/mod.rs.html#170-177'>[src]</a></span></h1>
+        </span><a id='src-10628' href='../../src/openssl/x509/mod.rs.html#172-179'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct X509Generator {
     // some fields omitted
 }</pre><div class='docblock'><p>Generator of private key/certificate pairs</p>
@@ -53,15 +53,15 @@
                            href="#example">Example</a></h1><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>File</span>, <span class='ident'>Open</span>, <span class='ident'>Write</span>};
 
-<span class='kw'>use</span> <span class='ident'>openssl</span>::<span class='ident'>crypto</span>::<span class='ident'>hash</span>::<span class='ident'>SHA256</span>;
-<span class='kw'>use</span> <span class='ident'>openssl</span>::<span class='ident'>x509</span>::{<span class='ident'>DigitalSignature</span>, <span class='ident'>X509Generator</span>};
+<span class='kw'>use</span> <span class='ident'>openssl</span>::<span class='ident'>crypto</span>::<span class='ident'>hash</span>::<span class='ident'>HashType</span>;
+<span class='kw'>use</span> <span class='ident'>openssl</span>::<span class='ident'>x509</span>::{<span class='ident'>KeyUsage</span>, <span class='ident'>X509Generator</span>};
 
 <span class='kw'>let</span> <span class='ident'>gen</span> <span class='op'>=</span> <span class='ident'>X509Generator</span>::<span class='ident'>new</span>()
        .<span class='ident'>set_bitlength</span>(<span class='number'>2048</span>)
        .<span class='ident'>set_valid_period</span>(<span class='number'>365</span><span class='op'>*</span><span class='number'>2</span>)
        .<span class='ident'>set_CN</span>(<span class='string'>&quot;SuperMegaCorp Inc.&quot;</span>)
-       .<span class='ident'>set_sign_hash</span>(<span class='ident'>SHA256</span>)
-       .<span class='ident'>set_usage</span>(<span class='kw-2'>&amp;</span>[<span class='ident'>DigitalSignature</span>]);
+       .<span class='ident'>set_sign_hash</span>(<span class='ident'>HashType</span>::<span class='ident'>SHA256</span>)
+       .<span class='ident'>set_usage</span>(<span class='kw-2'>&amp;</span>[<span class='ident'>KeyUsage</span>::<span class='ident'>DigitalSignature</span>]);
 
 <span class='kw'>let</span> (<span class='ident'>cert</span>, <span class='ident'>pkey</span>) <span class='op'>=</span> <span class='ident'>gen</span>.<span class='ident'>generate</span>().<span class='ident'>unwrap</span>();
 

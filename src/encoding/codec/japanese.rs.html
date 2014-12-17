@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.5/src/codec/japanese.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.6/src/codec/japanese.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>japanese.rs.html -- source</title>
@@ -1299,8 +1299,6 @@
 <span id='1257'>1257</span>
 <span id='1258'>1258</span>
 <span id='1259'>1259</span>
-<span id='1260'>1260</span>
-<span id='1261'>1261</span>
 </pre><pre class='rust '>
 <span class='comment'>// This is a part of rust-encoding.</span>
 <span class='comment'>// Copyright (c) 2013-2014, Kang Seonghoon.</span>
@@ -1328,7 +1326,7 @@
  * the upper half of JIS X 0212 in G2 (`8E [A1-DF]`), and
  * JIS X 0212 in G3 (`8F [A1-FE] [A1-FE]`).
  */</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>EUCJPEncoding</span>;
 
 <span class='kw'>impl</span> <span class='ident'>Encoding</span> <span class='kw'>for</span> <span class='ident'>EUCJPEncoding</span> {
@@ -1339,7 +1337,7 @@
 }
 
 <span class='doccomment'>/// An encoder for EUC-JP with unused G3 character set.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>EUCJPEncoder</span>;
 
 <span class='kw'>impl</span> <span class='ident'>EUCJPEncoder</span> {
@@ -1355,10 +1353,10 @@
 
         <span class='kw'>for</span> ((<span class='ident'>i</span>,<span class='ident'>j</span>), <span class='ident'>ch</span>) <span class='kw'>in</span> <span class='ident'>input</span>.<span class='ident'>index_iter</span>() {
             <span class='kw'>match</span> <span class='ident'>ch</span> {
-                <span class='string'>&#39;\u0000&#39;</span>...<span class='string'>&#39;\u007f&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u8</span>); }
-                <span class='string'>&#39;\u00a5&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x5c</span>); }
-                <span class='string'>&#39;\u203e&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x7e</span>); }
-                <span class='string'>&#39;\uff61&#39;</span>...<span class='string'>&#39;\uff9f&#39;</span> <span class='op'>=&gt;</span> {
+                <span class='string'>&#39;\u{0}&#39;</span>...<span class='string'>&#39;\u{7f}&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u8</span>); }
+                <span class='string'>&#39;\u{a5}&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x5c</span>); }
+                <span class='string'>&#39;\u{203e}&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x7e</span>); }
+                <span class='string'>&#39;\u{ff61}&#39;</span>...<span class='string'>&#39;\u{ff9f}&#39;</span> <span class='op'>=&gt;</span> {
                     <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x8e</span>);
                     <span class='ident'>output</span>.<span class='ident'>write_byte</span>((<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>-</span> <span class='number'>0xff61</span> <span class='op'>+</span> <span class='number'>0xa1</span>) <span class='kw'>as</span> <span class='ident'>u8</span>);
                 }
@@ -1387,7 +1385,7 @@
 
 <span class='macro'>ascii_compatible_stateful_decoder</span><span class='macro'>!</span> {
     <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>&quot;A decoder for EUC-JP with JIS X 0212 in G3.&quot;</span>]</span>
-    <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+    <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
     <span class='kw'>struct</span> <span class='ident'>EUCJP0212Decoder</span>;
 
     <span class='ident'>module</span> <span class='ident'>eucjp</span>;
@@ -1469,8 +1467,6 @@
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>range_inclusive</span>;
     <span class='kw'>use</span> <span class='ident'>testutils</span>;
     <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
-    <span class='kw'>use</span> <span class='ident'>types</span>::<span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span> <span class='kw'>as</span> <span class='ident'>DecodeStrict</span>;
-    <span class='kw'>use</span> <span class='ident'>types</span>::<span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span> <span class='kw'>as</span> <span class='ident'>EncodeStrict</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_encoder_valid</span>() {
@@ -1478,11 +1474,11 @@
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;A&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x41</span>]);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;BC&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x42</span>, <span class='number'>0x43</span>]);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u00a5&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x5c</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u203e&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x7e</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u306b\u307b\u3093&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xa4</span>, <span class='number'>0xcb</span>, <span class='number'>0xa4</span>, <span class='number'>0xdb</span>, <span class='number'>0xa4</span>, <span class='number'>0xf3</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\uff86\uff8e\uff9d&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x8e</span>, <span class='number'>0xc6</span>, <span class='number'>0x8e</span>, <span class='number'>0xce</span>, <span class='number'>0x8e</span>, <span class='number'>0xdd</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u65e5\u672c&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xc6</span>, <span class='number'>0xfc</span>, <span class='number'>0xcb</span>, <span class='number'>0xdc</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{a5}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x5c</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{203e}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x7e</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{306b}\u{307b}\u{3093}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xa4</span>, <span class='number'>0xcb</span>, <span class='number'>0xa4</span>, <span class='number'>0xdb</span>, <span class='number'>0xa4</span>, <span class='number'>0xf3</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{ff86}\u{ff8e}\u{ff9d}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x8e</span>, <span class='number'>0xc6</span>, <span class='number'>0x8e</span>, <span class='number'>0xce</span>, <span class='number'>0x8e</span>, <span class='number'>0xdd</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{65e5}\u{672c}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xc6</span>, <span class='number'>0xfc</span>, <span class='number'>0xcb</span>, <span class='number'>0xdc</span>]);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
     }
 
@@ -1491,17 +1487,17 @@
         <span class='comment'>// these characters are double-mapped to both EUDC area and Shift_JIS extension area</span>
         <span class='comment'>// but only the former should be used. (note that U+FFE2 is triple-mapped!)</span>
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_encoder</span>();
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u9ed1\u2170\uffe2&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xfc</span>, <span class='number'>0xee</span>, <span class='number'>0xfc</span>, <span class='number'>0xf1</span>, <span class='number'>0xa2</span>, <span class='number'>0xcc</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{9ed1}\u{2170}\u{ffe2}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xfc</span>, <span class='number'>0xee</span>, <span class='number'>0xfc</span>, <span class='number'>0xf1</span>, <span class='number'>0xa2</span>, <span class='number'>0xcc</span>]);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_encoder_invalid</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_encoder</span>();
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\uffff&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;?&quot;</span>, <span class='string'>&quot;\uffff&quot;</span>, <span class='string'>&quot;!&quot;</span>, [<span class='number'>0x3f</span>]);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{ffff}&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;?&quot;</span>, <span class='string'>&quot;\u{ffff}&quot;</span>, <span class='string'>&quot;!&quot;</span>, [<span class='number'>0x3f</span>]);
         <span class='comment'>// JIS X 0212 is not supported in the encoder</span>
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u736c&quot;</span>, <span class='string'>&quot;\u8c78&quot;</span>, []);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{736c}&quot;</span>, <span class='string'>&quot;\u{8c78}&quot;</span>, []);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
     }
 
@@ -1513,10 +1509,10 @@
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x5c</span>], [], <span class='string'>&quot;\\&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x7e</span>], [], <span class='string'>&quot;~&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0xcb</span>, <span class='number'>0xa4</span>, <span class='number'>0xdb</span>, <span class='number'>0xa4</span>, <span class='number'>0xf3</span>], [], <span class='string'>&quot;\u306b\u307b\u3093&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x8e</span>, <span class='number'>0xc6</span>, <span class='number'>0x8e</span>, <span class='number'>0xce</span>, <span class='number'>0x8e</span>, <span class='number'>0xdd</span>], [], <span class='string'>&quot;\uff86\uff8e\uff9d&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc6</span>, <span class='number'>0xfc</span>, <span class='number'>0xcb</span>, <span class='number'>0xdc</span>], [], <span class='string'>&quot;\u65e5\u672c&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x8f</span>, <span class='number'>0xcb</span>, <span class='number'>0xc6</span>, <span class='number'>0xec</span>, <span class='number'>0xb8</span>], [], <span class='string'>&quot;\u736c\u8c78&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0xcb</span>, <span class='number'>0xa4</span>, <span class='number'>0xdb</span>, <span class='number'>0xa4</span>, <span class='number'>0xf3</span>], [], <span class='string'>&quot;\u{306b}\u{307b}\u{3093}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x8e</span>, <span class='number'>0xc6</span>, <span class='number'>0x8e</span>, <span class='number'>0xce</span>, <span class='number'>0x8e</span>, <span class='number'>0xdd</span>], [], <span class='string'>&quot;\u{ff86}\u{ff8e}\u{ff9d}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc6</span>, <span class='number'>0xfc</span>, <span class='number'>0xcb</span>, <span class='number'>0xdc</span>], [], <span class='string'>&quot;\u{65e5}\u{672c}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x8f</span>, <span class='number'>0xcb</span>, <span class='number'>0xc6</span>, <span class='number'>0xec</span>, <span class='number'>0xb8</span>], [], <span class='string'>&quot;\u{736c}\u{8c78}&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
     }
 
@@ -1524,22 +1520,22 @@
     <span class='kw'>fn</span> <span class='ident'>test_decoder_valid_partial</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0xa4</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xcb</span>], [<span class='number'>0xa4</span>], <span class='string'>&quot;\u306b&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xdb</span>], [<span class='number'>0xa4</span>], <span class='string'>&quot;\u307b&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xf3</span>], [], <span class='string'>&quot;\u3093&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xcb</span>], [<span class='number'>0xa4</span>], <span class='string'>&quot;\u{306b}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xdb</span>], [<span class='number'>0xa4</span>], <span class='string'>&quot;\u{307b}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xf3</span>], [], <span class='string'>&quot;\u{3093}&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8e</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc6</span>], [<span class='number'>0x8e</span>], <span class='string'>&quot;\uff86&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xce</span>], [<span class='number'>0x8e</span>], <span class='string'>&quot;\uff8e&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xdd</span>], [], <span class='string'>&quot;\uff9d&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc6</span>], [<span class='number'>0x8e</span>], <span class='string'>&quot;\u{ff86}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xce</span>], [<span class='number'>0x8e</span>], <span class='string'>&quot;\u{ff8e}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xdd</span>], [], <span class='string'>&quot;\u{ff9d}&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0xc6</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xfc</span>], [<span class='number'>0xcb</span>], <span class='string'>&quot;\u65e5&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xdc</span>], [], <span class='string'>&quot;\u672c&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xfc</span>], [<span class='number'>0xcb</span>], <span class='string'>&quot;\u{65e5}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xdc</span>], [], <span class='string'>&quot;\u{672c}&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8f</span>], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0xcb</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc6</span>], [<span class='number'>0xec</span>], <span class='string'>&quot;\u736c&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xb8</span>], [], <span class='string'>&quot;\u8c78&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc6</span>], [<span class='number'>0xec</span>], <span class='string'>&quot;\u{736c}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xb8</span>], [], <span class='string'>&quot;\u{8c78}&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8f</span>, <span class='number'>0xcb</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc6</span>, <span class='number'>0xec</span>, <span class='number'>0xb8</span>], [], <span class='string'>&quot;\u736c\u8c78&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc6</span>, <span class='number'>0xec</span>, <span class='number'>0xb8</span>], [], <span class='string'>&quot;\u{736c}\u{8c78}&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
     }
 
@@ -1681,9 +1677,9 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_feed_after_finish</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0xa2</span>], [<span class='number'>0xa4</span>], <span class='string'>&quot;\u3042&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0xa2</span>], [<span class='number'>0xa4</span>], <span class='string'>&quot;\u{3042}&quot;</span>);
         <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0xa2</span>], [], <span class='string'>&quot;\u3042&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xa4</span>, <span class='number'>0xa2</span>], [], <span class='string'>&quot;\u{3042}&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
     }
 
@@ -1692,16 +1688,17 @@
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>testutils</span>::<span class='ident'>JAPANESE_TEXT</span>;
         <span class='ident'>bencher</span>.<span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>u64</span>;
         <span class='ident'>bencher</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='ident'>test</span>::<span class='ident'>black_box</span>({
-            <span class='ident'>EUCJPEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>s</span>[], <span class='ident'>EncodeStrict</span>)
+            <span class='ident'>EUCJPEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>s</span>[], <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>)
         }))
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>bench_decode_short_text</span>(<span class='ident'>bencher</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>test</span>::<span class='ident'>Bencher</span>) {
-        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>testutils</span>::<span class='ident'>JAPANESE_TEXT</span>, <span class='ident'>EncodeStrict</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>testutils</span>::<span class='ident'>JAPANESE_TEXT</span>,
+                                     <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
         <span class='ident'>bencher</span>.<span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>u64</span>;
         <span class='ident'>bencher</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='ident'>test</span>::<span class='ident'>black_box</span>({
-            <span class='ident'>EUCJPEncoding</span>.<span class='ident'>decode</span>(<span class='ident'>s</span>[], <span class='ident'>DecodeStrict</span>)
+            <span class='ident'>EUCJPEncoding</span>.<span class='ident'>decode</span>(<span class='ident'>s</span>[], <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>)
         }))
     }
 }
@@ -1721,7 +1718,7 @@
  * It requires some cares to handle
  * since the second byte of JIS X 0208 can have its MSB unset.
  */</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Windows31JEncoding</span>;
 
 <span class='kw'>impl</span> <span class='ident'>Encoding</span> <span class='kw'>for</span> <span class='ident'>Windows31JEncoding</span> {
@@ -1732,7 +1729,7 @@
 }
 
 <span class='doccomment'>/// An encoder for Shift_JIS with IBM/NEC extensions.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Windows31JEncoder</span>;
 
 <span class='kw'>impl</span> <span class='ident'>Windows31JEncoder</span> {
@@ -1748,10 +1745,10 @@
 
         <span class='kw'>for</span> ((<span class='ident'>i</span>,<span class='ident'>j</span>), <span class='ident'>ch</span>) <span class='kw'>in</span> <span class='ident'>input</span>.<span class='ident'>index_iter</span>() {
             <span class='kw'>match</span> <span class='ident'>ch</span> {
-                <span class='string'>&#39;\u0000&#39;</span>...<span class='string'>&#39;\u0080&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u8</span>); }
-                <span class='string'>&#39;\u00a5&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x5c</span>); }
-                <span class='string'>&#39;\u203e&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x7e</span>); }
-                <span class='string'>&#39;\uff61&#39;</span>...<span class='string'>&#39;\uff9f&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>((<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>-</span> <span class='number'>0xff61</span> <span class='op'>+</span> <span class='number'>0xa1</span>) <span class='kw'>as</span> <span class='ident'>u8</span>); }
+                <span class='string'>&#39;\u{0}&#39;</span>...<span class='string'>&#39;\u{80}&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u8</span>); }
+                <span class='string'>&#39;\u{a5}&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x5c</span>); }
+                <span class='string'>&#39;\u{203e}&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x7e</span>); }
+                <span class='string'>&#39;\u{ff61}&#39;</span>...<span class='string'>&#39;\u{ff9f}&#39;</span> <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_byte</span>((<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>-</span> <span class='number'>0xff61</span> <span class='op'>+</span> <span class='number'>0xa1</span>) <span class='kw'>as</span> <span class='ident'>u8</span>); }
                 _ <span class='op'>=&gt;</span> {
                     <span class='comment'>// corresponds to the &quot;index shift_jis pointer&quot; in the WHATWG spec</span>
                     <span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='ident'>index</span>::<span class='ident'>jis0208</span>::<span class='ident'>backward_remapped</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
@@ -1780,7 +1777,7 @@
 
 <span class='macro'>ascii_compatible_stateful_decoder</span><span class='macro'>!</span> {
     <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>&quot;A decoder for Shift_JIS with IBM/NEC extensions.&quot;</span>]</span>
-    <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+    <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
     <span class='kw'>struct</span> <span class='ident'>Windows31JDecoder</span>;
 
     <span class='ident'>module</span> <span class='ident'>windows31j</span>;
@@ -1827,8 +1824,6 @@
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>range_inclusive</span>;
     <span class='kw'>use</span> <span class='ident'>testutils</span>;
     <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
-    <span class='kw'>use</span> <span class='ident'>types</span>::<span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span> <span class='kw'>as</span> <span class='ident'>DecodeStrict</span>;
-    <span class='kw'>use</span> <span class='ident'>types</span>::<span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span> <span class='kw'>as</span> <span class='ident'>EncodeStrict</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_encoder_valid</span>() {
@@ -1836,20 +1831,20 @@
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;A&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x41</span>]);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;BC&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x42</span>, <span class='number'>0x43</span>]);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u00a5&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x5c</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u203e&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x7e</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u306b\u307b\u3093&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x82</span>, <span class='number'>0xc9</span>, <span class='number'>0x82</span>, <span class='number'>0xd9</span>, <span class='number'>0x82</span>, <span class='number'>0xf1</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\uff86\uff8e\uff9d&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xc6</span>, <span class='number'>0xce</span>, <span class='number'>0xdd</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u65e5\u672c&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x93</span>, <span class='number'>0xfa</span>, <span class='number'>0x96</span>, <span class='number'>0x7b</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{a5}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x5c</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{203e}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x7e</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{306b}\u{307b}\u{3093}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x82</span>, <span class='number'>0xc9</span>, <span class='number'>0x82</span>, <span class='number'>0xd9</span>, <span class='number'>0x82</span>, <span class='number'>0xf1</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{ff86}\u{ff8e}\u{ff9d}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xc6</span>, <span class='number'>0xce</span>, <span class='number'>0xdd</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{65e5}\u{672c}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x93</span>, <span class='number'>0xfa</span>, <span class='number'>0x96</span>, <span class='number'>0x7b</span>]);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_encoder_no_eudc</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_encoder</span>();
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\ue000&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\ue757&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\ue758&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{e000}&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{e757}&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{e758}&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
     }
 
@@ -1858,16 +1853,16 @@
         <span class='comment'>// these characters are double-mapped to both EUDC area and Shift_JIS extension area</span>
         <span class='comment'>// but only the latter should be used. (note that U+FFE2 is triple-mapped!)</span>
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_encoder</span>();
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u9ed1\u2170\uffe2&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xfc</span>, <span class='number'>0x4b</span>, <span class='number'>0xfa</span>, <span class='number'>0x40</span>, <span class='number'>0x81</span>, <span class='number'>0xca</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{9ed1}\u{2170}\u{ffe2}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0xfc</span>, <span class='number'>0x4b</span>, <span class='number'>0xfa</span>, <span class='number'>0x40</span>, <span class='number'>0x81</span>, <span class='number'>0xca</span>]);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_encoder_invalid</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_encoder</span>();
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\uffff&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;?&quot;</span>, <span class='string'>&quot;\uffff&quot;</span>, <span class='string'>&quot;!&quot;</span>, [<span class='number'>0x3f</span>]);
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u736c&quot;</span>, <span class='string'>&quot;\u8c78&quot;</span>, []);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{ffff}&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;?&quot;</span>, <span class='string'>&quot;\u{ffff}&quot;</span>, <span class='string'>&quot;!&quot;</span>, [<span class='number'>0x3f</span>]);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{736c}&quot;</span>, <span class='string'>&quot;\u{8c78}&quot;</span>, []);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
     }
 
@@ -1879,10 +1874,10 @@
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x5c</span>], [], <span class='string'>&quot;\\&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x7e</span>], [], <span class='string'>&quot;~&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x80</span>], [], <span class='string'>&quot;\u0080&quot;</span>); <span class='comment'>// compatibility</span>
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x82</span>, <span class='number'>0xc9</span>, <span class='number'>0x82</span>, <span class='number'>0xd9</span>, <span class='number'>0x82</span>, <span class='number'>0xf1</span>], [], <span class='string'>&quot;\u306b\u307b\u3093&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc6</span>, <span class='number'>0xce</span>, <span class='number'>0xdd</span>], [], <span class='string'>&quot;\uff86\uff8e\uff9d&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x93</span>, <span class='number'>0xfa</span>, <span class='number'>0x96</span>, <span class='number'>0x7b</span>], [], <span class='string'>&quot;\u65e5\u672c&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x80</span>], [], <span class='string'>&quot;\u{80}&quot;</span>); <span class='comment'>// compatibility</span>
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x82</span>, <span class='number'>0xc9</span>, <span class='number'>0x82</span>, <span class='number'>0xd9</span>, <span class='number'>0x82</span>, <span class='number'>0xf1</span>], [], <span class='string'>&quot;\u{306b}\u{307b}\u{3093}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xc6</span>, <span class='number'>0xce</span>, <span class='number'>0xdd</span>], [], <span class='string'>&quot;\u{ff86}\u{ff8e}\u{ff9d}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x93</span>, <span class='number'>0xfa</span>, <span class='number'>0x96</span>, <span class='number'>0x7b</span>], [], <span class='string'>&quot;\u{65e5}\u{672c}&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
     }
 
@@ -1890,8 +1885,8 @@
     <span class='kw'>fn</span> <span class='ident'>test_decoder_eudc</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_decoder</span>();
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0xf0</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x40</span>], [], <span class='string'>&quot;\ue000&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xf9</span>, <span class='number'>0xfc</span>], [], <span class='string'>&quot;\ue757&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x40</span>], [], <span class='string'>&quot;\u{e000}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0xf9</span>, <span class='number'>0xfc</span>], [], <span class='string'>&quot;\u{e757}&quot;</span>);
         <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0xf0</span>], [<span class='number'>0x00</span>], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0xf0</span>], [<span class='number'>0xff</span>], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1978,9 +1973,9 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_feed_after_finish</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_decoder</span>();
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x82</span>, <span class='number'>0xa0</span>], [<span class='number'>0x82</span>], <span class='string'>&quot;\u3042&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x82</span>, <span class='number'>0xa0</span>], [<span class='number'>0x82</span>], <span class='string'>&quot;\u{3042}&quot;</span>);
         <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x82</span>, <span class='number'>0xa0</span>], [], <span class='string'>&quot;\u3042&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x82</span>, <span class='number'>0xa0</span>], [], <span class='string'>&quot;\u{3042}&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
     }
 
@@ -1989,16 +1984,17 @@
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>testutils</span>::<span class='ident'>JAPANESE_TEXT</span>;
         <span class='ident'>bencher</span>.<span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>u64</span>;
         <span class='ident'>bencher</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='ident'>test</span>::<span class='ident'>black_box</span>({
-            <span class='ident'>Windows31JEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>s</span>[], <span class='ident'>EncodeStrict</span>)
+            <span class='ident'>Windows31JEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>s</span>[], <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>)
         }))
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>bench_decode_short_text</span>(<span class='ident'>bencher</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>test</span>::<span class='ident'>Bencher</span>) {
-        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>testutils</span>::<span class='ident'>JAPANESE_TEXT</span>, <span class='ident'>EncodeStrict</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>testutils</span>::<span class='ident'>JAPANESE_TEXT</span>,
+                                          <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
         <span class='ident'>bencher</span>.<span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>u64</span>;
         <span class='ident'>bencher</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='ident'>test</span>::<span class='ident'>black_box</span>({
-            <span class='ident'>Windows31JEncoding</span>.<span class='ident'>decode</span>(<span class='ident'>s</span>[], <span class='ident'>DecodeStrict</span>)
+            <span class='ident'>Windows31JEncoding</span>.<span class='ident'>decode</span>(<span class='ident'>s</span>[], <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>)
         }))
     }
 }
@@ -2016,7 +2012,7 @@
  *   but willfully violated)
  * - JIS X 0212-1990 (`ESC $ ( D`, XXX asymmetric support)
  */</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ISO2022JPEncoding</span>;
 
 <span class='kw'>impl</span> <span class='ident'>Encoding</span> <span class='kw'>for</span> <span class='ident'>ISO2022JPEncoding</span> {
@@ -2026,7 +2022,7 @@
     <span class='kw'>fn</span> <span class='ident'>raw_decoder</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawDecoder</span><span class='op'>&gt;</span> { <span class='ident'>ISO2022JPDecoder</span>::<span class='ident'>new</span>() }
 }
 
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>PartialEq</span>,<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>PartialEq</span>,<span class='ident'>Clone</span>,<span class='ident'>Copy</span>)]</span>
 <span class='kw'>enum</span> <span class='ident'>ISO2022JPState</span> {
     <span class='ident'>ASCII</span>, <span class='comment'>// U+0000..007F, U+00A5, U+203E</span>
     <span class='ident'>Katakana</span>, <span class='comment'>// JIS X 0201: U+FF61..FF9F</span>
@@ -2034,7 +2030,7 @@
 }
 
 <span class='doccomment'>/// An encoder for ISO-2022-JP without JIS X 0212/0213 support.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ISO2022JPEncoder</span> {
     <span class='ident'>st</span>: <span class='ident'>ISO2022JPState</span>
 }
@@ -2063,10 +2059,10 @@
 
         <span class='kw'>for</span> ((<span class='ident'>i</span>,<span class='ident'>j</span>), <span class='ident'>ch</span>) <span class='kw'>in</span> <span class='ident'>input</span>.<span class='ident'>index_iter</span>() {
             <span class='kw'>match</span> <span class='ident'>ch</span> {
-                <span class='string'>&#39;\u0000&#39;</span>...<span class='string'>&#39;\u007f&#39;</span> <span class='op'>=&gt;</span> { <span class='macro'>ensure_ASCII</span><span class='macro'>!</span>(); <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u8</span>); }
-                <span class='string'>&#39;\u00a5&#39;</span> <span class='op'>=&gt;</span> { <span class='macro'>ensure_ASCII</span><span class='macro'>!</span>(); <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x5c</span>); }
-                <span class='string'>&#39;\u203e&#39;</span> <span class='op'>=&gt;</span> { <span class='macro'>ensure_ASCII</span><span class='macro'>!</span>(); <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x7e</span>); }
-                <span class='string'>&#39;\uff61&#39;</span>...<span class='string'>&#39;\uff9f&#39;</span> <span class='op'>=&gt;</span> {
+                <span class='string'>&#39;\u{0}&#39;</span>...<span class='string'>&#39;\u{7f}&#39;</span> <span class='op'>=&gt;</span> { <span class='macro'>ensure_ASCII</span><span class='macro'>!</span>(); <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u8</span>); }
+                <span class='string'>&#39;\u{a5}&#39;</span> <span class='op'>=&gt;</span> { <span class='macro'>ensure_ASCII</span><span class='macro'>!</span>(); <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x5c</span>); }
+                <span class='string'>&#39;\u{203e}&#39;</span> <span class='op'>=&gt;</span> { <span class='macro'>ensure_ASCII</span><span class='macro'>!</span>(); <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='number'>0x7e</span>); }
+                <span class='string'>&#39;\u{ff61}&#39;</span>...<span class='string'>&#39;\u{ff9f}&#39;</span> <span class='op'>=&gt;</span> {
                     <span class='macro'>ensure_Katakana</span><span class='macro'>!</span>();
                     <span class='ident'>output</span>.<span class='ident'>write_byte</span>((<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>uint</span> <span class='op'>-</span> <span class='number'>0xff61</span> <span class='op'>+</span> <span class='number'>0x21</span>) <span class='kw'>as</span> <span class='ident'>u8</span>);
                 }
@@ -2099,7 +2095,7 @@
 
 <span class='macro'>stateful_decoder</span><span class='macro'>!</span> {
     <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>&quot;A decoder for ISO-2022-JP with JIS X 0212 support.&quot;</span>]</span>
-    <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+    <span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
     <span class='kw'>struct</span> <span class='ident'>ISO2022JPDecoder</span>;
 
     <span class='ident'>module</span> <span class='ident'>iso2022jp</span>;
@@ -2226,9 +2222,6 @@
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>ISO2022JPEncoding</span>;
     <span class='kw'>use</span> <span class='ident'>testutils</span>;
     <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
-    <span class='kw'>use</span> <span class='ident'>types</span>::<span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span> <span class='kw'>as</span> <span class='ident'>DecodeReplace</span>;
-    <span class='kw'>use</span> <span class='ident'>types</span>::<span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span> <span class='kw'>as</span> <span class='ident'>DecodeStrict</span>;
-    <span class='kw'>use</span> <span class='ident'>types</span>::<span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span> <span class='kw'>as</span> <span class='ident'>EncodeStrict</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_encoder_valid</span>() {
@@ -2237,13 +2230,13 @@
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;BC&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x42</span>, <span class='number'>0x43</span>]);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\x1b\x24\x42&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>]); <span class='comment'>// no round-trip guarantee</span>
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u00a5&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x5c</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u203e&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x7e</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u306b\u307b\u3093&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>,
-                                                      <span class='number'>0x24</span>, <span class='number'>0x4b</span>, <span class='number'>0x24</span>, <span class='number'>0x5b</span>, <span class='number'>0x24</span>, <span class='number'>0x73</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u65e5\u672c&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x46</span>, <span class='number'>0x7c</span>, <span class='number'>0x4b</span>, <span class='number'>0x5c</span>]);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\uff86\uff8e\uff9d&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x49</span>,
-                                                      <span class='number'>0x46</span>, <span class='number'>0x4e</span>, <span class='number'>0x5d</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{a5}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x5c</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{203e}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x7e</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{306b}\u{307b}\u{3093}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>,
+                                                            <span class='number'>0x24</span>, <span class='number'>0x4b</span>, <span class='number'>0x24</span>, <span class='number'>0x5b</span>, <span class='number'>0x24</span>, <span class='number'>0x73</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{65e5}\u{672c}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x46</span>, <span class='number'>0x7c</span>, <span class='number'>0x4b</span>, <span class='number'>0x5c</span>]);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;\u{ff86}\u{ff8e}\u{ff9d}&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x49</span>,
+                                                            <span class='number'>0x46</span>, <span class='number'>0x4e</span>, <span class='number'>0x5d</span>]);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;XYZ&quot;</span>, <span class='string'>&quot;&quot;</span>, [<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x42</span>,
                                        <span class='number'>0x58</span>, <span class='number'>0x59</span>, <span class='number'>0x5a</span>]);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
@@ -2255,8 +2248,8 @@
         <span class='comment'>// - D is omitted as the encoder does not support JIS X 0212.</span>
         <span class='comment'>// a (3,2) De Bruijn near-sequence &quot;ABCACBA&quot; is used to test all possible cases.</span>
         <span class='kw'>static</span> <span class='ident'>AD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\x20&quot;</span>;
-        <span class='kw'>static</span> <span class='ident'>BD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\u30cd&quot;</span>;
-        <span class='kw'>static</span> <span class='ident'>CD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\uff88&quot;</span>;
+        <span class='kw'>static</span> <span class='ident'>BD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\u{30cd}&quot;</span>;
+        <span class='kw'>static</span> <span class='ident'>CD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\u{ff88}&quot;</span>;
         <span class='kw'>static</span> <span class='ident'>AE</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> [<span class='ident'>u8</span>] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x42</span>, <span class='number'>0x20</span>];
         <span class='kw'>static</span> <span class='ident'>BE</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> [<span class='ident'>u8</span>] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>, <span class='number'>0x25</span>, <span class='number'>0x4d</span>];
         <span class='kw'>static</span> <span class='ident'>CE</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> [<span class='ident'>u8</span>] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x49</span>, <span class='number'>0x48</span>];
@@ -2270,10 +2263,10 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_encoder_invalid</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>raw_encoder</span>();
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\uffff&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;?&quot;</span>, <span class='string'>&quot;\uffff&quot;</span>, <span class='string'>&quot;!&quot;</span>, [<span class='number'>0x3f</span>]);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{ffff}&quot;</span>, <span class='string'>&quot;&quot;</span>, []);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;?&quot;</span>, <span class='string'>&quot;\u{ffff}&quot;</span>, <span class='string'>&quot;!&quot;</span>, [<span class='number'>0x3f</span>]);
         <span class='comment'>// JIS X 0212 is not supported in the encoder</span>
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u736c&quot;</span>, <span class='string'>&quot;\u8c78&quot;</span>, []);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;\u{736c}&quot;</span>, <span class='string'>&quot;\u{8c78}&quot;</span>, []);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>e</span>, []);
     }
 
@@ -2290,31 +2283,31 @@
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>,
                             <span class='number'>0x24</span>, <span class='number'>0x4b</span>,
                             <span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>,
-                            <span class='number'>0x24</span>, <span class='number'>0x5b</span>, <span class='number'>0x24</span>, <span class='number'>0x73</span>], [], <span class='string'>&quot;\u306b\u307b\u3093&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x46</span>, <span class='number'>0x7c</span>, <span class='number'>0x4b</span>, <span class='number'>0x5c</span>], [], <span class='string'>&quot;\u65e5\u672c&quot;</span>);
+                            <span class='number'>0x24</span>, <span class='number'>0x5b</span>, <span class='number'>0x24</span>, <span class='number'>0x73</span>], [], <span class='string'>&quot;\u{306b}\u{307b}\u{3093}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x46</span>, <span class='number'>0x7c</span>, <span class='number'>0x4b</span>, <span class='number'>0x5c</span>], [], <span class='string'>&quot;\u{65e5}\u{672c}&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x49</span>,
-                            <span class='number'>0x46</span>, <span class='number'>0x4e</span>, <span class='number'>0x5d</span>], [], <span class='string'>&quot;\uff86\uff8e\uff9d&quot;</span>);
+                            <span class='number'>0x46</span>, <span class='number'>0x4e</span>, <span class='number'>0x5d</span>], [], <span class='string'>&quot;\u{ff86}\u{ff8e}\u{ff9d}&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x28</span>, <span class='number'>0x44</span>,
                             <span class='number'>0x4b</span>, <span class='number'>0x46</span>,
                             <span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x40</span>,
-                            <span class='number'>0x6c</span>, <span class='number'>0x38</span>], [], <span class='string'>&quot;\u736c\u8c78&quot;</span>);
+                            <span class='number'>0x6c</span>, <span class='number'>0x38</span>], [], <span class='string'>&quot;\u{736c}\u{8c78}&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x42</span>,
                             <span class='number'>0x58</span>, <span class='number'>0x59</span>, <span class='number'>0x5a</span>], [], <span class='string'>&quot;XYZ&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>raw_decoder</span>();
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>,
-                            <span class='number'>0x24</span>, <span class='number'>0x4b</span>, <span class='number'>0x24</span>, <span class='number'>0x5b</span>, <span class='number'>0x24</span>, <span class='number'>0x73</span>], [], <span class='string'>&quot;\u306b\u307b\u3093&quot;</span>);
+                            <span class='number'>0x24</span>, <span class='number'>0x4b</span>, <span class='number'>0x24</span>, <span class='number'>0x5b</span>, <span class='number'>0x24</span>, <span class='number'>0x73</span>], [], <span class='string'>&quot;\u{306b}\u{307b}\u{3093}&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>raw_decoder</span>();
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x49</span>,
-                            <span class='number'>0x46</span>, <span class='number'>0x4e</span>, <span class='number'>0x5d</span>], [], <span class='string'>&quot;\uff86\uff8e\uff9d&quot;</span>);
+                            <span class='number'>0x46</span>, <span class='number'>0x4e</span>, <span class='number'>0x5d</span>], [], <span class='string'>&quot;\u{ff86}\u{ff8e}\u{ff9d}&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>raw_decoder</span>();
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x28</span>, <span class='number'>0x44</span>,
-                            <span class='number'>0x4b</span>, <span class='number'>0x46</span>], [], <span class='string'>&quot;\u736c&quot;</span>);
+                            <span class='number'>0x4b</span>, <span class='number'>0x46</span>], [], <span class='string'>&quot;\u{736c}&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
 
         <span class='comment'>// one ASCII character and three similarly looking characters:</span>
@@ -2324,9 +2317,9 @@
         <span class='comment'>// - D: U+793B CJK UNIFIED IDEOGRAPH-793B (requires JIS X 0212 Lead state)</span>
         <span class='comment'>// a (4,2) De Bruijn sequence &quot;AABBCCACBADDBDCDA&quot; is used to test all possible cases.</span>
         <span class='kw'>static</span> <span class='ident'>AD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\x20&quot;</span>;
-        <span class='kw'>static</span> <span class='ident'>BD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\u30cd&quot;</span>;
-        <span class='kw'>static</span> <span class='ident'>CD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\uff88&quot;</span>;
-        <span class='kw'>static</span> <span class='ident'>DD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\u793b&quot;</span>;
+        <span class='kw'>static</span> <span class='ident'>BD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\u{30cd}&quot;</span>;
+        <span class='kw'>static</span> <span class='ident'>CD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\u{ff88}&quot;</span>;
+        <span class='kw'>static</span> <span class='ident'>DD</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;\u{793b}&quot;</span>;
         <span class='kw'>static</span> <span class='ident'>AE</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> [<span class='ident'>u8</span>] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x42</span>,       <span class='number'>0x20</span>];
         <span class='kw'>static</span> <span class='ident'>BE</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> [<span class='ident'>u8</span>] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>,       <span class='number'>0x25</span>, <span class='number'>0x4d</span>];
         <span class='kw'>static</span> <span class='ident'>CE</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> [<span class='ident'>u8</span>] <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x49</span>,       <span class='number'>0x48</span>];
@@ -2352,23 +2345,23 @@
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x1b</span>], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x24</span>], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x42</span>], [<span class='number'>0x24</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x4b</span>], [<span class='number'>0x1b</span>, <span class='number'>0x24</span>], <span class='string'>&quot;\u306b&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x42</span>, <span class='number'>0x24</span>, <span class='number'>0x5b</span>], [], <span class='string'>&quot;\u307b&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x4b</span>], [<span class='number'>0x1b</span>, <span class='number'>0x24</span>], <span class='string'>&quot;\u{306b}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x42</span>, <span class='number'>0x24</span>, <span class='number'>0x5b</span>], [], <span class='string'>&quot;\u{307b}&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x1b</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x24</span>, <span class='number'>0x42</span>, <span class='number'>0x24</span>, <span class='number'>0x73</span>], [], <span class='string'>&quot;\u3093&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x24</span>, <span class='number'>0x42</span>, <span class='number'>0x24</span>, <span class='number'>0x73</span>], [], <span class='string'>&quot;\u{3093}&quot;</span>);
 
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x1b</span>], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x28</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x49</span>, <span class='number'>0x46</span>], [], <span class='string'>&quot;\uff86&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x49</span>, <span class='number'>0x46</span>], [], <span class='string'>&quot;\u{ff86}&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x1b</span>, <span class='number'>0x28</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x49</span>, <span class='number'>0x4e</span>], [<span class='number'>0x1b</span>], <span class='string'>&quot;\uff8e&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x28</span>, <span class='number'>0x49</span>, <span class='number'>0x5d</span>], [], <span class='string'>&quot;\uff9d&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x49</span>, <span class='number'>0x4e</span>], [<span class='number'>0x1b</span>], <span class='string'>&quot;\u{ff8e}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x28</span>, <span class='number'>0x49</span>, <span class='number'>0x5d</span>], [], <span class='string'>&quot;\u{ff9d}&quot;</span>);
 
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x1b</span>, <span class='number'>0x24</span>], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x28</span>], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x44</span>], [<span class='number'>0x4b</span>], <span class='string'>&quot;&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x46</span>], [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x28</span>], <span class='string'>&quot;\u736c&quot;</span>);
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x44</span>, <span class='number'>0x4b</span>, <span class='number'>0x46</span>], [], <span class='string'>&quot;\u736c&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x46</span>], [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x28</span>], <span class='string'>&quot;\u{736c}&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x44</span>, <span class='number'>0x4b</span>, <span class='number'>0x46</span>], [], <span class='string'>&quot;\u{736c}&quot;</span>);
 
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
     }
@@ -2380,16 +2373,16 @@
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>,
                             <span class='number'>0x25</span>, <span class='number'>0x4d</span>,
                             <span class='number'>0x0a</span>,
-                            <span class='number'>0x25</span>, <span class='number'>0x4d</span>], [], <span class='string'>&quot;\u30cd\n\x25\x4d&quot;</span>);
+                            <span class='number'>0x25</span>, <span class='number'>0x4d</span>], [], <span class='string'>&quot;\u{30cd}\n\x25\x4d&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x28</span>, <span class='number'>0x44</span>,
                             <span class='number'>0x50</span>, <span class='number'>0x4b</span>,
                             <span class='number'>0x0a</span>,
-                            <span class='number'>0x50</span>, <span class='number'>0x4b</span>], [], <span class='string'>&quot;\u793b\n\x50\x4b&quot;</span>);
+                            <span class='number'>0x50</span>, <span class='number'>0x4b</span>], [], <span class='string'>&quot;\u{793b}\n\x50\x4b&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
 
         <span class='comment'>// other states don&#39;t allow CR</span>
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>raw_decoder</span>();
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x49</span>, <span class='number'>0x48</span>], [<span class='number'>0x0a</span>], [], <span class='string'>&quot;\uff88&quot;</span>); <span class='comment'>// Katakana</span>
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x28</span>, <span class='number'>0x49</span>, <span class='number'>0x48</span>], [<span class='number'>0x0a</span>], [], <span class='string'>&quot;\u{ff88}&quot;</span>); <span class='comment'>// Katakana</span>
         <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>], [<span class='number'>0x25</span>, <span class='number'>0x0a</span>], [], <span class='string'>&quot;&quot;</span>); <span class='comment'>// Trail</span>
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
     }
@@ -2397,11 +2390,11 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_partial</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>raw_decoder</span>();
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>, <span class='number'>0x24</span>, <span class='number'>0x4b</span>], [<span class='number'>0x24</span>], <span class='string'>&quot;\u306b&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>, <span class='number'>0x24</span>, <span class='number'>0x4b</span>], [<span class='number'>0x24</span>], <span class='string'>&quot;\u{306b}&quot;</span>);
         <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
 
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>raw_decoder</span>();
-        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x28</span>, <span class='number'>0x44</span>, <span class='number'>0x4b</span>, <span class='number'>0x46</span>], [<span class='number'>0x50</span>], <span class='string'>&quot;\u736c&quot;</span>);
+        <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x28</span>, <span class='number'>0x44</span>, <span class='number'>0x4b</span>, <span class='number'>0x46</span>], [<span class='number'>0x50</span>], <span class='string'>&quot;\u{736c}&quot;</span>);
         <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
     }
 
@@ -2423,14 +2416,14 @@
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x1b</span>, <span class='number'>0x28</span>], <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>); <span class='comment'>// no backup</span>
 
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>decode</span>([<span class='number'>0x1b</span>][], <span class='ident'>DecodeReplace</span>),
-                   <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\ufffd&quot;</span>.<span class='ident'>to_string</span>()));
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>decode</span>([<span class='number'>0x1b</span>, <span class='number'>0x24</span>][], <span class='ident'>DecodeReplace</span>),
-                   <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\ufffd&quot;</span>.<span class='ident'>to_string</span>()));
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>decode</span>([<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x28</span>][], <span class='ident'>DecodeReplace</span>),
-                   <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\ufffd\x28&quot;</span>.<span class='ident'>to_string</span>()));
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>decode</span>([<span class='number'>0x1b</span>, <span class='number'>0x28</span>][], <span class='ident'>DecodeReplace</span>),
-                   <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\ufffd&quot;</span>.<span class='ident'>to_string</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>decode</span>([<span class='number'>0x1b</span>][], <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>),
+                   <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\u{fffd}&quot;</span>.<span class='ident'>to_string</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>decode</span>([<span class='number'>0x1b</span>, <span class='number'>0x24</span>][], <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>),
+                   <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\u{fffd}&quot;</span>.<span class='ident'>to_string</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>decode</span>([<span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x28</span>][], <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>),
+                   <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\u{fffd}\x28&quot;</span>.<span class='ident'>to_string</span>()));
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>decode</span>([<span class='number'>0x1b</span>, <span class='number'>0x28</span>][], <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>),
+                   <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\u{fffd}&quot;</span>.<span class='ident'>to_string</span>()));
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -2438,7 +2431,9 @@
         <span class='comment'>// also tests allowed but never used escape codes in ISO 2022</span>
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>raw_decoder</span>();
         <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>reset</span>(() <span class='op'>=&gt;</span> (
-            <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x41</span>, <span class='number'>0x42</span>, <span class='number'>0x43</span>, <span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>, <span class='number'>0x21</span>, <span class='number'>0x21</span>], [], <span class='string'>&quot;ABC\u3000&quot;</span>)))
+            <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x41</span>, <span class='number'>0x42</span>, <span class='number'>0x43</span>, <span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>, <span class='number'>0x21</span>, <span class='number'>0x21</span>], [],
+                            <span class='string'>&quot;ABC\u{3000}&quot;</span>)
+        ))
 
         <span class='macro'>reset</span><span class='macro'>!</span>()
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x1b</span>], <span class='string'>&quot;&quot;</span>);
@@ -2537,11 +2532,11 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>raw_decoder</span>();
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x24</span>, <span class='number'>0x22</span>,
                             <span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>,
-                            <span class='number'>0x24</span>, <span class='number'>0x22</span>], [<span class='number'>0x24</span>], <span class='string'>&quot;\x24\x22\u3042&quot;</span>);
+                            <span class='number'>0x24</span>, <span class='number'>0x22</span>], [<span class='number'>0x24</span>], <span class='string'>&quot;\x24\x22\u{3042}&quot;</span>);
         <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
         <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [<span class='number'>0x24</span>, <span class='number'>0x22</span>,
                             <span class='number'>0x1b</span>, <span class='number'>0x24</span>, <span class='number'>0x42</span>,
-                            <span class='number'>0x24</span>, <span class='number'>0x22</span>], [], <span class='string'>&quot;\x24\x22\u3042&quot;</span>);
+                            <span class='number'>0x24</span>, <span class='number'>0x22</span>], [], <span class='string'>&quot;\x24\x22\u{3042}&quot;</span>);
         <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
     }
 
@@ -2550,16 +2545,17 @@
         <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>testutils</span>::<span class='ident'>JAPANESE_TEXT</span>;
         <span class='ident'>bencher</span>.<span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>u64</span>;
         <span class='ident'>bencher</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='ident'>test</span>::<span class='ident'>black_box</span>({
-            <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>s</span>[], <span class='ident'>EncodeStrict</span>)
+            <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>s</span>[], <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>)
         }))
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>bench_decode_short_text</span>(<span class='ident'>bencher</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>test</span>::<span class='ident'>Bencher</span>) {
-        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>testutils</span>::<span class='ident'>JAPANESE_TEXT</span>, <span class='ident'>EncodeStrict</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>encode</span>(<span class='ident'>testutils</span>::<span class='ident'>JAPANESE_TEXT</span>,
+                                         <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>ok</span>().<span class='ident'>unwrap</span>();
         <span class='ident'>bencher</span>.<span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>u64</span>;
         <span class='ident'>bencher</span>.<span class='ident'>iter</span>(<span class='op'>||</span> <span class='ident'>test</span>::<span class='ident'>black_box</span>({
-            <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>decode</span>(<span class='ident'>s</span>[], <span class='ident'>DecodeStrict</span>)
+            <span class='ident'>ISO2022JPEncoding</span>.<span class='ident'>decode</span>(<span class='ident'>s</span>[], <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>)
         }))
     }
 }

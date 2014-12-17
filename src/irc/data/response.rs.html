@@ -387,7 +387,7 @@
 
 <span class='doccomment'>/// List of all server responses as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812).</span>
 <span class='doccomment'>/// All commands are documented with their expected form from the RFC.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Show</span>, <span class='ident'>PartialEq</span>, <span class='ident'>FromPrimitive</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Copy</span>, <span class='ident'>Show</span>, <span class='ident'>PartialEq</span>, <span class='ident'>FromPrimitive</span>)]</span>
 <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>uint</span>)]</span>
 <span class='attribute'>#[<span class='ident'>unstable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Response</span> {

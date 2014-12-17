@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.5/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.6/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -303,7 +303,7 @@ To encode a string:
 use encoding::{Encoding, EncoderTrap};
 use encoding::all::ISO_8859_1;
 
-assert_eq!(ISO_8859_1.encode(&quot;caf\u00e9&quot;, EncoderTrap::Strict),
+assert_eq!(ISO_8859_1.encode(&quot;caf\u{e9}&quot;, EncoderTrap::Strict),
            Ok(vec![99,97,102,233]));
 ~~~~
 
@@ -313,12 +313,12 @@ To encode a string with unrepresentable characters:
 use encoding::{Encoding, EncoderTrap};
 use encoding::all::ISO_8859_2;
 
-assert!(ISO_8859_2.encode(&quot;Acme\u00a9&quot;, EncoderTrap::Strict).is_err());
-assert_eq!(ISO_8859_2.encode(&quot;Acme\u00a9&quot;, EncoderTrap::Replace),
+assert!(ISO_8859_2.encode(&quot;Acme\u{a9}&quot;, EncoderTrap::Strict).is_err());
+assert_eq!(ISO_8859_2.encode(&quot;Acme\u{a9}&quot;, EncoderTrap::Replace),
            Ok(vec![65,99,109,101,63]));
-assert_eq!(ISO_8859_2.encode(&quot;Acme\u00a9&quot;, EncoderTrap::Ignore),
+assert_eq!(ISO_8859_2.encode(&quot;Acme\u{a9}&quot;, EncoderTrap::Ignore),
            Ok(vec![65,99,109,101]));
-assert_eq!(ISO_8859_2.encode(&quot;Acme\u00a9&quot;, EncoderTrap::NcrEscape),
+assert_eq!(ISO_8859_2.encode(&quot;Acme\u{a9}&quot;, EncoderTrap::NcrEscape),
            Ok(vec![65,99,109,101,38,35,49,54,57,59]));
 ~~~~
 
@@ -329,7 +329,7 @@ use encoding::{Encoding, DecoderTrap};
 use encoding::all::ISO_8859_1;
 
 assert_eq!(ISO_8859_1.decode(&amp;[99,97,102,233], DecoderTrap::Strict),
-           Ok(&quot;caf\u00e9&quot;.into_string()));
+           Ok(&quot;caf\u{e9}&quot;.into_string()));
 ~~~~
 
 To decode a byte sequence with invalid sequences:
@@ -340,7 +340,7 @@ use encoding::all::ISO_8859_6;
 
 assert!(ISO_8859_6.decode(&amp;[65,99,109,101,169], DecoderTrap::Strict).is_err());
 assert_eq!(ISO_8859_6.decode(&amp;[65,99,109,101,169], DecoderTrap::Replace),
-           Ok(&quot;Acme\ufffd&quot;.into_string()));
+           Ok(&quot;Acme\u{fffd}&quot;.into_string()));
 assert_eq!(ISO_8859_6.decode(&amp;[65,99,109,101,169], DecoderTrap::Ignore),
            Ok(&quot;Acme&quot;.into_string()));
 ~~~~
@@ -380,11 +380,11 @@ assert_eq!(euckr.name(), &quot;windows-949&quot;);
 assert_eq!(euckr.whatwg_name(), Some(&quot;euc-kr&quot;)); // for the sake of compatibility
 let broken = &amp;[0xbf, 0xec, 0xbf, 0xcd, 0xff, 0xbe, 0xd3];
 assert_eq!(euckr.decode(broken, DecoderTrap::Replace),
-           Ok(&quot;\uc6b0\uc640\ufffd\uc559&quot;.into_string()));
+           Ok(&quot;\u{c6b0}\u{c640}\u{fffd}\u{c559}&quot;.into_string()));
 
 // corresponding rust-encoding native API:
 assert_eq!(WINDOWS_949.decode(broken, DecoderTrap::Replace),
-           Ok(&quot;\uc6b0\uc640\ufffd\uc559&quot;.into_string()));
+           Ok(&quot;\u{c6b0}\u{c640}\u{fffd}\u{c559}&quot;.into_string()));
 ~~~~
 
 ## Detailed Usage

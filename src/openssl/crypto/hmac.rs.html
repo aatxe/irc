@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.2.2/src/crypto/hmac.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.2.5/src/crypto/hmac.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>hmac.rs.html -- source</title>
@@ -281,6 +281,14 @@
 <span id='239'>239</span>
 <span id='240'>240</span>
 <span id='241'>241</span>
+<span id='242'>242</span>
+<span id='243'>243</span>
+<span id='244'>244</span>
+<span id='245'>245</span>
+<span id='246'>246</span>
+<span id='247'>247</span>
+<span id='248'>248</span>
+<span id='249'>249</span>
 </pre><pre class='rust '>
 <span class='comment'>/*
  * Copyright 2013 Jack Lloyd
@@ -341,6 +349,14 @@
             <span class='ident'>ffi</span>::<span class='ident'>HMAC_Final</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>ctx</span>, <span class='ident'>res</span>.<span class='ident'>as_mut_ptr</span>(), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>outlen</span>);
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>len</span> <span class='op'>==</span> <span class='ident'>outlen</span> <span class='kw'>as</span> <span class='ident'>uint</span>)
             <span class='ident'>res</span>
+        }
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>HMAC</span> {
+    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='kw'>unsafe</span> {
+            <span class='ident'>ffi</span>::<span class='ident'>HMAC_CTX_cleanup</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>ctx</span>);
         }
     }
 }

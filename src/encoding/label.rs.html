@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.5/src/label.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.6/src/label.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>label.rs.html -- source</title>
@@ -718,10 +718,10 @@
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>encoding_from_whatwg_label</span>(<span class='string'>&quot;utf-8&quot;</span>).<span class='ident'>is_some</span>())
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>encoding_from_whatwg_label</span>(<span class='string'>&quot;UTF-8&quot;</span>).<span class='ident'>is_some</span>())
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>encoding_from_whatwg_label</span>(<span class='string'>&quot;\t\n\x0C\r utf-8\t\n\x0C\r &quot;</span>).<span class='ident'>is_some</span>())
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>encoding_from_whatwg_label</span>(<span class='string'>&quot;\u00A0utf-8&quot;</span>).<span class='ident'>is_none</span>(),
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>encoding_from_whatwg_label</span>(<span class='string'>&quot;\u{A0}utf-8&quot;</span>).<span class='ident'>is_none</span>(),
                 <span class='string'>&quot;Non-ASCII whitespace should not be trimmed&quot;</span>)
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>encoding_from_whatwg_label</span>(<span class='string'>&quot;greek&quot;</span>).<span class='ident'>is_some</span>())
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>encoding_from_whatwg_label</span>(<span class='string'>&quot;gree\u212A&quot;</span>).<span class='ident'>is_none</span>(),
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>encoding_from_whatwg_label</span>(<span class='string'>&quot;gree\u{212A}&quot;</span>).<span class='ident'>is_none</span>(),
                 <span class='string'>&quot;Case-insensitive matching should be ASCII only. Kelvin sign does not match k.&quot;</span>)
     }
 

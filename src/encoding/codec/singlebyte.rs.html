@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.5/src/codec/singlebyte.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.6/src/codec/singlebyte.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>singlebyte.rs.html -- source</title>
@@ -169,6 +169,7 @@
 <span id='127'>127</span>
 <span id='128'>128</span>
 <span id='129'>129</span>
+<span id='130'>130</span>
 </pre><pre class='rust '>
 <span class='comment'>// This is a part of rust-encoding.</span>
 <span class='comment'>// Copyright (c) 2013, Kang Seonghoon.</span>
@@ -180,6 +181,7 @@
 <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
 
 <span class='doccomment'>/// A common framework for single-byte encodings based on ASCII.</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>SingleByteEncoding</span> {
     <span class='kw'>pub</span> <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>,
     <span class='kw'>pub</span> <span class='ident'>whatwg_name</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span>,
@@ -195,7 +197,7 @@
 }
 
 <span class='doccomment'>/// An encoder for single-byte encodings based on ASCII.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>SingleByteEncoder</span> {
     <span class='ident'>index_backward</span>: <span class='kw'>extern</span> <span class='string'>&quot;Rust&quot;</span> <span class='kw'>fn</span>(<span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='ident'>u8</span>,
 }
@@ -214,7 +216,7 @@
         <span class='ident'>output</span>.<span class='ident'>writer_hint</span>(<span class='ident'>input</span>.<span class='ident'>len</span>());
 
         <span class='kw'>for</span> ((<span class='ident'>i</span>,<span class='ident'>j</span>), <span class='ident'>ch</span>) <span class='kw'>in</span> <span class='ident'>input</span>.<span class='ident'>index_iter</span>() {
-            <span class='kw'>if</span> <span class='ident'>ch</span> <span class='op'>&lt;=</span> <span class='string'>&#39;\u007f&#39;</span> {
+            <span class='kw'>if</span> <span class='ident'>ch</span> <span class='op'>&lt;=</span> <span class='string'>&#39;\u{7f}&#39;</span> {
                 <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u8</span>);
                 <span class='kw'>continue</span>;
             } <span class='kw'>else</span> {
@@ -237,7 +239,7 @@
 }
 
 <span class='doccomment'>/// A decoder for single-byte encodings based on ASCII.</span>
-<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>)]</span>
+<span class='attribute'>#[<span class='ident'>deriving</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>SingleByteDecoder</span> {
     <span class='ident'>index_forward</span>: <span class='kw'>extern</span> <span class='string'>&quot;Rust&quot;</span> <span class='kw'>fn</span>(<span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>u16</span>,
 }
@@ -294,8 +296,8 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_encoder_non_bmp</span>() {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>e</span> <span class='op'>=</span> <span class='ident'>ISO_8859_2</span>.<span class='ident'>raw_encoder</span>();
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;A&quot;</span>, <span class='string'>&quot;\uFFFF&quot;</span>, <span class='string'>&quot;B&quot;</span>, [<span class='number'>0x41</span>]);
-        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;A&quot;</span>, <span class='string'>&quot;\U00010000&quot;</span>, <span class='string'>&quot;B&quot;</span>, [<span class='number'>0x41</span>]);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;A&quot;</span>, <span class='string'>&quot;\u{FFFF}&quot;</span>, <span class='string'>&quot;B&quot;</span>, [<span class='number'>0x41</span>]);
+        <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>e</span>, <span class='string'>&quot;A&quot;</span>, <span class='string'>&quot;\u{10000}&quot;</span>, <span class='string'>&quot;B&quot;</span>, [<span class='number'>0x41</span>]);
     }
 }
 

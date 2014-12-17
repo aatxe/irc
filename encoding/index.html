@@ -59,7 +59,7 @@ and also provides an advanced interface for error detection and recovery.</p>
 <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>Encoding</span>, <span class='ident'>EncoderTrap</span>};
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::<span class='ident'>ISO_8859_1</span>;
 
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_1</span>.<span class='ident'>encode</span>(<span class='string'>&quot;caf\u00e9&quot;</span>, <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>),
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_1</span>.<span class='ident'>encode</span>(<span class='string'>&quot;caf\u{e9}&quot;</span>, <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>),
            <span class='prelude-val'>Ok</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>99</span>,<span class='number'>97</span>,<span class='number'>102</span>,<span class='number'>233</span>]));
 </pre>
 
@@ -68,12 +68,12 @@ and also provides an advanced interface for error detection and recovery.</p>
 <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>Encoding</span>, <span class='ident'>EncoderTrap</span>};
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::<span class='ident'>ISO_8859_2</span>;
 
-<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_2</span>.<span class='ident'>encode</span>(<span class='string'>&quot;Acme\u00a9&quot;</span>, <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>is_err</span>());
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_2</span>.<span class='ident'>encode</span>(<span class='string'>&quot;Acme\u00a9&quot;</span>, <span class='ident'>EncoderTrap</span>::<span class='ident'>Replace</span>),
+<span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_2</span>.<span class='ident'>encode</span>(<span class='string'>&quot;Acme\u{a9}&quot;</span>, <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>is_err</span>());
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_2</span>.<span class='ident'>encode</span>(<span class='string'>&quot;Acme\u{a9}&quot;</span>, <span class='ident'>EncoderTrap</span>::<span class='ident'>Replace</span>),
            <span class='prelude-val'>Ok</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>65</span>,<span class='number'>99</span>,<span class='number'>109</span>,<span class='number'>101</span>,<span class='number'>63</span>]));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_2</span>.<span class='ident'>encode</span>(<span class='string'>&quot;Acme\u00a9&quot;</span>, <span class='ident'>EncoderTrap</span>::<span class='ident'>Ignore</span>),
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_2</span>.<span class='ident'>encode</span>(<span class='string'>&quot;Acme\u{a9}&quot;</span>, <span class='ident'>EncoderTrap</span>::<span class='ident'>Ignore</span>),
            <span class='prelude-val'>Ok</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>65</span>,<span class='number'>99</span>,<span class='number'>109</span>,<span class='number'>101</span>]));
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_2</span>.<span class='ident'>encode</span>(<span class='string'>&quot;Acme\u00a9&quot;</span>, <span class='ident'>EncoderTrap</span>::<span class='ident'>NcrEscape</span>),
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_2</span>.<span class='ident'>encode</span>(<span class='string'>&quot;Acme\u{a9}&quot;</span>, <span class='ident'>EncoderTrap</span>::<span class='ident'>NcrEscape</span>),
            <span class='prelude-val'>Ok</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>65</span>,<span class='number'>99</span>,<span class='number'>109</span>,<span class='number'>101</span>,<span class='number'>38</span>,<span class='number'>35</span>,<span class='number'>49</span>,<span class='number'>54</span>,<span class='number'>57</span>,<span class='number'>59</span>]));
 </pre>
 
@@ -83,7 +83,7 @@ and also provides an advanced interface for error detection and recovery.</p>
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::<span class='ident'>ISO_8859_1</span>;
 
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_1</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span>[<span class='number'>99</span>,<span class='number'>97</span>,<span class='number'>102</span>,<span class='number'>233</span>], <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>),
-           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;caf\u00e9&quot;</span>.<span class='ident'>into_string</span>()));
+           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;caf\u{e9}&quot;</span>.<span class='ident'>into_string</span>()));
 </pre>
 
 <p>To decode a byte sequence with invalid sequences:</p>
@@ -93,7 +93,7 @@ and also provides an advanced interface for error detection and recovery.</p>
 
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_6</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span>[<span class='number'>65</span>,<span class='number'>99</span>,<span class='number'>109</span>,<span class='number'>101</span>,<span class='number'>169</span>], <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>is_err</span>());
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_6</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span>[<span class='number'>65</span>,<span class='number'>99</span>,<span class='number'>109</span>,<span class='number'>101</span>,<span class='number'>169</span>], <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>),
-           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;Acme\ufffd&quot;</span>.<span class='ident'>into_string</span>()));
+           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;Acme\u{fffd}&quot;</span>.<span class='ident'>into_string</span>()));
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_6</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span>[<span class='number'>65</span>,<span class='number'>99</span>,<span class='number'>109</span>,<span class='number'>101</span>,<span class='number'>169</span>], <span class='ident'>DecoderTrap</span>::<span class='ident'>Ignore</span>),
            <span class='prelude-val'>Ok</span>(<span class='string'>&quot;Acme&quot;</span>.<span class='ident'>into_string</span>()));
 </pre>
@@ -131,11 +131,11 @@ and also provides an advanced interface for error detection and recovery.</p>
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>euckr</span>.<span class='ident'>whatwg_name</span>(), <span class='prelude-val'>Some</span>(<span class='string'>&quot;euc-kr&quot;</span>)); <span class='comment'>// for the sake of compatibility</span>
 <span class='kw'>let</span> <span class='ident'>broken</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='number'>0xbf</span>, <span class='number'>0xec</span>, <span class='number'>0xbf</span>, <span class='number'>0xcd</span>, <span class='number'>0xff</span>, <span class='number'>0xbe</span>, <span class='number'>0xd3</span>];
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>euckr</span>.<span class='ident'>decode</span>(<span class='ident'>broken</span>, <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>),
-           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\uc6b0\uc640\ufffd\uc559&quot;</span>.<span class='ident'>into_string</span>()));
+           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\u{c6b0}\u{c640}\u{fffd}\u{c559}&quot;</span>.<span class='ident'>into_string</span>()));
 
 <span class='comment'>// corresponding rust-encoding native API:</span>
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>WINDOWS_949</span>.<span class='ident'>decode</span>(<span class='ident'>broken</span>, <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>),
-           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\uc6b0\uc640\ufffd\uc559&quot;</span>.<span class='ident'>into_string</span>()));
+           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\u{c6b0}\u{c640}\u{fffd}\u{c559}&quot;</span>.<span class='ident'>into_string</span>()));
 </pre>
 
 <h2 id="detailed-usage" class='section-header'><a
