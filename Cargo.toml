@@ -6,7 +6,7 @@ description = "A simple, thread-safe IRC client library."
 authors = ["Aaron Weiss <aaronweiss74@gmail.com>"]
 license = "Unlicense"
 keywords = ["irc", "client", "thread-safe"]
-documentation = "http://aatxe.github.io/irc/irc/"
+documentation = "http://www.rust-ci.org/aatxe/irc/doc/irc/"
 repository = "https://github.com/aatxe/irc"
 readme = "README.md"
 

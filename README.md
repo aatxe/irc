@@ -1,7 +1,7 @@
 # irc [![Build Status](https://travis-ci.org/aatxe/irc.svg?branch=master)](https://travis-ci.org/aatxe/irc) #
 A thread-safe IRC library in Rust based on iterators. It's hopefully compliant with 
 [RFC 2812](http://tools.ietf.org/html/rfc2812). You can find up-to-date, ready-to-use documentation
- online [here](http://aatxe.github.io/irc/irc/). The documentation is generated 
+ online [here](http://www.rust-ci.org/aatxe/irc/doc/irc/). The documentation is generated 
 using both the SSL feature and the encode feature. Specifically, the signatures of 
 irc::conn::Connection::send(...) and irc::conn::Connection::recv(...) will be different by default.
 
