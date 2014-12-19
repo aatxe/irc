@@ -22,5 +22,5 @@ optional = true
 
 [dependencies.openssl]
 
-openssl = "~0.2.4"
+openssl = "~0.2.5"
 optional = true

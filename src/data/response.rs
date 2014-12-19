@@ -332,7 +332,7 @@ mod test {
 
     #[test]
     fn is_error() {
-        assert!(!Response::RPL_NAMREPLY.is_error())
-        assert!(Response::ERR_NICKNAMEINUSE.is_error())
+        assert!(!Response::RPL_NAMREPLY.is_error());
+        assert!(Response::ERR_NICKNAMEINUSE.is_error());
     }
 }
