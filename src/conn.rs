@@ -88,10 +88,21 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Sets the keepalive for the network stream.
     #[experimental]
     pub fn set_keepalive(&self, delay_in_seconds: Option<uint>) -> IoResult<()> {
+        self.mod_stream(|tcp| tcp.set_keepalive(delay_in_seconds))
+    }
+    
+    /// Sets the timeout for the network stream.
+    #[experimental]
+    pub fn set_timeout(&self, timeout_ms: Option<u64>) {
+        self.mod_stream(|tcp| Ok(tcp.set_timeout(timeout_ms))).unwrap(); // this cannot fail.
+    }
+
+    /// Modifies the internal TcpStream using a function.
+    fn mod_stream(&self, f: |&mut TcpStream| -> IoResult<()>) -> IoResult<()> {
         match self.reader.lock().get_mut() {
-            &NetStream::UnsecuredTcpStream(ref mut tcp) => tcp.set_keepalive(delay_in_seconds),
+            &NetStream::UnsecuredTcpStream(ref mut tcp) => f(tcp),
             #[cfg(feature = "ssl")]
-            &NetStream::SslTcpStream(ref mut ssl) => ssl.get_mut().set_keepalive(delay_in_seconds),
+            &NetStream::SslTcpStream(ref mut ssl) => f(ssl.get_mut()),
         }
     }
 }
