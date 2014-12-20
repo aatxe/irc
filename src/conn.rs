@@ -23,24 +23,9 @@ pub type NetConnection = Connection<BufferedReader<NetStream>, BufferedWriter<Ne
 impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Creates a thread-safe TCP connection to the specified server.
     #[experimental]
-    pub fn connect(host: &str, port: u16) -> IoResult<NetConnection> {
-        Connection::connect_internal(host, port, None)
-    }
-
-    /// Creates a thread-safe TCP connection to the specified server with a given timeout in 
-    /// milliseconds.
-    #[experimental]
-    pub fn connect_with_timeout(host: &str, port: u16, timeout_ms: u64) 
-        -> IoResult<NetConnection> {   
-        Connection::connect_internal(host, port, Some(timeout_ms))
-    }
-
-    /// Creates a thread-safe TCP connection with an optional timeout.
-    #[experimental]
-    fn connect_internal(host: &str, port: u16, timeout_ms: Option<u64>) 
+    pub fn connect(host: &str, port: u16) 
     -> IoResult<NetConnection> {  
-        let mut socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
-        socket.set_timeout(timeout_ms);
+        let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
         Ok(Connection::new(
             BufferedReader::new(NetStream::UnsecuredTcpStream(socket.clone())),
             BufferedWriter::new(NetStream::UnsecuredTcpStream(socket))
@@ -50,33 +35,9 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Creates a thread-safe TCP connection to the specified server over SSL.
     /// If the library is compiled without SSL support, this method panics.
     #[experimental]
-    pub fn connect_ssl(host: &str, port: u16) -> IoResult<NetConnection> {
-        Connection::connect_ssl_internal(host, port, None)
-    }
-
-    /// Creates a thread-safe TCP connection to the specificed server over SSL with a given timeout
-    /// in milliseconds. If the library is compiled without SSL support, this method panics.
-    #[experimental]
-    pub fn connect_ssl_with_timeout(host: &str, port: u16, timeout_ms: u64)
-        -> IoResult<NetConnection> {
-        Connection::connect_ssl_internal(host, port, Some(timeout_ms))
-    }
-
-    /// Panics because SSL support was not included at compilation.
-    #[experimental]
-    #[cfg(not(feature = "ssl"))]
-    fn connect_ssl_internal(host: &str, port: u16, _: Option<u64>) 
-    -> IoResult<NetConnection> {
-        panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
-    }
-
-    /// Creates a thread-safe TCP connection over SSL with an optional timeout.
-    #[experimental]
     #[cfg(feature = "ssl")]
-    fn connect_ssl_internal(host: &str, port: u16, timeout_ms: Option<u64>)
-    -> IoResult<NetConnection> {
-        let mut socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
-        socket.set_timeout(timeout_ms);
+    pub fn connect_ssl(host: &str, port: u16) -> IoResult<NetConnection> {
+        let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
         let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Tlsv1)));
         let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
         Ok(Connection::new(
@@ -85,6 +46,15 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
         ))
     }
 
+    /// Creates a thread-safe TCP connection to the specified server over SSL.
+    /// If the library is compiled without SSL support, this method panics.
+    #[experimental]
+    #[cfg(not(feature = "ssl"))]
+    pub fn connect_ssl(host: &str, port: u16) 
+    -> IoResult<NetConnection> {
+        panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
+    }
+    
     /// Sets the keepalive for the network stream.
     #[experimental]
     pub fn set_keepalive(&self, delay_in_seconds: Option<uint>) -> IoResult<()> {
