@@ -1,7 +1,7 @@
 //! Interface for working with IRC Servers
 #![experimental]
 use std::collections::HashMap;
-use std::io::{BufferedReader, BufferedWriter, IoResult};
+use std::io::{BufferedReader, BufferedWriter, IoError, IoErrorKind, IoResult};
 use std::sync::{Mutex, RWLock};
 use conn::{Connection, NetStream};
 use data::{Command, Config, Message, Response, User};
@@ -217,15 +217,24 @@ impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
     }
 }
 
-impl<'a, T: IrcReader, U: IrcWriter> Iterator<Message> for ServerIterator<'a, T, U> {
-    fn next(&mut self) -> Option<Message> {
-        match self.get_next_line() {
-            Err(_) => None,
-            Ok(msg) => {
-                let message = from_str(msg[]);
-                self.server.handle_message(message.as_ref().unwrap());
-                message
-            }
+impl<'a, T: IrcReader, U: IrcWriter> Iterator<IoResult<Message>> for ServerIterator<'a, T, U> {
+    fn next(&mut self) -> Option<IoResult<Message>> {
+        let res = self.get_next_line().and_then(|msg|
+             match from_str(msg[]) {
+                Some(msg) => {
+                    self.server.handle_message(&msg);
+                    Ok(msg)
+                },
+                None => Err(IoError {
+                    kind: IoErrorKind::InvalidInput,
+                    desc: "Failed to parse message.",
+                    detail: Some(msg)
+                })
+            }   
+        );
+        match res {
+            Err(ref err) if err.kind == IoErrorKind::EndOfFile => None,
+            _ => Some(res)
         }
     }
 }
@@ -265,7 +274,7 @@ mod test {
         ));
         let mut messages = String::new();
         for message in server.iter() {
-            messages.push_str(message.into_string()[]);
+            messages.push_str(message.unwrap().into_string()[]);
         }
         assert_eq!(messages[], exp);
     }

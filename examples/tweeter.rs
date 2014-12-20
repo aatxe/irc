@@ -22,7 +22,7 @@ fn main() {
     let server = Wrapper::new(&*irc_server2);
     server.identify().unwrap();
     // Let's set up a loop that just prints the messages.
-    spawn(move || { irc_server.iter().map(|m| print!("{}", m.into_string())).count(); });
+    spawn(move || { irc_server.iter().map(|m| print!("{}", m.unwrap().into_string())).count(); });
     loop {
         server.send_privmsg("#vana", "TWEET TWEET").unwrap();
         sleep(Duration::seconds(10))

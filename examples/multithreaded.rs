@@ -22,7 +22,7 @@ fn main() {
     // We won't use a wrapper here because we don't need the added functionality.
     spawn(move || { 
         for msg in server.iter() {
-            print!("{}", msg.into_string());
+            print!("{}", msg.unwrap().into_string());
         }
     });
 }
