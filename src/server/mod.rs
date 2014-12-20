@@ -81,6 +81,16 @@ impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
                        alt_nick_index: RWLock::new(0u) })
     }
 
+    /// Reconnects to the IRC server.
+    #[experimental]
+    pub fn reconnect(&mut self) -> IoResult<()> {
+        self.conn = try!(if self.config.use_ssl() {
+            Connection::connect_ssl(self.config.server(), self.config.port())
+        } else {
+            Connection::connect(self.config.server(), self.config.port())
+        });    
+        Ok(())
+    }
 }
 
 impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for IrcServer<T, U> {
@@ -116,6 +126,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     }
 
     /// Gets a reference to the IRC server's connection.
+    #[experimental]
     pub fn conn(&self) -> &Connection<T, U> {
         &self.conn
     }

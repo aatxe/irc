@@ -20,7 +20,7 @@ fn main() {
     let server = Wrapper::new(&irc_server);
     server.identify().unwrap();
     for message in server.iter() {
-        let message = message.unwrap();
+        let message = message.unwrap(); // We'll just panic if there's an error.
         print!("{}", message.into_string());
         if message.command[] == "PRIVMSG" {
             if let Some(msg) = message.suffix {

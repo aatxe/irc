@@ -84,6 +84,16 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
             BufferedWriter::new(NetStream::SslTcpStream(ssl_socket)),
         ))
     }
+
+    /// Sets the keepalive for the network stream.
+    #[experimental]
+    pub fn set_keepalive(&self, delay_in_seconds: Option<uint>) -> IoResult<()> {
+        match self.reader.lock().get_mut() {
+            &NetStream::UnsecuredTcpStream(ref mut tcp) => tcp.set_keepalive(delay_in_seconds),
+            #[cfg(feature = "ssl")]
+            &NetStream::SslTcpStream(ref mut ssl) => ssl.get_mut().set_keepalive(delay_in_seconds),
+        }
+    }
 }
 
 impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
