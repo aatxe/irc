@@ -62,13 +62,8 @@ impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
 
     /// Reconnects to the IRC server.
     #[experimental]
-    pub fn reconnect(&mut self) -> IoResult<()> {
-        self.conn = try!(if self.config.use_ssl() {
-            Connection::connect_ssl(self.config.server(), self.config.port())
-        } else {
-            Connection::connect(self.config.server(), self.config.port())
-        });    
-        Ok(())
+    pub fn reconnect(&self) -> IoResult<()> {
+        self.conn.reconnect(self.config().server(), self.config.port()) 
     }
 }
 

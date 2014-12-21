@@ -4,7 +4,7 @@
 use std::io::IoResult;
 use data::{Command, Config, User};
 use data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
-use data::Command::{OPER, PASS, PONG, PRIVMSG, SAMODE, SANICK, TOPIC, USER};
+use data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
 use data::command::CapSubCommand::{END, REQ};
 use data::kinds::{IrcReader, IrcWriter};
 use server::{Server, ServerIterator};
@@ -152,6 +152,17 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     #[experimental]
     pub fn send_invite(&self, nick: &str, chan: &str) -> IoResult<()> {
         self.server.send(INVITE(nick, chan))
+    }
+
+    /// Quits the server entirely with a message. 
+    /// This defaults to `Powered by Rust.` if none is specified.
+    #[experimental]
+    pub fn send_quit(&self, msg: &str) -> IoResult<()> {
+        self.server.send(QUIT(Some(if msg.len() == 0 {
+            "Powered by Rust."
+        } else {
+            msg
+        })))
     }
 }
 

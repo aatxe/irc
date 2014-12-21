@@ -19,40 +19,64 @@ pub struct Connection<T: IrcReader, U: IrcWriter> {
 
 /// A Connection over a buffered NetStream.
 pub type NetConnection = Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>>;
+/// An internal type
+type NetReaderWriterPair = (BufferedReader<NetStream>, BufferedWriter<NetStream>);
+
 
 impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Creates a thread-safe TCP connection to the specified server.
     #[experimental]
-    pub fn connect(host: &str, port: u16) 
-    -> IoResult<NetConnection> {  
+    pub fn connect(host: &str, port: u16) -> IoResult<NetConnection> {  
+        let (reader, writer) = try!(Connection::connect_internal(host, port));
+        Ok(Connection::new(reader, writer))
+    }
+
+    /// connects to the specified server and returns a reader-writer pair.
+    fn connect_internal(host: &str, port: u16) -> IoResult<NetReaderWriterPair> {
         let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
-        Ok(Connection::new(
-            BufferedReader::new(NetStream::UnsecuredTcpStream(socket.clone())),
-            BufferedWriter::new(NetStream::UnsecuredTcpStream(socket))
-        ))
+        Ok((BufferedReader::new(NetStream::UnsecuredTcpStream(socket.clone())),
+            BufferedWriter::new(NetStream::UnsecuredTcpStream(socket))))
     }
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
     /// If the library is compiled without SSL support, this method panics.
     #[experimental]
-    #[cfg(feature = "ssl")]
     pub fn connect_ssl(host: &str, port: u16) -> IoResult<NetConnection> {
+        let (reader, writer) = try!(Connection::connect_ssl_internal(host, port));
+        Ok(Connection::new(reader, writer))
+    }
+
+    /// Connects over SSL to the specified server and returns a reader-writer pair.
+    #[cfg(feature = "ssl")]
+    fn connect_ssl_internal(host: &str, port: u16) -> IoResult<NetReaderWriterPair> {
         let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
         let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Tlsv1)));
         let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
-        Ok(Connection::new(
-            BufferedReader::new(NetStream::SslTcpStream(ssl_socket.clone())),
-            BufferedWriter::new(NetStream::SslTcpStream(ssl_socket)),
-        ))
+        Ok((BufferedReader::new(NetStream::SslTcpStream(ssl_socket.clone())), 
+            BufferedWriter::new(NetStream::SslTcpStream(ssl_socket))))
     }
 
-    /// Creates a thread-safe TCP connection to the specified server over SSL.
-    /// If the library is compiled without SSL support, this method panics.
-    #[experimental]
+    /// Panics because SSL support is not compiled in.
     #[cfg(not(feature = "ssl"))]
-    pub fn connect_ssl(host: &str, port: u16) 
-    -> IoResult<NetConnection> {
+    fn connect_ssl_internal(host: &str, port: u16) -> IoResult<NetReaderWriterPair> {
         panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
+    }
+
+    /// Reconnects to the specified server, dropping the current connection.
+    pub fn reconnect(&self, host: &str, port: u16) -> IoResult<()> {
+        let use_ssl = match self.reader.lock().get_ref() {
+            &NetStream::UnsecuredTcpStream(_) =>  false,
+            #[cfg(feature = "ssl")]
+            &NetStream::SslTcpStream(_) => true,
+        };
+        let (reader, writer) = if use_ssl {
+            try!(Connection::connect_ssl_internal(host, port))
+        } else {
+            try!(Connection::connect_internal(host, port))
+        };
+        *self.reader.lock() = reader;
+        *self.writer.lock() = writer;
+        Ok(())
     }
     
     /// Sets the keepalive for the network stream.
