@@ -468,7 +468,7 @@ mod test {
             wrapper.send_ctcp("test", "MESSAGE").unwrap();
         }
         assert_eq!(get_server_value(server)[],
-        "PRIVMSG test \u{001}MESSAGE\u{001}\r\n");
+        "PRIVMSG test :\u{001}MESSAGE\u{001}\r\n");
     }
 
     #[test]
@@ -481,7 +481,7 @@ mod test {
             wrapper.send_ctcp("test", "MESSAGE").unwrap();
         }
         assert_eq!(get_server_value(server)[],
-        "PRIVMSG test \u{001}MESSAGE\u{001}\r\n");
+        "PRIVMSG test :\u{001}MESSAGE\u{001}\r\n");
     }
 
     #[test]
@@ -494,7 +494,7 @@ mod test {
             wrapper.send_action("test", "tests.").unwrap();
         }
         assert_eq!(get_server_value(server)[],
-        "PRIVMSG test \u{001}ACTION tests.\u{001}\r\n");
+        "PRIVMSG test :\u{001}ACTION tests.\u{001}\r\n");
     }
 
     #[test]
@@ -507,7 +507,7 @@ mod test {
             wrapper.send_finger("test").unwrap();
         }
         assert_eq!(get_server_value(server)[],
-        "PRIVMSG test \u{001}FINGER\u{001}\r\n");
+        "PRIVMSG test :\u{001}FINGER\u{001}\r\n");
     }
 
     #[test]
@@ -520,7 +520,7 @@ mod test {
             wrapper.send_version("test").unwrap();
         }
         assert_eq!(get_server_value(server)[],
-        "PRIVMSG test \u{001}VERSION\u{001}\r\n");
+        "PRIVMSG test :\u{001}VERSION\u{001}\r\n");
     }
 
     #[test]
@@ -533,7 +533,7 @@ mod test {
             wrapper.send_source("test").unwrap();
         }
         assert_eq!(get_server_value(server)[],
-        "PRIVMSG test \u{001}SOURCE\u{001}\r\n");
+        "PRIVMSG test :\u{001}SOURCE\u{001}\r\n");
     }
 
     #[test]
@@ -546,7 +546,7 @@ mod test {
             wrapper.send_user_info("test").unwrap();
         }
         assert_eq!(get_server_value(server)[],
-        "PRIVMSG test \u{001}USERINFO\u{001}\r\n");
+        "PRIVMSG test :\u{001}USERINFO\u{001}\r\n");
     }
 
     #[test]
@@ -559,7 +559,7 @@ mod test {
             wrapper.send_ctcp_ping("PING").unwrap();
         }
         let val = get_server_value(server);
-        assert!(val.starts_with("PRIVMSG test \u{001}PING "));
+        assert!(val.starts_with("PRIVMSG test :\u{001}PING "));
         assert!(val.ends_with("\u{001}\r\n"));
     }
 
@@ -573,6 +573,6 @@ mod test {
             wrapper.send_time("test").unwrap();
         }
         assert_eq!(get_server_value(server)[],
-        "PRIVMSG test \u{001}TIME\u{001}\r\n");
+        "PRIVMSG test :\u{001}TIME\u{001}\r\n");
     }
 }
