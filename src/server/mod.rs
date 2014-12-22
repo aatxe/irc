@@ -5,7 +5,7 @@ use std::io::{BufferedReader, BufferedWriter, IoError, IoErrorKind, IoResult};
 use std::sync::{Mutex, RWLock};
 use conn::{Connection, NetStream};
 use data::{Command, Config, Message, Response, User};
-use data::Command::{JOIN, NICK, NICKSERV, NOTICE, PONG};
+use data::Command::{JOIN, NICK, NICKSERV, PONG};
 use data::kinds::{IrcReader, IrcWriter};
 #[cfg(feature = "ctcp")] use time::now;
 
@@ -221,13 +221,13 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     #[experimental]
     #[cfg(feature = "ctcp")]
     fn send_ctcp(&self, target: &str, msg: &str) {
-        self.send(NOTICE(target, format!("\u{001}{}\u{001}", msg)[])).unwrap();
+        self.send(Command::NOTICE(target, format!("\u{001}{}\u{001}", msg)[])).unwrap();
     }
 
     /// Handles CTCP requests if the CTCP feature is enabled.
     #[experimental]
     #[cfg(not(feature = "ctcp"))]
-    fn handle_ctcp(&self, msg: &Message) {}
+    fn handle_ctcp(&self, _: &Message) {}
 }
 
 /// An Iterator over an IrcServer's incoming Messages.

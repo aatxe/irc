@@ -7,6 +7,7 @@ use data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
 use data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
 use data::command::CapSubCommand::{END, REQ};
 use data::kinds::{IrcReader, IrcWriter};
+#[cfg(feature = "ctcp")] use time::get_time;
 use server::{Server, ServerIterator};
 
 /// Functionality-providing wrapper for Server.
@@ -165,11 +166,61 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
         })))
     }
 
+    /// Sends a CTCP-escaped message to the specified target.
+    #[experimental]
+    #[cfg(feature = "ctcp")]
+    pub fn send_ctcp(&self, target: &str, msg: &str) -> IoResult<()> {
+        self.send_privmsg(target, format!("\u{001}{}\u{001}", msg)[])
+    }
+
     /// Sends an action command to the specified target.
     #[experimental]
     #[cfg(feature = "ctcp")]
     pub fn send_action(&self, target: &str, msg: &str) -> IoResult<()> {
-        self.send_privmsg(target, format!("\u{001}ACTION {}\u{001}", msg  )[]) 
+        self.send_ctcp(target, format!("ACTION {}", msg)[])
+    }
+
+    /// Sends a finger request to the specified target.
+    #[experimental]
+    #[cfg(feature = "ctcp")]
+    pub fn send_finger(&self, target: &str) -> IoResult<()> {
+        self.send_ctcp(target, "FINGER")
+    }
+
+    /// Sends a version request to the specified target.
+    #[experimental]
+    #[cfg(feature = "ctcp")]
+    pub fn send_version(&self, target: &str) -> IoResult<()> {
+        self.send_ctcp(target, "VERSION")
+    }
+
+    /// Sends a source request to the specified target.
+    #[experimental]
+    #[cfg(feature = "ctcp")]
+    pub fn send_source(&self, target: &str) -> IoResult<()> {
+        self.send_ctcp(target, "SOURCE")
+    }
+
+    /// Sends a user info request to the specified target.
+    #[experimental]
+    #[cfg(feature = "ctcp")]
+    pub fn send_user_info(&self, target: &str) -> IoResult<()> {
+        self.send_ctcp(target, "USERINFO")
+    }
+
+    /// Sends a finger request to the specified target.
+    #[experimental]
+    #[cfg(feature = "ctcp")]
+    pub fn send_ctcp_ping(&self, target: &str) -> IoResult<()> {
+        let time = get_time();
+        self.send_ctcp(target, format!("PING {}.{}", time.sec, time.nsec)[])
+    }
+
+    /// Sends a time request to the specified target.
+    #[experimental]
+    #[cfg(feature = "ctcp")]
+    pub fn send_time(&self, target: &str) -> IoResult<()> {
+        self.send_ctcp(target, "TIME")
     }
 }
 
