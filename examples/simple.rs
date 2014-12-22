@@ -24,7 +24,7 @@ fn main() {
         if message.command[] == "PRIVMSG" {
             if let Some(msg) = message.suffix {
                 if msg.contains("pickles") {
-                    server.send_privmsg(message.args[0][], "Hi!").unwrap();
+                    server.send_action(message.args[0][], "Hi!").unwrap();
                 }
             }
         }

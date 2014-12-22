@@ -5,8 +5,9 @@ use std::io::{BufferedReader, BufferedWriter, IoError, IoErrorKind, IoResult};
 use std::sync::{Mutex, RWLock};
 use conn::{Connection, NetStream};
 use data::{Command, Config, Message, Response, User};
-use data::Command::{JOIN, NICK, NICKSERV, PONG};
+use data::Command::{JOIN, NICK, NICKSERV, NOTICE, PONG};
 use data::kinds::{IrcReader, IrcWriter};
+#[cfg(feature = "ctcp")] use time::now;
 
 pub mod utils;
 
@@ -170,8 +171,63 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                     vec[n].update_access_level(mode[]);
                 }
             }
+        } else {
+            self.handle_ctcp(msg);
         }
     }
+
+    /// Handles CTCP requests if the CTCP feature is enabled.
+    #[experimental]
+    #[cfg(feature = "ctcp")]
+    fn handle_ctcp(&self, msg: &Message) {
+        let source = match msg.prefix {
+            Some(ref source) => source.find('!').map_or(source[], |i| source[..i]),
+            None => "",
+        };
+        if let ("PRIVMSG", [ref target]) = (msg.command[], msg.args[]) {
+            let resp = if target.starts_with("#") { target[] } else { source };
+            match msg.suffix {
+                Some(ref msg) if msg.starts_with("\u{001}") => {
+                    let tokens: Vec<_> = { 
+                        let end = if msg.ends_with("\u{001}") {
+                            msg.len() - 1
+                        } else {
+                            msg.len()
+                        };
+                        msg[1..end].split_str(" ").collect()
+                    };
+                    match tokens[0] { 
+                        "FINGER" => self.send_ctcp(resp, format!("FINGER :{} ({})", 
+                                                                 self.config.real_name(), 
+                                                                 self.config.username())[]),
+                        "VERSION" => self.send_ctcp(resp, "VERSION irc v0.6.0 Rust"),
+                        "SOURCE" => {
+                            self.send_ctcp(resp, "SOURCE https://github.com/aatxe/irc");
+                            self.send_ctcp(resp, "SOURCE");
+                        },
+                        "PING" => self.send_ctcp(resp, format!("PING {}", tokens[1])[]),
+                        "TIME" => self.send_ctcp(resp, format!("TIME :{}", now().rfc822z())[]),
+                        "USERINFO" => self.send_ctcp(resp, format!("USERINFO :{}", 
+                                                                   self.config.user_info())[]),
+                        _ => {}
+                    }
+                },
+                _ => {}
+            }
+        }
+    }
+
+    /// Sends a CTCP-escaped message.
+    #[experimental]
+    #[cfg(feature = "ctcp")]
+    fn send_ctcp(&self, target: &str, msg: &str) {
+        self.send(NOTICE(target, format!("\u{001}{}\u{001}", msg)[])).unwrap();
+    }
+
+    /// Handles CTCP requests if the CTCP feature is enabled.
+    #[experimental]
+    #[cfg(not(feature = "ctcp"))]
+    fn handle_ctcp(&self, msg: &Message) {}
 }
 
 /// An Iterator over an IrcServer's incoming Messages.

@@ -5,6 +5,7 @@
 #![warn(missing_docs)]
 
 #![feature(slicing_syntax)]
+#[cfg(feature = "ctcp")] extern crate time;
 #[cfg(feature = "encode")] extern crate encoding;
 extern crate serialize;
 #[cfg(feature = "ssl")] extern crate openssl;

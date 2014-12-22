@@ -164,6 +164,13 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
             msg
         })))
     }
+
+    /// Sends an action command to the specified target.
+    #[experimental]
+    #[cfg(feature = "ctcp")]
+    pub fn send_action(&self, target: &str, msg: &str) -> IoResult<()> {
+        self.send_privmsg(target, format!("\u{001}ACTION {}\u{001}", msg  )[]) 
+    }
 }
 
 #[cfg(test)]

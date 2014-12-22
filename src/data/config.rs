@@ -35,6 +35,8 @@ pub struct Config {
     pub encoding: Option<String>,
     /// A list of channels to join on connection.
     pub channels: Option<Vec<String>>,
+    /// The text that'll be sent in response to CTCP USERINFO requests.
+    pub user_info: Option<String>,
     /// A map of additional options to be stored in config.
     pub options: Option<HashMap<String, String>>,
 }
@@ -144,6 +146,13 @@ impl Config {
     #[experimental]
     pub fn channels(&self) -> Vec<&str> {
         self.channels.as_ref().map(|v| v.iter().map(|s| s[]).collect()).unwrap_or(vec![])    
+    }
+
+    /// Gets the string to be sent in response to CTCP USERINFO requests.
+    /// This defaults to an empty string when not specified.
+    #[experimental]
+    pub fn user_info(&self) -> &str {
+        self.user_info.as_ref().map(|s| s[]).unwrap_or("")
     }
 
     /// Looks up the specified string in the options map.
