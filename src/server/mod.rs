@@ -200,7 +200,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                         "FINGER" => self.send_ctcp(resp, format!("FINGER :{} ({})", 
                                                                  self.config.real_name(), 
                                                                  self.config.username())[]),
-                        "VERSION" => self.send_ctcp(resp, "VERSION irc v0.6.0 Rust"),
+                        "VERSION" => self.send_ctcp(resp, "VERSION irc:git:Rust"),
                         "SOURCE" => {
                             self.send_ctcp(resp, "SOURCE https://github.com/aatxe/irc");
                             self.send_ctcp(resp, "SOURCE");
@@ -298,6 +298,7 @@ mod test {
             alt_nicks: Some(vec![format!("test2")]),
             server: Some(format!("irc.test.net")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
+            user_info: Some(format!("Testing.")),
             .. Default::default()
         }
     }
@@ -446,5 +447,104 @@ mod test {
         let mut levels = server.list_users("#test").unwrap()[0].access_levels();
         levels.retain(|l| exp.access_levels().contains(l));
         assert_eq!(levels.len(), exp.access_levels().len()); 
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn finger_response() {
+        let value = "test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            MemReader::new(value.as_bytes().to_vec()), NullWriter
+        ));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(get_server_value(server)[], "NOTICE test :\u{001}FINGER :test (test)\u{001}\
+                   \r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn finger_response() {
+        let value = "test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+        ));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(get_server_value(server)[], "NOTICE test :\u{001}FINGER :test (test)\u{001}\
+                   \r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn version_response() {
+        let value = "test!test@test PRIVMSG test :\u{001}VERSION\u{001}\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+        ));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(get_server_value(server)[], "NOTICE test :\u{001}VERSION irc:git:Rust\u{001}\
+                   \r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn source_response() {
+        let value = "test!test@test PRIVMSG test :\u{001}SOURCE\u{001}\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+        ));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(get_server_value(server)[], 
+        "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n\
+         NOTICE test :\u{001}SOURCE\u{001}\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn ctcp_ping_response() {
+        let value = "test!test@test PRIVMSG test :\u{001}PING test\u{001}\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+        ));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(get_server_value(server)[], "NOTICE test :\u{001}PING test\u{001}\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn time_response() {
+        let value = "test!test@test PRIVMSG test :\u{001}TIME\u{001}\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+        ));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        let val = get_server_value(server);
+        assert!(val.starts_with("NOTICE test :\u{001}TIME :"));
+        assert!(val.ends_with("\u{001}\r\n"));
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn user_info_response() {
+        let value = "test!test@test PRIVMSG test :\u{001}USERINFO\u{001}\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+        ));
+        for message in server.iter() {
+            println!("{}", message);
+        }
+        assert_eq!(get_server_value(server)[], "NOTICE test :\u{001}USERINFO :Testing.\u{001}\
+                   \r\n");
     }
 }
