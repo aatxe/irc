@@ -457,4 +457,122 @@ mod test {
         assert_eq!(get_server_value(server)[],
         "INVITE test #test\r\n");
     }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn send_ctcp() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(NullReader, MemWriter::new()));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_ctcp("test", "MESSAGE").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "PRIVMSG test \u{001}MESSAGE\u{001}\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn send_ctcp() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(NullReader, MemWriter::new()));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_ctcp("test", "MESSAGE").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "PRIVMSG test \u{001}MESSAGE\u{001}\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn send_action() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(NullReader, MemWriter::new()));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_action("test", "tests.").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "PRIVMSG test \u{001}ACTION tests.\u{001}\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn send_finger() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(NullReader, MemWriter::new()));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_finger("test").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "PRIVMSG test \u{001}FINGER\u{001}\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn send_version() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(NullReader, MemWriter::new()));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_version("test").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "PRIVMSG test \u{001}VERSION\u{001}\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn send_source() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(NullReader, MemWriter::new()));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_source("test").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "PRIVMSG test \u{001}SOURCE\u{001}\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn send_user_info() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(NullReader, MemWriter::new()));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_user_info("test").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "PRIVMSG test \u{001}USERINFO\u{001}\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn send_ctcp_ping() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(NullReader, MemWriter::new()));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_ctcp_ping("PING").unwrap();
+        }
+        let val = get_server_value(server);
+        assert!(val.starts_with("PRIVMSG test \u{001}PING "));
+        assert!(val.ends_with("\u{001}\r\n"));
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn send_time() {
+        let server = IrcServer::from_connection(test_config(),
+                     Connection::new(NullReader, MemWriter::new()));
+        {
+            let wrapper = Wrapper::new(&server);
+            wrapper.send_time("test").unwrap();
+        }
+        assert_eq!(get_server_value(server)[],
+        "PRIVMSG test \u{001}TIME\u{001}\r\n");
+    }
 }
