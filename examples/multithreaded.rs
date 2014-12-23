@@ -3,6 +3,7 @@ extern crate irc;
 
 use std::default::Default;
 use std::sync::Arc;
+use std::thread::Thread;
 use irc::data::config::Config;
 use irc::server::{IrcServer, Server};
 use irc::server::utils::Wrapper;
@@ -20,9 +21,9 @@ fn main() {
     server.identify().unwrap();
     let server = irc_server.clone();
     // We won't use a wrapper here because we don't need the added functionality.
-    spawn(move || { 
+    let _ = Thread::spawn(move || { 
         for msg in server.iter() {
             print!("{}", msg.unwrap().into_string());
         }
-    });
+    }).join(); // You might not want to join here for actual multi-threading.
 }

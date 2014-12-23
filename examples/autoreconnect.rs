@@ -3,6 +3,7 @@ extern crate irc;
 
 use std::default::Default;
 use std::sync::Arc;
+use std::thread::Thread;
 use irc::data::{Command, Config};
 use irc::server::{IrcServer, Server};
 use irc::server::utils::Wrapper;
@@ -17,7 +18,7 @@ fn main() {
     let irc_server = Arc::new(IrcServer::from_config(config).unwrap());
     irc_server.conn().set_keepalive(Some(5)).unwrap();
     // The wrapper provides us with methods like send_privmsg(...) and identify(...)
-    spawn(move || { 
+    let _ = Thread::spawn(move || { 
         let server = Wrapper::new(&*irc_server);
         server.identify().unwrap();
         loop {
@@ -41,5 +42,5 @@ fn main() {
             irc_server.reconnect().unwrap();
             server.identify().unwrap();
         }
-    }); 
+    }).join(); 
 }

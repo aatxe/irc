@@ -4,6 +4,7 @@ extern crate irc;
 use std::default::Default;
 use std::io::timer::sleep;
 use std::sync::Arc;
+use std::thread::Thread;
 use std::time::duration::Duration;
 use irc::data::config::Config;
 use irc::server::{IrcServer, Server};
@@ -22,7 +23,9 @@ fn main() {
     let server = Wrapper::new(&*irc_server2);
     server.identify().unwrap();
     // Let's set up a loop that just prints the messages.
-    spawn(move || { irc_server.iter().map(|m| print!("{}", m.unwrap().into_string())).count(); });
+    Thread::spawn(move || { 
+        irc_server.iter().map(|m| print!("{}", m.unwrap().into_string())).count(); 
+    }).detach();
     loop {
         server.send_privmsg("#vana", "TWEET TWEET").unwrap();
         sleep(Duration::seconds(10))
