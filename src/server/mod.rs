@@ -186,6 +186,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
             None => "",
         };
         if let ("PRIVMSG", [ref target]) = (msg.command[], msg.args[]) {
+            println!("it's a privmsg");
             let resp = if target.starts_with("#") { target[] } else { source };
             match msg.suffix {
                 Some(ref msg) if msg.starts_with("\u{001}") => {
@@ -197,14 +198,17 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                         };
                         msg[1..end].split_str(" ").collect()
                     };
+                    println!("we made it this far.");
                     match tokens[0] { 
                         "FINGER" => self.send_ctcp(resp, format!("FINGER :{} ({})", 
                                                                  self.config.real_name(), 
                                                                  self.config.username())[]),
                         "VERSION" => self.send_ctcp(resp, "VERSION irc:git:Rust"),
                         "SOURCE" => {
+                            println!("sending shit!");
                             self.send_ctcp(resp, "SOURCE https://github.com/aatxe/irc");
                             self.send_ctcp(resp, "SOURCE");
+                            println!("sent");
                         },
                         "PING" => self.send_ctcp(resp, format!("PING {}", tokens[1])[]),
                         "TIME" => self.send_ctcp(resp, format!("TIME :{}", now().rfc822z())[]),
@@ -453,7 +457,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn finger_response() {
-        let value = "test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
+        let value = ":test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
             MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
         ));
@@ -467,7 +471,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn version_response() {
-        let value = "test!test@test PRIVMSG test :\u{001}VERSION\u{001}\r\n";
+        let value = ":test!test@test PRIVMSG test :\u{001}VERSION\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
             MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
         ));
@@ -481,7 +485,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn source_response() {
-        let value = "test!test@test PRIVMSG test :\u{001}SOURCE\u{001}\r\n";
+        let value = ":test!test@test PRIVMSG test :\u{001}SOURCE\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
             MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
         ));
@@ -496,7 +500,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn ctcp_ping_response() {
-        let value = "test!test@test PRIVMSG test :\u{001}PING test\u{001}\r\n";
+        let value = ":test!test@test PRIVMSG test :\u{001}PING test\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
             MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
         ));
@@ -509,7 +513,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn time_response() {
-        let value = "test!test@test PRIVMSG test :\u{001}TIME\u{001}\r\n";
+        let value = ":test!test@test PRIVMSG test :\u{001}TIME\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
             MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
         ));
@@ -524,7 +528,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn user_info_response() {
-        let value = "test!test@test PRIVMSG test :\u{001}USERINFO\u{001}\r\n";
+        let value = ":test!test@test PRIVMSG test :\u{001}USERINFO\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
             MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
         ));

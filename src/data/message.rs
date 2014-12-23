@@ -26,7 +26,7 @@ impl Message {
         Message {
             prefix: prefix.map(|s| s.to_owned()),
             command: command.to_owned(),
-            args: args.map_or(Vec::new(), |v| v.iter().map(|s| s.to_string()).collect()),
+            args: args.map_or(Vec::new(), |v| v.iter().map(|&s| s.to_owned()).collect()),
             suffix: suffix.map(|s| s.to_owned()),
         }
     }

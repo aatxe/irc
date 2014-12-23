@@ -543,9 +543,10 @@ mod test {
                      Connection::new(NullReader, MemWriter::new()));
         {
             let wrapper = Wrapper::new(&server);
-            wrapper.send_ctcp_ping("PING").unwrap();
+            wrapper.send_ctcp_ping("test").unwrap();
         }
         let val = get_server_value(server);
+        println!("{}", val);
         assert!(val.starts_with("PRIVMSG test :\u{001}PING "));
         assert!(val.ends_with("\u{001}\r\n"));
     }
