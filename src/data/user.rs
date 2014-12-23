@@ -1,5 +1,6 @@
 //! Data for tracking user information.
 #![unstable]
+use std::borrow::ToOwned;
 use std::str::FromStr;
 
 /// IRC User data.
@@ -20,7 +21,7 @@ impl User {
     pub fn new(name: &str) -> User {
         let ranks: Vec<_> = AccessLevelIterator::new(name).collect();
         User {
-            name: name[ranks.len()..].into_string(),
+            name: name[ranks.len()..].to_owned(),
             access_levels: { 
                 let mut ranks = ranks.clone();
                 ranks.push(AccessLevel::Member);
@@ -188,7 +189,7 @@ impl<'a> AccessLevelIterator<'a> {
 
 impl<'a> Iterator<AccessLevel> for AccessLevelIterator<'a> {
     fn next(&mut self) -> Option<AccessLevel> {
-        let ret = from_str(self.value);
+        let ret = self.value.parse();
         if self.value.len() > 0 {
             self.value = self.value[1..];
         }
@@ -202,14 +203,14 @@ mod test {
     use super::AccessLevel::{Admin, HalfOp, Member, Oper, Owner, Voice};
 
     #[test]
-    fn access_level_from_str() {
-        assert!(from_str::<AccessLevel>("member").is_none());
-        assert_eq!(from_str::<AccessLevel>("~owner").unwrap(), Owner);
-        assert_eq!(from_str::<AccessLevel>("&admin").unwrap(), Admin);
-        assert_eq!(from_str::<AccessLevel>("@oper").unwrap(), Oper);
-        assert_eq!(from_str::<AccessLevel>("%halfop").unwrap(), HalfOp);
-        assert_eq!(from_str::<AccessLevel>("+voice").unwrap(), Voice);
-        assert!(from_str::<AccessLevel>("").is_none());
+    fn parse_access_level() {
+        assert!("member".parse::<AccessLevel>().is_none());
+        assert_eq!("~owner".parse::<AccessLevel>().unwrap(), Owner);
+        assert_eq!("&admin".parse::<AccessLevel>().unwrap(), Admin);
+        assert_eq!("@oper".parse::<AccessLevel>().unwrap(), Oper);
+        assert_eq!("%halfop".parse::<AccessLevel>().unwrap(), HalfOp);
+        assert_eq!("+voice".parse::<AccessLevel>().unwrap(), Voice);
+        assert!("".parse::<AccessLevel>().is_none());
     }
 
     #[test]

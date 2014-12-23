@@ -1,5 +1,6 @@
 //! Messages to and from the server.
 #![experimental]
+use std::borrow::ToOwned;
 use std::str::FromStr;
 
 /// IRC Message data.
@@ -23,10 +24,10 @@ impl Message {
     pub fn new(prefix: Option<&str>, command: &str, args: Option<Vec<&str>>, suffix: Option<&str>)
         -> Message {
         Message {
-            prefix: prefix.map(|s| s.into_string()),
-            command: command.into_string(),
-            args: args.map_or(Vec::new(), |v| v.iter().map(|s| s.into_string()).collect()),
-            suffix: suffix.map(|s| s.into_string()),
+            prefix: prefix.map(|s| s.to_owned()),
+            command: command.to_owned(),
+            args: args.map_or(Vec::new(), |v| v.iter().map(|s| s.to_string()).collect()),
+            suffix: suffix.map(|s| s.to_owned()),
         }
     }
 
@@ -125,13 +126,13 @@ mod test {
             args: vec![format!("test")],
             suffix: Some(format!("Testing!")),
         };
-        assert_eq!(from_str("PRIVMSG test :Testing!\r\n"), Some(message));
+        assert_eq!("PRIVMSG test :Testing!\r\n".parse(), Some(message));
         let message = Message {
             prefix: Some(format!("test!test@test")),
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
             suffix: Some(format!("Still testing!")),
         };
-        assert_eq!(from_str(":test!test@test PRIVMSG test :Still testing!\r\n"), Some(message));
+        assert_eq!(":test!test@test PRIVMSG test :Still testing!\r\n".parse(), Some(message));
     }
 }

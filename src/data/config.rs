@@ -1,12 +1,13 @@
 //! JSON configuration files using libserialize.
 #![stable]
+use std::borrow::ToOwned;
 use std::collections::HashMap;
 use std::io::fs::File;
 use std::io::{InvalidInput, IoError, IoResult};
-use serialize::json::decode;
+use rustc_serialize::json::decode;
 
 /// Configuration data.
-#[deriving(Clone, Decodable, Default, PartialEq, Show)]
+#[deriving(Clone, RustcDecodable, Default, PartialEq, Show)]
 #[unstable]
 pub struct Config {
     /// A list of the owners of the bot by nickname.
@@ -160,7 +161,7 @@ impl Config {
     /// This will also panic if used and there are no options.
     #[experimental]
     pub fn get_option(&self, option: &str) -> &str {
-        self.options.as_ref().map(|o| o[option.into_string()][]).unwrap()
+        self.options.as_ref().map(|o| o[option.to_owned()][]).unwrap()
     }
 }
 

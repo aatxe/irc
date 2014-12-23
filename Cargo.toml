@@ -16,6 +16,10 @@ ctcp = ["time"]
 encode = ["encoding"]
 ssl = ["openssl"]
 
+[dependencies.rustc-serialize]
+
+rustc-serialize = "~0.1.4"
+
 [dependencies.time]
 
 time = "~0.1.3"

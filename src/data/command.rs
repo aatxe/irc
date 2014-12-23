@@ -932,7 +932,7 @@ impl<'a> Command<'a> {
             }
         } else if let "CAP" = m.command[] {
             if m.args.len() != 1 { return Err(invalid_input()) }
-            if let Some(cmd) = from_str(m.args[0][]) {
+            if let Some(cmd) = m.args[0].parse() {
                 match m.suffix {
                     Some(ref suffix) => Command::CAP(cmd, Some(suffix[])),
                     None => Command::CAP(cmd, None),

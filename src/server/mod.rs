@@ -1,5 +1,6 @@
 //! Interface for working with IRC Servers
 #![experimental]
+use std::borrow::ToOwned;
 use std::collections::HashMap;
 use std::io::{BufferedReader, BufferedWriter, IoError, IoErrorKind, IoResult};
 use std::sync::{Mutex, RWLock};
@@ -88,7 +89,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for IrcServer<T, U> {
     }
 
     fn list_users(&self, chan: &str) -> Option<Vec<User>> {
-        self.chanlists.lock().get(&chan.into_string()).cloned()
+        self.chanlists.lock().get(&chan.to_owned()).cloned()
     }
 }
 
@@ -261,7 +262,7 @@ impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
 impl<'a, T: IrcReader, U: IrcWriter> Iterator<IoResult<Message>> for ServerIterator<'a, T, U> {
     fn next(&mut self) -> Option<IoResult<Message>> {
         let res = self.get_next_line().and_then(|msg|
-             match from_str(msg[]) {
+             match msg.parse() {
                 Some(msg) => {
                     self.server.handle_message(&msg);
                     Ok(msg)

@@ -296,7 +296,7 @@ impl Response {
     /// Gets a response from a message.
     #[stable]
     pub fn from_message(m: &Message) -> Option<Response> { 
-        from_str(m.command[])
+        m.command.parse() 
     }
 
     /// Determines whether or not this response is an error response.
@@ -308,7 +308,7 @@ impl Response {
 
 impl FromStr for Response {
     fn from_str(s: &str) -> Option<Response> {
-        if let Some(respcode) = from_str(s) {
+        if let Some(respcode) = s.parse() {
             FromPrimitive::from_uint(respcode)
         } else {
             None
@@ -323,10 +323,10 @@ mod test {
     #[test]
     fn from_message() {
         assert_eq!(Response::from_message(
-            &from_str(":irc.test.net 353 test = #test :test\r\n").unwrap()
+            &":irc.test.net 353 test = #test :test\r\n".parse().unwrap()
         ).unwrap(), Response::RPL_NAMREPLY);
         assert_eq!(Response::from_message(
-            &from_str(":irc.test.net 433 <nick> :Nickname is already in use\r\n").unwrap()
+            &":irc.test.net 433 <nick> :Nickname is already in use\r\n".parse().unwrap()
         ).unwrap(), Response::ERR_NICKNAMEINUSE);
     }
 
