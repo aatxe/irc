@@ -473,19 +473,6 @@ mod test {
 
     #[test]
     #[cfg(feature = "ctcp")]
-    fn send_ctcp() {
-        let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_ctcp("test", "MESSAGE").unwrap();
-        }
-        assert_eq!(get_server_value(server)[],
-        "PRIVMSG test :\u{001}MESSAGE\u{001}\r\n");
-    }
-
-    #[test]
-    #[cfg(feature = "ctcp")]
     fn send_action() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, MemWriter::new()));

@@ -454,20 +454,6 @@ mod test {
     fn finger_response() {
         let value = "test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), NullWriter
-        ));
-        for message in server.iter() {
-            println!("{}", message);
-        }
-        assert_eq!(get_server_value(server)[], "NOTICE test :\u{001}FINGER :test (test)\u{001}\
-                   \r\n");
-    }
-
-    #[test]
-    #[cfg(feature = "ctcp")]
-    fn finger_response() {
-        let value = "test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
             MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
         ));
         for message in server.iter() {

@@ -185,6 +185,7 @@ mod test {
             use_ssl: Some(false),
             encoding: Some(format!("UTF-8")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
+            user_info: None,
             options: Some(HashMap::new()),
         };
         assert_eq!(Config::load(Path::new("config.json")), Ok(cfg));
@@ -205,6 +206,7 @@ mod test {
             use_ssl: Some(false),
             encoding: Some(format!("UTF-8")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
+            user_info: None,
             options: Some(HashMap::new()),
         };
         assert_eq!(Config::load_utf8("config.json"), Ok(cfg));
