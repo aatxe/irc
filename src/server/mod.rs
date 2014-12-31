@@ -8,6 +8,7 @@ use conn::{Connection, NetStream};
 use data::{Command, Config, Message, Response, User};
 use data::Command::{JOIN, NICK, NICKSERV, PONG};
 use data::kinds::{IrcReader, IrcWriter};
+use data::message::ToMessage;
 #[cfg(feature = "ctcp")] use time::now;
 
 pub mod utils;
@@ -42,7 +43,7 @@ pub struct IrcServer<T: IrcReader, U: IrcWriter> {
 pub type NetIrcServer = IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>>;
 
 impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
-    /// Creates a new IRC Server connection from the configuration at the specified path, 
+    /// Creates a new IRC Server connection from the configuration at the specified path,
     /// connecting immediately.
     #[experimental]
     pub fn new(config: &str) -> IoResult<NetIrcServer> {
@@ -65,7 +66,7 @@ impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Reconnects to the IRC server.
     #[experimental]
     pub fn reconnect(&self) -> IoResult<()> {
-        self.conn.reconnect(self.config().server(), self.config.port()) 
+        self.conn.reconnect(self.config().server(), self.config.port())
     }
 }
 
@@ -133,7 +134,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                 for chan in self.config.channels().into_iter() {
                     self.send(JOIN(chan[], None)).unwrap();
                 }
-            } else if resp == Response::ERR_NICKNAMEINUSE || 
+            } else if resp == Response::ERR_NICKNAMEINUSE ||
                       resp == Response::ERR_ERRONEOUSNICKNAME {
                 let alt_nicks = self.config.get_alternate_nicknames();
                 let mut index = self.alt_nick_index.write();
@@ -190,7 +191,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
             let resp = if target.starts_with("#") { target[] } else { source };
             match msg.suffix {
                 Some(ref msg) if msg.starts_with("\u{001}") => {
-                    let tokens: Vec<_> = { 
+                    let tokens: Vec<_> = {
                         let end = if msg.ends_with("\u{001}") {
                             msg.len() - 1
                         } else {
@@ -199,9 +200,9 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                         msg[1..end].split_str(" ").collect()
                     };
                     println!("we made it this far.");
-                    match tokens[0] { 
-                        "FINGER" => self.send_ctcp(resp, format!("FINGER :{} ({})", 
-                                                                 self.config.real_name(), 
+                    match tokens[0] {
+                        "FINGER" => self.send_ctcp(resp, format!("FINGER :{} ({})",
+                                                                 self.config.real_name(),
                                                                  self.config.username())[]),
                         "VERSION" => self.send_ctcp(resp, "VERSION irc:git:Rust"),
                         "SOURCE" => {
@@ -212,7 +213,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                         },
                         "PING" => self.send_ctcp(resp, format!("PING {}", tokens[1])[]),
                         "TIME" => self.send_ctcp(resp, format!("TIME :{}", now().rfc822z())[]),
-                        "USERINFO" => self.send_ctcp(resp, format!("USERINFO :{}", 
+                        "USERINFO" => self.send_ctcp(resp, format!("USERINFO :{}",
                                                                    self.config.user_info())[]),
                         _ => {}
                     }
@@ -276,7 +277,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Iterator<IoResult<Message>> for ServerItera
                     desc: "Failed to parse message.",
                     detail: Some(msg)
                 })
-            }   
+            }
         );
         match res {
             Err(ref err) if err.kind == IoErrorKind::EndOfFile => None,
@@ -451,7 +452,7 @@ mod test {
         // but ignores the ordering of these entries.
         let mut levels = server.list_users("#test").unwrap()[0].access_levels();
         levels.retain(|l| exp.access_levels().contains(l));
-        assert_eq!(levels.len(), exp.access_levels().len()); 
+        assert_eq!(levels.len(), exp.access_levels().len());
     }
 
     #[test]
@@ -492,7 +493,7 @@ mod test {
         for message in server.iter() {
             println!("{}", message);
         }
-        assert_eq!(get_server_value(server)[], 
+        assert_eq!(get_server_value(server)[],
         "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n\
          NOTICE test :\u{001}SOURCE\u{001}\r\n");
     }
