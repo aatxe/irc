@@ -151,7 +151,6 @@ pub enum Command<'a> {
 }
 
 impl<'a> ToMessage for Command<'a> {
-
     /// Converts a Command into a Message.
     #[stable]
     fn to_message(&self) -> Message {
@@ -162,8 +161,9 @@ impl<'a> ToMessage for Command<'a> {
             Command::OPER(u, p) => Message::new(None, "OPER", Some(vec![u]), Some(p)),
             Command::MODE(t, m, Some(p)) => Message::new(None, "MODE", Some(vec![t, m, p]), None),
             Command::MODE(t, m, None) => Message::new(None, "MODE", Some(vec![t, m]), None),
-            Command::SERVICE(n, r, d, t, re, i) => Message::new(None, "SERVICE",
-            Some(vec![n, r, d, t, re]), Some(i)),
+            Command::SERVICE(n, r, d, t, re, i) => Message::new(None, "SERVICE", 
+                                                                Some(vec![n, r, d, t, re]), 
+                                                                Some(i)),
             Command::QUIT(Some(m)) => Message::new(None, "QUIT", None, Some(m)),
             Command::QUIT(None) => Message::new(None, "QUIT", None, None),
             Command::SQUIT(s, c) => Message::new(None, "SQUIT", Some(vec![s]), Some(c)),
@@ -187,7 +187,7 @@ impl<'a> ToMessage for Command<'a> {
             Command::MOTD(Some(t)) => Message::new(None, "MOTD", None, Some(t)),
             Command::MOTD(None) => Message::new(None, "MOTD", None, None),
             Command::LUSERS(Some(m), Some(t)) => Message::new(None, "LUSERS", Some(vec![m]),
-            Some(t)),
+                                                              Some(t)),
             Command::LUSERS(Some(m), None) => Message::new(None, "LUSERS", Some(vec![m]), None),
             Command::LUSERS(None, _) => Message::new(None, "LUSERS", None, None),
             Command::VERSION(Some(t)) => Message::new(None, "VERSION", None, Some(t)),
@@ -201,7 +201,7 @@ impl<'a> ToMessage for Command<'a> {
             Command::TIME(Some(t)) => Message::new(None, "TIME", None, Some(t)),
             Command::TIME(None) => Message::new(None, "TIME", None, None),
             Command::CONNECT(t, p, Some(r)) => Message::new(None, "CONNECT", Some(vec![t, p]),
-            Some(r)),
+                                                            Some(r)),
             Command::CONNECT(t, p, None) => Message::new(None, "CONNECT", Some(vec![t, p]), None),
             Command::TRACE(Some(t)) => Message::new(None, "TRACE", None, Some(t)),
             Command::TRACE(None) => Message::new(None, "TRACE", None, None),
@@ -210,20 +210,20 @@ impl<'a> ToMessage for Command<'a> {
             Command::INFO(Some(t)) => Message::new(None, "INFO", None, Some(t)),
             Command::INFO(None) => Message::new(None, "INFO", None, None),
             Command::SERVLIST(Some(m), Some(t)) => Message::new(None, "SERVLIST", Some(vec![m]),
-            Some(t)),
+                                                                Some(t)),
             Command::SERVLIST(Some(m), None) => Message::new(None, "SERVLIST", Some(vec![m]), None),
             Command::SERVLIST(None, _) => Message::new(None, "SERVLIST", None, None),
             Command::SQUERY(s, t) => Message::new(None, "SQUERY", Some(vec![s, t]), None),
             Command::WHO(Some(s), Some(true)) => Message::new(None, "WHO", Some(vec![s, "o"]),
-            None),
+                                                              None),
             Command::WHO(Some(s), _) => Message::new(None, "WHO", Some(vec![s]), None),
             Command::WHO(None, _) => Message::new(None, "WHO", None, None),
             Command::WHOIS(Some(t), m) => Message::new(None, "WHOIS", Some(vec![t, m]), None),
             Command::WHOIS(None, m) => Message::new(None, "WHOIS", Some(vec![m]), None),
             Command::WHOWAS(n, Some(c), Some(t)) => Message::new(None, "WHOWAS", Some(vec![n, c]),
-            Some(t)),
+                                                                 Some(t)),
             Command::WHOWAS(n, Some(c), None) => Message::new(None, "WHOWAS", Some(vec![n, c]),
-            None),
+                                                              None),
             Command::WHOWAS(n, None, _) => Message::new(None, "WHOWAS", Some(vec![n]), None),
             Command::KILL(n, c) => Message::new(None, "KILL", Some(vec![n]), Some(c)),
             Command::PING(s, Some(t)) => Message::new(None, "PING", Some(vec![s]), Some(t)),
@@ -237,9 +237,9 @@ impl<'a> ToMessage for Command<'a> {
             Command::DIE => Message::new(None, "DIE", None, None),
             Command::RESTART => Message::new(None, "RESTART", None, None),
             Command::SUMMON(u, Some(t), Some(c)) => Message::new(None, "SUMMON", Some(vec![u, t]),
-            Some(c)),
+                                                                 Some(c)),
             Command::SUMMON(u, Some(t), None) => Message::new(None, "SUMMON", Some(vec![u, t]),
-            None),
+                                                              None),
             Command::SUMMON(u, None, _) => Message::new(None, "SUMMON", Some(vec![u]), None),
             Command::USERS(Some(t)) => Message::new(None, "USERS", None, Some(t)),
             Command::USERS(None) => Message::new(None, "USERS", None, None),
@@ -248,7 +248,7 @@ impl<'a> ToMessage for Command<'a> {
             Command::ISON(ref u) => Message::new(None, "ISON", Some(u.clone()), None),
             Command::SAJOIN(n, c) => Message::new(None, "SAJOIN", Some(vec![n, c]), None),
             Command::SAMODE(t, m, Some(p)) => Message::new(None, "SAMODE", Some(vec![t, m, p]),
-            None),
+                                                           None),
             Command::SAMODE(t, m, None) => Message::new(None, "SAMODE", Some(vec![t, m]), None),
             Command::SANICK(o, n) => Message::new(None, "SANICK", Some(vec![o, n]), None),
             Command::SAPART(c, r) => Message::new(None, "SAPART", Some(vec![c]), Some(r)),
@@ -262,7 +262,6 @@ impl<'a> ToMessage for Command<'a> {
             Command::CAP(s, p) => Message::new(None, "CAP", Some(vec![s.to_str()]), p),
         }
     }
-
 }
 
 impl<'a> Command<'a> {

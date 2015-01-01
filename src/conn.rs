@@ -114,8 +114,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     /// Sends a Message over this connection.
     #[experimental]
     #[cfg(feature = "encode")]
-    pub fn send<T: ToMessage>(&self, tomsg: T, encoding: &str) -> IoResult<()> {
-        let message = tomsg.to_message();
+    pub fn send<T: ToMessage>(&self, to_msg: T, encoding: &str) -> IoResult<()> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
             None => return Err(IoError {
@@ -124,7 +123,8 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
                 detail: Some(format!("Invalid decoder: {}", encoding))
             })
         };
-        let data = match encoding.encode(message.into_string()[], EncoderTrap::Replace) {
+        let msg = to_msg.to_message();
+        let data = match encoding.encode(msg.into_string()[], EncoderTrap::Replace) {
             Ok(data) => data,
             Err(data) => return Err(IoError {
                 kind: IoErrorKind::InvalidInput,
@@ -140,10 +140,9 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     /// Sends a message over this connection.
     #[experimental]
     #[cfg(not(feature = "encode"))]
-    pub fn send<T: ToMessage>(&self, tomsg: T) -> IoResult<()> {
-        let message = tomsg.to_message();
+    pub fn send<T: ToMessage>(&self, to_msg: T) -> IoResult<()> {
         let mut writer = self.writer.lock();
-        try!(writer.write_str(message.into_string()[]));
+        try!(writer.write_str(to_msg.to_message().into_string()[]));
         writer.flush()
     }
 
@@ -254,6 +253,16 @@ mod test {
         let data = String::from_utf8(conn.writer().get_ref().to_vec()).unwrap();
         assert_eq!(data[], "PRIVMSG test :Testing!\r\n");
     }
+    
+    #[test]
+    #[cfg(not(feature = "encode"))]
+    fn send_str() {
+        let exp = "PRIVMSG test :Testing!\r\n";
+        let conn = Connection::new(NullReader, MemWriter::new());
+        assert!(conn.send(exp).is_ok());
+        let data = String::from_utf8(conn.writer().get_ref().to_vec()).unwrap();
+        assert_eq!(data[], exp);
+    }
 
     #[test]
     #[cfg(feature = "encode")]
@@ -268,6 +277,16 @@ mod test {
 
     #[test]
     #[cfg(feature = "encode")]
+    fn send_utf8_str() {
+        let exp = "PRIVMSG test :€ŠšŽžŒœŸ\r\n";
+        let conn = Connection::new(NullReader, MemWriter::new());
+        assert!(conn.send(exp, "UTF-8").is_ok());
+        let data = UTF_8.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
+        assert_eq!(data[], exp);
+    }
+
+    #[test]
+    #[cfg(feature = "encode")]
     fn send_iso885915() {
         let conn = Connection::new(NullReader, MemWriter::new());
         assert!(conn.send(
@@ -275,6 +294,16 @@ mod test {
         ).is_ok());
         let data = ISO_8859_15.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
         assert_eq!(data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "encode")]
+    fn send_iso885915_str() {
+        let exp = "PRIVMSG test :€ŠšŽžŒœŸ\r\n";
+        let conn = Connection::new(NullReader, MemWriter::new());
+        assert!(conn.send(exp, "l9").is_ok());
+        let data = ISO_8859_15.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
+        assert_eq!(data[], exp);
     }
 
     #[test]

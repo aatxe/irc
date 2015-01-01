@@ -3,14 +3,6 @@
 use std::borrow::ToOwned;
 use std::str::FromStr;
 
-/// Represents something that can be converted to a message.
-pub trait ToMessage {
-
-    /// Convert to message.
-    fn to_message(&self) -> Message;
-
-}
-
 /// IRC Message data.
 #[experimental]
 #[deriving(Clone, PartialEq, Show)]
@@ -63,11 +55,9 @@ impl Message {
 }
 
 impl ToMessage for Message {
-
     fn to_message(&self) -> Message {
         self.clone()
     }
-
 }
 
 impl FromStr for Message {
@@ -101,9 +91,21 @@ impl FromStr for Message {
     }
 }
 
+/// A trait representing the ability to be converted into a Message.
+pub trait ToMessage {
+    /// Converts this to a Message.
+    fn to_message(&self) -> Message;
+}
+
+impl<'a> ToMessage for &'a str {
+    fn to_message(&self) -> Message {
+        self.parse().unwrap()
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use super::Message;
+    use super::{Message, ToMessage};
 
     #[test]
     fn new() {
@@ -150,5 +152,29 @@ mod test {
             suffix: Some(format!("Still testing!")),
         };
         assert_eq!(":test!test@test PRIVMSG test :Still testing!\r\n".parse(), Some(message));
+    }
+
+    #[test]
+    fn to_message() {
+        let message = Message {
+            prefix: None,
+            command: format!("PRIVMSG"),
+            args: vec![format!("test")],
+            suffix: Some(format!("Testing!")),
+        };
+        assert_eq!("PRIVMSG test :Testing!\r\n".to_message(), message);
+        let message = Message {
+            prefix: Some(format!("test!test@test")),
+            command: format!("PRIVMSG"),
+            args: vec![format!("test")],
+            suffix: Some(format!("Still testing!")),
+        };
+        assert_eq!(":test!test@test PRIVMSG test :Still testing!\r\n".to_message(), message);
+    }
+
+    #[test]
+    #[should_fail]
+    fn to_message_invalid_format() {
+        ":invalid :message".to_message();
     }
 }
