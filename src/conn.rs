@@ -6,7 +6,7 @@ use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
 #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
 use data::kinds::{IrcReader, IrcWriter};
-use data::message::Message;
+use data::message::ToMessage;
 #[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslMethod, SslStream};
 #[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
 
@@ -26,7 +26,7 @@ type NetReaderWriterPair = (BufferedReader<NetStream>, BufferedWriter<NetStream>
 impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Creates a thread-safe TCP connection to the specified server.
     #[experimental]
-    pub fn connect(host: &str, port: u16) -> IoResult<NetConnection> {  
+    pub fn connect(host: &str, port: u16) -> IoResult<NetConnection> {
         let (reader, writer) = try!(Connection::connect_internal(host, port));
         Ok(Connection::new(reader, writer))
     }
@@ -52,7 +52,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
         let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
         let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Tlsv1)));
         let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
-        Ok((BufferedReader::new(NetStream::SslTcpStream(ssl_socket.clone())), 
+        Ok((BufferedReader::new(NetStream::SslTcpStream(ssl_socket.clone())),
             BufferedWriter::new(NetStream::SslTcpStream(ssl_socket))))
     }
 
@@ -78,13 +78,13 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
         *self.writer.lock() = writer;
         Ok(())
     }
-    
+
     /// Sets the keepalive for the network stream.
     #[experimental]
     pub fn set_keepalive(&self, delay_in_seconds: Option<uint>) -> IoResult<()> {
         self.mod_stream(|tcp| tcp.set_keepalive(delay_in_seconds))
     }
-    
+
     /// Sets the timeout for the network stream.
     #[experimental]
     pub fn set_timeout(&self, timeout_ms: Option<u64>) {
@@ -114,7 +114,8 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     /// Sends a Message over this connection.
     #[experimental]
     #[cfg(feature = "encode")]
-    pub fn send(&self, message: Message, encoding: &str) -> IoResult<()> {
+    pub fn send<T: ToMessage>(&self, tomsg: T, encoding: &str) -> IoResult<()> {
+        let message = tomsg.to_message();
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
             None => return Err(IoError {
@@ -139,7 +140,8 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     /// Sends a message over this connection.
     #[experimental]
     #[cfg(not(feature = "encode"))]
-    pub fn send(&self, message: Message) -> IoResult<()> {
+    pub fn send<T: ToMessage>(&self, tomsg: T) -> IoResult<()> {
+        let message = tomsg.to_message();
         let mut writer = self.writer.lock();
         try!(writer.write_str(message.into_string()[]));
         writer.flush()
@@ -181,7 +183,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     pub fn reader<'a>(&'a self) -> MutexGuard<'a, T> {
         self.reader.lock()
     }
-    
+
     /// Acquires the Writer lock.
     #[experimental]
     pub fn writer<'a>(&'a self) -> MutexGuard<'a, U> {
@@ -261,7 +263,7 @@ mod test {
             Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("€ŠšŽžŒœŸ")), "UTF-8"
         ).is_ok());
         let data = UTF_8.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
-        assert_eq!(data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");  
+        assert_eq!(data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 
     #[test]

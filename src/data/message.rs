@@ -3,6 +3,14 @@
 use std::borrow::ToOwned;
 use std::str::FromStr;
 
+/// Represents something that can be converted to a message.
+pub trait ToMessage {
+
+    /// Convert to message.
+    fn to_message(&self) -> Message;
+
+}
+
 /// IRC Message data.
 #[experimental]
 #[deriving(Clone, PartialEq, Show)]
@@ -52,6 +60,14 @@ impl Message {
         ret.push_str("\r\n");
         ret
     }
+}
+
+impl ToMessage for Message {
+
+    fn to_message(&self) -> Message {
+        self.clone()
+    }
+
 }
 
 impl FromStr for Message {
