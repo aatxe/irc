@@ -5,12 +5,12 @@ language: rust
 script:
   - chmod +x mktestconfig.sh
   - ./mktestconfig.sh
+  - cargo build --verbose --no-default-features
   - cargo build --verbose
-  - cargo build --verbose --features "ctcp encode ssl"
+  - cargo test --verbose --no-default-feature
   - cargo test --verbose
-  - cargo test --verbose --features "ctcp encode ssl" 
+  - cargo doc --verbose --no-default-features
   - cargo doc --verbose
-  - cargo doc --verbose --features "ctcp encode ssl"
 notifications:
   irc:
     channels:
