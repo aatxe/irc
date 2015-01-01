@@ -3,7 +3,7 @@
 
 pub use data::command::Command;
 pub use data::config::Config;
-pub use data::message::Message;
+pub use data::message::{Message, ToMessage};
 pub use data::response::Response;
 pub use data::user::{AccessLevel, User};
 

@@ -8,7 +8,6 @@ use conn::{Connection, NetStream};
 use data::{Command, Config, Message, Response, User};
 use data::Command::{JOIN, NICK, NICKSERV, PONG};
 use data::kinds::{IrcReader, IrcWriter};
-use data::message::ToMessage;
 #[cfg(feature = "ctcp")] use time::now;
 
 pub mod utils;
@@ -76,13 +75,13 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for IrcServer<T, U> {
     }
 
     #[cfg(feature = "encode")]
-    fn send(&self, command: Command) -> IoResult<()> {
-        self.conn.send(command.to_message(), self.config.encoding())
+    fn send(&self, cmd: Command) -> IoResult<()> {
+        self.conn.send(cmd, self.config.encoding())
     }
 
     #[cfg(not(feature = "encode"))]
-    fn send(&self, command: Command) -> IoResult<()> {
-        self.conn.send(command.to_message())
+    fn send(&self, cmd: Command) -> IoResult<()> {
+        self.conn.send(cmd)
     }
 
     fn iter(&'a self) -> ServerIterator<'a, T, U> {
@@ -187,7 +186,6 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
             None => "",
         };
         if let ("PRIVMSG", [ref target]) = (msg.command[], msg.args[]) {
-            println!("it's a privmsg");
             let resp = if target.starts_with("#") { target[] } else { source };
             match msg.suffix {
                 Some(ref msg) if msg.starts_with("\u{001}") => {
@@ -199,17 +197,14 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                         };
                         msg[1..end].split_str(" ").collect()
                     };
-                    println!("we made it this far.");
                     match tokens[0] {
                         "FINGER" => self.send_ctcp(resp, format!("FINGER :{} ({})",
                                                                  self.config.real_name(),
                                                                  self.config.username())[]),
                         "VERSION" => self.send_ctcp(resp, "VERSION irc:git:Rust"),
                         "SOURCE" => {
-                            println!("sending shit!");
                             self.send_ctcp(resp, "SOURCE https://github.com/aatxe/irc");
                             self.send_ctcp(resp, "SOURCE");
-                            println!("sent");
                         },
                         "PING" => self.send_ctcp(resp, format!("PING {}", tokens[1])[]),
                         "TIME" => self.send_ctcp(resp, format!("TIME :{}", now().rfc822z())[]),
