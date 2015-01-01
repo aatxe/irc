@@ -7,7 +7,7 @@ script:
   - ./mktestconfig.sh
   - cargo build --verbose --no-default-features
   - cargo build --verbose
-  - cargo test --verbose --no-default-feature
+  - cargo test --verbose --no-default-features
   - cargo test --verbose
   - cargo doc --verbose --no-default-features
   - cargo doc --verbose
