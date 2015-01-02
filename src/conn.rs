@@ -64,7 +64,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
 
     /// Reconnects to the specified server, dropping the current connection.
     pub fn reconnect(&self, host: &str, port: u16) -> IoResult<()> {
-        let use_ssl = match self.reader.lock().get_ref() {
+        let use_ssl = match self.reader.lock().unwrap().get_ref() {
             &NetStream::UnsecuredTcpStream(_) =>  false,
             #[cfg(feature = "ssl")]
             &NetStream::SslTcpStream(_) => true,
@@ -74,8 +74,8 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
         } else {
             try!(Connection::connect_internal(host, port))
         };
-        *self.reader.lock() = reader;
-        *self.writer.lock() = writer;
+        *self.reader.lock().unwrap() = reader;
+        *self.writer.lock().unwrap() = writer;
         Ok(())
     }
 
@@ -93,7 +93,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
 
     /// Modifies the internal TcpStream using a function.
     fn mod_stream(&self, f: |&mut TcpStream| -> IoResult<()>) -> IoResult<()> {
-        match self.reader.lock().get_mut() {
+        match self.reader.lock().unwrap().get_mut() {
             &NetStream::UnsecuredTcpStream(ref mut tcp) => f(tcp),
             #[cfg(feature = "ssl")]
             &NetStream::SslTcpStream(ref mut ssl) => f(ssl.get_mut()),
@@ -132,7 +132,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
                 detail: Some(format!("Failed to decode {} as {}.", data, encoding.name())),
             })
         };
-        let mut writer = self.writer.lock();
+        let mut writer = self.writer.lock().unwrap();
         try!(writer.write(data[]));
         writer.flush()
     }
@@ -141,7 +141,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     #[experimental]
     #[cfg(not(feature = "encode"))]
     pub fn send<T: ToMessage>(&self, to_msg: T) -> IoResult<()> {
-        let mut writer = self.writer.lock();
+        let mut writer = self.writer.lock().unwrap();
         try!(writer.write_str(to_msg.to_message().into_string()[]));
         writer.flush()
     }
@@ -158,7 +158,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
                 detail: Some(format!("Invalid decoder: {}", encoding))
             })
         };
-        self.reader.lock().read_until(b'\n').and_then(|line|
+        self.reader.lock().unwrap().read_until(b'\n').and_then(|line|
             match encoding.decode(line[], DecoderTrap::Replace) {
                 Ok(data) => Ok(data),
                 Err(data) => Err(IoError {
@@ -174,19 +174,19 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     #[experimental]
     #[cfg(not(feature = "encoding"))]
     pub fn recv(&self) -> IoResult<String> {
-        self.reader.lock().read_line()
+        self.reader.lock().unwrap().read_line()
     }
 
     /// Acquires the Reader lock.
     #[experimental]
     pub fn reader<'a>(&'a self) -> MutexGuard<'a, T> {
-        self.reader.lock()
+        self.reader.lock().unwrap()
     }
 
     /// Acquires the Writer lock.
     #[experimental]
     pub fn writer<'a>(&'a self) -> MutexGuard<'a, U> {
-        self.writer.lock()
+        self.writer.lock().unwrap()
     }
 }
 

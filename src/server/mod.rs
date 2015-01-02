@@ -89,7 +89,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for IrcServer<T, U> {
     }
 
     fn list_users(&self, chan: &str) -> Option<Vec<User>> {
-        self.chanlists.lock().get(&chan.to_owned()).cloned()
+        self.chanlists.lock().unwrap().get(&chan.to_owned()).cloned()
     }
 }
 
@@ -115,11 +115,12 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                 if let Some(users) = msg.suffix.clone() {
                     if let [_, _, ref chan] = msg.args[] {
                         for user in users.split_str(" ") {
-                            if match self.chanlists.lock().get_mut(chan) {
+                            if match self.chanlists.lock().unwrap().get_mut(chan) {
                                 Some(vec) => { vec.push(User::new(user)); false },
                                 None => true,
                             } {
-                                self.chanlists.lock().insert(chan.clone(), vec!(User::new(user)));
+                                self.chanlists.lock().unwrap().insert(chan.clone(), 
+                                                                      vec!(User::new(user)));
                             }
                         }
                     }
@@ -136,7 +137,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
             } else if resp == Response::ERR_NICKNAMEINUSE ||
                       resp == Response::ERR_ERRONEOUSNICKNAME {
                 let alt_nicks = self.config.get_alternate_nicknames();
-                let mut index = self.alt_nick_index.write();
+                let mut index = self.alt_nick_index.write().unwrap();
                 if *index.deref() >= alt_nicks.len() {
                     panic!("All specified nicknames were in use.")
                 } else {
@@ -153,13 +154,13 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                 Some(ref suffix) => suffix[],
                 None => msg.args[0][],
             };
-            if let Some(vec) = self.chanlists.lock().get_mut(&String::from_str(chan)) {
-                if let Some(ref source) = msg.prefix {
-                    if let Some(i) = source.find('!') {
+            if let Some(vec) = self.chanlists.lock().unwrap().get_mut(&String::from_str(chan)) {
+                if let Some(ref src) = msg.prefix {
+                    if let Some(i) = src.find('!') {
                         if msg.command[] == "JOIN" {
-                            vec.push(User::new(source[..i]));
+                            vec.push(User::new(src[..i]));
                         } else {
-                            if let Some(n) = vec.as_slice().position_elem(&User::new(source[..i])) {
+                            if let Some(n) = vec.as_slice().position_elem(&User::new(src[..i])) {
                                 vec.swap_remove(n);
                             }
                         }
@@ -167,7 +168,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                 }
             }
         } else if let ("MODE", [ref chan, ref mode, ref user]) = (msg.command[], msg.args[]) {
-            if let Some(vec) = self.chanlists.lock().get_mut(chan) {
+            if let Some(vec) = self.chanlists.lock().unwrap().get_mut(chan) {
                 if let Some(n) = vec.as_slice().position_elem(&User::new(user[])) {
                     vec[n].update_access_level(mode[]);
                 }
