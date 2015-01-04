@@ -306,7 +306,7 @@ mod test {
     }
 
     pub fn get_server_value<T: IrcReader>(server: IrcServer<T, MemWriter>) -> String {
-        String::from_utf8((*server.conn().writer().deref()).get_ref().to_vec()).unwrap()
+        String::from_utf8((*server.conn().writer()).get_ref().to_vec()).unwrap()
     }
 
     #[test]
