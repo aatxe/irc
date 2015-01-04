@@ -1,7 +1,7 @@
 [package]
 
 name = "irc"
-version = "0.7.4"
+version = "0.7.5"
 description = "A simple, thread-safe IRC client library."
 authors = ["Aaron Weiss <aaronweiss74@gmail.com>"]
 license = "Unlicense"
@@ -18,19 +18,19 @@ encode = ["encoding"]
 ssl = ["openssl"]
 
 [dependencies.rustc-serialize]
-rustc-serialize = "~0.2.0"
+rustc-serialize = "~0.2.3"
 
 [dependencies.time]
 
-time = "~0.1.5"
+time = "~0.1.9"
 optional = true
 
 [dependencies.encoding]
 
-encoding = "~0.2.11"
+encoding = "~0.2.14"
 optional = true
 
 [dependencies.openssl]
 
-openssl = "~0.2.10"
+openssl = "~0.2.12"
 optional = true
