@@ -260,7 +260,8 @@ impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
     }
 }
 
-impl<'a, T: IrcReader, U: IrcWriter> Iterator<IoResult<Message>> for ServerIterator<'a, T, U> {
+impl<'a, T: IrcReader, U: IrcWriter> Iterator for ServerIterator<'a, T, U> {
+    type Item = IoResult<Message>;
     fn next(&mut self) -> Option<IoResult<Message>> {
         let res = self.get_next_line().and_then(|msg|
              match msg.parse() {

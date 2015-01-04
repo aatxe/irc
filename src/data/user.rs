@@ -189,7 +189,8 @@ impl<'a> AccessLevelIterator<'a> {
     }
 }
 
-impl<'a> Iterator<AccessLevel> for AccessLevelIterator<'a> {
+impl<'a> Iterator for AccessLevelIterator<'a> {
+    type Item = AccessLevel;
     fn next(&mut self) -> Option<AccessLevel> {
         let ret = self.value.parse();
         if self.value.len() > 0 {
