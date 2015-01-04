@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 /// IRC Message data.
 #[experimental]
-#[deriving(Clone, PartialEq, Show)]
+#[derive(Clone, PartialEq, Show)]
 pub struct Message {
     /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
     pub prefix: Option<String>,

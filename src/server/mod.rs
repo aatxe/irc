@@ -138,11 +138,11 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                       resp == Response::ERR_ERRONEOUSNICKNAME {
                 let alt_nicks = self.config.get_alternate_nicknames();
                 let mut index = self.alt_nick_index.write().unwrap();
-                if *index.deref() >= alt_nicks.len() {
+                if *index >= alt_nicks.len() {
                     panic!("All specified nicknames were in use.")
                 } else {
-                    self.send(NICK(alt_nicks[*index.deref()])).unwrap();
-                    *index.deref_mut() += 1;
+                    self.send(NICK(alt_nicks[*index])).unwrap();
+                    *index += 1;
                 }
             }
             return

@@ -9,7 +9,7 @@ use data::message::{Message, ToMessage};
 /// [capabilities extension](https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01).
 /// Additionally, this includes some common additional commands from popular IRCds.
 #[stable]
-#[deriving(Show, PartialEq)]
+#[derive(Show, PartialEq)]
 pub enum Command<'a> {
     // 3.1 Connection Registration
     /// PASS password
@@ -951,7 +951,7 @@ impl<'a> Command<'a> {
 
 /// A list of all of the subcommands for the capabilities extension.
 #[stable]
-#[deriving(Copy, Show, PartialEq)]
+#[derive(Copy, Show, PartialEq)]
 pub enum CapSubCommand {
     /// Requests a list of the server's capabilities.
     LS,

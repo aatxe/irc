@@ -1,11 +1,13 @@
 //! Data for tracking user information.
 #![unstable]
 use std::borrow::ToOwned;
+use std::cmp::Ordering;
+use std::cmp::Ordering::{Less, Equal, Greater};
 use std::str::FromStr;
 
 /// IRC User data.
 #[unstable]
-#[deriving(Clone, Show)]
+#[derive(Clone, Show)]
 pub struct User {
     /// The user's nickname.
     /// This is the only detail used in determining the equality of two users.
@@ -108,7 +110,7 @@ impl PartialEq for User {
 
 /// The user's access level.
 #[stable]
-#[deriving(Copy, PartialEq, Clone, Show)]
+#[derive(Copy, PartialEq, Clone, Show)]
 pub enum AccessLevel {
     /// The channel owner (~).
     Owner,

@@ -7,7 +7,7 @@ use std::io::{InvalidInput, IoError, IoResult};
 use rustc_serialize::json::decode;
 
 /// Configuration data.
-#[deriving(Clone, RustcDecodable, Default, PartialEq, Show)]
+#[derive(Clone, RustcDecodable, Default, PartialEq, Show)]
 #[unstable]
 pub struct Config {
     /// A list of the owners of the bot by nickname.
