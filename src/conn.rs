@@ -92,7 +92,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     }
 
     /// Modifies the internal TcpStream using a function.
-    fn mod_stream(&self, f: |&mut TcpStream| -> IoResult<()>) -> IoResult<()> {
+    fn mod_stream<F>(&self, f: F) -> IoResult<()> where F: FnOnce(&mut TcpStream) -> IoResult<()> {
         match self.reader.lock().unwrap().get_mut() {
             &NetStream::UnsecuredTcpStream(ref mut tcp) => f(tcp),
             #[cfg(feature = "ssl")]
