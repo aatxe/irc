@@ -3,7 +3,7 @@
 use std::borrow::ToOwned;
 use std::collections::HashMap;
 use std::io::{BufferedReader, BufferedWriter, IoError, IoErrorKind, IoResult};
-use std::sync::{Mutex, RWLock};
+use std::sync::{Mutex, RwLock};
 use conn::{Connection, NetStream};
 use data::{Command, Config, Message, Response, User};
 use data::Command::{JOIN, NICK, NICKSERV, PONG};
@@ -35,7 +35,7 @@ pub struct IrcServer<T: IrcReader, U: IrcWriter> {
     /// A thread-safe map of channels to the list of users in them.
     chanlists: Mutex<HashMap<String, Vec<User>>>,
     /// A thread-safe index to track the current alternative nickname being used.
-    alt_nick_index: RWLock<uint>,
+    alt_nick_index: RwLock<uint>,
 }
 
 /// An IrcServer over a buffered NetStream.
@@ -59,7 +59,7 @@ impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
             Connection::connect(config.server(), config.port())
         });
         Ok(IrcServer { config: config, conn: conn, chanlists: Mutex::new(HashMap::new()),
-                       alt_nick_index: RWLock::new(0u) })
+                       alt_nick_index: RwLock::new(0u) })
     }
 
     /// Reconnects to the IRC server.
@@ -98,7 +98,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     #[experimental]
     pub fn from_connection(config: Config, conn: Connection<T, U>) -> IrcServer<T, U> {
         IrcServer { conn: conn, config: config, chanlists: Mutex::new(HashMap::new()),
-                    alt_nick_index: RWLock::new(0u) }
+                    alt_nick_index: RwLock::new(0u) }
     }
 
     /// Gets a reference to the IRC server's connection.
