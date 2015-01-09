@@ -1,5 +1,5 @@
 //! Data related to IRC functionality.
-#![unstable]
+#![stable]
 
 pub use data::command::Command;
 pub use data::config::Config;
@@ -9,18 +9,18 @@ pub use data::user::{AccessLevel, User};
 
 pub mod kinds {
     //! Trait definitions of appropriate Writers and Buffers for use with this library.
-    #![unstable]
+    #![stable]
 
     /// Trait describing all possible Writers for this library.
-    #[unstable]
+    #[stable]
     pub trait IrcWriter: Writer + Sized + Send + 'static {}
     impl<T> IrcWriter for T where T: Writer + Sized + Send + 'static {}
     /// Trait describing all possible Readers for this library.
-    #[unstable]
+    #[stable]
     pub trait IrcReader: Buffer + Sized + Send + 'static {}
     impl<T> IrcReader for T where T: Buffer + Sized + Send + 'static {}
     /// Trait describing all possible Streams for this library.
-    #[unstable]
+    #[unstable = "May be removed."]
     pub trait IrcStream: IrcWriter + IrcReader {}
     impl<T> IrcStream for T where T: IrcWriter + IrcReader {}
 }

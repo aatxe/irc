@@ -6,7 +6,7 @@ use std::cmp::Ordering::{Less, Equal, Greater};
 use std::str::FromStr;
 
 /// IRC User data.
-#[unstable]
+#[stable]
 #[derive(Clone, Show)]
 pub struct User {
     /// The user's nickname.
@@ -48,19 +48,19 @@ impl User {
     }
 
     /// Gets the user's highest access level.
-    #[experimental]
+    #[unstable = "API may change."]
     pub fn highest_access_level(&self) -> AccessLevel {
         self.highest_access_level
     }
 
     /// Gets all the user's access levels.
-    #[experimental]
+    #[unstable = "API may change."]
     pub fn access_levels(&self) -> Vec<AccessLevel> {
         self.access_levels.clone()
     }
 
     /// Updates the user's access level.
-    #[unstable]
+    #[unstable = "API may change."]
     pub fn update_access_level(&mut self, mode: &str) {
         match mode {
             "+q" => self.add_access_level(AccessLevel::Owner),
@@ -77,6 +77,7 @@ impl User {
        }
     }
 
+    /// Adds an access level to the list, and updates the highest level if necessary.
     fn add_access_level(&mut self, level: AccessLevel) {
         if level > self.highest_access_level() {
             self.highest_access_level = level   
@@ -84,6 +85,7 @@ impl User {
         self.access_levels.push(level.clone())
     }
 
+    /// Removes an access level from the list, and updates the highest level if necessary.
     fn sub_access_level(&mut self, level: AccessLevel) {
         if let Some(n) = self.access_levels[].position_elem(&level) {
             self.access_levels.swap_remove(n);
@@ -179,6 +181,7 @@ impl FromStr for AccessLevel {
     }
 }
 
+/// An iterator used to parse access levels from strings.
 struct AccessLevelIterator<'a> {
     value: &'a str,
 }

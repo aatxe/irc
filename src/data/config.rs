@@ -9,7 +9,7 @@ use rustc_serialize::json::decode;
 
 /// Configuration data.
 #[derive(Clone, RustcDecodable, Default, PartialEq, Show)]
-#[unstable]
+#[stable]
 pub struct Config {
     /// A list of the owners of the bot by nickname.
     pub owners: Option<Vec<String>>,
@@ -70,21 +70,21 @@ impl Config {
 
     /// Gets the nickname specified in the configuration.
     /// This will panic if not specified.
-    #[experimental]
+    #[stable]
     pub fn nickname(&self) -> &str {
         self.nickname.as_ref().map(|s| &s[]).unwrap()
     }
 
     /// Gets the bot's nickserv password specified in the configuration.
     /// This defaults to an empty string when not specified.
-    #[experimental]
+    #[stable]
     pub fn nick_password(&self) -> &str {
         self.nick_password.as_ref().map(|s| &s[]).unwrap_or("")
     }
 
     /// Gets the alternate nicknames specified in the configuration.
     /// This defaults to an empty vector when not specified.
-    #[experimental]
+    #[stable]
     pub fn get_alternate_nicknames(&self) -> Vec<&str> {
         self.alt_nicks.as_ref().map(|v| v.iter().map(|s| &s[]).collect()).unwrap_or(vec![])
     }
@@ -92,28 +92,28 @@ impl Config {
 
     /// Gets the username specified in the configuration.
     /// This defaults to the user's nickname when not specified.
-    #[experimental]
+    #[stable]
     pub fn username(&self) -> &str {
         self.username.as_ref().map(|s| &s[]).unwrap_or(self.nickname())
     }
 
     /// Gets the real name specified in the configuration.
     /// This defaults to the user's nickname when not specified.
-    #[experimental]
+    #[stable]
     pub fn real_name(&self) -> &str {
         self.realname.as_ref().map(|s| &s[]).unwrap_or(self.nickname())
     }
 
     /// Gets the address of the server specified in the configuration.
     /// This panics when not specified.
-    #[experimental]
+    #[stable]
     pub fn server(&self) -> &str {
         self.server.as_ref().map(|s| &s[]).unwrap()
     }
 
     /// Gets the port of the server specified in the configuration.
     /// This defaults to 6667 (or 6697 if use_ssl is specified as true) when not specified.
-    #[experimental]
+    #[stable]
     pub fn port(&self) -> u16 {
         self.port.as_ref().map(|p| *p).unwrap_or(if self.use_ssl() {
             6697
@@ -124,35 +124,35 @@ impl Config {
 
     /// Gets the server password specified in the configuration.
     /// This defaults to a blank string when not specified.
-    #[experimental]
+    #[stable]
     pub fn password(&self) -> &str {
         self.password.as_ref().map(|s| &s[]).unwrap_or("")
     }
 
     /// Gets whether or not to use SSL with this connection.
     /// This defaults to false when not specified.
-    #[experimental]
+    #[stable]
     pub fn use_ssl(&self) -> bool {
         self.use_ssl.as_ref().map(|u| *u).unwrap_or(false)
     }
 
     /// Gets the encoding to use for this connection. This requires the encode feature to work.
     /// This defaults to UTF-8 when not specified.
-    #[experimental]
+    #[stable]
     pub fn encoding(&self) -> &str {
         self.encoding.as_ref().map(|s| &s[]).unwrap_or("UTF-8")
     }
 
     /// Gets the channels to join upon connection.
     /// This defaults to an empty vector if it's not specified.
-    #[experimental]
+    #[stable]
     pub fn channels(&self) -> Vec<&str> {
         self.channels.as_ref().map(|v| v.iter().map(|s| &s[]).collect()).unwrap_or(vec![])    
     }
 
     /// Gets the string to be sent in response to CTCP USERINFO requests.
     /// This defaults to an empty string when not specified.
-    #[experimental]
+    #[unstable = "Feature is still relatively new."]
     pub fn user_info(&self) -> &str {
         self.user_info.as_ref().map(|s| &s[]).unwrap_or("")
     }
@@ -160,7 +160,7 @@ impl Config {
     /// Looks up the specified string in the options map.
     /// This uses indexing, and thus panics when the string is not present.
     /// This will also panic if used and there are no options.
-    #[experimental]
+    #[stable]
     pub fn get_option(&self, option: &str) -> &str {
         self.options.as_ref().map(|o| &o[option.to_owned()][]).unwrap()
     }

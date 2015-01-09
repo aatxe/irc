@@ -4,7 +4,7 @@ use std::borrow::ToOwned;
 use std::str::FromStr;
 
 /// IRC Message data.
-#[experimental]
+#[stable]
 #[derive(Clone, PartialEq, Show)]
 pub struct Message {
     /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
@@ -20,7 +20,7 @@ pub struct Message {
 
 impl Message {
     /// Creates a new Message.
-    #[experimental]
+    #[stable]
     pub fn new(prefix: Option<&str>, command: &str, args: Option<Vec<&str>>, suffix: Option<&str>)
         -> Message {
         Message {
@@ -32,13 +32,13 @@ impl Message {
     }
 
     /// Gets the nickname of the message source, if it exists. 
-    #[experimental]
+    #[experimental = "Feature is new."]
     pub fn get_source_nickname(&self) -> Option<&str> {
         self.prefix.as_ref().and_then(|s| s.find('!').map(|i| &s[..i]))
     }
 
     /// Converts a Message into a String according to the IRC protocol.
-    #[experimental]
+    #[stable]
     pub fn into_string(&self) -> String {
         let mut ret = String::new();
         if let Some(ref prefix) = self.prefix {
@@ -98,6 +98,7 @@ impl FromStr for Message {
 }
 
 /// A trait representing the ability to be converted into a Message.
+#[experimental = "Design is new."]
 pub trait ToMessage {
     /// Converts this to a Message.
     fn to_message(&self) -> Message;

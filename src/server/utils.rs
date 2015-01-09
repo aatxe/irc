@@ -1,5 +1,5 @@
 //! Utilities and shortcuts for working with IRC servers.
-#![experimental]
+#![stable]
 
 use std::io::IoResult;
 use data::{Command, Config, User};
@@ -12,7 +12,7 @@ use server::{Server, ServerIterator};
 
 /// Functionality-providing wrapper for Server.
 /// Wrappers are currently not thread-safe, and should be created per-thread, as needed.
-#[experimental]
+#[stable]
 pub struct Wrapper<'a, T: IrcReader, U: IrcWriter> {
     server: &'a (Server<'a, T, U> + 'a)
 }
@@ -37,13 +37,13 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for Wrapper<'a, T, U> {
 
 impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// Creates a new Wrapper from the given Server.
-    #[experimental]
+    #[stable]
     pub fn new(server: &'a Server<'a, T, U>) -> Wrapper<'a, T, U> {
         Wrapper { server: server }
     }
 
     /// Sends a NICK and USER to identify.
-    #[experimental]
+    #[unstable = "Capabilities requests may be moved outside of identify."]
     pub fn identify(&self) -> IoResult<()> {
         // We'll issue a CAP REQ for multi-prefix support to improve access level tracking.
         try!(self.server.send(CAP(REQ, Some("multi-prefix"))));
@@ -58,25 +58,25 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     }
 
     /// Sends a PONG with the specified message.
-    #[experimental]
+    #[stable]
     pub fn send_pong(&self, msg: &str) -> IoResult<()> {
         self.server.send(PONG(msg, None))
     }
 
     /// Joins the specified channel or chanlist.
-    #[experimental]
+    #[stable]
     pub fn send_join(&self, chanlist: &str) -> IoResult<()> {
         self.server.send(JOIN(chanlist, None))
     }
 
     /// Attempts to oper up using the specified username and password.
-    #[experimental]
+    #[stable]
     pub fn send_oper(&self, username: &str, password: &str) -> IoResult<()> {
         self.server.send(OPER(username, password))
     }
 
     /// Sends a message to the specified target.
-    #[experimental]
+    #[stable]
     pub fn send_privmsg(&self, target: &str, message: &str) -> IoResult<()> {
         for line in message.split_str("\r\n") {
             try!(self.server.send(PRIVMSG(target, line)))
@@ -85,7 +85,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     }
 
     /// Sends a notice to the specified target.
-    #[experimental]
+    #[stable]
     pub fn send_notice(&self, target: &str, message: &str) -> IoResult<()> {
         for line in message.split_str("\r\n") {
             try!(self.server.send(NOTICE(target, line)))
@@ -95,7 +95,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sets the topic of a channel or requests the current one.
     /// If `topic` is an empty string, it won't be included in the message.
-    #[experimental]
+    #[unstable = "Design may change."]
     pub fn send_topic(&self, channel: &str, topic: &str) -> IoResult<()> {
         self.server.send(TOPIC(channel, if topic.len() == 0 {
             None
@@ -105,7 +105,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     }
 
     /// Kills the target with the provided message.
-    #[experimental]
+    #[stable]
     pub fn send_kill(&self, target: &str, message: &str) -> IoResult<()> {
         self.server.send(KILL(target, message))
     }
@@ -123,7 +123,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Changes the mode of the target.
     /// If `modeparmas` is an empty string, it won't be included in the message.
-    #[experimental]
+    #[unstable = "Design may change."]
     pub fn send_mode(&self, target: &str, mode: &str, modeparams: &str) -> IoResult<()> {
         self.server.send(MODE(target, mode, if modeparams.len() == 0 {
             None
@@ -134,7 +134,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Changes the mode of the target by force.
     /// If `modeparams` is an empty string, it won't be included in the message.
-    #[experimental]
+    #[unstable = "Design may change."]
     pub fn send_samode(&self, target: &str, mode: &str, modeparams: &str) -> IoResult<()> {
         self.server.send(SAMODE(target, mode, if modeparams.len() == 0 {
             None
@@ -144,20 +144,20 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     }
 
     /// Forces a user to change from the old nickname to the new nickname.
-    #[experimental]
+    #[stable]
     pub fn send_sanick(&self, old_nick: &str, new_nick: &str) -> IoResult<()> {
         self.server.send(SANICK(old_nick, new_nick))
     }
 
     /// Invites a user to the specified channel.
-    #[experimental]
+    #[stable]
     pub fn send_invite(&self, nick: &str, chan: &str) -> IoResult<()> {
         self.server.send(INVITE(nick, chan))
     }
 
     /// Quits the server entirely with a message. 
     /// This defaults to `Powered by Rust.` if none is specified.
-    #[experimental]
+    #[unstable = "Design may change."]
     pub fn send_quit(&self, msg: &str) -> IoResult<()> {
         self.server.send(QUIT(Some(if msg.len() == 0 {
             "Powered by Rust."
@@ -168,7 +168,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a CTCP-escaped message to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[experimental]
+    #[unstable = "Feature is relatively new."]
     #[cfg(feature = "ctcp")]
     pub fn send_ctcp(&self, target: &str, msg: &str) -> IoResult<()> {
         self.send_privmsg(target, &format!("\u{001}{}\u{001}", msg)[])
@@ -176,7 +176,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends an action command to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[experimental]
+    #[unstable = "Feature is relatively new."]
     #[cfg(feature = "ctcp")]
     pub fn send_action(&self, target: &str, msg: &str) -> IoResult<()> {
         self.send_ctcp(target, &format!("ACTION {}", msg)[])
@@ -184,7 +184,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a finger request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[experimental]
+    #[unstable = "Feature is relatively new."]
     #[cfg(feature = "ctcp")]
     pub fn send_finger(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "FINGER")
@@ -192,7 +192,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a version request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[experimental]
+    #[unstable = "Feature is relatively new."]
     #[cfg(feature = "ctcp")]
     pub fn send_version(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "VERSION")
@@ -200,7 +200,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a source request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[experimental]
+    #[unstable = "Feature is relatively new."]
     #[cfg(feature = "ctcp")]
     pub fn send_source(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "SOURCE")
@@ -208,7 +208,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a user info request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[experimental]
+    #[unstable = "Feature is relatively new."]
     #[cfg(feature = "ctcp")]
     pub fn send_user_info(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "USERINFO")
@@ -216,7 +216,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a finger request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[experimental]
+    #[unstable = "Feature is relatively new."]
     #[cfg(feature = "ctcp")]
     pub fn send_ctcp_ping(&self, target: &str) -> IoResult<()> {
         let time = get_time();
@@ -225,7 +225,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a time request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[experimental]
+    #[unstable = "Feature is relatively new."]
     #[cfg(feature = "ctcp")]
     pub fn send_time(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "TIME")

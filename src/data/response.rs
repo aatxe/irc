@@ -1,5 +1,5 @@
 //! Enumeration of all the possible server responses.
-#![unstable]
+#![stable]
 #![allow(non_camel_case_types)]
 use std::num::FromPrimitive;
 use std::str::FromStr;
@@ -9,7 +9,7 @@ use data::message::Message;
 /// All commands are documented with their expected form from the RFC.
 #[derive(Copy, Show, PartialEq, FromPrimitive)]
 #[repr(u16)]
-#[unstable]
+#[stable]
 pub enum Response {
     // Expected replies
     /// 001 Welcome to the Internet Relay Network <nick>!<user>@<host>

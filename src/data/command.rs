@@ -12,72 +12,72 @@ use data::message::{Message, ToMessage};
 #[derive(Show, PartialEq)]
 pub enum Command<'a> {
     // 3.1 Connection Registration
-    /// PASS password
+    /// PASS :password
     PASS(&'a str),
-    /// NICK nickname
+    /// NICK :nickname
     NICK(&'a str),
-    /// USER user mode * realname
+    /// USER user mode * :realname
     USER(&'a str, &'a str, &'a str),
-    /// OPER name password
+    /// OPER name :password
     OPER(&'a str, &'a str),
     /// MODE nickname modes
     /// MODE channel modes [modeparams]
     MODE(&'a str, &'a str, Option<&'a str>),
-    /// SERVICE nickname reserved distribution type reserved info
+    /// SERVICE nickname reserved distribution type reserved :info
     SERVICE(&'a str, &'a str, &'a str, &'a str, &'a str, &'a str),
-    /// QUIT Quit Message
+    /// QUIT :comment
     QUIT(Option<&'a str>),
-    /// SQUIT server comment
+    /// SQUIT server :comment
     SQUIT(&'a str, &'a str),
 
     // 3.2 Channel operations
     /// JOIN chanlist [chankeys]
     JOIN(&'a str, Option<&'a str>),
-    /// PART chanlist [Part Message]
+    /// PART chanlist :[comment]
     PART(&'a str, Option<&'a str>),
     // MODE is already defined.
     // MODE(&'a str, &'a str, Option<&'a str>),
-    /// TOPIC channel [topic]
+    /// TOPIC channel :[topic]
     TOPIC(&'a str, Option<&'a str>),
-    /// NAMES [chanlist [target]]
+    /// NAMES [chanlist :[target]]
     NAMES(Option<&'a str>, Option<&'a str>),
-    /// LIST [chanlist [target]]
+    /// LIST [chanlist :[target]]
     LIST(Option<&'a str>, Option<&'a str>),
     /// INVITE nickname channel
     INVITE(&'a str, &'a str),
-    /// KICK chanlist userlist [comment]
+    /// KICK chanlist userlist :[comment]
     KICK(&'a str, &'a str, Option<&'a str>),
 
     // 3.3 Sending messages
-    /// PRIVMSG msgtarget text to be sent
+    /// PRIVMSG msgtarget :message
     PRIVMSG(&'a str, &'a str),
-    /// NOTICE msgtarget text
+    /// NOTICE msgtarget :message
     NOTICE(&'a str, &'a str),
 
     // 3.4 Server queries and commands
-    /// MOTD [target]
+    /// MOTD :[target]
     MOTD(Option<&'a str>),
-    /// LUSERS [mask [target]]
+    /// LUSERS [mask :[target]]
     LUSERS(Option<&'a str>, Option<&'a str>),
-    /// VERSION [target]
+    /// VERSION :[target]
     VERSION(Option<&'a str>),
-    /// STATS [query [target]]
+    /// STATS [query :[target]]
     STATS(Option<&'a str>, Option<&'a str>),
-    /// LINKS [[remote server] server mask]
+    /// LINKS [[remote server] server :mask]
     LINKS(Option<&'a str>, Option<&'a str>),
-    /// TIME [target]
+    /// TIME :[target]
     TIME(Option<&'a str>),
-    /// CONNECT target server port [remote server]
+    /// CONNECT target server port :[remote server]
     CONNECT(&'a str, &'a str, Option<&'a str>),
-    /// TRACE [target]
+    /// TRACE :[target]
     TRACE(Option<&'a str>),
-    /// ADMIN [target]
+    /// ADMIN :[target]
     ADMIN(Option<&'a str>),
-    /// INFO [target]
+    /// INFO :[target]
     INFO(Option<&'a str>),
 
     // 3.5 Service Query and Commands
-    /// SERVLIST [mask [type]]
+    /// SERVLIST [mask :[type]]
     SERVLIST(Option<&'a str>, Option<&'a str>),
     /// SQUERY servicename text
     SQUERY(&'a str, &'a str),
@@ -87,22 +87,22 @@ pub enum Command<'a> {
     WHO(Option<&'a str>, Option<bool>),
     /// WHOIS [target] masklist
     WHOIS(Option<&'a str>, &'a str),
-    /// WHOWAS nicklist [count [target]]
+    /// WHOWAS nicklist [count :[target]]
     WHOWAS(&'a str, Option<&'a str>, Option<&'a str>),
 
     // 3.7 Miscellaneous messages
-    /// KILL nickname comment
+    /// KILL nickname :comment
     KILL(&'a str, &'a str),
-    /// PING server1 [server2]
+    /// PING server1 :[server2]
     PING(&'a str, Option<&'a str>),
-    /// PONG server [server2]
+    /// PONG server :[server2]
     PONG(&'a str, Option<&'a str>),
-    /// ERROR error message
+    /// ERROR :message
     ERROR(&'a str),
 
 
     // 4 Optional Features
-    /// AWAY [text]
+    /// AWAY :[message]
     AWAY(Option<&'a str>),
     /// REHASH
     REHASH,
@@ -110,11 +110,11 @@ pub enum Command<'a> {
     DIE,
     /// RESTART
     RESTART,
-    /// SUMMON user [target [channel]]
+    /// SUMMON user [target :[channel]]
     SUMMON(&'a str, Option<&'a str>, Option<&'a str>),
-    /// USERS [target]
+    /// USERS :[target]
     USERS(Option<&'a str>),
-    /// WALLOPS Text to be sent
+    /// WALLOPS :Text to be sent
     WALLOPS(&'a str),
     /// USERHOST space-separated nicklist
     USERHOST(Vec<&'a str>),
@@ -128,9 +128,9 @@ pub enum Command<'a> {
     SAMODE(&'a str, &'a str, Option<&'a str>),
     /// SANICK old nickname new nickname
     SANICK(&'a str, &'a str),
-    /// SAPART nickname reason
+    /// SAPART nickname :comment
     SAPART(&'a str, &'a str),
-    /// SAQUIT nickname reason
+    /// SAQUIT nickname :comment
     SAQUIT(&'a str, &'a str),
     /// NICKSERV message
     NICKSERV(&'a str),
@@ -146,7 +146,8 @@ pub enum Command<'a> {
     MEMOSERV(&'a str),
 
     // Capabilities extension to IRCv3
-    /// CAP COMMAND [param]
+    /// CAP COMMAND :[param]
+    #[experimental = "This command is not entirely specification compliant."]
     CAP(CapSubCommand, Option<&'a str>),
 }
 

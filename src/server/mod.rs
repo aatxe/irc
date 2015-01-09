@@ -1,5 +1,5 @@
 //! Interface for working with IRC Servers
-#![experimental]
+#![stable]
 use std::borrow::ToOwned;
 use std::collections::HashMap;
 use std::io::{BufferedReader, BufferedWriter, IoError, IoErrorKind, IoResult};
@@ -13,7 +13,7 @@ use data::kinds::{IrcReader, IrcWriter};
 pub mod utils;
 
 /// Trait describing core Server functionality.
-#[experimental]
+#[stable]
 pub trait Server<'a, T, U> {
     /// Gets the configuration being used with this Server.
     fn config(&self) -> &Config;
@@ -26,7 +26,7 @@ pub trait Server<'a, T, U> {
 }
 
 /// A thread-safe implementation of an IRC Server connection.
-#[experimental]
+#[stable]
 pub struct IrcServer<T: IrcReader, U: IrcWriter> {
     /// The thread-safe IRC connection.
     conn: Connection<T, U>,
@@ -44,14 +44,14 @@ pub type NetIrcServer = IrcServer<BufferedReader<NetStream>, BufferedWriter<NetS
 impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Creates a new IRC Server connection from the configuration at the specified path,
     /// connecting immediately.
-    #[experimental]
+    #[stable]
     pub fn new(config: &str) -> IoResult<NetIrcServer> {
         IrcServer::from_config(try!(Config::load_utf8(config)))
     }
 
     /// Creates a new IRC server connection from the specified configuration, connecting
     /// immediately.
-    #[experimental]
+    #[stable]
     pub fn from_config(config: Config) -> IoResult<NetIrcServer> {
         let conn = try!(if config.use_ssl() {
             Connection::connect_ssl(config.server(), config.port())
@@ -63,7 +63,7 @@ impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     }
 
     /// Reconnects to the IRC server.
-    #[experimental]
+    #[unstable = "Feature is relatively new."]
     pub fn reconnect(&self) -> IoResult<()> {
         self.conn.reconnect(self.config().server(), self.config.port())
     }
@@ -95,20 +95,19 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for IrcServer<T, U> {
 
 impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     /// Creates an IRC server from the specified configuration, and any arbitrary Connection.
-    #[experimental]
+    #[stable]
     pub fn from_connection(config: Config, conn: Connection<T, U>) -> IrcServer<T, U> {
         IrcServer { conn: conn, config: config, chanlists: Mutex::new(HashMap::new()),
                     alt_nick_index: RwLock::new(0) }
     }
 
     /// Gets a reference to the IRC server's connection.
-    #[experimental]
+    #[stable]
     pub fn conn(&self) -> &Connection<T, U> {
         &self.conn
     }
 
     /// Handles messages internally for basic bot functionality.
-    #[experimental]
     fn handle_message(&self, msg: &Message) {
         if let Some(resp) = Response::from_message(msg) {
             if resp == Response::RPL_NAMREPLY {
@@ -179,7 +178,6 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     }
 
     /// Handles CTCP requests if the CTCP feature is enabled.
-    #[experimental]
     #[cfg(feature = "ctcp")]
     fn handle_ctcp(&self, msg: &Message) {
         let source = match msg.prefix {
@@ -220,31 +218,26 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     }
 
     /// Sends a CTCP-escaped message.
-    #[experimental]
     #[cfg(feature = "ctcp")]
     fn send_ctcp(&self, target: &str, msg: &str) {
         self.send(Command::NOTICE(target, &format!("\u{001}{}\u{001}", msg)[])).unwrap();
     }
 
     /// Handles CTCP requests if the CTCP feature is enabled.
-    #[experimental]
-    #[cfg(not(feature = "ctcp"))]
-    fn handle_ctcp(&self, _: &Message) {}
+    #[cfg(not(feature = "ctcp"))] fn handle_ctcp(&self, _: &Message) {}
 }
 
 /// An Iterator over an IrcServer's incoming Messages.
-#[experimental]
+#[stable]
 pub struct ServerIterator<'a, T: IrcReader, U: IrcWriter> {
     server: &'a IrcServer<T, U>
 }
 
 impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
     /// Creates a new ServerIterator for the desired IrcServer.
-    #[experimental]
+    #[experimental = "Design will change to accomodate new behavior."]
     pub fn new(server: &IrcServer<T, U>) -> ServerIterator<T, U> {
-        ServerIterator {
-            server: server
-        }
+        ServerIterator { server: server }
     }
 
     /// Gets the next line from the connection.

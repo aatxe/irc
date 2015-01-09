@@ -1,5 +1,5 @@
 //! Thread-safe connections on IrcStreams.
-#![experimental]
+#![stable]
 use std::error::Error;
 use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 #[cfg(any(feature = "encode", feature = "ssl"))] use std::io::{IoError, IoErrorKind};
@@ -12,7 +12,7 @@ use data::message::ToMessage;
 #[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
 
 /// A thread-safe connection.
-#[experimental]
+#[stable]
 pub struct Connection<T: IrcReader, U: IrcWriter> {
     reader: Mutex<T>,
     writer: Mutex<U>,
@@ -26,7 +26,7 @@ type NetReaderWriterPair = (BufferedReader<NetStream>, BufferedWriter<NetStream>
 
 impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Creates a thread-safe TCP connection to the specified server.
-    #[experimental]
+    #[stable]
     pub fn connect(host: &str, port: u16) -> IoResult<NetConnection> {
         let (reader, writer) = try!(Connection::connect_internal(host, port));
         Ok(Connection::new(reader, writer))
@@ -41,7 +41,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
     /// If the library is compiled without SSL support, this method panics.
-    #[experimental]
+    #[stable]
     pub fn connect_ssl(host: &str, port: u16) -> IoResult<NetConnection> {
         let (reader, writer) = try!(Connection::connect_ssl_internal(host, port));
         Ok(Connection::new(reader, writer))
@@ -64,6 +64,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     }
 
     /// Reconnects to the specified server, dropping the current connection.
+    #[unstable = "Feature is relatively new."]
     pub fn reconnect(&self, host: &str, port: u16) -> IoResult<()> {
         let use_ssl = match self.reader.lock().unwrap().get_ref() {
             &NetStream::UnsecuredTcpStream(_) =>  false,
@@ -81,13 +82,13 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     }
 
     /// Sets the keepalive for the network stream.
-    #[experimental]
+    #[unstable = "Feature is relatively new."]
     pub fn set_keepalive(&self, delay_in_seconds: Option<usize>) -> IoResult<()> {
         self.mod_stream(|tcp| tcp.set_keepalive(delay_in_seconds))
     }
 
     /// Sets the timeout for the network stream.
-    #[experimental]
+    #[unstable = "Feature is relatively new."]
     pub fn set_timeout(&self, timeout_ms: Option<u64>) {
         self.mod_stream(|tcp| Ok(tcp.set_timeout(timeout_ms))).unwrap(); // this cannot fail.
     }
@@ -104,7 +105,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
 
 impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     /// Creates a new connection from an IrcReader and an IrcWriter.
-    #[experimental]
+    #[stable]
     pub fn new(reader: T, writer: U) -> Connection<T, U> {
         Connection {
             reader: Mutex::new(reader),
@@ -113,7 +114,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     }
 
     /// Sends a Message over this connection.
-    #[experimental]
+    #[experimental = "Design is very new."]
     #[cfg(feature = "encode")]
     pub fn send<M: ToMessage>(&self, to_msg: M, encoding: &str) -> IoResult<()> {
         let encoding = match encoding_from_whatwg_label(encoding) {
@@ -138,8 +139,8 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
         writer.flush()
     }
 
-    /// Sends a message over this connection.
-    #[experimental]
+    /// Sends a message over this connection. 
+    #[experimental = "Design is very new."]
     #[cfg(not(feature = "encode"))]
     pub fn send<T: ToMessage>(&self, to_msg: T) -> IoResult<()> {
         let mut writer = self.writer.lock().unwrap();
@@ -148,7 +149,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     }
 
     /// Receives a single line from this connection.
-    #[experimental]
+    #[stable]
     #[cfg(feature = "encoding")]
     pub fn recv(&self, encoding: &str) -> IoResult<String> {
         let encoding = match encoding_from_whatwg_label(encoding) {
@@ -172,20 +173,20 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     }
 
     /// Receives a single line from this connection.
-    #[experimental]
+    #[stable]
     #[cfg(not(feature = "encoding"))]
     pub fn recv(&self) -> IoResult<String> {
         self.reader.lock().unwrap().read_line()
     }
 
     /// Acquires the Reader lock.
-    #[experimental]
+    #[stable]
     pub fn reader<'a>(&'a self) -> MutexGuard<'a, T> {
         self.reader.lock().unwrap()
     }
 
     /// Acquires the Writer lock.
-    #[experimental]
+    #[stable]
     pub fn writer<'a>(&'a self) -> MutexGuard<'a, U> {
         self.writer.lock().unwrap()
     }
@@ -205,7 +206,7 @@ fn ssl_to_io<T>(res: Result<T, SslError>) -> IoResult<T> {
 }
 
 /// An abstraction over different networked streams.
-#[experimental]
+#[stable]
 pub enum NetStream {
     /// An unsecured TcpStream.
     UnsecuredTcpStream(TcpStream),
