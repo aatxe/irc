@@ -1,4 +1,5 @@
 #![feature(slicing_syntax)]
+#![allow(unstable)]
 extern crate irc;
 
 use std::default::Default;
@@ -25,7 +26,7 @@ fn main() {
     // Let's set up a loop that just prints the messages.
     Thread::spawn(move || { 
         irc_server.iter().map(|m| print!("{}", m.unwrap().into_string())).count(); 
-    }).detach();
+    });
     loop {
         server.send_privmsg("#vana", "TWEET TWEET").unwrap();
         sleep(Duration::seconds(10))

@@ -44,7 +44,7 @@ impl User {
     /// Gets the nickname of the user.
     #[stable]
     pub fn get_name(&self) -> &str {
-        self.name[]
+        &self.name[]
     }
 
     /// Gets the user's highest access level.
@@ -194,7 +194,7 @@ impl<'a> Iterator for AccessLevelIterator<'a> {
     fn next(&mut self) -> Option<AccessLevel> {
         let ret = self.value.parse();
         if self.value.len() > 0 {
-            self.value = self.value[1..];
+            self.value = &self.value[1..];
         }
         ret
     }

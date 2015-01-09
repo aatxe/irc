@@ -1,8 +1,9 @@
 //! Thread-safe connections on IrcStreams.
 #![experimental]
-use std::sync::{Mutex, MutexGuard};
+use std::error::Error;
 use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 #[cfg(any(feature = "encode", feature = "ssl"))] use std::io::{IoError, IoErrorKind};
+use std::sync::{Mutex, MutexGuard};
 #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
 #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
 use data::kinds::{IrcReader, IrcWriter};
@@ -33,7 +34,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
 
     /// connects to the specified server and returns a reader-writer pair.
     fn connect_internal(host: &str, port: u16) -> IoResult<NetReaderWriterPair> {
-        let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
+        let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[]));
         Ok((BufferedReader::new(NetStream::UnsecuredTcpStream(socket.clone())),
             BufferedWriter::new(NetStream::UnsecuredTcpStream(socket))))
     }
@@ -49,7 +50,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Connects over SSL to the specified server and returns a reader-writer pair.
     #[cfg(feature = "ssl")]
     fn connect_ssl_internal(host: &str, port: u16) -> IoResult<NetReaderWriterPair> {
-        let socket = try!(TcpStream::connect(format!("{}:{}", host, port)[]));
+        let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[]));
         let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Tlsv1)));
         let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
         Ok((BufferedReader::new(NetStream::SslTcpStream(ssl_socket.clone())),
@@ -81,7 +82,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
 
     /// Sets the keepalive for the network stream.
     #[experimental]
-    pub fn set_keepalive(&self, delay_in_seconds: Option<uint>) -> IoResult<()> {
+    pub fn set_keepalive(&self, delay_in_seconds: Option<usize>) -> IoResult<()> {
         self.mod_stream(|tcp| tcp.set_keepalive(delay_in_seconds))
     }
 
@@ -94,9 +95,9 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Modifies the internal TcpStream using a function.
     fn mod_stream<F>(&self, f: F) -> IoResult<()> where F: FnOnce(&mut TcpStream) -> IoResult<()> {
         match self.reader.lock().unwrap().get_mut() {
-            &NetStream::UnsecuredTcpStream(ref mut tcp) => f(tcp),
+            &mut NetStream::UnsecuredTcpStream(ref mut tcp) => f(tcp),
             #[cfg(feature = "ssl")]
-            &NetStream::SslTcpStream(ref mut ssl) => f(ssl.get_mut()),
+            &mut NetStream::SslTcpStream(ref mut ssl) => f(ssl.get_mut()),
         }
     }
 }
@@ -114,7 +115,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     /// Sends a Message over this connection.
     #[experimental]
     #[cfg(feature = "encode")]
-    pub fn send<T: ToMessage>(&self, to_msg: T, encoding: &str) -> IoResult<()> {
+    pub fn send<M: ToMessage>(&self, to_msg: M, encoding: &str) -> IoResult<()> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
             None => return Err(IoError {
@@ -124,7 +125,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
             })
         };
         let msg = to_msg.to_message();
-        let data = match encoding.encode(msg.into_string()[], EncoderTrap::Replace) {
+        let data = match encoding.encode(&msg.into_string()[], EncoderTrap::Replace) {
             Ok(data) => data,
             Err(data) => return Err(IoError {
                 kind: IoErrorKind::InvalidInput,
@@ -133,7 +134,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
             })
         };
         let mut writer = self.writer.lock().unwrap();
-        try!(writer.write(data[]));
+        try!(writer.write(&data[]));
         writer.flush()
     }
 
@@ -159,7 +160,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
             })
         };
         self.reader.lock().unwrap().read_until(b'\n').and_then(|line|
-            match encoding.decode(line[], DecoderTrap::Replace) {
+            match encoding.decode(&line[], DecoderTrap::Replace) {
                 Ok(data) => Ok(data),
                 Err(data) => Err(IoError {
                     kind: IoErrorKind::InvalidInput,
@@ -198,7 +199,7 @@ fn ssl_to_io<T>(res: Result<T, SslError>) -> IoResult<T> {
         Err(e) => Err(IoError {
             kind: IoErrorKind::OtherIoError,
             desc: "An SSL error occurred.",
-            detail: Some(format!("{}", e)),
+            detail: e.detail(),
         }),
     }
 }
@@ -215,11 +216,11 @@ pub enum NetStream {
 }
 
 impl Reader for NetStream {
-    fn read(&mut self, buf: &mut [u8]) -> IoResult<uint> {
+    fn read(&mut self, buf: &mut [u8]) -> IoResult<usize> {
         match self {
-            &NetStream::UnsecuredTcpStream(ref mut stream) => stream.read(buf),
+            &mut NetStream::UnsecuredTcpStream(ref mut stream) => stream.read(buf),
             #[cfg(feature = "ssl")]
-            &NetStream::SslTcpStream(ref mut stream) => stream.read(buf),
+            &mut NetStream::SslTcpStream(ref mut stream) => stream.read(buf),
         }
     }
 }
@@ -227,9 +228,9 @@ impl Reader for NetStream {
 impl Writer for NetStream {
     fn write(&mut self, buf: &[u8]) -> IoResult<()> {
         match self {
-            &NetStream::UnsecuredTcpStream(ref mut stream) => stream.write(buf),
+            &mut NetStream::UnsecuredTcpStream(ref mut stream) => stream.write(buf),
             #[cfg(feature = "ssl")]
-            &NetStream::SslTcpStream(ref mut stream) => stream.write(buf),
+            &mut NetStream::SslTcpStream(ref mut stream) => stream.write(buf),
         }
     }
 }
@@ -251,7 +252,7 @@ mod test {
             Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("Testing!"))
         ).is_ok());
         let data = String::from_utf8(conn.writer().get_ref().to_vec()).unwrap();
-        assert_eq!(data[], "PRIVMSG test :Testing!\r\n");
+        assert_eq!(&data[], "PRIVMSG test :Testing!\r\n");
     }
     
     #[test]
@@ -261,7 +262,7 @@ mod test {
         let conn = Connection::new(NullReader, MemWriter::new());
         assert!(conn.send(exp).is_ok());
         let data = String::from_utf8(conn.writer().get_ref().to_vec()).unwrap();
-        assert_eq!(data[], exp);
+        assert_eq!(&data[], exp);
     }
 
     #[test]
@@ -272,7 +273,7 @@ mod test {
             Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("€ŠšŽžŒœŸ")), "UTF-8"
         ).is_ok());
         let data = UTF_8.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
-        assert_eq!(data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
+        assert_eq!(&data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 
     #[test]
@@ -282,7 +283,7 @@ mod test {
         let conn = Connection::new(NullReader, MemWriter::new());
         assert!(conn.send(exp, "UTF-8").is_ok());
         let data = UTF_8.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
-        assert_eq!(data[], exp);
+        assert_eq!(&data[], exp);
     }
 
     #[test]
@@ -293,7 +294,7 @@ mod test {
             Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("€ŠšŽžŒœŸ")), "l9"
         ).is_ok());
         let data = ISO_8859_15.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
-        assert_eq!(data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
+        assert_eq!(&data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 
     #[test]
@@ -303,7 +304,7 @@ mod test {
         let conn = Connection::new(NullReader, MemWriter::new());
         assert!(conn.send(exp, "l9").is_ok());
         let data = ISO_8859_15.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
-        assert_eq!(data[], exp);
+        assert_eq!(&data[], exp);
     }
 
     #[test]
@@ -312,7 +313,7 @@ mod test {
         let conn = Connection::new(
             MemReader::new("PRIVMSG test :Testing!\r\n".as_bytes().to_vec()), NullWriter
         );
-        assert_eq!(conn.recv().unwrap()[], "PRIVMSG test :Testing!\r\n");
+        assert_eq!(&conn.recv().unwrap()[], "PRIVMSG test :Testing!\r\n");
     }
 
     #[test]
@@ -321,7 +322,7 @@ mod test {
         let conn = Connection::new(
             MemReader::new(b"PRIVMSG test :Testing!\r\n".to_vec()), NullWriter
         );
-        assert_eq!(conn.recv("UTF-8").unwrap()[], "PRIVMSG test :Testing!\r\n");
+        assert_eq!(&conn.recv("UTF-8").unwrap()[], "PRIVMSG test :Testing!\r\n");
     }
 
     #[test]
@@ -336,6 +337,6 @@ mod test {
                 vec
             }), NullWriter
         );
-        assert_eq!(conn.recv("l9").unwrap()[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
+        assert_eq!(&conn.recv("l9").unwrap()[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 }

@@ -1,3 +1,4 @@
+#![allow(unstable)]
 #![feature(slicing_syntax)]
 extern crate irc;
 
@@ -18,7 +19,7 @@ fn main() {
     let irc_server = Arc::new(IrcServer::from_config(config).unwrap());
     irc_server.conn().set_keepalive(Some(5)).unwrap();
     // The wrapper provides us with methods like send_privmsg(...) and identify(...)
-    let _ = Thread::spawn(move || { 
+    let _ = Thread::scoped(move || { 
         let server = Wrapper::new(&*irc_server);
         server.identify().unwrap();
         loop {

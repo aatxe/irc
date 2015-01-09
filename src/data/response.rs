@@ -8,7 +8,7 @@ use data::message::Message;
 /// List of all server responses as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812).
 /// All commands are documented with their expected form from the RFC.
 #[derive(Copy, Show, PartialEq, FromPrimitive)]
-#[repr(uint)]
+#[repr(u16)]
 #[unstable]
 pub enum Response {
     // Expected replies
@@ -303,14 +303,14 @@ impl Response {
     /// Determines whether or not this response is an error response.
     #[stable]
     pub fn is_error(&self) -> bool {
-        *self as uint >= 400
+        *self as u16 >= 400
     }
 }
 
 impl FromStr for Response {
     fn from_str(s: &str) -> Option<Response> {
         if let Some(respcode) = s.parse() {
-            FromPrimitive::from_uint(respcode)
+            FromPrimitive::from_u16(respcode)
         } else {
             None
         }   

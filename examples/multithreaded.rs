@@ -1,3 +1,4 @@
+#![allow(unstable)]
 #![feature(slicing_syntax)]
 extern crate irc;
 
@@ -21,7 +22,7 @@ fn main() {
     server.identify().unwrap();
     let server = irc_server.clone();
     // We won't use a wrapper here because we don't need the added functionality.
-    let _ = Thread::spawn(move || { 
+    let _ = Thread::scoped(move || { 
         for msg in server.iter() {
             print!("{}", msg.unwrap().into_string());
         }

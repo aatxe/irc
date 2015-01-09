@@ -2,6 +2,7 @@
 #![stable]
 use std::borrow::ToOwned;
 use std::collections::HashMap;
+use std::error::Error;
 use std::io::fs::File;
 use std::io::{InvalidInput, IoError, IoResult};
 use rustc_serialize::json::decode;
@@ -48,10 +49,10 @@ impl Config {
     pub fn load(path: Path) -> IoResult<Config> {
         let mut file = try!(File::open(&path));
         let data = try!(file.read_to_string());
-        decode(data[]).map_err(|e| IoError {
+        decode(&data[]).map_err(|e| IoError {
             kind: InvalidInput,
             desc: "Failed to decode configuration file.",
-            detail: Some(e.to_string()),
+            detail: e.detail(),
         })
     }
 
@@ -71,21 +72,21 @@ impl Config {
     /// This will panic if not specified.
     #[experimental]
     pub fn nickname(&self) -> &str {
-        self.nickname.as_ref().map(|s| s[]).unwrap()
+        self.nickname.as_ref().map(|s| &s[]).unwrap()
     }
 
     /// Gets the bot's nickserv password specified in the configuration.
     /// This defaults to an empty string when not specified.
     #[experimental]
     pub fn nick_password(&self) -> &str {
-        self.nick_password.as_ref().map(|s| s[]).unwrap_or("")
+        self.nick_password.as_ref().map(|s| &s[]).unwrap_or("")
     }
 
     /// Gets the alternate nicknames specified in the configuration.
     /// This defaults to an empty vector when not specified.
     #[experimental]
     pub fn get_alternate_nicknames(&self) -> Vec<&str> {
-        self.alt_nicks.as_ref().map(|v| v.iter().map(|s| s[]).collect()).unwrap_or(vec![])
+        self.alt_nicks.as_ref().map(|v| v.iter().map(|s| &s[]).collect()).unwrap_or(vec![])
     }
 
 
@@ -93,21 +94,21 @@ impl Config {
     /// This defaults to the user's nickname when not specified.
     #[experimental]
     pub fn username(&self) -> &str {
-        self.username.as_ref().map(|s| s[]).unwrap_or(self.nickname())
+        self.username.as_ref().map(|s| &s[]).unwrap_or(self.nickname())
     }
 
     /// Gets the real name specified in the configuration.
     /// This defaults to the user's nickname when not specified.
     #[experimental]
     pub fn real_name(&self) -> &str {
-        self.realname.as_ref().map(|s| s[]).unwrap_or(self.nickname())
+        self.realname.as_ref().map(|s| &s[]).unwrap_or(self.nickname())
     }
 
     /// Gets the address of the server specified in the configuration.
     /// This panics when not specified.
     #[experimental]
     pub fn server(&self) -> &str {
-        self.server.as_ref().map(|s| s[]).unwrap()
+        self.server.as_ref().map(|s| &s[]).unwrap()
     }
 
     /// Gets the port of the server specified in the configuration.
@@ -125,7 +126,7 @@ impl Config {
     /// This defaults to a blank string when not specified.
     #[experimental]
     pub fn password(&self) -> &str {
-        self.password.as_ref().map(|s| s[]).unwrap_or("")
+        self.password.as_ref().map(|s| &s[]).unwrap_or("")
     }
 
     /// Gets whether or not to use SSL with this connection.
@@ -139,21 +140,21 @@ impl Config {
     /// This defaults to UTF-8 when not specified.
     #[experimental]
     pub fn encoding(&self) -> &str {
-        self.encoding.as_ref().map(|s| s[]).unwrap_or("UTF-8")
+        self.encoding.as_ref().map(|s| &s[]).unwrap_or("UTF-8")
     }
 
     /// Gets the channels to join upon connection.
     /// This defaults to an empty vector if it's not specified.
     #[experimental]
     pub fn channels(&self) -> Vec<&str> {
-        self.channels.as_ref().map(|v| v.iter().map(|s| s[]).collect()).unwrap_or(vec![])    
+        self.channels.as_ref().map(|v| v.iter().map(|s| &s[]).collect()).unwrap_or(vec![])    
     }
 
     /// Gets the string to be sent in response to CTCP USERINFO requests.
     /// This defaults to an empty string when not specified.
     #[experimental]
     pub fn user_info(&self) -> &str {
-        self.user_info.as_ref().map(|s| s[]).unwrap_or("")
+        self.user_info.as_ref().map(|s| &s[]).unwrap_or("")
     }
 
     /// Looks up the specified string in the options map.
@@ -161,7 +162,7 @@ impl Config {
     /// This will also panic if used and there are no options.
     #[experimental]
     pub fn get_option(&self, option: &str) -> &str {
-        self.options.as_ref().map(|o| o[option.to_owned()][]).unwrap()
+        self.options.as_ref().map(|o| &o[option.to_owned()][]).unwrap()
     }
 }
 

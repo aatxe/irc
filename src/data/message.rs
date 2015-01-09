@@ -34,7 +34,7 @@ impl Message {
     /// Gets the nickname of the message source, if it exists. 
     #[experimental]
     pub fn get_source_nickname(&self) -> Option<&str> {
-        self.prefix.as_ref().and_then(|s| s.find('!').map(|i| s[..i]))
+        self.prefix.as_ref().and_then(|s| s.find('!').map(|i| &s[..i]))
     }
 
     /// Converts a Message into a String according to the IRC protocol.
@@ -43,17 +43,17 @@ impl Message {
         let mut ret = String::new();
         if let Some(ref prefix) = self.prefix {
             ret.push(':');
-            ret.push_str(prefix[]);
+            ret.push_str(&prefix[]);
             ret.push(' ');
         }
-        ret.push_str(self.command[]);
+        ret.push_str(&self.command[]);
         for arg in self.args.iter() {
             ret.push(' ');
-            ret.push_str(arg[]);
+            ret.push_str(&arg[]);
         }
         if let Some(ref suffix) = self.suffix {
             ret.push_str(" :");
-            ret.push_str(suffix[]);
+            ret.push_str(&suffix[]);
         }
         ret.push_str("\r\n");
         ret
@@ -71,27 +71,27 @@ impl FromStr for Message {
         let mut state = s.clone();
         if s.len() == 0 { return None }
         let prefix = if state.starts_with(":") {
-            let prefix = state.find(' ').map(|i| state[1..i]);
-            state = state.find(' ').map_or("", |i| state[i+1..]);
+            let prefix = state.find(' ').map(|i| &state[1..i]);
+            state = state.find(' ').map_or("", |i| &state[i+1..]);
             prefix
         } else {
             None
         };
         let suffix = if state.contains(":") {
-            let suffix = state.find(':').map(|i| state[i+1..state.len()-2]);
-            state = state.find(':').map_or("", |i| state[..i]);
+            let suffix = state.find(':').map(|i| &state[i+1..state.len()-2]);
+            state = state.find(':').map_or("", |i| &state[..i]);
             suffix
         } else {
             None
         };
-        let command = match state.find(' ').map(|i| state[..i]) {
+        let command = match state.find(' ').map(|i| &state[..i]) {
             Some(cmd) => {
-                state = state.find(' ').map_or("", |i| state[i+1..]);
+                state = state.find(' ').map_or("", |i| &state[i+1..]);
                 cmd
             }
             _ => return None
         };
-        if suffix.is_none() { state = state[..state.len() - 2] }
+        if suffix.is_none() { state = &state[..state.len() - 2] }
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| s.len() != 0).collect();
         Some(Message::new(prefix, command, if args.len() > 0 { Some(args) } else { None }, suffix))
     }
@@ -143,14 +143,14 @@ mod test {
             args: vec![format!("test")],
             suffix: Some(format!("Testing!")),
         };
-        assert_eq!(message.into_string()[], "PRIVMSG test :Testing!\r\n");
+        assert_eq!(&message.into_string()[], "PRIVMSG test :Testing!\r\n");
         let message = Message {
             prefix: Some(format!("test!test@test")),
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
             suffix: Some(format!("Still testing!")),
         };
-        assert_eq!(message.into_string()[], ":test!test@test PRIVMSG test :Still testing!\r\n");
+        assert_eq!(&message.into_string()[], ":test!test@test PRIVMSG test :Still testing!\r\n");
     }
 
     #[test]

@@ -171,7 +171,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     #[experimental]
     #[cfg(feature = "ctcp")]
     pub fn send_ctcp(&self, target: &str, msg: &str) -> IoResult<()> {
-        self.send_privmsg(target, format!("\u{001}{}\u{001}", msg)[])
+        self.send_privmsg(target, &format!("\u{001}{}\u{001}", msg)[])
     }
 
     /// Sends an action command to the specified target.
@@ -179,7 +179,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     #[experimental]
     #[cfg(feature = "ctcp")]
     pub fn send_action(&self, target: &str, msg: &str) -> IoResult<()> {
-        self.send_ctcp(target, format!("ACTION {}", msg)[])
+        self.send_ctcp(target, &format!("ACTION {}", msg)[])
     }
 
     /// Sends a finger request to the specified target.
@@ -220,7 +220,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     #[cfg(feature = "ctcp")]
     pub fn send_ctcp_ping(&self, target: &str) -> IoResult<()> {
         let time = get_time();
-        self.send_ctcp(target, format!("PING {}.{}", time.sec, time.nsec)[])
+        self.send_ctcp(target, &format!("PING {}.{}", time.sec, time.nsec)[])
     }
 
     /// Sends a time request to the specified target.
@@ -251,7 +251,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.identify().unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "CAP REQ :multi-prefix\r\nCAP END\r\nNICK :test\r\nUSER test 0 * :test\r\n");
     }
 
@@ -270,7 +270,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.identify().unwrap();
         }
-        assert_eq!(get_server_value(server)[], "CAP REQ :multi-prefix\r\nCAP END\r\n\
+        assert_eq!(&get_server_value(server)[], "CAP REQ :multi-prefix\r\nCAP END\r\n\
         PASS :password\r\nNICK :test\r\nUSER test 0 * :test\r\n");
     }
 
@@ -282,7 +282,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_pong("irc.test.net").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "PONG :irc.test.net\r\n");
     }
 
@@ -294,7 +294,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_join("#test,#test2,#test3").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "JOIN #test,#test2,#test3\r\n");
     }
 
@@ -306,7 +306,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_oper("test", "test").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "OPER test :test\r\n");
     }
 
@@ -318,7 +318,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_privmsg("#test", "Hi, everybody!").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "PRIVMSG #test :Hi, everybody!\r\n");
     }
 
@@ -330,7 +330,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_notice("#test", "Hi, everybody!").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "NOTICE #test :Hi, everybody!\r\n");
     }
 
@@ -342,7 +342,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_topic("#test", "").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "TOPIC #test\r\n");
     }
 
@@ -354,7 +354,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_topic("#test", "Testing stuff.").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "TOPIC #test :Testing stuff.\r\n");
     }
 
@@ -366,7 +366,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_kill("test", "Testing kills.").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "KILL test :Testing kills.\r\n");
     }
 
@@ -378,7 +378,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_kick("#test", "test", "").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "KICK #test test\r\n");
     }
 
@@ -390,7 +390,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_kick("#test", "test", "Testing kicks.").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "KICK #test test :Testing kicks.\r\n");
     }
 
@@ -402,7 +402,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_mode("#test", "+i", "").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "MODE #test +i\r\n");
     }
 
@@ -414,7 +414,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_mode("#test", "+o", "test").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "MODE #test +o test\r\n");
     }
 
@@ -426,7 +426,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_samode("#test", "+i", "").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "SAMODE #test +i\r\n");
     }
 
@@ -438,7 +438,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_samode("#test", "+o", "test").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "SAMODE #test +o test\r\n");
     }
 
@@ -450,7 +450,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_sanick("test", "test2").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "SANICK test test2\r\n");
     }
 
@@ -462,7 +462,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_invite("test", "#test").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "INVITE test #test\r\n");
     }
 
@@ -475,7 +475,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_ctcp("test", "MESSAGE").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "PRIVMSG test :\u{001}MESSAGE\u{001}\r\n");
     }
 
@@ -488,7 +488,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_action("test", "tests.").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "PRIVMSG test :\u{001}ACTION tests.\u{001}\r\n");
     }
 
@@ -501,7 +501,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_finger("test").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "PRIVMSG test :\u{001}FINGER\u{001}\r\n");
     }
 
@@ -514,7 +514,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_version("test").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "PRIVMSG test :\u{001}VERSION\u{001}\r\n");
     }
 
@@ -527,7 +527,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_source("test").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "PRIVMSG test :\u{001}SOURCE\u{001}\r\n");
     }
 
@@ -540,7 +540,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_user_info("test").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "PRIVMSG test :\u{001}USERINFO\u{001}\r\n");
     }
 
@@ -568,7 +568,7 @@ mod test {
             let wrapper = Wrapper::new(&server);
             wrapper.send_time("test").unwrap();
         }
-        assert_eq!(get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[],
         "PRIVMSG test :\u{001}TIME\u{001}\r\n");
     }
 }
