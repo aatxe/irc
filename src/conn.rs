@@ -142,7 +142,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     /// Sends a message over this connection. 
     #[experimental = "Design is very new."]
     #[cfg(not(feature = "encode"))]
-    pub fn send<T: ToMessage>(&self, to_msg: T) -> IoResult<()> {
+    pub fn send<M: ToMessage>(&self, to_msg: M) -> IoResult<()> {
         let mut writer = self.writer.lock().unwrap();
         try!(writer.write_str(to_msg.to_message().into_string()[]));
         writer.flush()
