@@ -1,6 +1,6 @@
 //! Thread-safe connections on IrcStreams.
 #![stable]
-use std::error::Error;
+#[cfg(feature = "ssl")] use std::error::Error;
 use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 #[cfg(any(feature = "encode", feature = "ssl"))] use std::io::{IoError, IoErrorKind};
 use std::sync::{Mutex, MutexGuard};
@@ -144,7 +144,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     #[cfg(not(feature = "encode"))]
     pub fn send<M: ToMessage>(&self, to_msg: M) -> IoResult<()> {
         let mut writer = self.writer.lock().unwrap();
-        try!(writer.write_str(to_msg.to_message().into_string()[]));
+        try!(writer.write_str(&to_msg.to_message().into_string()[]));
         writer.flush()
     }
 
