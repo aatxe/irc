@@ -111,15 +111,17 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     fn handle_message(&self, msg: &Message) {
         if let Some(resp) = Response::from_message(msg) {
             if resp == Response::RPL_NAMREPLY {
-                if let Some(users) = msg.suffix.clone() {
-                    if let [_, _, ref chan] = &msg.args[] {
-                        for user in users.split_str(" ") {
-                            if match self.chanlists.lock().unwrap().get_mut(chan) {
-                                Some(vec) => { vec.push(User::new(user)); false },
-                                None => true,
-                            } {
-                                self.chanlists.lock().unwrap().insert(chan.clone(), 
-                                                                      vec!(User::new(user)));
+                if cfg!(not(feature = "nochanlists")) {
+                    if let Some(users) = msg.suffix.clone() {
+                        if let [_, _, ref chan] = &msg.args[] {
+                            for user in users.split_str(" ") {
+                                if match self.chanlists.lock().unwrap().get_mut(chan) {
+                                    Some(vec) => { vec.push(User::new(user)); false },
+                                    None => true,
+                                } {
+                                    self.chanlists.lock().unwrap().insert(chan.clone(), 
+                                                                          vec!(User::new(user)));
+                                }
                             }
                         }
                     }
@@ -153,23 +155,27 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                 Some(ref suffix) => &suffix[],
                 None => &msg.args[0][],
             };
-            if let Some(vec) = self.chanlists.lock().unwrap().get_mut(&String::from_str(chan)) {
-                if let Some(ref src) = msg.prefix {
-                    if let Some(i) = src.find('!') {
-                        if &msg.command[] == "JOIN" {
-                            vec.push(User::new(&src[..i]));
-                        } else {
-                            if let Some(n) = vec.as_slice().position_elem(&User::new(&src[..i])) {
-                                vec.swap_remove(n);
+            if cfg!(not(feature = "nochanlists")) {
+                if let Some(vec) = self.chanlists.lock().unwrap().get_mut(&String::from_str(chan)) {
+                    if let Some(ref src) = msg.prefix {
+                        if let Some(i) = src.find('!') {
+                            if &msg.command[] == "JOIN" {
+                                vec.push(User::new(&src[..i]));
+                            } else {
+                                if let Some(n) = vec.as_slice().position_elem(&User::new(&src[..i])) {
+                                    vec.swap_remove(n);
+                                }
                             }
                         }
                     }
                 }
             }
         } else if let ("MODE", [ref chan, ref mode, ref user]) = (&msg.command[], &msg.args[]) {
-            if let Some(vec) = self.chanlists.lock().unwrap().get_mut(chan) {
-                if let Some(n) = vec.as_slice().position_elem(&User::new(&user[])) {
-                    vec[n].update_access_level(&mode[]);
+            if cfg!(not(feature = "nochanlists")) {
+                if let Some(vec) = self.chanlists.lock().unwrap().get_mut(chan) {
+                    if let Some(n) = vec.as_slice().position_elem(&User::new(&user[])) {
+                        vec[n].update_access_level(&mode[]);
+                    }
                 }
             }
         } else {
@@ -381,6 +387,7 @@ mod test {
         assert_eq!(&get_server_value(server)[], "PRIVMSG #test :Hi there!\r\n");
     }
 
+    #[cfg(not(feature = "nochanlists"))]
     #[test]
     fn user_tracking_names() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
@@ -394,6 +401,7 @@ mod test {
         vec![User::new("test"), User::new("~owner"), User::new("&admin")])
     }
 
+    #[cfg(not(feature = "nochanlists"))]
     #[test]
     fn user_tracking_names_join() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
@@ -408,6 +416,7 @@ mod test {
         vec![User::new("test"), User::new("~owner"), User::new("&admin"), User::new("test2")])
     }
 
+    #[cfg(not(feature = "nochanlists"))]
     #[test]
     fn user_tracking_names_part() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
@@ -422,6 +431,7 @@ mod test {
         vec![User::new("test"), User::new("&admin")])
     }
 
+    #[cfg(not(feature = "nochanlists"))]
     #[test]
     fn user_tracking_names_mode() {
         let value = ":irc.test.net 353 test = #test :+test ~owner &admin\r\n\
