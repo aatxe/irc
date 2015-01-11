@@ -16,6 +16,7 @@ default = ["ctcp", "encode", "ssl"]
 ctcp = ["time"]
 encode = ["encoding"]
 ssl = ["openssl"]
+nochanlists = []
 
 [dependencies.rustc-serialize]
 rustc-serialize = "~0.2.7"
