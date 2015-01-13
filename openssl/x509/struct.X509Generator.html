@@ -44,7 +44,7 @@
 <h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>openssl</a>::<wbr><a href='index.html'>x509</a>::<wbr><a class='struct' href=''>X509Generator</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-10628' href='../../src/openssl/x509/mod.rs.html#172-179'>[src]</a></span></h1>
+        </span><a id='src-11275' href='../../src/openssl/x509/mod.rs.html#178-185'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct X509Generator {
     // some fields omitted
 }</pre><div class='docblock'><p>Generator of private key/certificate pairs</p>
@@ -83,9 +83,9 @@
 <p>CN: &quot;rust-openssl&quot;</p>
 
 <p>hash: SHA1</p>
-</div><h4 id='method.set_bitlength' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.set_bitlength' class='fnname'>set_bitlength</a>(self, bits: <a href='http://doc.rust-lang.org/nightly/std/primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../openssl/x509/struct.X509Generator.html' title='openssl::x509::X509Generator'>X509Generator</a></code></h4>
+</div><h4 id='method.set_bitlength' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.set_bitlength' class='fnname'>set_bitlength</a>(self, bits: <a href='http://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; <a class='struct' href='../../openssl/x509/struct.X509Generator.html' title='openssl::x509::X509Generator'>X509Generator</a></code></h4>
 <div class='docblock'><p>Sets desired bit length</p>
-</div><h4 id='method.set_valid_period' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.set_valid_period' class='fnname'>set_valid_period</a>(self, days: <a href='http://doc.rust-lang.org/nightly/std/primitive.uint.html'>uint</a>) -&gt; <a class='struct' href='../../openssl/x509/struct.X509Generator.html' title='openssl::x509::X509Generator'>X509Generator</a></code></h4>
+</div><h4 id='method.set_valid_period' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.set_valid_period' class='fnname'>set_valid_period</a>(self, days: <a href='http://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; <a class='struct' href='../../openssl/x509/struct.X509Generator.html' title='openssl::x509::X509Generator'>X509Generator</a></code></h4>
 <div class='docblock'><p>Sets certificate validity period in days since today</p>
 </div><h4 id='method.set_CN' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.set_CN' class='fnname'>set_CN</a>(self, CN: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../openssl/x509/struct.X509Generator.html' title='openssl::x509::X509Generator'>X509Generator</a></code></h4>
 <div class='docblock'><p>Sets Common Name of certificate</p>

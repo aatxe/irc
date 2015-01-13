@@ -44,11 +44,11 @@
 <h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>encoding</a><wbr></span><span class='out-of-band'><a href='stability.html'>[stability]</a> <span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-0' href='../src/encoding/lib.rs.html#5-242'>[src]</a></span></h1>
+        </span><a id='src-0' href='../src/encoding/lib.rs.html#5-248'>[src]</a></span></h1>
 <div class='docblock'>
-<h1 id="rust-encoding" class='section-header'><a
-                           href="#rust-encoding">Rust-encoding</a></h1>
-<p>Character encoding support for Rust.
+<h1 id="encoding-0.2.18" class='section-header'><a
+                           href="#encoding-0.2.18">Encoding 0.2.18</a></h1>
+<p>Character encoding support for Rust. (also known as <code>rust-encoding</code>)
 It is based on <a href="http://encoding.spec.whatwg.org/">WHATWG Encoding Standard</a>,
 and also provides an advanced interface for error detection and recovery.</p>
 
@@ -83,7 +83,7 @@ and also provides an advanced interface for error detection and recovery.</p>
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::<span class='ident'>ISO_8859_1</span>;
 
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_1</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span>[<span class='number'>99</span>,<span class='number'>97</span>,<span class='number'>102</span>,<span class='number'>233</span>], <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>),
-           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;caf\u{e9}&quot;</span>.<span class='ident'>into_string</span>()));
+           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;caf\u{e9}&quot;</span>.<span class='ident'>to_string</span>()));
 </pre>
 
 <p>To decode a byte sequence with invalid sequences:</p>
@@ -93,9 +93,9 @@ and also provides an advanced interface for error detection and recovery.</p>
 
 <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_6</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span>[<span class='number'>65</span>,<span class='number'>99</span>,<span class='number'>109</span>,<span class='number'>101</span>,<span class='number'>169</span>], <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>is_err</span>());
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_6</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span>[<span class='number'>65</span>,<span class='number'>99</span>,<span class='number'>109</span>,<span class='number'>101</span>,<span class='number'>169</span>], <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>),
-           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;Acme\u{fffd}&quot;</span>.<span class='ident'>into_string</span>()));
+           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;Acme\u{fffd}&quot;</span>.<span class='ident'>to_string</span>()));
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ISO_8859_6</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span>[<span class='number'>65</span>,<span class='number'>99</span>,<span class='number'>109</span>,<span class='number'>101</span>,<span class='number'>169</span>], <span class='ident'>DecoderTrap</span>::<span class='ident'>Ignore</span>),
-           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;Acme&quot;</span>.<span class='ident'>into_string</span>()));
+           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;Acme&quot;</span>.<span class='ident'>to_string</span>()));
 </pre>
 
 <p>A practical example of custom encoder traps:</p>
@@ -107,17 +107,17 @@ and also provides an advanced interface for error detection and recovery.</p>
 <span class='comment'>// hexadecimal numeric character reference replacement</span>
 <span class='kw'>fn</span> <span class='ident'>hex_ncr_escape</span>(<span class='ident'>_encoder</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>RawEncoder</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ByteWriter</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='ident'>escapes</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span>
-        <span class='ident'>input</span>.<span class='ident'>chars</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>ch</span><span class='op'>|</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;&amp;#x{:x};&quot;</span>, <span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>int</span>)).<span class='ident'>collect</span>();
+        <span class='ident'>input</span>.<span class='ident'>chars</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>ch</span><span class='op'>|</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;&amp;#x{:x};&quot;</span>, <span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>isize</span>)).<span class='ident'>collect</span>();
     <span class='kw'>let</span> <span class='ident'>escapes</span> <span class='op'>=</span> <span class='ident'>escapes</span>.<span class='ident'>concat</span>();
     <span class='ident'>output</span>.<span class='ident'>write_bytes</span>(<span class='ident'>escapes</span>.<span class='ident'>as_bytes</span>());
     <span class='boolval'>true</span>
 }
 <span class='kw'>static</span> <span class='ident'>HEX_NCR_ESCAPE</span>: <span class='ident'>EncoderTrap</span> <span class='op'>=</span> <span class='ident'>EncoderTrap</span>::<span class='ident'>Call</span>(<span class='ident'>hex_ncr_escape</span>);
 
-<span class='kw'>let</span> <span class='ident'>orig</span> <span class='op'>=</span> <span class='string'>&quot;Hello, 世界!&quot;</span>.<span class='ident'>into_string</span>();
+<span class='kw'>let</span> <span class='ident'>orig</span> <span class='op'>=</span> <span class='string'>&quot;Hello, 世界!&quot;</span>.<span class='ident'>to_string</span>();
 <span class='kw'>let</span> <span class='ident'>encoded</span> <span class='op'>=</span> <span class='ident'>ASCII</span>.<span class='ident'>encode</span>(<span class='ident'>orig</span>.<span class='ident'>as_slice</span>(), <span class='ident'>HEX_NCR_ESCAPE</span>).<span class='ident'>unwrap</span>();
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ASCII</span>.<span class='ident'>decode</span>(<span class='ident'>encoded</span>.<span class='ident'>as_slice</span>(), <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>),
-           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;Hello, &amp;#x4e16;&amp;#x754c;!&quot;</span>.<span class='ident'>into_string</span>()));
+           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;Hello, &amp;#x4e16;&amp;#x754c;!&quot;</span>.<span class='ident'>to_string</span>()));
 </pre>
 
 <p>Getting the encoding from the string label, as specified in WHATWG Encoding standard:</p>
@@ -131,16 +131,16 @@ and also provides an advanced interface for error detection and recovery.</p>
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>euckr</span>.<span class='ident'>whatwg_name</span>(), <span class='prelude-val'>Some</span>(<span class='string'>&quot;euc-kr&quot;</span>)); <span class='comment'>// for the sake of compatibility</span>
 <span class='kw'>let</span> <span class='ident'>broken</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span>[<span class='number'>0xbf</span>, <span class='number'>0xec</span>, <span class='number'>0xbf</span>, <span class='number'>0xcd</span>, <span class='number'>0xff</span>, <span class='number'>0xbe</span>, <span class='number'>0xd3</span>];
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>euckr</span>.<span class='ident'>decode</span>(<span class='ident'>broken</span>, <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>),
-           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\u{c6b0}\u{c640}\u{fffd}\u{c559}&quot;</span>.<span class='ident'>into_string</span>()));
+           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\u{c6b0}\u{c640}\u{fffd}\u{c559}&quot;</span>.<span class='ident'>to_string</span>()));
 
-<span class='comment'>// corresponding rust-encoding native API:</span>
+<span class='comment'>// corresponding Encoding native API:</span>
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>WINDOWS_949</span>.<span class='ident'>decode</span>(<span class='ident'>broken</span>, <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>),
-           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\u{c6b0}\u{c640}\u{fffd}\u{c559}&quot;</span>.<span class='ident'>into_string</span>()));
+           <span class='prelude-val'>Ok</span>(<span class='string'>&quot;\u{c6b0}\u{c640}\u{fffd}\u{c559}&quot;</span>.<span class='ident'>to_string</span>()));
 </pre>
 
 <h2 id="detailed-usage" class='section-header'><a
                            href="#detailed-usage">Detailed Usage</a></h2>
-<p>There are three main entry points to rust-encoding.</p>
+<p>There are three main entry points to Encoding.</p>
 
 <p><strong><code>Encoding</code></strong> is a single character encoding.
 It contains <code>encode</code> and <code>decode</code> methods for converting <code>String</code> to <code>Vec&lt;u8&gt;</code> and vice versa.
@@ -177,7 +177,7 @@ See the additional documents on <code>encoding::types</code> module for more inf
 
 <h2 id="supported-encodings" class='section-header'><a
                            href="#supported-encodings">Supported Encodings</a></h2>
-<p>Rust-encoding covers all encodings specified by WHATWG Encoding Standard and some more:</p>
+<p>Encoding covers all encodings specified by WHATWG Encoding Standard and some more:</p>
 
 <ul>
 <li>7-bit strict ASCII (<code>ascii</code>)</li>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Response` enum in crate `irc`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Response">
+
+    <title>irc::client::data::response::Response - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../../../index.html'>irc</a>::<wbr><a href='../../index.html'>client</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>response</a></p><div class='block enum'><h2>Enums</h2><a class='enum current' href='enum.Response.html'>Response</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../../../index.html'>irc</a>::<wbr><a href='../../index.html'>client</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>response</a>::<wbr><a class='enum' href=''>Response</a><wbr><a class='stability Stable' title=''>Stable</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]
+            </a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-17110' href='../../../../src/irc/client/data/response.rs.html#13-294'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum Response {
+    RPL_WELCOME,
+    RPL_YOURHOST,
+    RPL_CREATED,
+    RPL_MYINFO,
+    RPL_BOUNCE,
+    RPL_USERHOST,
+    RPL_ISON,
+    RPL_AWAY,
+    RPL_UNAWAY,
+    RPL_NOWAWAY,
+    RPL_WHOISUSER,
+    RPL_WHOISSERVER,
+    RPL_WHOISOPERATOR,
+    RPL_WHOISIDLE,
+    RPL_ENDOFWHOIS,
+    RPL_WHOISCHANNELS,
+    RPL_WHOWASUSER,
+    RPL_ENDOFWHOWAS,
+    RPL_LISTSTART,
+    RPL_LIST,
+    RPL_LISTEND,
+    RPL_UNIQOPIS,
+    RPL_CHANNELMODEIS,
+    RPL_NOTOPIC,
+    RPL_TOPIC,
+    RPL_INVITING,
+    RPL_SUMMONING,
+    RPL_INVITELIST,
+    RPL_ENDOFINVITELIST,
+    RPL_EXCEPTLIST,
+    RPL_ENDOFEXECPTLIST,
+    RPL_VERSION,
+    RPL_WHOREPLY,
+    RPL_ENDOFWHO,
+    RPL_NAMREPLY,
+    RPL_ENDOFNAMES,
+    RPL_LINKS,
+    RPL_ENDOFLINKS,
+    RPL_BANLIST,
+    RPL_ENDOFBANLIST,
+    RPL_INFO,
+    RPL_ENDOFINFO,
+    RPL_MOTDSTART,
+    RPL_MOTD,
+    RPL_ENDOFMOTD,
+    RPL_YOUREOPER,
+    RPL_REHASHING,
+    RPL_YOURESERVICE,
+    RPL_TIME,
+    RPL_USERSSTART,
+    RPL_USERS,
+    RPL_ENDOFUSERS,
+    RPL_NOUSERS,
+    RPL_TRACELINK,
+    RPL_TRACECONNECTING,
+    RPL_TRACEHANDSHAKE,
+    RPL_TRACEUKNOWN,
+    RPL_TRACEOPERATOR,
+    RPL_TRACEUSER,
+    RPL_TRACESERVER,
+    RPL_TRACESERVICE,
+    RPL_TRACENEWTYPE,
+    RPL_TRACECLASS,
+    RPL_TRACERECONNECT,
+    RPL_TRACELOG,
+    RPL_TRACEEND,
+    RPL_STATSLINKINFO,
+    RPL_STATSCOMMANDS,
+    RPL_ENDOFSTATS,
+    RPL_STATSUPTIME,
+    RPL_STATSOLINE,
+    RPL_UMODEIS,
+    RPL_SERVLIST,
+    RPL_SERVLISTEND,
+    RPL_LUSERCLIENT,
+    RPL_LUSEROP,
+    RPL_LUSERUNKNOWN,
+    RPL_LUSERCHANNELS,
+    RPL_LUSERME,
+    RPL_ADMINME,
+    RPL_ADMINLOC1,
+    RPL_ADMINLOC2,
+    RPL_ADMINEMAIL,
+    RPL_TRYAGAIN,
+    ERR_NOSUCHNICK,
+    ERR_NOSUCHSERVER,
+    ERR_NOSUCHCHANNEL,
+    ERR_CANNOTSENDTOCHAN,
+    ERR_TOOMANYCHANNELS,
+    ERR_WASNOSUCHNICK,
+    ERR_TOOMANYTARGETS,
+    ERR_NOSUCHSERVICE,
+    ERR_NOORIGIN,
+    ERR_NORECIPIENT,
+    ERR_NOTEXTTOSEND,
+    ERR_NOTOPLEVEL,
+    ERR_WILDTOPLEVEL,
+    ERR_BADMASK,
+    ERR_UNKNOWNCOMMAND,
+    ERR_NOMOTD,
+    ERR_NOADMININFO,
+    ERR_FILEERROR,
+    ERR_NONICKNAMEGIVEN,
+    ERR_ERRONEOUSNICKNAME,
+    ERR_NICKNAMEINUSE,
+    ERR_NICKCOLLISION,
+    ERR_UNAVAILRESOURCE,
+    ERR_USERNOTINCHANNEL,
+    ERR_NOTONCHANNEL,
+    ERR_USERONCHANNEL,
+    ERR_NOLOGIN,
+    ERR_SUMMONDISABLED,
+    ERR_USERSDISABLED,
+    ERR_NOTREGISTERED,
+    ERR_NEEDMOREPARAMS,
+    ERR_ALREADYREGISTRED,
+    ERR_NOPERMFORHOST,
+    ERR_PASSWDMISMATCH,
+    ERR_YOUREBANNEDCREEP,
+    ERR_YOUWILLBEBANNED,
+    ERR_KEYSET,
+    ERR_CHANNELISFULL,
+    ERR_UNKNOWNMODE,
+    ERR_INVITEONLYCHAN,
+    ERR_BANNEDFROMCHAN,
+    ERR_BADCHANNELKEY,
+    ERR_BADCHANMASK,
+    ERR_NOCHANMODES,
+    ERR_BANLISTFULL,
+    ERR_NOPRIVILEGES,
+    ERR_CHANOPRIVSNEEDED,
+    ERR_CANTKILLSERVER,
+    ERR_RESTRICTED,
+    ERR_UNIQOPPRIVSNEEDED,
+    ERR_NOOPERHOST,
+    ERR_UMODEUNKNOWNFLAG,
+    ERR_USERSDONTMATCH,
+}</pre><div class='docblock'><p>List of all server responses as defined in <a href="http://tools.ietf.org/html/rfc2812">RFC 2812</a>.
+All commands are documented with their expected form from the RFC.</p>
+</div><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.RPL_WELCOME'><a class='stability Unstable' title='Unstable'></a><code>RPL_WELCOME</code></td><td><div class='docblock'><p>001 Welcome to the Internet Relay Network <nick>!<user>@<host></p>
+</div></td></tr><tr><td id='variant.RPL_YOURHOST'><a class='stability Unstable' title='Unstable'></a><code>RPL_YOURHOST</code></td><td><div class='docblock'><p>002 Your host is <servername>, running version <ver></p>
+</div></td></tr><tr><td id='variant.RPL_CREATED'><a class='stability Unstable' title='Unstable'></a><code>RPL_CREATED</code></td><td><div class='docblock'><p>003 This server was created <date></p>
+</div></td></tr><tr><td id='variant.RPL_MYINFO'><a class='stability Unstable' title='Unstable'></a><code>RPL_MYINFO</code></td><td><div class='docblock'><p>004 <servername> <version> <available user modes> available channel modes&gt;</p>
+</div></td></tr><tr><td id='variant.RPL_BOUNCE'><a class='stability Unstable' title='Unstable'></a><code>RPL_BOUNCE</code></td><td><div class='docblock'><p>005 Try server <server name>, port <port number></p>
+</div></td></tr><tr><td id='variant.RPL_USERHOST'><a class='stability Unstable' title='Unstable'></a><code>RPL_USERHOST</code></td><td><div class='docblock'><p>302 :*1<reply> *( &quot; &quot; <reply> )</p>
+</div></td></tr><tr><td id='variant.RPL_ISON'><a class='stability Unstable' title='Unstable'></a><code>RPL_ISON</code></td><td><div class='docblock'><p>303 :*1<nick> *( &quot; &quot; <nick> )</p>
+</div></td></tr><tr><td id='variant.RPL_AWAY'><a class='stability Unstable' title='Unstable'></a><code>RPL_AWAY</code></td><td><div class='docblock'><p>301 <nick> :<away message></p>
+</div></td></tr><tr><td id='variant.RPL_UNAWAY'><a class='stability Unstable' title='Unstable'></a><code>RPL_UNAWAY</code></td><td><div class='docblock'><p>305 :You are no longer marked as being away</p>
+</div></td></tr><tr><td id='variant.RPL_NOWAWAY'><a class='stability Unstable' title='Unstable'></a><code>RPL_NOWAWAY</code></td><td><div class='docblock'><p>306 :You have been marked as being away</p>
+</div></td></tr><tr><td id='variant.RPL_WHOISUSER'><a class='stability Unstable' title='Unstable'></a><code>RPL_WHOISUSER</code></td><td><div class='docblock'><p>311 <nick> <user> <host> * :<real name></p>
+</div></td></tr><tr><td id='variant.RPL_WHOISSERVER'><a class='stability Unstable' title='Unstable'></a><code>RPL_WHOISSERVER</code></td><td><div class='docblock'><p>312 <nick> <server> :<server info></p>
+</div></td></tr><tr><td id='variant.RPL_WHOISOPERATOR'><a class='stability Unstable' title='Unstable'></a><code>RPL_WHOISOPERATOR</code></td><td><div class='docblock'><p>313 <nick> :is an IRC operator</p>
+</div></td></tr><tr><td id='variant.RPL_WHOISIDLE'><a class='stability Unstable' title='Unstable'></a><code>RPL_WHOISIDLE</code></td><td><div class='docblock'><p>317 <nick> <integer> :seconds idle</p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFWHOIS'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFWHOIS</code></td><td><div class='docblock'><p>318 <nick> :End of WHOIS list</p>
+</div></td></tr><tr><td id='variant.RPL_WHOISCHANNELS'><a class='stability Unstable' title='Unstable'></a><code>RPL_WHOISCHANNELS</code></td><td><div class='docblock'><p>319 <nick> :*( ( &quot;@&quot; / &quot;+&quot; ) <channel> &quot; &quot; )</p>
+</div></td></tr><tr><td id='variant.RPL_WHOWASUSER'><a class='stability Unstable' title='Unstable'></a><code>RPL_WHOWASUSER</code></td><td><div class='docblock'><p>314 <nick> <user> <host> * :<real name></p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFWHOWAS'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFWHOWAS</code></td><td><div class='docblock'><p>369 <nick> :End of WHOWAS</p>
+</div></td></tr><tr><td id='variant.RPL_LISTSTART'><a class='stability Unstable' title='Unstable'></a><code>RPL_LISTSTART</code></td><td><div class='docblock'><p>Obsolete. Not used.</p>
+</div></td></tr><tr><td id='variant.RPL_LIST'><a class='stability Unstable' title='Unstable'></a><code>RPL_LIST</code></td><td><div class='docblock'><p>322 <channel> &lt;# visible&gt; :<topic></p>
+</div></td></tr><tr><td id='variant.RPL_LISTEND'><a class='stability Unstable' title='Unstable'></a><code>RPL_LISTEND</code></td><td><div class='docblock'><p>323 :End of LIST</p>
+</div></td></tr><tr><td id='variant.RPL_UNIQOPIS'><a class='stability Unstable' title='Unstable'></a><code>RPL_UNIQOPIS</code></td><td><div class='docblock'><p>325 <channel> <nickname></p>
+</div></td></tr><tr><td id='variant.RPL_CHANNELMODEIS'><a class='stability Unstable' title='Unstable'></a><code>RPL_CHANNELMODEIS</code></td><td><div class='docblock'><p>324 <channel> <mode> <mode params></p>
+</div></td></tr><tr><td id='variant.RPL_NOTOPIC'><a class='stability Unstable' title='Unstable'></a><code>RPL_NOTOPIC</code></td><td><div class='docblock'><p>331 <channel> :No topic is set</p>
+</div></td></tr><tr><td id='variant.RPL_TOPIC'><a class='stability Unstable' title='Unstable'></a><code>RPL_TOPIC</code></td><td><div class='docblock'><p>332 <channel> :<topic></p>
+</div></td></tr><tr><td id='variant.RPL_INVITING'><a class='stability Unstable' title='Unstable'></a><code>RPL_INVITING</code></td><td><div class='docblock'><p>341 <channel> <nick></p>
+</div></td></tr><tr><td id='variant.RPL_SUMMONING'><a class='stability Unstable' title='Unstable'></a><code>RPL_SUMMONING</code></td><td><div class='docblock'><p>342 <user> :Summoning user to IRC</p>
+</div></td></tr><tr><td id='variant.RPL_INVITELIST'><a class='stability Unstable' title='Unstable'></a><code>RPL_INVITELIST</code></td><td><div class='docblock'><p>346 <channel> <invitemask></p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFINVITELIST'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFINVITELIST</code></td><td><div class='docblock'><p>347 <channel> :End of channel invite list</p>
+</div></td></tr><tr><td id='variant.RPL_EXCEPTLIST'><a class='stability Unstable' title='Unstable'></a><code>RPL_EXCEPTLIST</code></td><td><div class='docblock'><p>348 <channel> <exceptionmask></p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFEXECPTLIST'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFEXECPTLIST</code></td><td><div class='docblock'><p>349 <channel> :End of channel exception list</p>
+</div></td></tr><tr><td id='variant.RPL_VERSION'><a class='stability Unstable' title='Unstable'></a><code>RPL_VERSION</code></td><td><div class='docblock'><p>351 <version>.<debuglevel> <server> :<comments></p>
+</div></td></tr><tr><td id='variant.RPL_WHOREPLY'><a class='stability Unstable' title='Unstable'></a><code>RPL_WHOREPLY</code></td><td><div class='docblock'><p>352 <channel> <user> <host> <server> <nick> ( &quot;H&quot; / &quot;G&quot; &gt; [&quot;*&quot;] [ ( &quot;@&quot; / &quot;+&quot; ) ]
+:<hopcount> <real name></p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFWHO'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFWHO</code></td><td><div class='docblock'><p>315 <name> :End of WHO list</p>
+</div></td></tr><tr><td id='variant.RPL_NAMREPLY'><a class='stability Unstable' title='Unstable'></a><code>RPL_NAMREPLY</code></td><td><div class='docblock'><p>353 ( &quot;=&quot; / &quot;*&quot; / &quot;@&quot; ) <channel> :[ &quot;@&quot; / &quot;+&quot; ] <nick> *( &quot; &quot; [ &quot;@&quot; / &quot;+&quot; ] <nick> )</p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFNAMES'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFNAMES</code></td><td><div class='docblock'><p>366 <channel> :End of NAMES list</p>
+</div></td></tr><tr><td id='variant.RPL_LINKS'><a class='stability Unstable' title='Unstable'></a><code>RPL_LINKS</code></td><td><div class='docblock'><p>364 <mask> <server> :<hopcount> <server info></p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFLINKS'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFLINKS</code></td><td><div class='docblock'><p>365 <mask> :End of LINKS list</p>
+</div></td></tr><tr><td id='variant.RPL_BANLIST'><a class='stability Unstable' title='Unstable'></a><code>RPL_BANLIST</code></td><td><div class='docblock'><p>367 <channel> <banmask></p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFBANLIST'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFBANLIST</code></td><td><div class='docblock'><p>368 <channel> :End of channel ban list</p>
+</div></td></tr><tr><td id='variant.RPL_INFO'><a class='stability Unstable' title='Unstable'></a><code>RPL_INFO</code></td><td><div class='docblock'><p>371 :<string></p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFINFO'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFINFO</code></td><td><div class='docblock'><p>374 :End of INFO list</p>
+</div></td></tr><tr><td id='variant.RPL_MOTDSTART'><a class='stability Unstable' title='Unstable'></a><code>RPL_MOTDSTART</code></td><td><div class='docblock'><p>375 :- <server> Message of the day -</p>
+</div></td></tr><tr><td id='variant.RPL_MOTD'><a class='stability Unstable' title='Unstable'></a><code>RPL_MOTD</code></td><td><div class='docblock'><p>372 :- <text></p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFMOTD'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFMOTD</code></td><td><div class='docblock'><p>376 :End of MOTD command</p>
+</div></td></tr><tr><td id='variant.RPL_YOUREOPER'><a class='stability Unstable' title='Unstable'></a><code>RPL_YOUREOPER</code></td><td><div class='docblock'><p>381 :You are now an IRC operator</p>
+</div></td></tr><tr><td id='variant.RPL_REHASHING'><a class='stability Unstable' title='Unstable'></a><code>RPL_REHASHING</code></td><td><div class='docblock'><p>382 <config file> :Rehashing</p>
+</div></td></tr><tr><td id='variant.RPL_YOURESERVICE'><a class='stability Unstable' title='Unstable'></a><code>RPL_YOURESERVICE</code></td><td><div class='docblock'><p>383 You are service <servicename></p>
+</div></td></tr><tr><td id='variant.RPL_TIME'><a class='stability Unstable' title='Unstable'></a><code>RPL_TIME</code></td><td><div class='docblock'><p>391 <server> :<string showing server's local time></p>
+</div></td></tr><tr><td id='variant.RPL_USERSSTART'><a class='stability Unstable' title='Unstable'></a><code>RPL_USERSSTART</code></td><td><div class='docblock'><p>392 :UserID   Terminal  Host</p>
+</div></td></tr><tr><td id='variant.RPL_USERS'><a class='stability Unstable' title='Unstable'></a><code>RPL_USERS</code></td><td><div class='docblock'><p>393 :<username> <ttyline> <hostname></p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFUSERS'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFUSERS</code></td><td><div class='docblock'><p>394 :End of users</p>
+</div></td></tr><tr><td id='variant.RPL_NOUSERS'><a class='stability Unstable' title='Unstable'></a><code>RPL_NOUSERS</code></td><td><div class='docblock'><p>395 :Nobody logged in</p>
+</div></td></tr><tr><td id='variant.RPL_TRACELINK'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACELINK</code></td><td><div class='docblock'><p>200 Link <version & debug level> <destination> <next server> V<protocol version>
+<link uptime in seconds> <backstream sendq> <upstream sendq></p>
+</div></td></tr><tr><td id='variant.RPL_TRACECONNECTING'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACECONNECTING</code></td><td><div class='docblock'><p>201 Try. <class> <server></p>
+</div></td></tr><tr><td id='variant.RPL_TRACEHANDSHAKE'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACEHANDSHAKE</code></td><td><div class='docblock'><p>202 H.S. <class> <server></p>
+</div></td></tr><tr><td id='variant.RPL_TRACEUKNOWN'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACEUKNOWN</code></td><td><div class='docblock'><p>203 ???? <class> [<client IP address in dot form>]</p>
+</div></td></tr><tr><td id='variant.RPL_TRACEOPERATOR'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACEOPERATOR</code></td><td><div class='docblock'><p>204 Oper <class> <nick></p>
+</div></td></tr><tr><td id='variant.RPL_TRACEUSER'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACEUSER</code></td><td><div class='docblock'><p>205 User <class> <nick></p>
+</div></td></tr><tr><td id='variant.RPL_TRACESERVER'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACESERVER</code></td><td><div class='docblock'><p>206 Serv <class> <int>S <int>C <server> <nick!user|*!*>@<host|server> V<protocol version></p>
+</div></td></tr><tr><td id='variant.RPL_TRACESERVICE'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACESERVICE</code></td><td><div class='docblock'><p>207 Service <class> <name> <type> <active type></p>
+</div></td></tr><tr><td id='variant.RPL_TRACENEWTYPE'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACENEWTYPE</code></td><td><div class='docblock'><p>208 <newtype> 0 <client name></p>
+</div></td></tr><tr><td id='variant.RPL_TRACECLASS'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACECLASS</code></td><td><div class='docblock'><p>209 Class <class> <count></p>
+</div></td></tr><tr><td id='variant.RPL_TRACERECONNECT'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACERECONNECT</code></td><td><div class='docblock'><p>Unused.</p>
+</div></td></tr><tr><td id='variant.RPL_TRACELOG'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACELOG</code></td><td><div class='docblock'><p>261 File <logfile> <debug level></p>
+</div></td></tr><tr><td id='variant.RPL_TRACEEND'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRACEEND</code></td><td><div class='docblock'><p>262 <server name> <version & debug level> :End of TRACE</p>
+</div></td></tr><tr><td id='variant.RPL_STATSLINKINFO'><a class='stability Unstable' title='Unstable'></a><code>RPL_STATSLINKINFO</code></td><td><div class='docblock'><p>211 <linkname> <sendq> <sent messages> <sent Kbytes> <received messages> <received Kbytes>
+<time open></p>
+</div></td></tr><tr><td id='variant.RPL_STATSCOMMANDS'><a class='stability Unstable' title='Unstable'></a><code>RPL_STATSCOMMANDS</code></td><td><div class='docblock'><p>212 <command> <count> <byte count> <remote count></p>
+</div></td></tr><tr><td id='variant.RPL_ENDOFSTATS'><a class='stability Unstable' title='Unstable'></a><code>RPL_ENDOFSTATS</code></td><td><div class='docblock'><p>219 <stats letter> :End of STATS report</p>
+</div></td></tr><tr><td id='variant.RPL_STATSUPTIME'><a class='stability Unstable' title='Unstable'></a><code>RPL_STATSUPTIME</code></td><td><div class='docblock'><p>242 :Server Up %d days %d:%02d:%02d</p>
+</div></td></tr><tr><td id='variant.RPL_STATSOLINE'><a class='stability Unstable' title='Unstable'></a><code>RPL_STATSOLINE</code></td><td><div class='docblock'><p>O <hostmask> * <name></p>
+</div></td></tr><tr><td id='variant.RPL_UMODEIS'><a class='stability Unstable' title='Unstable'></a><code>RPL_UMODEIS</code></td><td><div class='docblock'><p>221 <user mode string></p>
+</div></td></tr><tr><td id='variant.RPL_SERVLIST'><a class='stability Unstable' title='Unstable'></a><code>RPL_SERVLIST</code></td><td><div class='docblock'><p>234 <name> <server> <mask> <type> <hopcount> <info></p>
+</div></td></tr><tr><td id='variant.RPL_SERVLISTEND'><a class='stability Unstable' title='Unstable'></a><code>RPL_SERVLISTEND</code></td><td><div class='docblock'><p>235 <mask> <type> :End of service listing</p>
+</div></td></tr><tr><td id='variant.RPL_LUSERCLIENT'><a class='stability Unstable' title='Unstable'></a><code>RPL_LUSERCLIENT</code></td><td><div class='docblock'><p>251 :There are <integer> users and <integer> services on <integer> servers</p>
+</div></td></tr><tr><td id='variant.RPL_LUSEROP'><a class='stability Unstable' title='Unstable'></a><code>RPL_LUSEROP</code></td><td><div class='docblock'><p>252 <integer> :operator(s) online</p>
+</div></td></tr><tr><td id='variant.RPL_LUSERUNKNOWN'><a class='stability Unstable' title='Unstable'></a><code>RPL_LUSERUNKNOWN</code></td><td><div class='docblock'><p>253 <integer> :unknown connection(s)</p>
+</div></td></tr><tr><td id='variant.RPL_LUSERCHANNELS'><a class='stability Unstable' title='Unstable'></a><code>RPL_LUSERCHANNELS</code></td><td><div class='docblock'><p>254 <integer> :channels formed</p>
+</div></td></tr><tr><td id='variant.RPL_LUSERME'><a class='stability Unstable' title='Unstable'></a><code>RPL_LUSERME</code></td><td><div class='docblock'><p>255 :I have <integer> clients and <integer> servers</p>
+</div></td></tr><tr><td id='variant.RPL_ADMINME'><a class='stability Unstable' title='Unstable'></a><code>RPL_ADMINME</code></td><td><div class='docblock'><p>256 <server> :Administrative info</p>
+</div></td></tr><tr><td id='variant.RPL_ADMINLOC1'><a class='stability Unstable' title='Unstable'></a><code>RPL_ADMINLOC1</code></td><td><div class='docblock'><p>257 :<admin info></p>
+</div></td></tr><tr><td id='variant.RPL_ADMINLOC2'><a class='stability Unstable' title='Unstable'></a><code>RPL_ADMINLOC2</code></td><td><div class='docblock'><p>258 :<admin info></p>
+</div></td></tr><tr><td id='variant.RPL_ADMINEMAIL'><a class='stability Unstable' title='Unstable'></a><code>RPL_ADMINEMAIL</code></td><td><div class='docblock'><p>259 :<admin info></p>
+</div></td></tr><tr><td id='variant.RPL_TRYAGAIN'><a class='stability Unstable' title='Unstable'></a><code>RPL_TRYAGAIN</code></td><td><div class='docblock'><p>263 <command> :Please wait a while and try again.</p>
+</div></td></tr><tr><td id='variant.ERR_NOSUCHNICK'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOSUCHNICK</code></td><td><div class='docblock'><p>401 <nickname> :No such nick/channel</p>
+</div></td></tr><tr><td id='variant.ERR_NOSUCHSERVER'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOSUCHSERVER</code></td><td><div class='docblock'><p>402 <server name> :No such server</p>
+</div></td></tr><tr><td id='variant.ERR_NOSUCHCHANNEL'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOSUCHCHANNEL</code></td><td><div class='docblock'><p>403 <channel name> :No such channel</p>
+</div></td></tr><tr><td id='variant.ERR_CANNOTSENDTOCHAN'><a class='stability Unstable' title='Unstable'></a><code>ERR_CANNOTSENDTOCHAN</code></td><td><div class='docblock'><p>404 <channel name> :Cannot send to channel</p>
+</div></td></tr><tr><td id='variant.ERR_TOOMANYCHANNELS'><a class='stability Unstable' title='Unstable'></a><code>ERR_TOOMANYCHANNELS</code></td><td><div class='docblock'><p>405 <channel name> :You have joined too many channels</p>
+</div></td></tr><tr><td id='variant.ERR_WASNOSUCHNICK'><a class='stability Unstable' title='Unstable'></a><code>ERR_WASNOSUCHNICK</code></td><td><div class='docblock'><p>406 <nickname> :There was no such nickname</p>
+</div></td></tr><tr><td id='variant.ERR_TOOMANYTARGETS'><a class='stability Unstable' title='Unstable'></a><code>ERR_TOOMANYTARGETS</code></td><td><div class='docblock'><p>407 <target> :<error code> recipients. <abort message></p>
+</div></td></tr><tr><td id='variant.ERR_NOSUCHSERVICE'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOSUCHSERVICE</code></td><td><div class='docblock'><p>408 <service name> :No such service</p>
+</div></td></tr><tr><td id='variant.ERR_NOORIGIN'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOORIGIN</code></td><td><div class='docblock'><p>409 :No origin specified</p>
+</div></td></tr><tr><td id='variant.ERR_NORECIPIENT'><a class='stability Unstable' title='Unstable'></a><code>ERR_NORECIPIENT</code></td><td><div class='docblock'><p>411 :No recipient given (<command>)</p>
+</div></td></tr><tr><td id='variant.ERR_NOTEXTTOSEND'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOTEXTTOSEND</code></td><td><div class='docblock'><p>412 :No text to send</p>
+</div></td></tr><tr><td id='variant.ERR_NOTOPLEVEL'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOTOPLEVEL</code></td><td><div class='docblock'><p>413 <mask> :No toplevel domain specified</p>
+</div></td></tr><tr><td id='variant.ERR_WILDTOPLEVEL'><a class='stability Unstable' title='Unstable'></a><code>ERR_WILDTOPLEVEL</code></td><td><div class='docblock'><p>414 <mask> :Wildcard in toplevel domain</p>
+</div></td></tr><tr><td id='variant.ERR_BADMASK'><a class='stability Unstable' title='Unstable'></a><code>ERR_BADMASK</code></td><td><div class='docblock'><p>415 <mask> :Bad Server/host mask</p>
+</div></td></tr><tr><td id='variant.ERR_UNKNOWNCOMMAND'><a class='stability Unstable' title='Unstable'></a><code>ERR_UNKNOWNCOMMAND</code></td><td><div class='docblock'><p>421 <command> :Unknown command</p>
+</div></td></tr><tr><td id='variant.ERR_NOMOTD'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOMOTD</code></td><td><div class='docblock'><p>422 :MOTD File is missing</p>
+</div></td></tr><tr><td id='variant.ERR_NOADMININFO'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOADMININFO</code></td><td><div class='docblock'><p>423 <server> :No administrative info available</p>
+</div></td></tr><tr><td id='variant.ERR_FILEERROR'><a class='stability Unstable' title='Unstable'></a><code>ERR_FILEERROR</code></td><td><div class='docblock'><p>424 :File error doing <file op> on <file></p>
+</div></td></tr><tr><td id='variant.ERR_NONICKNAMEGIVEN'><a class='stability Unstable' title='Unstable'></a><code>ERR_NONICKNAMEGIVEN</code></td><td><div class='docblock'><p>431 :No nickname given</p>
+</div></td></tr><tr><td id='variant.ERR_ERRONEOUSNICKNAME'><a class='stability Unstable' title='Unstable'></a><code>ERR_ERRONEOUSNICKNAME</code></td><td><div class='docblock'><p>432 <nick> :Erroneous nickname&quot;</p>
+</div></td></tr><tr><td id='variant.ERR_NICKNAMEINUSE'><a class='stability Unstable' title='Unstable'></a><code>ERR_NICKNAMEINUSE</code></td><td><div class='docblock'><p>433 <nick> :Nickname is already in use</p>
+</div></td></tr><tr><td id='variant.ERR_NICKCOLLISION'><a class='stability Unstable' title='Unstable'></a><code>ERR_NICKCOLLISION</code></td><td><div class='docblock'><p>436 <nick> :Nickname collision KILL from <user>@<host></p>
+</div></td></tr><tr><td id='variant.ERR_UNAVAILRESOURCE'><a class='stability Unstable' title='Unstable'></a><code>ERR_UNAVAILRESOURCE</code></td><td><div class='docblock'><p>437 <nick/channel> :Nick/channel is temporarily unavailable</p>
+</div></td></tr><tr><td id='variant.ERR_USERNOTINCHANNEL'><a class='stability Unstable' title='Unstable'></a><code>ERR_USERNOTINCHANNEL</code></td><td><div class='docblock'><p>441 <nick> <channel> :They aren&#39;t on that channel</p>
+</div></td></tr><tr><td id='variant.ERR_NOTONCHANNEL'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOTONCHANNEL</code></td><td><div class='docblock'><p>442 <channel> :You&#39;re not on that channel</p>
+</div></td></tr><tr><td id='variant.ERR_USERONCHANNEL'><a class='stability Unstable' title='Unstable'></a><code>ERR_USERONCHANNEL</code></td><td><div class='docblock'><p>443 <user> <channel> :is already on channel</p>
+</div></td></tr><tr><td id='variant.ERR_NOLOGIN'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOLOGIN</code></td><td><div class='docblock'><p>444 <user> :User not logged in</p>
+</div></td></tr><tr><td id='variant.ERR_SUMMONDISABLED'><a class='stability Unstable' title='Unstable'></a><code>ERR_SUMMONDISABLED</code></td><td><div class='docblock'><p>445 :SUMMON has been disabled</p>
+</div></td></tr><tr><td id='variant.ERR_USERSDISABLED'><a class='stability Unstable' title='Unstable'></a><code>ERR_USERSDISABLED</code></td><td><div class='docblock'><p>446 :USERS has been disabled</p>
+</div></td></tr><tr><td id='variant.ERR_NOTREGISTERED'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOTREGISTERED</code></td><td><div class='docblock'><p>451 :You have not registered</p>
+</div></td></tr><tr><td id='variant.ERR_NEEDMOREPARAMS'><a class='stability Unstable' title='Unstable'></a><code>ERR_NEEDMOREPARAMS</code></td><td><div class='docblock'><p>461 <command> :Not enough parameters</p>
+</div></td></tr><tr><td id='variant.ERR_ALREADYREGISTRED'><a class='stability Unstable' title='Unstable'></a><code>ERR_ALREADYREGISTRED</code></td><td><div class='docblock'><p>462 :Unauthorized command (already registered)</p>
+</div></td></tr><tr><td id='variant.ERR_NOPERMFORHOST'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOPERMFORHOST</code></td><td><div class='docblock'><p>463 :Your host isn&#39;t among the privileged</p>
+</div></td></tr><tr><td id='variant.ERR_PASSWDMISMATCH'><a class='stability Unstable' title='Unstable'></a><code>ERR_PASSWDMISMATCH</code></td><td><div class='docblock'><p>464 :Password incorrect</p>
+</div></td></tr><tr><td id='variant.ERR_YOUREBANNEDCREEP'><a class='stability Unstable' title='Unstable'></a><code>ERR_YOUREBANNEDCREEP</code></td><td><div class='docblock'><p>465 :You are banned from this server</p>
+</div></td></tr><tr><td id='variant.ERR_YOUWILLBEBANNED'><a class='stability Unstable' title='Unstable'></a><code>ERR_YOUWILLBEBANNED</code></td><td><div class='docblock'><p>466</p>
+</div></td></tr><tr><td id='variant.ERR_KEYSET'><a class='stability Unstable' title='Unstable'></a><code>ERR_KEYSET</code></td><td><div class='docblock'><p>467 <channel> :Channel key already set</p>
+</div></td></tr><tr><td id='variant.ERR_CHANNELISFULL'><a class='stability Unstable' title='Unstable'></a><code>ERR_CHANNELISFULL</code></td><td><div class='docblock'><p>471 <channel> :Cannot join channel (+l)</p>
+</div></td></tr><tr><td id='variant.ERR_UNKNOWNMODE'><a class='stability Unstable' title='Unstable'></a><code>ERR_UNKNOWNMODE</code></td><td><div class='docblock'><p>472 <char> :is unknown mode char to me for <channel></p>
+</div></td></tr><tr><td id='variant.ERR_INVITEONLYCHAN'><a class='stability Unstable' title='Unstable'></a><code>ERR_INVITEONLYCHAN</code></td><td><div class='docblock'><p>473 <channel> :Cannot join channel (+i)</p>
+</div></td></tr><tr><td id='variant.ERR_BANNEDFROMCHAN'><a class='stability Unstable' title='Unstable'></a><code>ERR_BANNEDFROMCHAN</code></td><td><div class='docblock'><p>474 <channel> :Cannot join channel (+b)</p>
+</div></td></tr><tr><td id='variant.ERR_BADCHANNELKEY'><a class='stability Unstable' title='Unstable'></a><code>ERR_BADCHANNELKEY</code></td><td><div class='docblock'><p>475 <channel> :Cannot join channel (+k)</p>
+</div></td></tr><tr><td id='variant.ERR_BADCHANMASK'><a class='stability Unstable' title='Unstable'></a><code>ERR_BADCHANMASK</code></td><td><div class='docblock'><p>476 <channel> :Bad Channel Mask</p>
+</div></td></tr><tr><td id='variant.ERR_NOCHANMODES'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOCHANMODES</code></td><td><div class='docblock'><p>477 <channel> :Channel doesn&#39;t support modes</p>
+</div></td></tr><tr><td id='variant.ERR_BANLISTFULL'><a class='stability Unstable' title='Unstable'></a><code>ERR_BANLISTFULL</code></td><td><div class='docblock'><p>478 <channel> <char> :Channel list is full</p>
+</div></td></tr><tr><td id='variant.ERR_NOPRIVILEGES'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOPRIVILEGES</code></td><td><div class='docblock'><p>481 :Permission Denied- You&#39;re not an IRC operator</p>
+</div></td></tr><tr><td id='variant.ERR_CHANOPRIVSNEEDED'><a class='stability Unstable' title='Unstable'></a><code>ERR_CHANOPRIVSNEEDED</code></td><td><div class='docblock'><p>482 <channel> :You&#39;re not channel operator</p>
+</div></td></tr><tr><td id='variant.ERR_CANTKILLSERVER'><a class='stability Unstable' title='Unstable'></a><code>ERR_CANTKILLSERVER</code></td><td><div class='docblock'><p>483 :You can&#39;t kill a server!</p>
+</div></td></tr><tr><td id='variant.ERR_RESTRICTED'><a class='stability Unstable' title='Unstable'></a><code>ERR_RESTRICTED</code></td><td><div class='docblock'><p>484 :Your connection is restricted!</p>
+</div></td></tr><tr><td id='variant.ERR_UNIQOPPRIVSNEEDED'><a class='stability Unstable' title='Unstable'></a><code>ERR_UNIQOPPRIVSNEEDED</code></td><td><div class='docblock'><p>485 :You&#39;re not the original channel operator</p>
+</div></td></tr><tr><td id='variant.ERR_NOOPERHOST'><a class='stability Unstable' title='Unstable'></a><code>ERR_NOOPERHOST</code></td><td><div class='docblock'><p>491 :No O-lines for your host</p>
+</div></td></tr><tr><td id='variant.ERR_UMODEUNKNOWNFLAG'><a class='stability Unstable' title='Unstable'></a><code>ERR_UMODEUNKNOWNFLAG</code></td><td><div class='docblock'><p>501 :Unknown MODE flag</p>
+</div></td></tr><tr><td id='variant.ERR_USERSDONTMATCH'><a class='stability Unstable' title='Unstable'></a><code>ERR_USERSDONTMATCH</code></td><td><div class='docblock'><p>502 :Cannot change mode for other users</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl <a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a></code></h3><div class='impl-items'><h4 id='method.from_message' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.from_message' class='fnname'>from_message</a>(m: &amp;<a class='struct' href='../../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a>&gt;</code></h4>
+<div class='docblock'><p>Gets a response from a message.</p>
+</div><h4 id='method.is_error' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.is_error' class='fnname'>is_error</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Determines whether or not this response is an error response.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Unstable' title='Unstable: will return a Result once associated types are working'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/str/trait.FromStr.html' title='core::str::FromStr'>FromStr</a> for <a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a></code></h3><div class='impl-items'><h4 id='method.from_str' class='method'><a class='stability Unstable' title='Unstable: will return a Result once associated types are working'></a><code>fn <a href='#method.from_str' class='fnname'>from_str</a>(s: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a>&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/num/trait.FromPrimitive.html' title='core::num::FromPrimitive'>FromPrimitive</a> for <a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a></code></h3><div class='impl-items'><h4 id='method.from_i64' class='method'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#method.from_i64' class='fnname'>from_i64</a>(__arg_0: <a href='http://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a>&gt;</code></h4>
+<h4 id='method.from_u64' class='method'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#method.from_u64' class='fnname'>from_u64</a>(__arg_0: <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a>&gt;</code></h4>
+<h4 id='method.from_int' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_int' class='fnname'>from_int</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_i8' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_i8' class='fnname'>from_i8</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.i8.html'>i8</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_i16' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_i16' class='fnname'>from_i16</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.i16.html'>i16</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_i32' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_i32' class='fnname'>from_i32</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_uint' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_uint' class='fnname'>from_uint</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_u8' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_u8' class='fnname'>from_u8</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_u16' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_u16' class='fnname'>from_u16</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_u32' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_u32' class='fnname'>from_u32</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_f32' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_f32' class='fnname'>from_f32</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+<h4 id='method.from_f64' class='tymethod'><a class='stability Unstable' title='Unstable: trait is likely to be removed'></a><code>fn <a href='#tymethod.from_f64' class='fnname'>from_f64</a>(n: <a href='http://doc.rust-lang.org/nightly/std/primitive.f64.html'>f64</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Unstable' title='Unstable: I/O and core have yet to be reconciled'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Show.html' title='core::fmt::Show'>Show</a> for <a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><a class='stability Unstable' title='Unstable: I/O and core have yet to be reconciled'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a></code></h3><div class='impl-items'></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "irc";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script async src="../../../../search-index.js"></script>
+</body>
+</html>

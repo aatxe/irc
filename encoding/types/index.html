@@ -44,7 +44,7 @@
 <h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>encoding</a>::<wbr><a class='mod' href=''>types</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-358' href='../../src/encoding/types.rs.html#5-555'>[src]</a></span></h1>
+        </span><a id='src-387' href='../../src/encoding/types.rs.html#5-556'>[src]</a></span></h1>
 <div class='docblock'><p>Interface to the character encoding.</p>
 
 <h1 id="raw-incremental-interface" class='section-header'><a
@@ -75,7 +75,7 @@ processed  unprocessed             |  remaining
 <p>Since these parts can span the multiple input sequences to <code>raw_feed</code>,
 <code>raw_feed</code> returns two offsets (one optional)
 with that the caller can track the problematic sequence.
-The first offset (the first <code>uint</code> in the tuple) points to the first unprocessed bytes,
+The first offset (the first <code>usize</code> in the tuple) points to the first unprocessed bytes,
 or is zero when unprocessed bytes have started before the current call.
 (The first unprocessed byte can also be at offset 0,
 which doesn&#39;t make a difference for the caller.)
