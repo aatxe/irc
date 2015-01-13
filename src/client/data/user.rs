@@ -115,16 +115,22 @@ impl PartialEq for User {
 #[derive(Copy, PartialEq, Clone, Show)]
 pub enum AccessLevel {
     /// The channel owner (~).
+    #[stable]
     Owner,
     /// A channel administrator (&).
+    #[stable]
     Admin,
     /// A channel operator (@),
+    #[stable]
     Oper,
     /// A channel half-oper (%),
+    #[stable]
     HalfOp,
     /// A user with voice (+),
+    #[stable]
     Voice,
     /// A normal user,
+    #[stable]
     Member,
 }
 

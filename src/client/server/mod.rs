@@ -16,12 +16,16 @@ pub mod utils;
 #[stable]
 pub trait Server<'a, T, U> {
     /// Gets the configuration being used with this Server.
+    #[stable]
     fn config(&self) -> &Config;
     /// Sends a Command to this Server.
+    #[stable]
     fn send(&self, _: Command) -> IoResult<()>;
     /// Gets an Iterator over Messages received by this Server.
+    #[stable]
     fn iter(&'a self) -> ServerIterator<'a, T, U>;
     /// Gets a list of Users in the specified channel.
+    #[stable]
     fn list_users(&self, _: &str) -> Option<Vec<User>>;
 }
 
@@ -39,8 +43,10 @@ pub struct IrcServer<T: IrcReader, U: IrcWriter> {
 }
 
 /// An IrcServer over a buffered NetStream.
+#[stable]
 pub type NetIrcServer = IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>>;
 
+#[stable]
 impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Creates a new IRC Server connection from the configuration at the specified path,
     /// connecting immediately.
@@ -93,6 +99,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for IrcServer<T, U> {
     }
 }
 
+#[stable]
 impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     /// Creates an IRC server from the specified configuration, and any arbitrary Connection.
     #[stable]
@@ -239,9 +246,10 @@ pub struct ServerIterator<'a, T: IrcReader, U: IrcWriter> {
     server: &'a IrcServer<T, U>
 }
 
+#[experimental = "Design is liable to change to accomodate new functionality."]
 impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
     /// Creates a new ServerIterator for the desired IrcServer.
-    #[experimental = "Design will change to accomodate new behavior."]
+    #[experimental = "Design is liable to change to accomodate new functionality."]
     pub fn new(server: &IrcServer<T, U>) -> ServerIterator<T, U> {
         ServerIterator { server: server }
     }
@@ -260,6 +268,7 @@ impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
 }
 
 impl<'a, T: IrcReader, U: IrcWriter> Iterator for ServerIterator<'a, T, U> {
+    #[unstable = "Design changed fairly recently."]
     type Item = IoResult<Message>;
     fn next(&mut self) -> Option<IoResult<Message>> {
         let res = self.get_next_line().and_then(|msg|

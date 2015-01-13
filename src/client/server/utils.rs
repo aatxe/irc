@@ -35,6 +35,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for Wrapper<'a, T, U> {
     }
 }
 
+#[unstable = "More functionality will be added."]
 impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// Creates a new Wrapper from the given Server.
     #[stable]
@@ -112,7 +113,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Kicks the listed nicknames from the listed channels with a comment.
     /// If `message` is an empty string, it won't be included in the message.
-    #[experimental]
+    #[unstable = "Design may change."]
     pub fn send_kick(&self, chanlist: &str, nicklist: &str, message: &str) -> IoResult<()> {
         self.server.send(KICK(chanlist, nicklist, if message.len() == 0 {
             None

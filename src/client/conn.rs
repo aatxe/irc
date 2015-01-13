@@ -19,6 +19,7 @@ pub struct Connection<T: IrcReader, U: IrcWriter> {
 }
 
 /// A Connection over a buffered NetStream.
+#[stable]
 pub type NetConnection = Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>>;
 /// An internal type
 type NetReaderWriterPair = (BufferedReader<NetStream>, BufferedWriter<NetStream>);
@@ -209,10 +210,12 @@ fn ssl_to_io<T>(res: Result<T, SslError>) -> IoResult<T> {
 #[stable]
 pub enum NetStream {
     /// An unsecured TcpStream.
+    #[stable]
     UnsecuredTcpStream(TcpStream),
     /// An SSL-secured TcpStream.
     /// This is only available when compiled with SSL support.
     #[cfg(feature = "ssl")]
+    #[stable]
     SslTcpStream(SslStream<TcpStream>),
 }
 

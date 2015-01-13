@@ -13,136 +13,192 @@ use client::data::message::{Message, ToMessage};
 pub enum Command<'a> {
     // 3.1 Connection Registration
     /// PASS :password
+    #[stable]
     PASS(&'a str),
     /// NICK :nickname
+    #[stable]
     NICK(&'a str),
     /// USER user mode * :realname
+    #[stable]
     USER(&'a str, &'a str, &'a str),
     /// OPER name :password
+    #[stable]
     OPER(&'a str, &'a str),
     /// MODE nickname modes
     /// MODE channel modes [modeparams]
+    #[stable]
     MODE(&'a str, &'a str, Option<&'a str>),
     /// SERVICE nickname reserved distribution type reserved :info
+    #[stable]
     SERVICE(&'a str, &'a str, &'a str, &'a str, &'a str, &'a str),
     /// QUIT :comment
+    #[stable]
     QUIT(Option<&'a str>),
     /// SQUIT server :comment
+    #[stable]
     SQUIT(&'a str, &'a str),
 
     // 3.2 Channel operations
     /// JOIN chanlist [chankeys]
+    #[stable]
     JOIN(&'a str, Option<&'a str>),
     /// PART chanlist :[comment]
+    #[stable]
     PART(&'a str, Option<&'a str>),
     // MODE is already defined.
     // MODE(&'a str, &'a str, Option<&'a str>),
     /// TOPIC channel :[topic]
+    #[stable]
     TOPIC(&'a str, Option<&'a str>),
     /// NAMES [chanlist :[target]]
+    #[stable]
     NAMES(Option<&'a str>, Option<&'a str>),
     /// LIST [chanlist :[target]]
+    #[stable]
     LIST(Option<&'a str>, Option<&'a str>),
     /// INVITE nickname channel
+    #[stable]
     INVITE(&'a str, &'a str),
     /// KICK chanlist userlist :[comment]
+    #[stable]
     KICK(&'a str, &'a str, Option<&'a str>),
 
     // 3.3 Sending messages
     /// PRIVMSG msgtarget :message
+    #[stable]
     PRIVMSG(&'a str, &'a str),
     /// NOTICE msgtarget :message
+    #[stable]
     NOTICE(&'a str, &'a str),
 
     // 3.4 Server queries and commands
     /// MOTD :[target]
+    #[stable]
     MOTD(Option<&'a str>),
     /// LUSERS [mask :[target]]
+    #[stable]
     LUSERS(Option<&'a str>, Option<&'a str>),
     /// VERSION :[target]
+    #[stable]
     VERSION(Option<&'a str>),
     /// STATS [query :[target]]
+    #[stable]
     STATS(Option<&'a str>, Option<&'a str>),
     /// LINKS [[remote server] server :mask]
+    #[stable]
     LINKS(Option<&'a str>, Option<&'a str>),
     /// TIME :[target]
+    #[stable]
     TIME(Option<&'a str>),
     /// CONNECT target server port :[remote server]
+    #[stable]
     CONNECT(&'a str, &'a str, Option<&'a str>),
     /// TRACE :[target]
+    #[stable]
     TRACE(Option<&'a str>),
     /// ADMIN :[target]
+    #[stable]
     ADMIN(Option<&'a str>),
     /// INFO :[target]
+    #[stable]
     INFO(Option<&'a str>),
 
     // 3.5 Service Query and Commands
     /// SERVLIST [mask :[type]]
+    #[stable]
     SERVLIST(Option<&'a str>, Option<&'a str>),
     /// SQUERY servicename text
+    #[stable]
     SQUERY(&'a str, &'a str),
 
     // 3.6 User based queries
     /// WHO [mask ["o"]]
+    #[stable]
     WHO(Option<&'a str>, Option<bool>),
     /// WHOIS [target] masklist
+    #[stable]
     WHOIS(Option<&'a str>, &'a str),
     /// WHOWAS nicklist [count :[target]]
+    #[stable]
     WHOWAS(&'a str, Option<&'a str>, Option<&'a str>),
 
     // 3.7 Miscellaneous messages
     /// KILL nickname :comment
+    #[stable]
     KILL(&'a str, &'a str),
     /// PING server1 :[server2]
+    #[stable]
     PING(&'a str, Option<&'a str>),
     /// PONG server :[server2]
+    #[stable]
     PONG(&'a str, Option<&'a str>),
     /// ERROR :message
+    #[stable]
     ERROR(&'a str),
 
 
     // 4 Optional Features
     /// AWAY :[message]
+    #[stable]
     AWAY(Option<&'a str>),
     /// REHASH
+    #[stable]
     REHASH,
     /// DIE
+    #[stable]
     DIE,
     /// RESTART
+    #[stable]
     RESTART,
     /// SUMMON user [target :[channel]]
+    #[stable]
     SUMMON(&'a str, Option<&'a str>, Option<&'a str>),
     /// USERS :[target]
+    #[stable]
     USERS(Option<&'a str>),
     /// WALLOPS :Text to be sent
+    #[stable]
     WALLOPS(&'a str),
     /// USERHOST space-separated nicklist
+    #[stable]
     USERHOST(Vec<&'a str>),
     /// ISON space-separated nicklist
+    #[stable]
     ISON(Vec<&'a str>),
 
     // Non-RFC commands from InspIRCd
     /// SAJOIN nickname channel
+    #[stable]
     SAJOIN(&'a str, &'a str),
     /// SAMODE target modes [modeparams]
+    #[stable]
     SAMODE(&'a str, &'a str, Option<&'a str>),
     /// SANICK old nickname new nickname
+    #[stable]
     SANICK(&'a str, &'a str),
     /// SAPART nickname :comment
+    #[stable]
     SAPART(&'a str, &'a str),
     /// SAQUIT nickname :comment
+    #[stable]
     SAQUIT(&'a str, &'a str),
     /// NICKSERV message
+    #[stable]
     NICKSERV(&'a str),
     /// CHANSERV message
+    #[stable]
     CHANSERV(&'a str),
     /// OPERSERV message
+    #[stable]
     OPERSERV(&'a str),
     /// BOTSERV message
+    #[stable]
     BOTSERV(&'a str),
     /// HOSTSERV message
+    #[stable]
     HOSTSERV(&'a str),
     /// MEMOSERV message
+    #[stable]
     MEMOSERV(&'a str),
 
     // Capabilities extension to IRCv3
