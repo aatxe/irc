@@ -190,7 +190,7 @@ mod test {
             user_info: None,
             options: Some(HashMap::new()),
         };
-        assert_eq!(Config::load(Path::new("config.json")), Ok(cfg));
+        assert_eq!(Config::load(Path::new("client_config.json")), Ok(cfg));
     }
 
     #[test]
@@ -211,7 +211,7 @@ mod test {
             user_info: None,
             options: Some(HashMap::new()),
         };
-        assert_eq!(Config::load_utf8("config.json"), Ok(cfg));
+        assert_eq!(Config::load_utf8("client_config.json"), Ok(cfg));
     }
 
 
