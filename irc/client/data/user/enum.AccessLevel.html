@@ -44,7 +44,7 @@
 <h1 class='fqn'><span class='in-band'>Enum <a href='../../../index.html'>irc</a>::<wbr><a href='../../index.html'>client</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>user</a>::<wbr><a class='enum' href=''>AccessLevel</a><wbr><a class='stability Stable' title=''>Stable</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-27194' href='../../../../src/irc/client/data/user.rs.html#116-129'>[src]</a></span></h1>
+        </span><a id='src-27194' href='../../../../src/irc/client/data/user.rs.html#116-135'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum AccessLevel {
     Owner,
     Admin,
@@ -54,12 +54,12 @@
     Member,
 }</pre><div class='docblock'><p>The user&#39;s access level.</p>
 </div><h2 class='variants'>Variants</h2>
-<table><tr><td id='variant.Owner'><a class='stability Unstable' title='Unstable'></a><code>Owner</code></td><td><div class='docblock'><p>The channel owner (~).</p>
-</div></td></tr><tr><td id='variant.Admin'><a class='stability Unstable' title='Unstable'></a><code>Admin</code></td><td><div class='docblock'><p>A channel administrator (&amp;).</p>
-</div></td></tr><tr><td id='variant.Oper'><a class='stability Unstable' title='Unstable'></a><code>Oper</code></td><td><div class='docblock'><p>A channel operator (@),</p>
-</div></td></tr><tr><td id='variant.HalfOp'><a class='stability Unstable' title='Unstable'></a><code>HalfOp</code></td><td><div class='docblock'><p>A channel half-oper (%),</p>
-</div></td></tr><tr><td id='variant.Voice'><a class='stability Unstable' title='Unstable'></a><code>Voice</code></td><td><div class='docblock'><p>A user with voice (+),</p>
-</div></td></tr><tr><td id='variant.Member'><a class='stability Unstable' title='Unstable'></a><code>Member</code></td><td><div class='docblock'><p>A normal user,</p>
+<table><tr><td id='variant.Owner'><a class='stability Stable' title='Stable'></a><code>Owner</code></td><td><div class='docblock'><p>The channel owner (~).</p>
+</div></td></tr><tr><td id='variant.Admin'><a class='stability Stable' title='Stable'></a><code>Admin</code></td><td><div class='docblock'><p>A channel administrator (&amp;).</p>
+</div></td></tr><tr><td id='variant.Oper'><a class='stability Stable' title='Stable'></a><code>Oper</code></td><td><div class='docblock'><p>A channel operator (@),</p>
+</div></td></tr><tr><td id='variant.HalfOp'><a class='stability Stable' title='Stable'></a><code>HalfOp</code></td><td><div class='docblock'><p>A channel half-oper (%),</p>
+</div></td></tr><tr><td id='variant.Voice'><a class='stability Stable' title='Stable'></a><code>Voice</code></td><td><div class='docblock'><p>A user with voice (+),</p>
+</div></td></tr><tr><td id='variant.Member'><a class='stability Stable' title='Stable'></a><code>Member</code></td><td><div class='docblock'><p>A normal user,</p>
 </div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> for <a class='enum' href='../../../../irc/client/data/user/enum.AccessLevel.html' title='irc::client::data::user::AccessLevel'>AccessLevel</a></code></h3><div class='impl-items'><h4 id='method.partial_cmp' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.partial_cmp' class='fnname'>partial_cmp</a>(&amp;self, other: &amp;<a class='enum' href='../../../../irc/client/data/user/enum.AccessLevel.html' title='irc::client::data::user::AccessLevel'>AccessLevel</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='http://doc.rust-lang.org/nightly/core/cmp/enum.Ordering.html' title='core::cmp::Ordering'>Ordering</a>&gt;</code></h4>
 <h4 id='method.lt' class='tymethod'><a class='stability Stable' title='Stable'></a><code>fn <a href='#tymethod.lt' class='fnname'>lt</a>(&amp;self, other: &amp;Rhs) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
 <h4 id='method.le' class='tymethod'><a class='stability Stable' title='Stable'></a><code>fn <a href='#tymethod.le' class='fnname'>le</a>(&amp;self, other: &amp;Rhs) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>

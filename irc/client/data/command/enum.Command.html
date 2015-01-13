@@ -44,7 +44,7 @@
 <h1 class='fqn'><span class='in-band'>Enum <a href='../../../index.html'>irc</a>::<wbr><a href='../../index.html'>client</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>command</a>::<wbr><a class='enum' href=''>Command</a><wbr><a class='stability Stable' title=''>Stable</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-1171' href='../../../../src/irc/client/data/command.rs.html#13-152'>[src]</a></span></h1>
+        </span><a id='src-1171' href='../../../../src/irc/client/data/command.rs.html#13-208'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum Command&lt;'a&gt; {
     PASS(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
     NICK(&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>),
@@ -108,63 +108,63 @@ also includes commands from the
 <a href="https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01">capabilities extension</a>.
 Additionally, this includes some common additional commands from popular IRCds.</p>
 </div><h2 class='variants'>Variants</h2>
-<table><tr><td id='variant.PASS'><a class='stability Unstable' title='Unstable'></a><code>PASS</code></td><td><div class='docblock'><p>PASS :password</p>
-</div></td></tr><tr><td id='variant.NICK'><a class='stability Unstable' title='Unstable'></a><code>NICK</code></td><td><div class='docblock'><p>NICK :nickname</p>
-</div></td></tr><tr><td id='variant.USER'><a class='stability Unstable' title='Unstable'></a><code>USER</code></td><td><div class='docblock'><p>USER user mode * :realname</p>
-</div></td></tr><tr><td id='variant.OPER'><a class='stability Unstable' title='Unstable'></a><code>OPER</code></td><td><div class='docblock'><p>OPER name :password</p>
-</div></td></tr><tr><td id='variant.MODE'><a class='stability Unstable' title='Unstable'></a><code>MODE</code></td><td><div class='docblock'><p>MODE nickname modes
+<table><tr><td id='variant.PASS'><a class='stability Stable' title='Stable'></a><code>PASS</code></td><td><div class='docblock'><p>PASS :password</p>
+</div></td></tr><tr><td id='variant.NICK'><a class='stability Stable' title='Stable'></a><code>NICK</code></td><td><div class='docblock'><p>NICK :nickname</p>
+</div></td></tr><tr><td id='variant.USER'><a class='stability Stable' title='Stable'></a><code>USER</code></td><td><div class='docblock'><p>USER user mode * :realname</p>
+</div></td></tr><tr><td id='variant.OPER'><a class='stability Stable' title='Stable'></a><code>OPER</code></td><td><div class='docblock'><p>OPER name :password</p>
+</div></td></tr><tr><td id='variant.MODE'><a class='stability Stable' title='Stable'></a><code>MODE</code></td><td><div class='docblock'><p>MODE nickname modes
 MODE channel modes [modeparams]</p>
-</div></td></tr><tr><td id='variant.SERVICE'><a class='stability Unstable' title='Unstable'></a><code>SERVICE</code></td><td><div class='docblock'><p>SERVICE nickname reserved distribution type reserved :info</p>
-</div></td></tr><tr><td id='variant.QUIT'><a class='stability Unstable' title='Unstable'></a><code>QUIT</code></td><td><div class='docblock'><p>QUIT :comment</p>
-</div></td></tr><tr><td id='variant.SQUIT'><a class='stability Unstable' title='Unstable'></a><code>SQUIT</code></td><td><div class='docblock'><p>SQUIT server :comment</p>
-</div></td></tr><tr><td id='variant.JOIN'><a class='stability Unstable' title='Unstable'></a><code>JOIN</code></td><td><div class='docblock'><p>JOIN chanlist [chankeys]</p>
-</div></td></tr><tr><td id='variant.PART'><a class='stability Unstable' title='Unstable'></a><code>PART</code></td><td><div class='docblock'><p>PART chanlist :[comment]</p>
-</div></td></tr><tr><td id='variant.TOPIC'><a class='stability Unstable' title='Unstable'></a><code>TOPIC</code></td><td><div class='docblock'><p>TOPIC channel :[topic]</p>
-</div></td></tr><tr><td id='variant.NAMES'><a class='stability Unstable' title='Unstable'></a><code>NAMES</code></td><td><div class='docblock'><p>NAMES [chanlist :[target]]</p>
-</div></td></tr><tr><td id='variant.LIST'><a class='stability Unstable' title='Unstable'></a><code>LIST</code></td><td><div class='docblock'><p>LIST [chanlist :[target]]</p>
-</div></td></tr><tr><td id='variant.INVITE'><a class='stability Unstable' title='Unstable'></a><code>INVITE</code></td><td><div class='docblock'><p>INVITE nickname channel</p>
-</div></td></tr><tr><td id='variant.KICK'><a class='stability Unstable' title='Unstable'></a><code>KICK</code></td><td><div class='docblock'><p>KICK chanlist userlist :[comment]</p>
-</div></td></tr><tr><td id='variant.PRIVMSG'><a class='stability Unstable' title='Unstable'></a><code>PRIVMSG</code></td><td><div class='docblock'><p>PRIVMSG msgtarget :message</p>
-</div></td></tr><tr><td id='variant.NOTICE'><a class='stability Unstable' title='Unstable'></a><code>NOTICE</code></td><td><div class='docblock'><p>NOTICE msgtarget :message</p>
-</div></td></tr><tr><td id='variant.MOTD'><a class='stability Unstable' title='Unstable'></a><code>MOTD</code></td><td><div class='docblock'><p>MOTD :[target]</p>
-</div></td></tr><tr><td id='variant.LUSERS'><a class='stability Unstable' title='Unstable'></a><code>LUSERS</code></td><td><div class='docblock'><p>LUSERS [mask :[target]]</p>
-</div></td></tr><tr><td id='variant.VERSION'><a class='stability Unstable' title='Unstable'></a><code>VERSION</code></td><td><div class='docblock'><p>VERSION :[target]</p>
-</div></td></tr><tr><td id='variant.STATS'><a class='stability Unstable' title='Unstable'></a><code>STATS</code></td><td><div class='docblock'><p>STATS [query :[target]]</p>
-</div></td></tr><tr><td id='variant.LINKS'><a class='stability Unstable' title='Unstable'></a><code>LINKS</code></td><td><div class='docblock'><p>LINKS [[remote server] server :mask]</p>
-</div></td></tr><tr><td id='variant.TIME'><a class='stability Unstable' title='Unstable'></a><code>TIME</code></td><td><div class='docblock'><p>TIME :[target]</p>
-</div></td></tr><tr><td id='variant.CONNECT'><a class='stability Unstable' title='Unstable'></a><code>CONNECT</code></td><td><div class='docblock'><p>CONNECT target server port :[remote server]</p>
-</div></td></tr><tr><td id='variant.TRACE'><a class='stability Unstable' title='Unstable'></a><code>TRACE</code></td><td><div class='docblock'><p>TRACE :[target]</p>
-</div></td></tr><tr><td id='variant.ADMIN'><a class='stability Unstable' title='Unstable'></a><code>ADMIN</code></td><td><div class='docblock'><p>ADMIN :[target]</p>
-</div></td></tr><tr><td id='variant.INFO'><a class='stability Unstable' title='Unstable'></a><code>INFO</code></td><td><div class='docblock'><p>INFO :[target]</p>
-</div></td></tr><tr><td id='variant.SERVLIST'><a class='stability Unstable' title='Unstable'></a><code>SERVLIST</code></td><td><div class='docblock'><p>SERVLIST [mask :[type]]</p>
-</div></td></tr><tr><td id='variant.SQUERY'><a class='stability Unstable' title='Unstable'></a><code>SQUERY</code></td><td><div class='docblock'><p>SQUERY servicename text</p>
-</div></td></tr><tr><td id='variant.WHO'><a class='stability Unstable' title='Unstable'></a><code>WHO</code></td><td><div class='docblock'><p>WHO [mask [&quot;o&quot;]]</p>
-</div></td></tr><tr><td id='variant.WHOIS'><a class='stability Unstable' title='Unstable'></a><code>WHOIS</code></td><td><div class='docblock'><p>WHOIS [target] masklist</p>
-</div></td></tr><tr><td id='variant.WHOWAS'><a class='stability Unstable' title='Unstable'></a><code>WHOWAS</code></td><td><div class='docblock'><p>WHOWAS nicklist [count :[target]]</p>
-</div></td></tr><tr><td id='variant.KILL'><a class='stability Unstable' title='Unstable'></a><code>KILL</code></td><td><div class='docblock'><p>KILL nickname :comment</p>
-</div></td></tr><tr><td id='variant.PING'><a class='stability Unstable' title='Unstable'></a><code>PING</code></td><td><div class='docblock'><p>PING server1 :[server2]</p>
-</div></td></tr><tr><td id='variant.PONG'><a class='stability Unstable' title='Unstable'></a><code>PONG</code></td><td><div class='docblock'><p>PONG server :[server2]</p>
-</div></td></tr><tr><td id='variant.ERROR'><a class='stability Unstable' title='Unstable'></a><code>ERROR</code></td><td><div class='docblock'><p>ERROR :message</p>
-</div></td></tr><tr><td id='variant.AWAY'><a class='stability Unstable' title='Unstable'></a><code>AWAY</code></td><td><div class='docblock'><p>AWAY :[message]</p>
-</div></td></tr><tr><td id='variant.REHASH'><a class='stability Unstable' title='Unstable'></a><code>REHASH</code></td><td><div class='docblock'><p>REHASH</p>
-</div></td></tr><tr><td id='variant.DIE'><a class='stability Unstable' title='Unstable'></a><code>DIE</code></td><td><div class='docblock'><p>DIE</p>
-</div></td></tr><tr><td id='variant.RESTART'><a class='stability Unstable' title='Unstable'></a><code>RESTART</code></td><td><div class='docblock'><p>RESTART</p>
-</div></td></tr><tr><td id='variant.SUMMON'><a class='stability Unstable' title='Unstable'></a><code>SUMMON</code></td><td><div class='docblock'><p>SUMMON user [target :[channel]]</p>
-</div></td></tr><tr><td id='variant.USERS'><a class='stability Unstable' title='Unstable'></a><code>USERS</code></td><td><div class='docblock'><p>USERS :[target]</p>
-</div></td></tr><tr><td id='variant.WALLOPS'><a class='stability Unstable' title='Unstable'></a><code>WALLOPS</code></td><td><div class='docblock'><p>WALLOPS :Text to be sent</p>
-</div></td></tr><tr><td id='variant.USERHOST'><a class='stability Unstable' title='Unstable'></a><code>USERHOST</code></td><td><div class='docblock'><p>USERHOST space-separated nicklist</p>
-</div></td></tr><tr><td id='variant.ISON'><a class='stability Unstable' title='Unstable'></a><code>ISON</code></td><td><div class='docblock'><p>ISON space-separated nicklist</p>
-</div></td></tr><tr><td id='variant.SAJOIN'><a class='stability Unstable' title='Unstable'></a><code>SAJOIN</code></td><td><div class='docblock'><p>SAJOIN nickname channel</p>
-</div></td></tr><tr><td id='variant.SAMODE'><a class='stability Unstable' title='Unstable'></a><code>SAMODE</code></td><td><div class='docblock'><p>SAMODE target modes [modeparams]</p>
-</div></td></tr><tr><td id='variant.SANICK'><a class='stability Unstable' title='Unstable'></a><code>SANICK</code></td><td><div class='docblock'><p>SANICK old nickname new nickname</p>
-</div></td></tr><tr><td id='variant.SAPART'><a class='stability Unstable' title='Unstable'></a><code>SAPART</code></td><td><div class='docblock'><p>SAPART nickname :comment</p>
-</div></td></tr><tr><td id='variant.SAQUIT'><a class='stability Unstable' title='Unstable'></a><code>SAQUIT</code></td><td><div class='docblock'><p>SAQUIT nickname :comment</p>
-</div></td></tr><tr><td id='variant.NICKSERV'><a class='stability Unstable' title='Unstable'></a><code>NICKSERV</code></td><td><div class='docblock'><p>NICKSERV message</p>
-</div></td></tr><tr><td id='variant.CHANSERV'><a class='stability Unstable' title='Unstable'></a><code>CHANSERV</code></td><td><div class='docblock'><p>CHANSERV message</p>
-</div></td></tr><tr><td id='variant.OPERSERV'><a class='stability Unstable' title='Unstable'></a><code>OPERSERV</code></td><td><div class='docblock'><p>OPERSERV message</p>
-</div></td></tr><tr><td id='variant.BOTSERV'><a class='stability Unstable' title='Unstable'></a><code>BOTSERV</code></td><td><div class='docblock'><p>BOTSERV message</p>
-</div></td></tr><tr><td id='variant.HOSTSERV'><a class='stability Unstable' title='Unstable'></a><code>HOSTSERV</code></td><td><div class='docblock'><p>HOSTSERV message</p>
-</div></td></tr><tr><td id='variant.MEMOSERV'><a class='stability Unstable' title='Unstable'></a><code>MEMOSERV</code></td><td><div class='docblock'><p>MEMOSERV message</p>
+</div></td></tr><tr><td id='variant.SERVICE'><a class='stability Stable' title='Stable'></a><code>SERVICE</code></td><td><div class='docblock'><p>SERVICE nickname reserved distribution type reserved :info</p>
+</div></td></tr><tr><td id='variant.QUIT'><a class='stability Stable' title='Stable'></a><code>QUIT</code></td><td><div class='docblock'><p>QUIT :comment</p>
+</div></td></tr><tr><td id='variant.SQUIT'><a class='stability Stable' title='Stable'></a><code>SQUIT</code></td><td><div class='docblock'><p>SQUIT server :comment</p>
+</div></td></tr><tr><td id='variant.JOIN'><a class='stability Stable' title='Stable'></a><code>JOIN</code></td><td><div class='docblock'><p>JOIN chanlist [chankeys]</p>
+</div></td></tr><tr><td id='variant.PART'><a class='stability Stable' title='Stable'></a><code>PART</code></td><td><div class='docblock'><p>PART chanlist :[comment]</p>
+</div></td></tr><tr><td id='variant.TOPIC'><a class='stability Stable' title='Stable'></a><code>TOPIC</code></td><td><div class='docblock'><p>TOPIC channel :[topic]</p>
+</div></td></tr><tr><td id='variant.NAMES'><a class='stability Stable' title='Stable'></a><code>NAMES</code></td><td><div class='docblock'><p>NAMES [chanlist :[target]]</p>
+</div></td></tr><tr><td id='variant.LIST'><a class='stability Stable' title='Stable'></a><code>LIST</code></td><td><div class='docblock'><p>LIST [chanlist :[target]]</p>
+</div></td></tr><tr><td id='variant.INVITE'><a class='stability Stable' title='Stable'></a><code>INVITE</code></td><td><div class='docblock'><p>INVITE nickname channel</p>
+</div></td></tr><tr><td id='variant.KICK'><a class='stability Stable' title='Stable'></a><code>KICK</code></td><td><div class='docblock'><p>KICK chanlist userlist :[comment]</p>
+</div></td></tr><tr><td id='variant.PRIVMSG'><a class='stability Stable' title='Stable'></a><code>PRIVMSG</code></td><td><div class='docblock'><p>PRIVMSG msgtarget :message</p>
+</div></td></tr><tr><td id='variant.NOTICE'><a class='stability Stable' title='Stable'></a><code>NOTICE</code></td><td><div class='docblock'><p>NOTICE msgtarget :message</p>
+</div></td></tr><tr><td id='variant.MOTD'><a class='stability Stable' title='Stable'></a><code>MOTD</code></td><td><div class='docblock'><p>MOTD :[target]</p>
+</div></td></tr><tr><td id='variant.LUSERS'><a class='stability Stable' title='Stable'></a><code>LUSERS</code></td><td><div class='docblock'><p>LUSERS [mask :[target]]</p>
+</div></td></tr><tr><td id='variant.VERSION'><a class='stability Stable' title='Stable'></a><code>VERSION</code></td><td><div class='docblock'><p>VERSION :[target]</p>
+</div></td></tr><tr><td id='variant.STATS'><a class='stability Stable' title='Stable'></a><code>STATS</code></td><td><div class='docblock'><p>STATS [query :[target]]</p>
+</div></td></tr><tr><td id='variant.LINKS'><a class='stability Stable' title='Stable'></a><code>LINKS</code></td><td><div class='docblock'><p>LINKS [[remote server] server :mask]</p>
+</div></td></tr><tr><td id='variant.TIME'><a class='stability Stable' title='Stable'></a><code>TIME</code></td><td><div class='docblock'><p>TIME :[target]</p>
+</div></td></tr><tr><td id='variant.CONNECT'><a class='stability Stable' title='Stable'></a><code>CONNECT</code></td><td><div class='docblock'><p>CONNECT target server port :[remote server]</p>
+</div></td></tr><tr><td id='variant.TRACE'><a class='stability Stable' title='Stable'></a><code>TRACE</code></td><td><div class='docblock'><p>TRACE :[target]</p>
+</div></td></tr><tr><td id='variant.ADMIN'><a class='stability Stable' title='Stable'></a><code>ADMIN</code></td><td><div class='docblock'><p>ADMIN :[target]</p>
+</div></td></tr><tr><td id='variant.INFO'><a class='stability Stable' title='Stable'></a><code>INFO</code></td><td><div class='docblock'><p>INFO :[target]</p>
+</div></td></tr><tr><td id='variant.SERVLIST'><a class='stability Stable' title='Stable'></a><code>SERVLIST</code></td><td><div class='docblock'><p>SERVLIST [mask :[type]]</p>
+</div></td></tr><tr><td id='variant.SQUERY'><a class='stability Stable' title='Stable'></a><code>SQUERY</code></td><td><div class='docblock'><p>SQUERY servicename text</p>
+</div></td></tr><tr><td id='variant.WHO'><a class='stability Stable' title='Stable'></a><code>WHO</code></td><td><div class='docblock'><p>WHO [mask [&quot;o&quot;]]</p>
+</div></td></tr><tr><td id='variant.WHOIS'><a class='stability Stable' title='Stable'></a><code>WHOIS</code></td><td><div class='docblock'><p>WHOIS [target] masklist</p>
+</div></td></tr><tr><td id='variant.WHOWAS'><a class='stability Stable' title='Stable'></a><code>WHOWAS</code></td><td><div class='docblock'><p>WHOWAS nicklist [count :[target]]</p>
+</div></td></tr><tr><td id='variant.KILL'><a class='stability Stable' title='Stable'></a><code>KILL</code></td><td><div class='docblock'><p>KILL nickname :comment</p>
+</div></td></tr><tr><td id='variant.PING'><a class='stability Stable' title='Stable'></a><code>PING</code></td><td><div class='docblock'><p>PING server1 :[server2]</p>
+</div></td></tr><tr><td id='variant.PONG'><a class='stability Stable' title='Stable'></a><code>PONG</code></td><td><div class='docblock'><p>PONG server :[server2]</p>
+</div></td></tr><tr><td id='variant.ERROR'><a class='stability Stable' title='Stable'></a><code>ERROR</code></td><td><div class='docblock'><p>ERROR :message</p>
+</div></td></tr><tr><td id='variant.AWAY'><a class='stability Stable' title='Stable'></a><code>AWAY</code></td><td><div class='docblock'><p>AWAY :[message]</p>
+</div></td></tr><tr><td id='variant.REHASH'><a class='stability Stable' title='Stable'></a><code>REHASH</code></td><td><div class='docblock'><p>REHASH</p>
+</div></td></tr><tr><td id='variant.DIE'><a class='stability Stable' title='Stable'></a><code>DIE</code></td><td><div class='docblock'><p>DIE</p>
+</div></td></tr><tr><td id='variant.RESTART'><a class='stability Stable' title='Stable'></a><code>RESTART</code></td><td><div class='docblock'><p>RESTART</p>
+</div></td></tr><tr><td id='variant.SUMMON'><a class='stability Stable' title='Stable'></a><code>SUMMON</code></td><td><div class='docblock'><p>SUMMON user [target :[channel]]</p>
+</div></td></tr><tr><td id='variant.USERS'><a class='stability Stable' title='Stable'></a><code>USERS</code></td><td><div class='docblock'><p>USERS :[target]</p>
+</div></td></tr><tr><td id='variant.WALLOPS'><a class='stability Stable' title='Stable'></a><code>WALLOPS</code></td><td><div class='docblock'><p>WALLOPS :Text to be sent</p>
+</div></td></tr><tr><td id='variant.USERHOST'><a class='stability Stable' title='Stable'></a><code>USERHOST</code></td><td><div class='docblock'><p>USERHOST space-separated nicklist</p>
+</div></td></tr><tr><td id='variant.ISON'><a class='stability Stable' title='Stable'></a><code>ISON</code></td><td><div class='docblock'><p>ISON space-separated nicklist</p>
+</div></td></tr><tr><td id='variant.SAJOIN'><a class='stability Stable' title='Stable'></a><code>SAJOIN</code></td><td><div class='docblock'><p>SAJOIN nickname channel</p>
+</div></td></tr><tr><td id='variant.SAMODE'><a class='stability Stable' title='Stable'></a><code>SAMODE</code></td><td><div class='docblock'><p>SAMODE target modes [modeparams]</p>
+</div></td></tr><tr><td id='variant.SANICK'><a class='stability Stable' title='Stable'></a><code>SANICK</code></td><td><div class='docblock'><p>SANICK old nickname new nickname</p>
+</div></td></tr><tr><td id='variant.SAPART'><a class='stability Stable' title='Stable'></a><code>SAPART</code></td><td><div class='docblock'><p>SAPART nickname :comment</p>
+</div></td></tr><tr><td id='variant.SAQUIT'><a class='stability Stable' title='Stable'></a><code>SAQUIT</code></td><td><div class='docblock'><p>SAQUIT nickname :comment</p>
+</div></td></tr><tr><td id='variant.NICKSERV'><a class='stability Stable' title='Stable'></a><code>NICKSERV</code></td><td><div class='docblock'><p>NICKSERV message</p>
+</div></td></tr><tr><td id='variant.CHANSERV'><a class='stability Stable' title='Stable'></a><code>CHANSERV</code></td><td><div class='docblock'><p>CHANSERV message</p>
+</div></td></tr><tr><td id='variant.OPERSERV'><a class='stability Stable' title='Stable'></a><code>OPERSERV</code></td><td><div class='docblock'><p>OPERSERV message</p>
+</div></td></tr><tr><td id='variant.BOTSERV'><a class='stability Stable' title='Stable'></a><code>BOTSERV</code></td><td><div class='docblock'><p>BOTSERV message</p>
+</div></td></tr><tr><td id='variant.HOSTSERV'><a class='stability Stable' title='Stable'></a><code>HOSTSERV</code></td><td><div class='docblock'><p>HOSTSERV message</p>
+</div></td></tr><tr><td id='variant.MEMOSERV'><a class='stability Stable' title='Stable'></a><code>MEMOSERV</code></td><td><div class='docblock'><p>MEMOSERV message</p>
 </div></td></tr><tr><td id='variant.CAP'><a class='stability Experimental' title='Experimental: This command is not entirely specification compliant.'></a><code>CAP</code></td><td><div class='docblock'><p>CAP COMMAND :[param]</p>
 </div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unstable' title='Unstable'></a><code>impl&lt;'a&gt; <a class='enum' href='../../../../irc/client/data/command/enum.Command.html' title='irc::client::data::command::Command'>Command</a>&lt;'a&gt;</code></h3><div class='impl-items'><h4 id='method.from_message' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.from_message' class='fnname'>from_message</a>(m: &amp;'a <a class='struct' href='../../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/type.IoResult.html' title='std::io::IoResult'>IoResult</a>&lt;<a class='enum' href='../../../../irc/client/data/command/enum.Command.html' title='irc::client::data::command::Command'>Command</a>&lt;'a&gt;&gt;</code></h4>
 <div class='docblock'><p>Converts a Message into a Command.</p>

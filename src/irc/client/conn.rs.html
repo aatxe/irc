@@ -383,6 +383,9 @@
 <span id="341">341</span>
 <span id="342">342</span>
 <span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Thread-safe connections on IrcStreams.</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
@@ -405,6 +408,7 @@
 }
 
 <span class='doccomment'>/// A Connection over a buffered NetStream.</span>
+<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>NetConnection</span> <span class='op'>=</span> <span class='ident'>Connection</span><span class='op'>&lt;</span><span class='ident'>BufferedReader</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>, <span class='ident'>BufferedWriter</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;&gt;</span>;
 <span class='doccomment'>/// An internal type</span>
 <span class='kw'>type</span> <span class='ident'>NetReaderWriterPair</span> <span class='op'>=</span> (<span class='ident'>BufferedReader</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>, <span class='ident'>BufferedWriter</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>);
@@ -595,10 +599,12 @@
 <span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>NetStream</span> {
     <span class='doccomment'>/// An unsecured TcpStream.</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>UnsecuredTcpStream</span>(<span class='ident'>TcpStream</span>),
     <span class='doccomment'>/// An SSL-secured TcpStream.</span>
     <span class='doccomment'>/// This is only available when compiled with SSL support.</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>SslTcpStream</span>(<span class='ident'>SslStream</span><span class='op'>&lt;</span><span class='ident'>TcpStream</span><span class='op'>&gt;</span>),
 }
 
