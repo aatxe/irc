@@ -17,6 +17,7 @@ pub struct User {
     access_levels: Vec<AccessLevel>,
 }
 
+#[stable]
 impl User {
     /// Creates a new User.
     #[stable]

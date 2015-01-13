@@ -430,6 +430,7 @@ pub enum Response {
     ERR_USERSDONTMATCH      = 502,
 }
 
+#[stable]
 impl Response {
     /// Gets a response from a message.
     #[stable]

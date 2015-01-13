@@ -24,7 +24,7 @@ pub type NetConnection = Connection<BufferedReader<NetStream>, BufferedWriter<Ne
 /// An internal type
 type NetReaderWriterPair = (BufferedReader<NetStream>, BufferedWriter<NetStream>);
 
-
+#[stable]
 impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Creates a thread-safe TCP connection to the specified server.
     #[stable]
@@ -104,6 +104,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     }
 }
 
+#[stable]
 impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     /// Creates a new connection from an IrcReader and an IrcWriter.
     #[stable]

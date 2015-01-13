@@ -209,7 +209,6 @@ pub enum Command<'a> {
 
 impl<'a> ToMessage for Command<'a> {
     /// Converts a Command into a Message.
-    #[stable]
     fn to_message(&self) -> Message {
         match *self {
             Command::PASS(p) => Message::new(None, "PASS", None, Some(p)),
@@ -321,6 +320,7 @@ impl<'a> ToMessage for Command<'a> {
     }
 }
 
+#[stable]
 impl<'a> Command<'a> {
     /// Converts a Message into a Command.
     #[stable]
@@ -1011,23 +1011,32 @@ impl<'a> Command<'a> {
 #[derive(Copy, Show, PartialEq)]
 pub enum CapSubCommand {
     /// Requests a list of the server's capabilities.
+    #[stable]
     LS,
     /// Requests a list of the server's capabilities.
+    #[stable]
     LIST,
     /// Requests specific capabilities blindly.
+    #[stable]
     REQ,
     /// Acknowledges capabilities.
+    #[stable]
     ACK,
     /// Does not acknowledge certain capabilities.
+    #[stable]
     NAK,
     /// Requests that the server clears the capabilities of this client.
+    #[stable]
     CLEAR,
     /// Ends the capability negotiation before registration.
+    #[stable]
     END
 }
 
+#[stable]
 impl CapSubCommand {
     /// Gets the string that corresponds to this subcommand.
+    #[stable]
     pub fn to_str(&self) -> &str {
         match self {
             &CapSubCommand::LS    => "LS",
@@ -1057,7 +1066,6 @@ impl FromStr for CapSubCommand {
 }
 
 /// Produces an invalid_input IoError.
-#[stable]
 fn invalid_input() -> IoError {
     IoError {
         kind: InvalidInput,

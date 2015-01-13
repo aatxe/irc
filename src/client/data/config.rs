@@ -12,37 +12,52 @@ use rustc_serialize::json::decode;
 #[stable]
 pub struct Config {
     /// A list of the owners of the bot by nickname.
+    #[stable]
     pub owners: Option<Vec<String>>,
     /// The bot's nickname.
+    #[stable]
     pub nickname: Option<String>,
     /// The bot's NICKSERV password.
+    #[stable]
     pub nick_password: Option<String>,
     /// Alternative nicknames for the bots, if the default is taken.
+    #[stable]
     pub alt_nicks: Option<Vec<String>>,
     /// The bot's username.
+    #[stable]
     pub username: Option<String>,
     /// The bot's real name.
+    #[stable]
     pub realname: Option<String>,
     /// The server to connect to.
+    #[stable]
     pub server: Option<String>,
     /// The port to connect on.
+    #[stable]
     pub port: Option<u16>,
     /// The password to connect to the server.
+    #[stable]
     pub password: Option<String>,
     /// Whether or not to use SSL.
     /// Bots will automatically panic if this is enabled without SSL support.
+    #[stable]
     pub use_ssl: Option<bool>,
     /// The encoding type used for this connection.
     /// This is typically UTF-8, but could be something else.
+    #[stable]
     pub encoding: Option<String>,
     /// A list of channels to join on connection.
+    #[stable]
     pub channels: Option<Vec<String>>,
     /// The text that'll be sent in response to CTCP USERINFO requests.
+    #[stable]
     pub user_info: Option<String>,
     /// A map of additional options to be stored in config.
+    #[stable]
     pub options: Option<HashMap<String, String>>,
 }
 
+#[stable]
 impl Config {
     /// Loads a JSON configuration from the desired path.
     #[stable]

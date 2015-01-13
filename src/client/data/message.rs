@@ -8,16 +8,21 @@ use std::str::FromStr;
 #[derive(Clone, PartialEq, Show)]
 pub struct Message {
     /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
+    #[stable]
     pub prefix: Option<String>,
     /// The IRC command as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
+    #[stable]
     pub command: String,
     /// The command arguments.
+    #[stable]
     pub args: Vec<String>,
     /// The message suffix as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
     /// This is the only part of the message that is allowed to contain spaces.
+    #[stable]
     pub suffix: Option<String>,
 }
 
+#[stable]
 impl Message {
     /// Creates a new Message.
     #[stable]
