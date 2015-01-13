@@ -3,7 +3,7 @@
 #![allow(non_camel_case_types)]
 use std::num::FromPrimitive;
 use std::str::FromStr;
-use data::message::Message;
+use client::data::message::Message;
 
 /// List of all server responses as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812).
 /// All commands are documented with their expected form from the RFC.
@@ -320,7 +320,7 @@ impl FromStr for Response {
 #[cfg(test)]
 mod test {
     use super::Response;
-    use data::message::ToMessage;
+    use client::data::message::ToMessage;
 
     #[test]
     fn from_message() {

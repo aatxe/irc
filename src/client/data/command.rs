@@ -2,7 +2,7 @@
 #![stable]
 use std::io::{InvalidInput, IoError, IoResult};
 use std::str::FromStr;
-use data::message::{Message, ToMessage};
+use client::data::message::{Message, ToMessage};
 
 /// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This
 /// also includes commands from the

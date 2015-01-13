@@ -2,13 +2,13 @@
 #![stable]
 
 use std::io::IoResult;
-use data::{Command, Config, User};
-use data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
-use data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
-use data::command::CapSubCommand::{END, REQ};
-use data::kinds::{IrcReader, IrcWriter};
+use client::data::{Command, Config, User};
+use client::data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
+use client::data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
+use client::data::command::CapSubCommand::{END, REQ};
+use client::data::kinds::{IrcReader, IrcWriter};
 #[cfg(feature = "ctcp")] use time::get_time;
-use server::{Server, ServerIterator};
+use client::server::{Server, ServerIterator};
 
 /// Functionality-providing wrapper for Server.
 /// Wrappers are currently not thread-safe, and should be created per-thread, as needed.
@@ -238,10 +238,10 @@ mod test {
     use std::default::Default;
     use std::io::MemWriter;
     use std::io::util::NullReader;
-    use conn::Connection;
-    use data::Config;
-    use server::IrcServer;
-    use server::test::{get_server_value, test_config};
+    use client::conn::Connection;
+    use client::data::Config;
+    use client::server::IrcServer;
+    use client::server::test::{get_server_value, test_config};
 
     #[test]
     fn identify() {

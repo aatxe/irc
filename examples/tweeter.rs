@@ -7,9 +7,9 @@ use std::io::timer::sleep;
 use std::sync::Arc;
 use std::thread::Thread;
 use std::time::duration::Duration;
-use irc::data::config::Config;
-use irc::server::{IrcServer, Server};
-use irc::server::utils::Wrapper;
+use irc::client::data::config::Config;
+use irc::client::server::{IrcServer, Server};
+use irc::client::server::utils::Wrapper;
 
 fn main() {
     let config = Config {

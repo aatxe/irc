@@ -3,9 +3,9 @@
 extern crate irc;
 
 use std::default::Default;
-use irc::data::config::Config;
-use irc::server::{IrcServer, Server};
-use irc::server::utils::Wrapper;
+use irc::client::data::config::Config;
+use irc::client::server::{IrcServer, Server};
+use irc::client::server::utils::Wrapper;
 
 fn main() {
     let config = Config {

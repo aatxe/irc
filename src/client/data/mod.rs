@@ -1,11 +1,11 @@
 //! Data related to IRC functionality.
 #![stable]
 
-pub use data::command::Command;
-pub use data::config::Config;
-pub use data::message::{Message, ToMessage};
-pub use data::response::Response;
-pub use data::user::{AccessLevel, User};
+pub use client::data::command::Command;
+pub use client::data::config::Config;
+pub use client::data::message::{Message, ToMessage};
+pub use client::data::response::Response;
+pub use client::data::user::{AccessLevel, User};
 
 pub mod kinds {
     //! Trait definitions of appropriate Writers and Buffers for use with this library.

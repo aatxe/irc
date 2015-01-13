@@ -1,4 +1,4 @@
-//! A simple, thread-safe IRC client library.
+//! A simple, thread-safe IRC library.
 #![crate_name = "irc"]
 #![crate_type = "lib"]
 #![unstable]
@@ -11,6 +11,5 @@
 extern crate "rustc-serialize" as rustc_serialize;
 #[cfg(feature = "ssl")] extern crate openssl;
 
-pub mod conn;
-pub mod data;
+pub mod client;
 pub mod server;

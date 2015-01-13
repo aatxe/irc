@@ -206,7 +206,7 @@ impl<'a> Iterator for AccessLevelIterator<'a> {
 #[cfg(test)]
 mod test {
     use super::{AccessLevel, User};
-    use super::AccessLevel::{Admin, HalfOp, Member, Oper, Owner, Voice};
+    use super::AccessLevel::*;
 
     #[test]
     fn parse_access_level() {

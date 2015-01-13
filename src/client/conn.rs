@@ -6,8 +6,8 @@ use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 use std::sync::{Mutex, MutexGuard};
 #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
 #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
-use data::kinds::{IrcReader, IrcWriter};
-use data::message::ToMessage;
+use client::data::kinds::{IrcReader, IrcWriter};
+use client::data::message::ToMessage;
 #[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslMethod, SslStream};
 #[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
 
@@ -241,7 +241,7 @@ mod test {
     use super::Connection;
     use std::io::{MemReader, MemWriter};
     use std::io::util::{NullReader, NullWriter};
-    use data::message::Message;
+    use client::data::message::Message;
     #[cfg(feature = "encode")] use encoding::{DecoderTrap, Encoding};
     #[cfg(feature = "encode")] use encoding::all::{ISO_8859_15, UTF_8};
 
