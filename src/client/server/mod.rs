@@ -165,21 +165,20 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
         }
         if &msg.command[] == "PING" {
             self.send(PONG(&msg.suffix.as_ref().unwrap()[], None)).unwrap();
-        } else if &msg.command[] == "JOIN" || &msg.command[] == "PART" {
+        } else if cfg!(not(feature = "nochanlists")) && 
+                  (&msg.command[] == "JOIN" || &msg.command[] == "PART") {
             let chan = match msg.suffix {
                 Some(ref suffix) => &suffix[],
                 None => &msg.args[0][],
             };
-            if cfg!(not(feature = "nochanlists")) {
-                if let Some(vec) = self.chanlists.lock().unwrap().get_mut(&String::from_str(chan)) {
-                    if let Some(ref src) = msg.prefix {
-                        if let Some(i) = src.find('!') {
-                            if &msg.command[] == "JOIN" {
-                                vec.push(User::new(&src[..i]));
-                            } else {
-                                if let Some(n) = vec.as_slice().position_elem(&User::new(&src[..i])) {
-                                    vec.swap_remove(n);
-                                }
+            if let Some(vec) = self.chanlists.lock().unwrap().get_mut(&String::from_str(chan)) {
+                if let Some(ref src) = msg.prefix {
+                    if let Some(i) = src.find('!') {
+                        if &msg.command[] == "JOIN" {
+                            vec.push(User::new(&src[..i]));
+                        } else {
+                            if let Some(n) = vec.as_slice().position_elem(&User::new(&src[..i])) {
+                                vec.swap_remove(n);
                             }
                         }
                     }
