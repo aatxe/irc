@@ -20,13 +20,14 @@ pub trait Server<'a, T, U> {
     fn config(&self) -> &Config;
     /// Sends a Command to this Server.
     #[stable]
-    fn send(&self, _: Command) -> IoResult<()>;
+    fn send(&self, command: Command) -> IoResult<()>;
     /// Gets an Iterator over Messages received by this Server.
     #[stable]
     fn iter(&'a self) -> ServerIterator<'a, T, U>;
-    /// Gets a list of Users in the specified channel.
+    /// Gets a list of Users in the specified channel. This will be none if the channel is not
+    /// being tracked, or if tracking is not supported altogether.
     #[stable]
-    fn list_users(&self, _: &str) -> Option<Vec<User>>;
+    fn list_users(&self, channel: &str) -> Option<Vec<User>>;
 }
 
 /// A thread-safe implementation of an IRC Server connection.
@@ -94,8 +95,15 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for IrcServer<T, U> {
         ServerIterator::new(self)
     }
 
+    #[cfg(not(feature = "nochanlists"))]
     fn list_users(&self, chan: &str) -> Option<Vec<User>> {
         self.chanlists.lock().unwrap().get(&chan.to_owned()).cloned()
+    }
+
+
+    #[cfg(feature = "nochanlists")]
+    fn list_users(&self, chan: &str) -> Option<Vec<User>> {
+        None
     }
 }
 
