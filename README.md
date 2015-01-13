@@ -2,7 +2,7 @@
 A thread-safe IRC library in Rust. The client portion is compliant with 
 [RFC 2812](http://tools.ietf.org/html/rfc2812) and includes some additional, common features. The 
 server portion is still a work in progress. You can find up-to-date, ready-to-use documentation 
-online [here](http://www.rust-ci.org/aatxe/irc/doc/irc/). The documentation is generated with the 
+online [here](http://aatxe.github.io/irc/irc/). The documentation is generated with the 
 default features. These are, however, strictly optional and can be disabled accordingly. 
 
 ## Getting Started ##
