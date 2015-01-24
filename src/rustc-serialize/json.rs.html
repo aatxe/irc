@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-serialize-0.2.7/src/json.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-serialize-0.2.9/src/json.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>json.rs.html -- source</title>
@@ -3906,6 +3906,163 @@
 <span id="3864">3864</span>
 <span id="3865">3865</span>
 <span id="3866">3866</span>
+<span id="3867">3867</span>
+<span id="3868">3868</span>
+<span id="3869">3869</span>
+<span id="3870">3870</span>
+<span id="3871">3871</span>
+<span id="3872">3872</span>
+<span id="3873">3873</span>
+<span id="3874">3874</span>
+<span id="3875">3875</span>
+<span id="3876">3876</span>
+<span id="3877">3877</span>
+<span id="3878">3878</span>
+<span id="3879">3879</span>
+<span id="3880">3880</span>
+<span id="3881">3881</span>
+<span id="3882">3882</span>
+<span id="3883">3883</span>
+<span id="3884">3884</span>
+<span id="3885">3885</span>
+<span id="3886">3886</span>
+<span id="3887">3887</span>
+<span id="3888">3888</span>
+<span id="3889">3889</span>
+<span id="3890">3890</span>
+<span id="3891">3891</span>
+<span id="3892">3892</span>
+<span id="3893">3893</span>
+<span id="3894">3894</span>
+<span id="3895">3895</span>
+<span id="3896">3896</span>
+<span id="3897">3897</span>
+<span id="3898">3898</span>
+<span id="3899">3899</span>
+<span id="3900">3900</span>
+<span id="3901">3901</span>
+<span id="3902">3902</span>
+<span id="3903">3903</span>
+<span id="3904">3904</span>
+<span id="3905">3905</span>
+<span id="3906">3906</span>
+<span id="3907">3907</span>
+<span id="3908">3908</span>
+<span id="3909">3909</span>
+<span id="3910">3910</span>
+<span id="3911">3911</span>
+<span id="3912">3912</span>
+<span id="3913">3913</span>
+<span id="3914">3914</span>
+<span id="3915">3915</span>
+<span id="3916">3916</span>
+<span id="3917">3917</span>
+<span id="3918">3918</span>
+<span id="3919">3919</span>
+<span id="3920">3920</span>
+<span id="3921">3921</span>
+<span id="3922">3922</span>
+<span id="3923">3923</span>
+<span id="3924">3924</span>
+<span id="3925">3925</span>
+<span id="3926">3926</span>
+<span id="3927">3927</span>
+<span id="3928">3928</span>
+<span id="3929">3929</span>
+<span id="3930">3930</span>
+<span id="3931">3931</span>
+<span id="3932">3932</span>
+<span id="3933">3933</span>
+<span id="3934">3934</span>
+<span id="3935">3935</span>
+<span id="3936">3936</span>
+<span id="3937">3937</span>
+<span id="3938">3938</span>
+<span id="3939">3939</span>
+<span id="3940">3940</span>
+<span id="3941">3941</span>
+<span id="3942">3942</span>
+<span id="3943">3943</span>
+<span id="3944">3944</span>
+<span id="3945">3945</span>
+<span id="3946">3946</span>
+<span id="3947">3947</span>
+<span id="3948">3948</span>
+<span id="3949">3949</span>
+<span id="3950">3950</span>
+<span id="3951">3951</span>
+<span id="3952">3952</span>
+<span id="3953">3953</span>
+<span id="3954">3954</span>
+<span id="3955">3955</span>
+<span id="3956">3956</span>
+<span id="3957">3957</span>
+<span id="3958">3958</span>
+<span id="3959">3959</span>
+<span id="3960">3960</span>
+<span id="3961">3961</span>
+<span id="3962">3962</span>
+<span id="3963">3963</span>
+<span id="3964">3964</span>
+<span id="3965">3965</span>
+<span id="3966">3966</span>
+<span id="3967">3967</span>
+<span id="3968">3968</span>
+<span id="3969">3969</span>
+<span id="3970">3970</span>
+<span id="3971">3971</span>
+<span id="3972">3972</span>
+<span id="3973">3973</span>
+<span id="3974">3974</span>
+<span id="3975">3975</span>
+<span id="3976">3976</span>
+<span id="3977">3977</span>
+<span id="3978">3978</span>
+<span id="3979">3979</span>
+<span id="3980">3980</span>
+<span id="3981">3981</span>
+<span id="3982">3982</span>
+<span id="3983">3983</span>
+<span id="3984">3984</span>
+<span id="3985">3985</span>
+<span id="3986">3986</span>
+<span id="3987">3987</span>
+<span id="3988">3988</span>
+<span id="3989">3989</span>
+<span id="3990">3990</span>
+<span id="3991">3991</span>
+<span id="3992">3992</span>
+<span id="3993">3993</span>
+<span id="3994">3994</span>
+<span id="3995">3995</span>
+<span id="3996">3996</span>
+<span id="3997">3997</span>
+<span id="3998">3998</span>
+<span id="3999">3999</span>
+<span id="4000">4000</span>
+<span id="4001">4001</span>
+<span id="4002">4002</span>
+<span id="4003">4003</span>
+<span id="4004">4004</span>
+<span id="4005">4005</span>
+<span id="4006">4006</span>
+<span id="4007">4007</span>
+<span id="4008">4008</span>
+<span id="4009">4009</span>
+<span id="4010">4010</span>
+<span id="4011">4011</span>
+<span id="4012">4012</span>
+<span id="4013">4013</span>
+<span id="4014">4014</span>
+<span id="4015">4015</span>
+<span id="4016">4016</span>
+<span id="4017">4017</span>
+<span id="4018">4018</span>
+<span id="4019">4019</span>
+<span id="4020">4020</span>
+<span id="4021">4021</span>
+<span id="4022">4022</span>
+<span id="4023">4023</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT</span>
 <span class='comment'>// file at the top-level directory of this distribution and at</span>
@@ -3928,22 +4085,26 @@
 <span class='doccomment'>//! # What is JSON?</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! JSON (JavaScript Object Notation) is a way to write data in Javascript.</span>
-<span class='doccomment'>//! Like XML, it allows to encode structured data in a text format that can be easily read by humans</span>
-<span class='doccomment'>//! Its simple syntax and native compatibility with JavaScript have made it a widely used format.</span>
+<span class='doccomment'>//! Like XML, it allows to encode structured data in a text format that can be</span>
+<span class='doccomment'>//! easily read by humans Its simple syntax and native compatibility with</span>
+<span class='doccomment'>//! JavaScript have made it a widely used format.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Data types that can be encoded are JavaScript types (see the `Json` enum for more details):</span>
+<span class='doccomment'>//! Data types that can be encoded are JavaScript types (see the `Json` enum</span>
+<span class='doccomment'>//! for more details):</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! * `Boolean`: equivalent to rust&#39;s `bool`</span>
 <span class='doccomment'>//! * `Number`: equivalent to rust&#39;s `f64`</span>
 <span class='doccomment'>//! * `String`: equivalent to rust&#39;s `String`</span>
-<span class='doccomment'>//! * `Array`: equivalent to rust&#39;s `Vec&lt;T&gt;`, but also allowing objects of different types in the</span>
+<span class='doccomment'>//! * `Array`: equivalent to rust&#39;s `Vec&lt;T&gt;`, but also allowing objects of</span>
+<span class='doccomment'>//!   different types in the</span>
 <span class='doccomment'>//!   same array</span>
-<span class='doccomment'>//! * `Object`: equivalent to rust&#39;s `Treemap&lt;String, json::Json&gt;`</span>
+<span class='doccomment'>//! * `Object`: equivalent to rust&#39;s `BTreeMap&lt;String, json::Json&gt;`</span>
 <span class='doccomment'>//! * `Null`</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! An object is a series of string keys mapping to values, in `&quot;key&quot;: value` format.</span>
-<span class='doccomment'>//! Arrays are enclosed in square brackets ([ ... ]) and objects in curly brackets ({ ... }).</span>
-<span class='doccomment'>//! A simple JSON document encoding a person, his/her age, address and phone numbers could look like</span>
+<span class='doccomment'>//! An object is a series of string keys mapping to values, in `&quot;key&quot;: value`</span>
+<span class='doccomment'>//! format.  Arrays are enclosed in square brackets ([ ... ]) and objects in</span>
+<span class='doccomment'>//! curly brackets ({ ... }).  A simple JSON document encoding a person,</span>
+<span class='doccomment'>//! his/her age, address and phone numbers could look like</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```ignore</span>
 <span class='doccomment'>//! {</span>
@@ -3993,7 +4154,8 @@
 <span class='doccomment'>//! extern crate &quot;rustc-serialize&quot; as rustc_serialize;</span>
 <span class='doccomment'>//! use rustc_serialize::json;</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! // Automatically generate `RustcDecodable` and `RustcEncodable` trait implementations</span>
+<span class='doccomment'>//! // Automatically generate `RustcDecodable` and `RustcEncodable` trait</span>
+<span class='doccomment'>//! // implementations</span>
 <span class='doccomment'>//! #[derive(RustcDecodable, RustcEncodable)]</span>
 <span class='doccomment'>//! pub struct TestStruct  {</span>
 <span class='doccomment'>//!     data_int: u8,</span>
@@ -4009,7 +4171,7 @@
 <span class='doccomment'>//!     };</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!     // Serialize using `json::encode`</span>
-<span class='doccomment'>//!     let encoded = json::encode(&amp;object);</span>
+<span class='doccomment'>//!     let encoded = json::encode(&amp;object).unwrap();</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//!     // Deserialize using `json::decode`</span>
 <span class='doccomment'>//!     let decoded: TestStruct = json::decode(encoded.as_slice()).unwrap();</span>
@@ -4055,7 +4217,7 @@
 <span class='doccomment'>//!         uid: 1,</span>
 <span class='doccomment'>//!         dsc: &quot;test&quot;.to_string(),</span>
 <span class='doccomment'>//!         val: num.to_json(),</span>
-<span class='doccomment'>//!     });</span>
+<span class='doccomment'>//!     }).unwrap();</span>
 <span class='doccomment'>//!     println!(&quot;data: {}&quot;, data);</span>
 <span class='doccomment'>//!     // data: {&quot;uid&quot;:1,&quot;dsc&quot;:&quot;test&quot;,&quot;val&quot;:&quot;0.0001+12.539j&quot;};</span>
 <span class='doccomment'>//! }</span>
@@ -4111,14 +4273,15 @@
 <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>ParserState</span>::<span class='op'>*</span>;
 <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>InternalStackElement</span>::<span class='op'>*</span>;
 
-<span class='kw'>use</span> <span class='ident'>std</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::{<span class='ident'>HashMap</span>, <span class='ident'>BTreeMap</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::{<span class='ident'>char</span>, <span class='ident'>f64</span>, <span class='ident'>fmt</span>, <span class='ident'>io</span>, <span class='ident'>num</span>, <span class='ident'>str</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>::{<span class='ident'>swap</span>, <span class='ident'>transmute</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>error</span>::<span class='ident'>Error</span> <span class='kw'>as</span> <span class='ident'>StdError</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>swap</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>num</span>::{<span class='ident'>Float</span>, <span class='ident'>Int</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>::{<span class='ident'>FromStr</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>string</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>::<span class='ident'>Index</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>::<span class='ident'>FromStr</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>string</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::{<span class='ident'>char</span>, <span class='ident'>f64</span>, <span class='ident'>fmt</span>, <span class='ident'>io</span>, <span class='ident'>num</span>, <span class='ident'>str</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>;
 <span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>str</span> <span class='kw'>as</span> <span class='ident'>unicode_str</span>;
 <span class='kw'>use</span> <span class='ident'>unicode</span>::<span class='ident'>str</span>::<span class='ident'>Utf16Item</span>;
 
@@ -4186,6 +4349,12 @@
     <span class='ident'>ApplicationError</span>(<span class='ident'>string</span>::<span class='ident'>String</span>)
 }
 
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Copy</span>, <span class='ident'>Show</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>EncoderError</span> {
+    <span class='ident'>FmtError</span>(<span class='ident'>fmt</span>::<span class='ident'>Error</span>),
+    <span class='ident'>BadHashmapKey</span>,
+}
+
 <span class='doccomment'>/// Returns a readable error string for a given error code.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>error_str</span>(<span class='ident'>error</span>: <span class='ident'>ErrorCode</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> {
     <span class='kw'>match</span> <span class='ident'>error</span> {
@@ -4221,16 +4390,16 @@
 }
 
 <span class='doccomment'>/// Shortcut function to encode a `T` into a JSON `String`</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>encode</span><span class='op'>&lt;</span><span class='ident'>T</span>: ::<span class='ident'>Encodable</span><span class='op'>&gt;</span>(<span class='ident'>object</span>: <span class='kw-2'>&amp;</span><span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='ident'>string</span>::<span class='ident'>String</span> {
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>encode</span><span class='op'>&lt;</span><span class='ident'>T</span>: ::<span class='ident'>Encodable</span><span class='op'>&gt;</span>(<span class='ident'>object</span>: <span class='kw-2'>&amp;</span><span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>string</span>::<span class='ident'>String</span>, <span class='ident'>EncoderError</span><span class='op'>&gt;</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
     {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>encoder</span> <span class='op'>=</span> <span class='ident'>Encoder</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>s</span>);
-        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>object</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>);
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>object</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>));
     }
-    <span class='ident'>s</span>
+    <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>)
 }
 
-<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Show</span> <span class='kw'>for</span> <span class='ident'>ErrorCode</span> {
+<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Debug</span> <span class='kw'>for</span> <span class='ident'>ErrorCode</span> {
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='ident'>error_str</span>(<span class='op'>*</span><span class='self'>self</span>).<span class='ident'>fmt</span>(<span class='ident'>f</span>)
     }
@@ -4240,15 +4409,50 @@
     <span class='ident'>IoError</span>(<span class='ident'>io</span>.<span class='ident'>kind</span>, <span class='ident'>io</span>.<span class='ident'>desc</span>)
 }
 
-<span class='kw'>impl</span> <span class='ident'>std</span>::<span class='ident'>error</span>::<span class='ident'>Error</span> <span class='kw'>for</span> <span class='ident'>DecoderError</span> {
+<span class='kw'>impl</span> <span class='ident'>StdError</span> <span class='kw'>for</span> <span class='ident'>DecoderError</span> {
     <span class='kw'>fn</span> <span class='ident'>description</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> { <span class='string'>&quot;decoder error&quot;</span> }
-    <span class='kw'>fn</span> <span class='ident'>detail</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>std</span>::<span class='ident'>string</span>::<span class='ident'>String</span><span class='op'>&gt;</span> { <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{:?}&quot;</span>, <span class='self'>self</span>)) }
+    <span class='kw'>fn</span> <span class='ident'>cause</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>StdError</span><span class='op'>&gt;</span> {
+        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
+            <span class='ident'>DecoderError</span>::<span class='ident'>ParseError</span>(<span class='kw-2'>ref</span> <span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>e</span> <span class='kw'>as</span> <span class='kw-2'>&amp;</span><span class='ident'>StdError</span>),
+            _ <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>,
+        }
+    }
 }
 
-<span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>EncodeResult</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>fmt</span>::<span class='ident'>Error</span><span class='op'>&gt;</span>;
+<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>DecoderError</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='ident'>fmt</span>::<span class='ident'>Debug</span>::<span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>)
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>StdError</span> <span class='kw'>for</span> <span class='ident'>ParserError</span> {
+    <span class='kw'>fn</span> <span class='ident'>description</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> { <span class='string'>&quot;failed to parse json&quot;</span> }
+}
+
+<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>ParserError</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='ident'>fmt</span>::<span class='ident'>Debug</span>::<span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>)
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>StdError</span> <span class='kw'>for</span> <span class='ident'>EncoderError</span> {
+    <span class='kw'>fn</span> <span class='ident'>description</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> { <span class='string'>&quot;encoder error&quot;</span> }
+}
+
+<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>EncoderError</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='ident'>fmt</span>::<span class='ident'>Debug</span>::<span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>)
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>std</span>::<span class='ident'>error</span>::<span class='ident'>FromError</span><span class='op'>&lt;</span><span class='ident'>fmt</span>::<span class='ident'>Error</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>EncoderError</span> {
+    <span class='kw'>fn</span> <span class='ident'>from_error</span>(<span class='ident'>err</span>: <span class='ident'>fmt</span>::<span class='ident'>Error</span>) <span class='op'>-&gt;</span> <span class='ident'>EncoderError</span> { <span class='ident'>EncoderError</span>::<span class='ident'>FmtError</span>(<span class='ident'>err</span>) }
+}
+
+<span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>EncodeResult</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>EncoderError</span><span class='op'>&gt;</span>;
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>DecodeResult</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>DecoderError</span><span class='op'>&gt;</span>;
 
-<span class='kw'>fn</span> <span class='ident'>escape_str</span>(<span class='ident'>wr</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Writer</span>, <span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+<span class='kw'>fn</span> <span class='ident'>escape_str</span>(<span class='ident'>wr</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Writer</span>, <span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
     <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>wr</span>.<span class='ident'>write_str</span>(<span class='string'>&quot;\&quot;&quot;</span>));
 
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='number'>0</span>;
@@ -4306,17 +4510,18 @@
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>wr</span>.<span class='ident'>write_str</span>(<span class='kw-2'>&amp;</span><span class='ident'>v</span>[<span class='ident'>start</span>..]));
     }
 
-    <span class='ident'>wr</span>.<span class='ident'>write_str</span>(<span class='string'>&quot;\&quot;&quot;</span>)
+    <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>wr</span>.<span class='ident'>write_str</span>(<span class='string'>&quot;\&quot;&quot;</span>));
+    <span class='prelude-val'>Ok</span>(())
 }
 
-<span class='kw'>fn</span> <span class='ident'>escape_char</span>(<span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Writer</span>, <span class='ident'>v</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+<span class='kw'>fn</span> <span class='ident'>escape_char</span>(<span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Writer</span>, <span class='ident'>v</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> [<span class='number'>0</span>; <span class='number'>4</span>];
     <span class='kw'>let</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>encode_utf8</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>buf</span>).<span class='ident'>unwrap</span>();
-    <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>str</span>::<span class='ident'>from_utf8_unchecked</span>(<span class='kw-2'>&amp;</span><span class='ident'>buf</span>[<span class='number'>0</span>..<span class='ident'>n</span>]) };
+    <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>str</span>::<span class='ident'>from_utf8_unchecked</span>(<span class='kw-2'>&amp;</span><span class='ident'>buf</span>[..<span class='ident'>n</span>]) };
     <span class='ident'>escape_str</span>(<span class='ident'>writer</span>, <span class='ident'>buf</span>)
 }
 
-<span class='kw'>fn</span> <span class='ident'>spaces</span>(<span class='ident'>wr</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Writer</span>, <span class='ident'>n</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+<span class='kw'>fn</span> <span class='ident'>spaces</span>(<span class='ident'>wr</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Writer</span>, <span class='ident'>n</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>n</span> <span class='op'>=</span> <span class='ident'>n</span> <span class='kw'>as</span> <span class='ident'>usize</span>;
     <span class='kw'>const</span> <span class='ident'>BUF</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>&quot;                &quot;</span>;
 
@@ -4326,10 +4531,9 @@
     }
 
     <span class='kw'>if</span> <span class='ident'>n</span> <span class='op'>&gt;</span> <span class='number'>0</span> {
-        <span class='ident'>wr</span>.<span class='ident'>write_str</span>(<span class='kw-2'>&amp;</span><span class='ident'>BUF</span>[..<span class='ident'>n</span>])
-    } <span class='kw'>else</span> {
-        <span class='prelude-val'>Ok</span>(())
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>wr</span>.<span class='ident'>write_str</span>(<span class='kw-2'>&amp;</span><span class='ident'>BUF</span>[..<span class='ident'>n</span>]));
     }
+    <span class='prelude-val'>Ok</span>(())
 }
 
 <span class='kw'>fn</span> <span class='ident'>fmt_number_or_null</span>(<span class='ident'>v</span>: <span class='ident'>f64</span>) <span class='op'>-&gt;</span> <span class='ident'>string</span>::<span class='ident'>String</span> {
@@ -4345,42 +4549,61 @@
 <span class='doccomment'>/// A structure for implementing serialization to JSON.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> (<span class='ident'>fmt</span>::<span class='ident'>Writer</span><span class='op'>+</span><span class='lifetime'>&#39;a</span>),
+    <span class='ident'>is_emitting_map_key</span>: <span class='ident'>bool</span>,
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Creates a new JSON encoder whose output will be written to the writer</span>
     <span class='doccomment'>/// specified.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Writer</span>) <span class='op'>-&gt;</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-        <span class='ident'>Encoder</span> { <span class='ident'>writer</span>: <span class='ident'>writer</span> }
+        <span class='ident'>Encoder</span> { <span class='ident'>writer</span>: <span class='ident'>writer</span>, <span class='ident'>is_emitting_map_key</span>: <span class='boolval'>false</span>, }
+    }
+}
+
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>emit_enquoted_if_mapkey</span> {
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>enc</span>:<span class='ident'>ident</span>,<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> {
+        <span class='kw'>if</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>enc</span>.<span class='ident'>is_emitting_map_key</span> {
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>enc</span>.<span class='ident'>writer</span>, <span class='string'>&quot;\&quot;{}\&quot;&quot;</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>));
+            <span class='prelude-val'>Ok</span>(())
+        } <span class='kw'>else</span> {
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>enc</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>));
+            <span class='prelude-val'>Ok</span>(())
+        }
     }
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> ::<span class='ident'>Encoder</span> <span class='kw'>for</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='kw'>type</span> <span class='ident'>Error</span> <span class='op'>=</span> <span class='ident'>fmt</span>::<span class='ident'>Error</span>;
-    <span class='kw'>fn</span> <span class='ident'>emit_nil</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;null&quot;</span>) }
+    <span class='kw'>type</span> <span class='ident'>Error</span> <span class='op'>=</span> <span class='ident'>EncoderError</span>;
+    <span class='kw'>fn</span> <span class='ident'>emit_nil</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;null&quot;</span>));
+        <span class='prelude-val'>Ok</span>(())
+    }
 
-    <span class='kw'>fn</span> <span class='ident'>emit_usize</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_u64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_u32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_u16</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_u8</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_usize</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_u64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_u32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_u16</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_u8</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
 
-    <span class='kw'>fn</span> <span class='ident'>emit_isize</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>isize</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_i64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i64</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_i32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_i16</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i16</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_i8</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i8</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_isize</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>isize</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_i64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i64</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_i32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_i16</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i16</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_i8</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i8</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
 
     <span class='kw'>fn</span> <span class='ident'>emit_bool</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>v</span> {
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;true&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;true&quot;</span>));
         } <span class='kw'>else</span> {
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;false&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;false&quot;</span>));
         }
+        <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_f64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>f64</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
-        <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>fmt_number_or_null</span>(<span class='ident'>v</span>))
+        <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>fmt_number_or_null</span>(<span class='ident'>v</span>))
     }
     <span class='kw'>fn</span> <span class='ident'>emit_f32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>f32</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
         <span class='self'>self</span>.<span class='ident'>emit_f64</span>(<span class='ident'>v</span> <span class='kw'>as</span> <span class='ident'>f64</span>)
@@ -4412,17 +4635,20 @@
         <span class='kw'>if</span> <span class='ident'>cnt</span> <span class='op'>==</span> <span class='number'>0</span> {
             <span class='ident'>escape_str</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='ident'>name</span>)
         } <span class='kw'>else</span> {
+            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{{\&quot;variant\&quot;:&quot;</span>));
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>escape_str</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='ident'>name</span>));
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;,\&quot;fields\&quot;:[&quot;</span>));
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>f</span>(<span class='self'>self</span>));
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;]}}&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;]}}&quot;</span>));
+            <span class='prelude-val'>Ok</span>(())
         }
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_enum_variant_arg</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>idx</span> <span class='op'>!=</span> <span class='number'>0</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;,&quot;</span>));
         }
@@ -4436,6 +4662,7 @@
                                    <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_enum_variant</span>(<span class='ident'>name</span>, <span class='ident'>id</span>, <span class='ident'>cnt</span>, <span class='ident'>f</span>)
     }
 
@@ -4445,20 +4672,24 @@
                                          <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_enum_variant_arg</span>(<span class='ident'>idx</span>, <span class='ident'>f</span>)
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_struct</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, _: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, _: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{{&quot;</span>));
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>f</span>(<span class='self'>self</span>));
-        <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;}}&quot;</span>)
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;}}&quot;</span>));
+        <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_struct_field</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>idx</span> <span class='op'>!=</span> <span class='number'>0</span> { <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;,&quot;</span>)); }
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>escape_str</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='ident'>name</span>));
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;:&quot;</span>));
@@ -4468,48 +4699,60 @@
     <span class='kw'>fn</span> <span class='ident'>emit_tuple</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>len</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_seq</span>(<span class='ident'>len</span>, <span class='ident'>f</span>)
     }
     <span class='kw'>fn</span> <span class='ident'>emit_tuple_arg</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_seq_elt</span>(<span class='ident'>idx</span>, <span class='ident'>f</span>)
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_tuple_struct</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>_name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>len</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_seq</span>(<span class='ident'>len</span>, <span class='ident'>f</span>)
     }
     <span class='kw'>fn</span> <span class='ident'>emit_tuple_struct_arg</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_seq_elt</span>(<span class='ident'>idx</span>, <span class='ident'>f</span>)
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_option</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='ident'>f</span>(<span class='self'>self</span>)
     }
-    <span class='kw'>fn</span> <span class='ident'>emit_option_none</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='self'>self</span>.<span class='ident'>emit_nil</span>() }
+    <span class='kw'>fn</span> <span class='ident'>emit_option_none</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
+        <span class='self'>self</span>.<span class='ident'>emit_nil</span>()
+    }
     <span class='kw'>fn</span> <span class='ident'>emit_option_some</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='ident'>f</span>(<span class='self'>self</span>)
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_seq</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>_len</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;[&quot;</span>));
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>f</span>(<span class='self'>self</span>));
-        <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;]&quot;</span>)
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;]&quot;</span>));
+        <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_seq_elt</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>idx</span> <span class='op'>!=</span> <span class='number'>0</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;,&quot;</span>));
         }
@@ -4519,34 +4762,28 @@
     <span class='kw'>fn</span> <span class='ident'>emit_map</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>_len</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{{&quot;</span>));
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>f</span>(<span class='self'>self</span>));
-        <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;}}&quot;</span>)
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;}}&quot;</span>));
+        <span class='prelude-val'>Ok</span>(())
     }
 
-    <span class='kw'>fn</span> <span class='ident'>emit_map_elt_key</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='kw-2'>mut</span> <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
-        <span class='ident'>F</span>: <span class='ident'>FnMut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
+    <span class='kw'>fn</span> <span class='ident'>emit_map_elt_key</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
+        <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>idx</span> <span class='op'>!=</span> <span class='number'>0</span> { <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;,&quot;</span>)) }
-        <span class='comment'>// ref #12967, make sure to wrap a key in double quotes,</span>
-        <span class='comment'>// in the event that its of a type that omits them (eg numbers)</span>
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
-        <span class='comment'>// FIXME(14302) remove the transmute and unsafe block.</span>
-        <span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>check_encoder</span> <span class='op'>=</span> <span class='ident'>Encoder</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>buf</span>);
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>f</span>(<span class='ident'>transmute</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>check_encoder</span>)));
-        }
-        <span class='kw'>let</span> <span class='ident'>out</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='kw-2'>&amp;</span><span class='ident'>buf</span>[]).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>needs_wrapping</span> <span class='op'>=</span> <span class='ident'>out</span>.<span class='ident'>char_at</span>(<span class='number'>0</span>) <span class='op'>!=</span> <span class='string'>&#39;&quot;&#39;</span> <span class='op'>&amp;&amp;</span> <span class='ident'>out</span>.<span class='ident'>char_at_reverse</span>(<span class='ident'>out</span>.<span class='ident'>len</span>()) <span class='op'>!=</span> <span class='string'>&#39;&quot;&#39;</span>;
-        <span class='kw'>if</span> <span class='ident'>needs_wrapping</span> { <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;\&quot;&quot;</span>)); }
+        <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> <span class='op'>=</span> <span class='boolval'>true</span>;
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>f</span>(<span class='self'>self</span>));
-        <span class='kw'>if</span> <span class='ident'>needs_wrapping</span> { <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;\&quot;&quot;</span>)); }
+        <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> <span class='op'>=</span> <span class='boolval'>false</span>;
         <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_map_elt_val</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>_idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Encoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;:&quot;</span>));
         <span class='ident'>f</span>(<span class='self'>self</span>)
     }
@@ -4558,12 +4795,18 @@
     <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> (<span class='ident'>fmt</span>::<span class='ident'>Writer</span><span class='op'>+</span><span class='lifetime'>&#39;a</span>),
     <span class='ident'>curr_indent</span>: <span class='ident'>u32</span>,
     <span class='ident'>indent</span>: <span class='ident'>u32</span>,
+    <span class='ident'>is_emitting_map_key</span>: <span class='ident'>bool</span>,
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Creates a new encoder whose output will be written to the specified writer</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Writer</span>) <span class='op'>-&gt;</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-        <span class='ident'>PrettyEncoder</span> { <span class='ident'>writer</span>: <span class='ident'>writer</span>, <span class='ident'>curr_indent</span>: <span class='number'>0</span>, <span class='ident'>indent</span>: <span class='number'>2</span>, }
+        <span class='ident'>PrettyEncoder</span> {
+            <span class='ident'>writer</span>: <span class='ident'>writer</span>,
+            <span class='ident'>curr_indent</span>: <span class='number'>0</span>,
+            <span class='ident'>indent</span>: <span class='number'>2</span>,
+            <span class='ident'>is_emitting_map_key</span>: <span class='boolval'>false</span>,
+        }
     }
 
     <span class='doccomment'>/// Set the number of spaces to indent for each level.</span>
@@ -4577,32 +4820,38 @@
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> ::<span class='ident'>Encoder</span> <span class='kw'>for</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='kw'>type</span> <span class='ident'>Error</span> <span class='op'>=</span> <span class='ident'>fmt</span>::<span class='ident'>Error</span>;
+    <span class='kw'>type</span> <span class='ident'>Error</span> <span class='op'>=</span> <span class='ident'>EncoderError</span>;
 
-    <span class='kw'>fn</span> <span class='ident'>emit_nil</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;null&quot;</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_nil</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;null&quot;</span>));
+        <span class='prelude-val'>Ok</span>(())
+    }
 
-    <span class='kw'>fn</span> <span class='ident'>emit_usize</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_u64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_u32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_u16</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_u8</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_usize</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_u64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u64</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_u32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_u16</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_u8</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
 
-    <span class='kw'>fn</span> <span class='ident'>emit_isize</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>isize</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_i64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i64</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_i32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_i16</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i16</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
-    <span class='kw'>fn</span> <span class='ident'>emit_i8</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i8</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_isize</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>isize</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_i64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i64</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_i32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i32</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_i16</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i16</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
+    <span class='kw'>fn</span> <span class='ident'>emit_i8</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>i8</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>v</span>) }
 
     <span class='kw'>fn</span> <span class='ident'>emit_bool</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>v</span> {
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;true&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;true&quot;</span>));
         } <span class='kw'>else</span> {
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;false&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;false&quot;</span>));
         }
+        <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_f64</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>f64</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
-        <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{}&quot;</span>, <span class='ident'>fmt_number_or_null</span>(<span class='ident'>v</span>))
+        <span class='macro'>emit_enquoted_if_mapkey</span><span class='macro'>!</span>(<span class='self'>self</span>, <span class='ident'>fmt_number_or_null</span>(<span class='ident'>v</span>))
     }
     <span class='kw'>fn</span> <span class='ident'>emit_f32</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>v</span>: <span class='ident'>f32</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
         <span class='self'>self</span>.<span class='ident'>emit_f64</span>(<span class='ident'>v</span> <span class='kw'>as</span> <span class='ident'>f64</span>)
@@ -4632,6 +4881,7 @@
         <span class='kw'>if</span> <span class='ident'>cnt</span> <span class='op'>==</span> <span class='number'>0</span> {
             <span class='ident'>escape_str</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='ident'>name</span>)
         } <span class='kw'>else</span> {
+            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{{\n&quot;</span>));
             <span class='self'>self</span>.<span class='ident'>curr_indent</span> <span class='op'>+=</span> <span class='self'>self</span>.<span class='ident'>indent</span>;
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>spaces</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='self'>self</span>.<span class='ident'>curr_indent</span>));
@@ -4648,13 +4898,15 @@
             <span class='self'>self</span>.<span class='ident'>curr_indent</span> <span class='op'>-=</span> <span class='self'>self</span>.<span class='ident'>indent</span>;
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;]\n&quot;</span>));
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>spaces</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='self'>self</span>.<span class='ident'>curr_indent</span>));
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;}}&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;}}&quot;</span>));
+            <span class='prelude-val'>Ok</span>(())
         }
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_enum_variant_arg</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>idx</span> <span class='op'>!=</span> <span class='number'>0</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;,\n&quot;</span>));
         }
@@ -4669,6 +4921,7 @@
                                    <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_enum_variant</span>(<span class='ident'>name</span>, <span class='ident'>id</span>, <span class='ident'>cnt</span>, <span class='ident'>f</span>)
     }
 
@@ -4678,6 +4931,7 @@
                                          <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_enum_variant_arg</span>(<span class='ident'>idx</span>, <span class='ident'>f</span>)
     }
 
@@ -4685,8 +4939,9 @@
     <span class='kw'>fn</span> <span class='ident'>emit_struct</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, _: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>len</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>len</span> <span class='op'>==</span> <span class='number'>0</span> {
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{{}}&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{{}}&quot;</span>));
         } <span class='kw'>else</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{{&quot;</span>));
             <span class='self'>self</span>.<span class='ident'>curr_indent</span> <span class='op'>+=</span> <span class='self'>self</span>.<span class='ident'>indent</span>;
@@ -4694,13 +4949,15 @@
             <span class='self'>self</span>.<span class='ident'>curr_indent</span> <span class='op'>-=</span> <span class='self'>self</span>.<span class='ident'>indent</span>;
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;\n&quot;</span>));
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>spaces</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='self'>self</span>.<span class='ident'>curr_indent</span>));
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;}}&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;}}&quot;</span>));
         }
+        <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_struct_field</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>idx</span> <span class='op'>==</span> <span class='number'>0</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;\n&quot;</span>));
         } <span class='kw'>else</span> {
@@ -4715,42 +4972,52 @@
     <span class='kw'>fn</span> <span class='ident'>emit_tuple</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>len</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_seq</span>(<span class='ident'>len</span>, <span class='ident'>f</span>)
     }
     <span class='kw'>fn</span> <span class='ident'>emit_tuple_arg</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_seq_elt</span>(<span class='ident'>idx</span>, <span class='ident'>f</span>)
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_tuple_struct</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, _: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>len</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_seq</span>(<span class='ident'>len</span>, <span class='ident'>f</span>)
     }
     <span class='kw'>fn</span> <span class='ident'>emit_tuple_struct_arg</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='self'>self</span>.<span class='ident'>emit_seq_elt</span>(<span class='ident'>idx</span>, <span class='ident'>f</span>)
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_option</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='ident'>f</span>(<span class='self'>self</span>)
     }
-    <span class='kw'>fn</span> <span class='ident'>emit_option_none</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> { <span class='self'>self</span>.<span class='ident'>emit_nil</span>() }
+    <span class='kw'>fn</span> <span class='ident'>emit_option_none</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
+        <span class='self'>self</span>.<span class='ident'>emit_nil</span>()
+    }
     <span class='kw'>fn</span> <span class='ident'>emit_option_some</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='ident'>f</span>(<span class='self'>self</span>)
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_seq</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>len</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>len</span> <span class='op'>==</span> <span class='number'>0</span> {
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;[]&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;[]&quot;</span>));
         } <span class='kw'>else</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;[&quot;</span>));
             <span class='self'>self</span>.<span class='ident'>curr_indent</span> <span class='op'>+=</span> <span class='self'>self</span>.<span class='ident'>indent</span>;
@@ -4758,13 +5025,15 @@
             <span class='self'>self</span>.<span class='ident'>curr_indent</span> <span class='op'>-=</span> <span class='self'>self</span>.<span class='ident'>indent</span>;
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;\n&quot;</span>));
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>spaces</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='self'>self</span>.<span class='ident'>curr_indent</span>));
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;]&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;]&quot;</span>));
         }
+        <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_seq_elt</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>idx</span> <span class='op'>==</span> <span class='number'>0</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;\n&quot;</span>));
         } <span class='kw'>else</span> {
@@ -4777,8 +5046,9 @@
     <span class='kw'>fn</span> <span class='ident'>emit_map</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>len</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>len</span> <span class='op'>==</span> <span class='number'>0</span> {
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{{}}&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{{}}&quot;</span>));
         } <span class='kw'>else</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;{{&quot;</span>));
             <span class='self'>self</span>.<span class='ident'>curr_indent</span> <span class='op'>+=</span> <span class='self'>self</span>.<span class='ident'>indent</span>;
@@ -4786,38 +5056,31 @@
             <span class='self'>self</span>.<span class='ident'>curr_indent</span> <span class='op'>-=</span> <span class='self'>self</span>.<span class='ident'>indent</span>;
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;\n&quot;</span>));
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>spaces</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='self'>self</span>.<span class='ident'>curr_indent</span>));
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;}}&quot;</span>)
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;}}&quot;</span>));
         }
+        <span class='prelude-val'>Ok</span>(())
     }
 
-    <span class='kw'>fn</span> <span class='ident'>emit_map_elt_key</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='kw-2'>mut</span> <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
-        <span class='ident'>F</span>: <span class='ident'>FnMut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
+    <span class='kw'>fn</span> <span class='ident'>emit_map_elt_key</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
+        <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='kw'>if</span> <span class='ident'>idx</span> <span class='op'>==</span> <span class='number'>0</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;\n&quot;</span>));
         } <span class='kw'>else</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;,\n&quot;</span>));
         }
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>spaces</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='self'>self</span>.<span class='ident'>curr_indent</span>));
-        <span class='comment'>// ref #12967, make sure to wrap a key in double quotes,</span>
-        <span class='comment'>// in the event that its of a type that omits them (eg numbers)</span>
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
-        <span class='comment'>// FIXME(14302) remove the transmute and unsafe block.</span>
-        <span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>check_encoder</span> <span class='op'>=</span> <span class='ident'>PrettyEncoder</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>buf</span>);
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>f</span>(<span class='ident'>transmute</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>check_encoder</span>)));
-        }
-        <span class='kw'>let</span> <span class='ident'>out</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='kw-2'>&amp;</span><span class='ident'>buf</span>[]).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>needs_wrapping</span> <span class='op'>=</span> <span class='ident'>out</span>.<span class='ident'>char_at</span>(<span class='number'>0</span>) <span class='op'>!=</span> <span class='string'>&#39;&quot;&#39;</span> <span class='op'>&amp;&amp;</span> <span class='ident'>out</span>.<span class='ident'>char_at_reverse</span>(<span class='ident'>out</span>.<span class='ident'>len</span>()) <span class='op'>!=</span> <span class='string'>&#39;&quot;&#39;</span>;
-        <span class='kw'>if</span> <span class='ident'>needs_wrapping</span> { <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;\&quot;&quot;</span>)); }
+        <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> <span class='op'>=</span> <span class='boolval'>true</span>;
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>f</span>(<span class='self'>self</span>));
-        <span class='kw'>if</span> <span class='ident'>needs_wrapping</span> { <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;\&quot;&quot;</span>)); }
+        <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> <span class='op'>=</span> <span class='boolval'>false</span>;
         <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='kw'>fn</span> <span class='ident'>emit_map_elt_val</span><span class='op'>&lt;</span><span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>_idx</span>: <span class='ident'>usize</span>, <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span> <span class='kw'>where</span>
         <span class='ident'>F</span>: <span class='ident'>FnOnce</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>PrettyEncoder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>EncodeResult</span>,
     {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_emitting_map_key</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span>); }
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>writer</span>, <span class='string'>&quot;: &quot;</span>));
         <span class='ident'>f</span>(<span class='self'>self</span>)
     }
@@ -5070,7 +5333,7 @@
 
     <span class='kw'>fn</span> <span class='ident'>index</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>, <span class='ident'>idx</span>: <span class='kw-2'>&amp;</span><span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Json</span> {
         <span class='kw'>match</span> <span class='self'>self</span> {
-            <span class='kw-2'>&amp;</span><span class='ident'>Json</span>::<span class='ident'>Array</span>(<span class='kw-2'>ref</span> <span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='ident'>v</span>.<span class='ident'>index</span>(<span class='ident'>idx</span>),
+            <span class='kw-2'>&amp;</span><span class='ident'>Json</span>::<span class='ident'>Array</span>(<span class='kw-2'>ref</span> <span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>v</span>[<span class='op'>*</span><span class='ident'>idx</span>],
             _ <span class='op'>=&gt;</span> <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;can only index Json with usize if it is an array&quot;</span>)
         }
     }
@@ -6349,34 +6612,46 @@
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='lifetime'>&#39;b</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>Writer</span> <span class='kw'>for</span> <span class='ident'>FormatShim</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='lifetime'>&#39;b</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>write_str</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
-        <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>write_str</span>(<span class='ident'>s</span>)
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>write_str</span>(<span class='ident'>s</span>) {
+            <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(()),
+            <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>fmt</span>::<span class='ident'>Error</span>)
+        }
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>String</span> <span class='kw'>for</span> <span class='ident'>Json</span> {
+<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>Json</span> {
     <span class='doccomment'>/// Encodes a json value into a string</span>
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>shim</span> <span class='op'>=</span> <span class='ident'>FormatShim</span> { <span class='ident'>inner</span>: <span class='ident'>f</span> };
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>encoder</span> <span class='op'>=</span> <span class='ident'>Encoder</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>shim</span>);
-        <span class='self'>self</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>)
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>) {
+            <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(()),
+            <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>fmt</span>::<span class='ident'>Error</span>)
+        }
     }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>String</span> <span class='kw'>for</span> <span class='ident'>PrettyJson</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>PrettyJson</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Encodes a json value into a string</span>
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>shim</span> <span class='op'>=</span> <span class='ident'>FormatShim</span> { <span class='ident'>inner</span>: <span class='ident'>f</span> };
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>encoder</span> <span class='op'>=</span> <span class='ident'>PrettyEncoder</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>shim</span>);
-        <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>)
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>) {
+            <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(()),
+            <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>fmt</span>::<span class='ident'>Error</span>)
+        }
     }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Encodable</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>String</span> <span class='kw'>for</span> <span class='ident'>AsJson</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Encodable</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>AsJson</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Encodes a json value into a string</span>
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>shim</span> <span class='op'>=</span> <span class='ident'>FormatShim</span> { <span class='ident'>inner</span>: <span class='ident'>f</span> };
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>encoder</span> <span class='op'>=</span> <span class='ident'>Encoder</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>shim</span>);
-        <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>)
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>) {
+            <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(()),
+            <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>fmt</span>::<span class='ident'>Error</span>)
+        }
     }
 }
 
@@ -6388,7 +6663,7 @@
     }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Encodable</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>String</span> <span class='kw'>for</span> <span class='ident'>AsPrettyJson</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>Encodable</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>AsPrettyJson</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Encodes a json value into a string</span>
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>shim</span> <span class='op'>=</span> <span class='ident'>FormatShim</span> { <span class='ident'>inner</span>: <span class='ident'>f</span> };
@@ -6397,7 +6672,10 @@
             <span class='prelude-val'>Some</span>(<span class='ident'>n</span>) <span class='op'>=&gt;</span> <span class='ident'>encoder</span>.<span class='ident'>set_indent</span>(<span class='ident'>n</span>),
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {}
         }
-        <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>)
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>inner</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>) {
+            <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(()),
+            <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>fmt</span>::<span class='ident'>Error</span>)
+        }
     }
 }
 
@@ -6421,7 +6699,7 @@
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>JsonEvent</span>::<span class='op'>*</span>;
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>StackElement</span>::<span class='op'>*</span>;
     <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Json</span>, <span class='ident'>DecodeResult</span>, <span class='ident'>DecoderError</span>, <span class='ident'>JsonEvent</span>, <span class='ident'>Parser</span>,
-                <span class='ident'>StackElement</span>, <span class='ident'>Stack</span>, <span class='ident'>Decoder</span>};
+                <span class='ident'>StackElement</span>, <span class='ident'>Stack</span>, <span class='ident'>Decoder</span>, <span class='ident'>Encoder</span>, <span class='ident'>EncoderError</span>};
     <span class='kw'>use</span> <span class='ident'>std</span>::{<span class='ident'>i64</span>, <span class='ident'>u64</span>, <span class='ident'>f32</span>, <span class='ident'>f64</span>};
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>BTreeMap</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>num</span>::<span class='ident'>Float</span>;
@@ -7354,6 +7632,24 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_hashmap_with_enum_key</span>() {
+        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+        <span class='kw'>use</span> <span class='ident'>json</span>;
+        <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>RustcEncodable</span>, <span class='ident'>Eq</span>, <span class='ident'>Hash</span>, <span class='ident'>PartialEq</span>, <span class='ident'>RustcDecodable</span>, <span class='ident'>Show</span>)]</span>
+        <span class='kw'>enum</span> <span class='ident'>Enum</span> {
+            <span class='ident'>Foo</span>,
+            <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
+            <span class='ident'>Bar</span>,
+        }
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>map</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+        <span class='ident'>map</span>.<span class='ident'>insert</span>(<span class='ident'>Enum</span>::<span class='ident'>Foo</span>, <span class='number'>0</span>);
+        <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='ident'>map</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>result</span>[], <span class='string'>r#&quot;{&quot;Foo&quot;:0}&quot;#</span>);
+        <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>Enum</span>, _<span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>result</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>map</span>, <span class='ident'>decoded</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_hashmap_with_numeric_key_will_error_with_string_keys</span>() {
         <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
         <span class='kw'>use</span> <span class='ident'>Decodable</span>;
@@ -7707,6 +8003,24 @@
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='prelude-val'>Some</span>(<span class='number'>15is</span>).<span class='ident'>to_json</span>(), <span class='ident'>I64</span>(<span class='number'>15</span>));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='prelude-val'>Some</span>(<span class='number'>15us</span>).<span class='ident'>to_json</span>(), <span class='ident'>U64</span>(<span class='number'>15</span>));
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='prelude-val'>None</span>::<span class='op'>&lt;</span><span class='ident'>isize</span><span class='op'>&gt;</span>.<span class='ident'>to_json</span>(), <span class='ident'>Null</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_encode_hashmap_with_arbitrary_key</span>() {
+        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Writer</span>;
+        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
+        <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Hash</span>, <span class='ident'>RustcEncodable</span>)]</span>
+        <span class='kw'>struct</span> <span class='ident'>ArbitraryType</span>(<span class='ident'>u32</span>);
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>hm</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>ArbitraryType</span>, <span class='ident'>bool</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>new</span>();
+        <span class='ident'>hm</span>.<span class='ident'>insert</span>(<span class='ident'>ArbitraryType</span>(<span class='number'>1</span>), <span class='boolval'>true</span>);
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mem_buf</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>encoder</span> <span class='op'>=</span> <span class='ident'>Encoder</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>mem_buf</span> <span class='kw'>as</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Writer</span>);
+        <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>hm</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>encoder</span>);
+        <span class='kw'>match</span> <span class='ident'>result</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>() {
+            <span class='ident'>EncoderError</span>::<span class='ident'>BadHashmapKey</span> <span class='op'>=&gt;</span> (),
+            _ <span class='op'>=&gt;</span> <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;expected bad hash map key&quot;</span>)
+        }
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>

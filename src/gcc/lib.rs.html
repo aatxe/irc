@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/gcc-0.1.4/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/gcc-0.1.6/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -379,12 +379,12 @@
                                            .<span class='ident'>arg</span>(<span class='ident'>dst</span>.<span class='ident'>join</span>(<span class='ident'>output</span>))
                                            .<span class='ident'>args</span>(<span class='ident'>objects</span>.<span class='ident'>as_slice</span>())
                                            .<span class='ident'>args</span>(<span class='ident'>config</span>.<span class='ident'>objects</span>.<span class='ident'>as_slice</span>()));
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-flags=-L native={} -l {}:static&quot;</span>,
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-flags=-L native={} -l static={}&quot;</span>,
              <span class='ident'>dst</span>.<span class='ident'>display</span>(), <span class='ident'>output</span>.<span class='ident'>slice</span>(<span class='number'>3</span>, <span class='ident'>output</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='number'>2</span>));
 }
 
 <span class='kw'>fn</span> <span class='ident'>run</span>(<span class='ident'>cmd</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Command</span>) {
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;running: {}&quot;</span>, <span class='ident'>cmd</span>);
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;running: {:?}&quot;</span>, <span class='ident'>cmd</span>);
     <span class='kw'>let</span> <span class='ident'>status</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>cmd</span>.<span class='ident'>stdout</span>(<span class='ident'>InheritFd</span>(<span class='number'>1</span>)).<span class='ident'>stderr</span>(<span class='ident'>InheritFd</span>(<span class='number'>2</span>)).<span class='ident'>status</span>() {
         <span class='prelude-val'>Ok</span>(<span class='ident'>status</span>) <span class='op'>=&gt;</span> <span class='ident'>status</span>,
         <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;failed to spawn process: {}&quot;</span>, <span class='ident'>e</span>),

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/Documents/Programming/Rust/irc/src/client/conn.rs`.">
+    <meta name="description" content="Source to the Rust file `src/client/conn.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>conn.rs.html -- source</title>
@@ -386,9 +386,12 @@
 <span id="344">344</span>
 <span id="345">345</span>
 <span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Thread-safe connections on IrcStreams.</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>ToOwned</span>;
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>error</span>::<span class='ident'>Error</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>BufferedReader</span>, <span class='ident'>BufferedWriter</span>, <span class='ident'>IoResult</span>, <span class='ident'>TcpStream</span>};
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>any</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>, <span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>))]</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>IoError</span>, <span class='ident'>IoErrorKind</span>};
@@ -413,7 +416,7 @@
 <span class='doccomment'>/// An internal type</span>
 <span class='kw'>type</span> <span class='ident'>NetReaderWriterPair</span> <span class='op'>=</span> (<span class='ident'>BufferedReader</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>, <span class='ident'>BufferedWriter</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>);
 
-
+<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>impl</span> <span class='ident'>Connection</span><span class='op'>&lt;</span><span class='ident'>BufferedReader</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>, <span class='ident'>BufferedWriter</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;&gt;</span> {
     <span class='doccomment'>/// Creates a thread-safe TCP connection to the specified server.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
@@ -493,6 +496,7 @@
     }
 }
 
+<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>IrcReader</span>, <span class='ident'>U</span>: <span class='ident'>IrcWriter</span><span class='op'>&gt;</span> <span class='ident'>Connection</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Creates a new connection from an IrcReader and an IrcWriter.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
@@ -590,7 +594,7 @@
         <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>IoError</span> {
             <span class='ident'>kind</span>: <span class='ident'>IoErrorKind</span>::<span class='ident'>OtherIoError</span>,
             <span class='ident'>desc</span>: <span class='string'>&quot;An SSL error occurred.&quot;</span>,
-            <span class='ident'>detail</span>: <span class='ident'>e</span>.<span class='ident'>detail</span>(),
+            <span class='ident'>detail</span>: <span class='prelude-val'>Some</span>(<span class='ident'>e</span>.<span class='ident'>description</span>().<span class='ident'>to_owned</span>()),
         }),
     }
 }

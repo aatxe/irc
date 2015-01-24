@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/Documents/Programming/Rust/irc/src/client/server/mod.rs`.">
+    <meta name="description" content="Source to the Rust file `src/client/server/mod.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>mod.rs.html -- source</title>
@@ -591,6 +591,13 @@
 <span id="549">549</span>
 <span id="550">550</span>
 <span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Interface for working with IRC Servers</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
@@ -614,13 +621,14 @@
     <span class='kw'>fn</span> <span class='ident'>config</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>Config</span>;
     <span class='doccomment'>/// Sends a Command to this Server.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, _: <span class='ident'>Command</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>;
+    <span class='kw'>fn</span> <span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>command</span>: <span class='ident'>Command</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>;
     <span class='doccomment'>/// Gets an Iterator over Messages received by this Server.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>iter</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ServerIterator</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span>;
-    <span class='doccomment'>/// Gets a list of Users in the specified channel.</span>
+    <span class='doccomment'>/// Gets a list of Users in the specified channel. This will be none if the channel is not</span>
+    <span class='doccomment'>/// being tracked, or if tracking is not supported altogether.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>list_users</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, _: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>User</span><span class='op'>&gt;&gt;</span>;
+    <span class='kw'>fn</span> <span class='ident'>list_users</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>channel</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>User</span><span class='op'>&gt;&gt;</span>;
 }
 
 <span class='doccomment'>/// A thread-safe implementation of an IRC Server connection.</span>
@@ -688,8 +696,15 @@
         <span class='ident'>ServerIterator</span>::<span class='ident'>new</span>(<span class='self'>self</span>)
     }
 
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nochanlists&quot;</span>))]</span>
     <span class='kw'>fn</span> <span class='ident'>list_users</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>chan</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>User</span><span class='op'>&gt;&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>chanlists</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>chan</span>.<span class='ident'>to_owned</span>()).<span class='ident'>cloned</span>()
+    }
+
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nochanlists&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>list_users</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>chan</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>User</span><span class='op'>&gt;&gt;</span> {
+        <span class='prelude-val'>None</span>
     }
 }
 
@@ -751,21 +766,20 @@
         }
         <span class='kw'>if</span> <span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>command</span>[] <span class='op'>==</span> <span class='string'>&quot;PING&quot;</span> {
             <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>PONG</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>suffix</span>.<span class='ident'>as_ref</span>().<span class='ident'>unwrap</span>()[], <span class='prelude-val'>None</span>)).<span class='ident'>unwrap</span>();
-        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>command</span>[] <span class='op'>==</span> <span class='string'>&quot;JOIN&quot;</span> <span class='op'>||</span> <span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>command</span>[] <span class='op'>==</span> <span class='string'>&quot;PART&quot;</span> {
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nochanlists&quot;</span>)) <span class='op'>&amp;&amp;</span> 
+                  (<span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>command</span>[] <span class='op'>==</span> <span class='string'>&quot;JOIN&quot;</span> <span class='op'>||</span> <span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>command</span>[] <span class='op'>==</span> <span class='string'>&quot;PART&quot;</span>) {
             <span class='kw'>let</span> <span class='ident'>chan</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>msg</span>.<span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>suffix</span>[],
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>args</span>[<span class='number'>0</span>][],
             };
-            <span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nochanlists&quot;</span>)) {
-                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>vec</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>chanlists</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='ident'>chan</span>)) {
-                    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>src</span>) <span class='op'>=</span> <span class='ident'>msg</span>.<span class='ident'>prefix</span> {
-                        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>i</span>) <span class='op'>=</span> <span class='ident'>src</span>.<span class='ident'>find</span>(<span class='string'>&#39;!&#39;</span>) {
-                            <span class='kw'>if</span> <span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>command</span>[] <span class='op'>==</span> <span class='string'>&quot;JOIN&quot;</span> {
-                                <span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='ident'>User</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>src</span>[..<span class='ident'>i</span>]));
-                            } <span class='kw'>else</span> {
-                                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>n</span>) <span class='op'>=</span> <span class='ident'>vec</span>.<span class='ident'>as_slice</span>().<span class='ident'>position_elem</span>(<span class='kw-2'>&amp;</span><span class='ident'>User</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>src</span>[..<span class='ident'>i</span>])) {
-                                    <span class='ident'>vec</span>.<span class='ident'>swap_remove</span>(<span class='ident'>n</span>);
-                                }
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>vec</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>chanlists</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>String</span>::<span class='ident'>from_str</span>(<span class='ident'>chan</span>)) {
+                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>src</span>) <span class='op'>=</span> <span class='ident'>msg</span>.<span class='ident'>prefix</span> {
+                    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>i</span>) <span class='op'>=</span> <span class='ident'>src</span>.<span class='ident'>find</span>(<span class='string'>&#39;!&#39;</span>) {
+                        <span class='kw'>if</span> <span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>command</span>[] <span class='op'>==</span> <span class='string'>&quot;JOIN&quot;</span> {
+                            <span class='ident'>vec</span>.<span class='ident'>push</span>(<span class='ident'>User</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>src</span>[..<span class='ident'>i</span>]));
+                        } <span class='kw'>else</span> {
+                            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>n</span>) <span class='op'>=</span> <span class='ident'>vec</span>.<span class='ident'>as_slice</span>().<span class='ident'>position_elem</span>(<span class='kw-2'>&amp;</span><span class='ident'>User</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>src</span>[..<span class='ident'>i</span>])) {
+                                <span class='ident'>vec</span>.<span class='ident'>swap_remove</span>(<span class='ident'>n</span>);
                             }
                         }
                     }

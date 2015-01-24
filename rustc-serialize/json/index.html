@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         <a href='../../rustc-serialize/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
-        <p class='location'><a href='../index.html'>rustc-serialize</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../base64/index.html'>base64</a><a class='mod ' href='../hex/index.html'>hex</a><a class='mod current' href='../json/index.html'>json</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='../trait.Decodable.html'>Decodable</a><a class='trait ' href='../trait.Decoder.html'>Decoder</a><a class='trait ' href='../trait.DecoderHelpers.html'>DecoderHelpers</a><a class='trait ' href='../trait.Encodable.html'>Encodable</a><a class='trait ' href='../trait.Encoder.html'>Encoder</a><a class='trait ' href='../trait.EncoderHelpers.html'>EncoderHelpers</a></div>
+        <p class='location'><a href='../index.html'>rustc-serialize</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../base64/index.html' title='Base64 binary-to-text encoding'>base64</a><a class='mod ' href='../hex/index.html' title='Hex binary-to-text encoding'>hex</a><a class='mod current' href='../json/index.html' title='JSON parsing and serialization'>json</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='../trait.Decodable.html' title=''>Decodable</a><a class='trait ' href='../trait.Decoder.html' title=''>Decoder</a><a class='trait ' href='../trait.DecoderHelpers.html' title=''>DecoderHelpers</a><a class='trait ' href='../trait.Encodable.html' title=''>Encodable</a><a class='trait ' href='../trait.Encoder.html' title=''>Encoder</a><a class='trait ' href='../trait.EncoderHelpers.html' title=''>EncoderHelpers</a></div>
     </section>
 
     <nav class="sub">
@@ -44,31 +44,35 @@
 <h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>rustc-serialize</a>::<wbr><a class='mod' href=''>json</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-15375' href='../../src/rustc-serialize/json.rs.html#14-3866'>[src]</a></span></h1>
+        </span><a id='src-15188' href='../../src/rustc-serialize/json.rs.html#14-4023'>[src]</a></span></h1>
 <div class='docblock'><p>JSON parsing and serialization</p>
 
 <h1 id="what-is-json?" class='section-header'><a
                            href="#what-is-json?">What is JSON?</a></h1>
 <p>JSON (JavaScript Object Notation) is a way to write data in Javascript.
-Like XML, it allows to encode structured data in a text format that can be easily read by humans
-Its simple syntax and native compatibility with JavaScript have made it a widely used format.</p>
+Like XML, it allows to encode structured data in a text format that can be
+easily read by humans Its simple syntax and native compatibility with
+JavaScript have made it a widely used format.</p>
 
-<p>Data types that can be encoded are JavaScript types (see the <code>Json</code> enum for more details):</p>
+<p>Data types that can be encoded are JavaScript types (see the <code>Json</code> enum
+for more details):</p>
 
 <ul>
 <li><code>Boolean</code>: equivalent to rust&#39;s <code>bool</code></li>
 <li><code>Number</code>: equivalent to rust&#39;s <code>f64</code></li>
 <li><code>String</code>: equivalent to rust&#39;s <code>String</code></li>
-<li><code>Array</code>: equivalent to rust&#39;s <code>Vec&lt;T&gt;</code>, but also allowing objects of different types in the
+<li><code>Array</code>: equivalent to rust&#39;s <code>Vec&lt;T&gt;</code>, but also allowing objects of
+different types in the
 same array</li>
-<li><code>Object</code>: equivalent to rust&#39;s <code>Treemap&lt;String, json::Json&gt;</code></li>
+<li><code>Object</code>: equivalent to rust&#39;s <code>BTreeMap&lt;String, json::Json&gt;</code></li>
 <li><code>Null</code></li>
 </ul>
 
-<p>An object is a series of string keys mapping to values, in <code>&quot;key&quot;: value</code> format.
-Arrays are enclosed in square brackets ([ ... ]) and objects in curly brackets ({ ... }).
-A simple JSON document encoding a person, his/her age, address and phone numbers could look like</p>
-<pre class='rust '>
+<p>An object is a series of string keys mapping to values, in <code>&quot;key&quot;: value</code>
+format.  Arrays are enclosed in square brackets ([ ... ]) and objects in
+curly brackets ({ ... }).  A simple JSON document encoding a person,
+his/her age, address and phone numbers could look like</p>
+<pre id='rust-example-rendered' class='rust '>
 {
     <span class='string'>&quot;FirstName&quot;</span>: <span class='string'>&quot;John&quot;</span>,
     <span class='string'>&quot;LastName&quot;</span>: <span class='string'>&quot;Doe&quot;</span>,
@@ -110,11 +114,12 @@ mandatory.</p>
                            href="#using-autoserialization">Using Autoserialization</a></h2>
 <p>Create a struct called <code>TestStruct</code> and serialize and deserialize it to and
 from JSON using the serialization API, using the derived serialization code.</p>
-<pre class='rust '>
+<pre id='rust-example-rendered' class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;rustc-serialize&quot;</span> <span class='kw'>as</span> <span class='ident'>rustc_serialize</span>;
 <span class='kw'>use</span> <span class='ident'>rustc_serialize</span>::<span class='ident'>json</span>;
 
-<span class='comment'>// Automatically generate `RustcDecodable` and `RustcEncodable` trait implementations</span>
+<span class='comment'>// Automatically generate `RustcDecodable` and `RustcEncodable` trait</span>
+<span class='comment'>// implementations</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>RustcDecodable</span>, <span class='ident'>RustcEncodable</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>TestStruct</span>  {
     <span class='ident'>data_int</span>: <span class='ident'>u8</span>,
@@ -130,7 +135,7 @@ from JSON using the serialization API, using the derived serialization code.</p>
     };
 
     <span class='comment'>// Serialize using `json::encode`</span>
-    <span class='kw'>let</span> <span class='ident'>encoded</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='ident'>object</span>);
+    <span class='kw'>let</span> <span class='ident'>encoded</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='ident'>object</span>).<span class='ident'>unwrap</span>();
 
     <span class='comment'>// Deserialize using `json::decode`</span>
     <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>encoded</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
@@ -143,7 +148,7 @@ from JSON using the serialization API, using the derived serialization code.</p>
 which is required for custom mappings.</p>
 
 <h3 id="simple-example-of-tojson-usage" class='section-header'><a
-                           href="#simple-example-of-tojson-usage">Simple example of <code>ToJson</code> usage</a></h3><pre class='rust '>
+                           href="#simple-example-of-tojson-usage">Simple example of <code>ToJson</code> usage</a></h3><pre id='rust-example-rendered' class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;rustc-serialize&quot;</span> <span class='kw'>as</span> <span class='ident'>rustc_serialize</span>;
 <span class='kw'>use</span> <span class='ident'>rustc_serialize</span>::<span class='ident'>json</span>::{<span class='self'>self</span>, <span class='ident'>ToJson</span>, <span class='ident'>Json</span>};
 
@@ -174,14 +179,14 @@ which is required for custom mappings.</p>
         <span class='ident'>uid</span>: <span class='number'>1</span>,
         <span class='ident'>dsc</span>: <span class='string'>&quot;test&quot;</span>.<span class='ident'>to_string</span>(),
         <span class='ident'>val</span>: <span class='ident'>num</span>.<span class='ident'>to_json</span>(),
-    });
+    }).<span class='ident'>unwrap</span>();
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;data: {}&quot;</span>, <span class='ident'>data</span>);
     <span class='comment'>// data: {&quot;uid&quot;:1,&quot;dsc&quot;:&quot;test&quot;,&quot;val&quot;:&quot;0.0001+12.539j&quot;};</span>
 }
 </pre>
 
 <h3 id="verbose-example-of-tojson-usage" class='section-header'><a
-                           href="#verbose-example-of-tojson-usage">Verbose example of <code>ToJson</code> usage</a></h3><pre class='rust '>
+                           href="#verbose-example-of-tojson-usage">Verbose example of <code>ToJson</code> usage</a></h3><pre id='rust-example-rendered' class='rust '>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;rustc-serialize&quot;</span> <span class='kw'>as</span> <span class='ident'>rustc_serialize</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>BTreeMap</span>;
 <span class='kw'>use</span> <span class='ident'>rustc_serialize</span>::<span class='ident'>json</span>::{<span class='self'>self</span>, <span class='ident'>Json</span>, <span class='ident'>ToJson</span>};
@@ -290,6 +295,12 @@ For example foo.bar[3].x</p>
                     <tr>
                         <td><a class='stability Unmarked' title='No stability level'></a><a class='enum' href='enum.DecoderError.html'
                                title='rustc-serialize::json::DecoderError'>DecoderError</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='enum' href='enum.EncoderError.html'
+                               title='rustc-serialize::json::EncoderError'>EncoderError</a></td>
                         <td class='docblock short'></td>
                     </tr>
                 

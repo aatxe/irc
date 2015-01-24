@@ -55,7 +55,7 @@ and also provides an advanced interface for error detection and recovery.</p>
 <h2 id="simple-usage" class='section-header'><a
                            href="#simple-usage">Simple Usage</a></h2>
 <p>To encode a string:</p>
-<pre class='rust '>
+<pre id='rust-example-rendered' class='rust '>
 <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>Encoding</span>, <span class='ident'>EncoderTrap</span>};
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::<span class='ident'>ISO_8859_1</span>;
 
@@ -64,7 +64,7 @@ and also provides an advanced interface for error detection and recovery.</p>
 </pre>
 
 <p>To encode a string with unrepresentable characters:</p>
-<pre class='rust '>
+<pre id='rust-example-rendered' class='rust '>
 <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>Encoding</span>, <span class='ident'>EncoderTrap</span>};
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::<span class='ident'>ISO_8859_2</span>;
 
@@ -78,7 +78,7 @@ and also provides an advanced interface for error detection and recovery.</p>
 </pre>
 
 <p>To decode a byte sequence:</p>
-<pre class='rust '>
+<pre id='rust-example-rendered' class='rust '>
 <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>Encoding</span>, <span class='ident'>DecoderTrap</span>};
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::<span class='ident'>ISO_8859_1</span>;
 
@@ -87,7 +87,7 @@ and also provides an advanced interface for error detection and recovery.</p>
 </pre>
 
 <p>To decode a byte sequence with invalid sequences:</p>
-<pre class='rust '>
+<pre id='rust-example-rendered' class='rust '>
 <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>Encoding</span>, <span class='ident'>DecoderTrap</span>};
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::<span class='ident'>ISO_8859_6</span>;
 
@@ -99,7 +99,7 @@ and also provides an advanced interface for error detection and recovery.</p>
 </pre>
 
 <p>A practical example of custom encoder traps:</p>
-<pre class='rust '>
+<pre id='rust-example-rendered' class='rust '>
 <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>Encoding</span>, <span class='ident'>ByteWriter</span>, <span class='ident'>EncoderTrap</span>, <span class='ident'>DecoderTrap</span>};
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>types</span>::<span class='ident'>RawEncoder</span>;
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::<span class='ident'>ASCII</span>;
@@ -121,7 +121,7 @@ and also provides an advanced interface for error detection and recovery.</p>
 </pre>
 
 <p>Getting the encoding from the string label, as specified in WHATWG Encoding standard:</p>
-<pre class='rust '>
+<pre id='rust-example-rendered' class='rust '>
 <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>Encoding</span>, <span class='ident'>DecoderTrap</span>};
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>label</span>::<span class='ident'>encoding_from_whatwg_label</span>;
 <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::<span class='ident'>WINDOWS_949</span>;

@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a>::<wbr><a href='index.html'>utf_8</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.UTF8Decoder.html'>UTF8Decoder</a><a class='struct ' href='struct.UTF8Encoder.html'>UTF8Encoder</a><a class='struct ' href='struct.UTF8Encoding.html'>UTF8Encoding</a></div><div class='block fn'><h2>Functions</h2><a class='fn current' href='fn.from_utf8.html'>from_utf8</a></div>
+        <p class='location'><a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a>::<wbr><a href='index.html'>utf_8</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.UTF8Decoder.html' title='A decoder for UTF-8.'>UTF8Decoder</a><a class='struct ' href='struct.UTF8Encoder.html' title='An encoder for UTF-8.'>UTF8Encoder</a><a class='struct ' href='struct.UTF8Encoding.html' title='UTF-8 (UCS Transformation Format, 8-bit).'>UTF8Encoding</a></div><div class='block fn'><h2>Functions</h2><a class='fn current' href='fn.from_utf8.html' title='Almost equivalent to `std::str::from_utf8`. This function is provided for the fair benchmark against the stdlib&#39;s UTF-8 conversion functions, as rust-encoding always allocates a new string.'>from_utf8</a></div>
     </section>
 
     <nav class="sub">
@@ -44,7 +44,7 @@
 <h1 class='fqn'><span class='in-band'>Function <a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a>::<wbr><a href='index.html'>utf_8</a>::<wbr><a class='fn' href=''>from_utf8</a><wbr><a class='stability Unstable' title=''>Unstable</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-3949' href='../../../src/encoding/codec/utf_8.rs.html#214-238'>[src]</a></span></h1>
+        </span><a id='src-3933' href='../../../src/encoding/codec/utf_8.rs.html#214-238'>[src]</a></span></h1>
 <pre class='rust fn'>pub fn from_utf8&lt;'a&gt;(input: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a [</a><a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'a <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</pre><div class='docblock'><p>Almost equivalent to <code>std::str::from_utf8</code>.
 This function is provided for the fair benchmark against the stdlib&#39;s UTF-8 conversion
 functions, as rust-encoding always allocates a new string.</p>

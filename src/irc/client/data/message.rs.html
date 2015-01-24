@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/Documents/Programming/Rust/irc/src/client/data/message.rs`.">
+    <meta name="description" content="Source to the Rust file `src/client/data/message.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>message.rs.html -- source</title>
@@ -238,6 +238,11 @@
 <span id="196">196</span>
 <span id="197">197</span>
 <span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Messages to and from the server.</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;New features were added recently.&quot;</span>]</span>
@@ -249,16 +254,21 @@
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Show</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Message</span> {
     <span class='doccomment'>/// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// The IRC command as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='ident'>command</span>: <span class='ident'>String</span>,
     <span class='doccomment'>/// The command arguments.</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='ident'>args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// The message suffix as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).</span>
     <span class='doccomment'>/// This is the only part of the message that is allowed to contain spaces.</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='ident'>suffix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
 }
 
+<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>impl</span> <span class='ident'>Message</span> {
     <span class='doccomment'>/// Creates a new Message.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
