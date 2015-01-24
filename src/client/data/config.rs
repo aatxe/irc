@@ -67,7 +67,7 @@ impl Config {
         decode(&data[]).map_err(|e| IoError {
             kind: InvalidInput,
             desc: "Failed to decode configuration file.",
-            detail: e.detail(),
+            detail: Some(e.description().to_owned()),
         })
     }
 

@@ -1,5 +1,6 @@
 //! Thread-safe connections on IrcStreams.
 #![stable]
+#[cfg(feature = "ssl")] use std::borrow::ToOwned;
 #[cfg(feature = "ssl")] use std::error::Error;
 use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
 #[cfg(any(feature = "encode", feature = "ssl"))] use std::io::{IoError, IoErrorKind};
@@ -202,7 +203,7 @@ fn ssl_to_io<T>(res: Result<T, SslError>) -> IoResult<T> {
         Err(e) => Err(IoError {
             kind: IoErrorKind::OtherIoError,
             desc: "An SSL error occurred.",
-            detail: e.detail(),
+            detail: Some(e.description().to_owned()),
         }),
     }
 }
