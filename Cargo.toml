@@ -1,7 +1,7 @@
 [package]
 
 name = "irc"
-version = "0.8.1"
+version = "0.8.2"
 description = "A simple, thread-safe IRC client library."
 authors = ["Aaron Weiss <aaronweiss74@gmail.com>"]
 license = "Unlicense"
@@ -19,11 +19,11 @@ ssl = ["openssl"]
 nochanlists = []
 
 [dependencies.rustc-serialize]
-rustc-serialize = "~0.2.7"
+rustc-serialize = "~0.2.9"
 
 [dependencies.time]
 
-time = "~0.1.12"
+time = "~0.1.14"
 optional = true
 
 [dependencies.encoding]
@@ -33,5 +33,5 @@ optional = true
 
 [dependencies.openssl]
 
-openssl = "~0.2.15"
+openssl = "~0.2.17"
 optional = true
