@@ -2,7 +2,7 @@
 #![stable]
 use std::borrow::ToOwned;
 use std::collections::HashMap;
-use std::io::{BufferedReader, BufferedWriter, IoError, IoErrorKind, IoResult};
+use std::old_io::{BufferedReader, BufferedWriter, IoError, IoErrorKind, IoResult};
 use std::sync::{Mutex, RwLock};
 use client::conn::{Connection, NetStream};
 use client::data::{Command, Config, Message, Response, User};
@@ -302,8 +302,8 @@ impl<'a, T: IrcReader, U: IrcWriter> Iterator for ServerIterator<'a, T, U> {
 mod test {
     use super::{IrcServer, Server};
     use std::default::Default;
-    use std::io::{MemReader, MemWriter};
-    use std::io::util::{NullReader, NullWriter};
+    use std::old_io::{MemReader, MemWriter};
+    use std::old_io::util::{NullReader, NullWriter};
     use client::conn::Connection;
     use client::data::{Config, User};
     use client::data::command::Command::PRIVMSG;

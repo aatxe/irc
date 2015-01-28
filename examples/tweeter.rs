@@ -3,7 +3,7 @@
 extern crate irc;
 
 use std::default::Default;
-use std::io::timer::sleep;
+use std::old_io::timer::sleep;
 use std::sync::Arc;
 use std::thread::Thread;
 use std::time::duration::Duration;

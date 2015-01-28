@@ -1,6 +1,6 @@
 //! Enumeration of all available client commands.
 #![stable]
-use std::io::{InvalidInput, IoError, IoResult};
+use std::old_io::{InvalidInput, IoError, IoResult};
 use std::str::FromStr;
 use client::data::message::{Message, ToMessage};
 

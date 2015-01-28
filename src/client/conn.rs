@@ -2,8 +2,8 @@
 #![stable]
 #[cfg(feature = "ssl")] use std::borrow::ToOwned;
 #[cfg(feature = "ssl")] use std::error::Error;
-use std::io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
-#[cfg(any(feature = "encode", feature = "ssl"))] use std::io::{IoError, IoErrorKind};
+use std::old_io::{BufferedReader, BufferedWriter, IoResult, TcpStream};
+#[cfg(any(feature = "encode", feature = "ssl"))] use std::old_io::{IoError, IoErrorKind};
 use std::sync::{Mutex, MutexGuard};
 #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
 #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
@@ -138,7 +138,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
             })
         };
         let mut writer = self.writer.lock().unwrap();
-        try!(writer.write(&data[]));
+        try!(writer.write_all(&data[]));
         writer.flush()
     }
 
@@ -232,11 +232,11 @@ impl Reader for NetStream {
 }
 
 impl Writer for NetStream {
-    fn write(&mut self, buf: &[u8]) -> IoResult<()> {
+    fn write_all(&mut self, buf: &[u8]) -> IoResult<()> {
         match self {
-            &mut NetStream::UnsecuredTcpStream(ref mut stream) => stream.write(buf),
+            &mut NetStream::UnsecuredTcpStream(ref mut stream) => stream.write_all(buf),
             #[cfg(feature = "ssl")]
-            &mut NetStream::SslTcpStream(ref mut stream) => stream.write(buf),
+            &mut NetStream::SslTcpStream(ref mut stream) => stream.write_all(buf),
         }
     }
 }
@@ -244,8 +244,8 @@ impl Writer for NetStream {
 #[cfg(test)]
 mod test {
     use super::Connection;
-    use std::io::{MemReader, MemWriter};
-    use std::io::util::{NullReader, NullWriter};
+    use std::old_io::{MemReader, MemWriter};
+    use std::old_io::util::{NullReader, NullWriter};
     use client::data::message::Message;
     #[cfg(feature = "encode")] use encoding::{DecoderTrap, Encoding};
     #[cfg(feature = "encode")] use encoding::all::{ISO_8859_15, UTF_8};

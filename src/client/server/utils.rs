@@ -1,7 +1,7 @@
 //! Utilities and shortcuts for working with IRC servers.
 #![stable]
 
-use std::io::IoResult;
+use std::old_io::IoResult;
 use client::data::{Command, Config, User};
 use client::data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
 use client::data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
@@ -237,8 +237,8 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 mod test {
     use super::Wrapper;
     use std::default::Default;
-    use std::io::MemWriter;
-    use std::io::util::NullReader;
+    use std::old_io::MemWriter;
+    use std::old_io::util::NullReader;
     use client::conn::Connection;
     use client::data::Config;
     use client::server::IrcServer;

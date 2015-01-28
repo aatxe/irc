@@ -3,8 +3,8 @@
 use std::borrow::ToOwned;
 use std::collections::HashMap;
 use std::error::Error;
-use std::io::fs::File;
-use std::io::{InvalidInput, IoError, IoResult};
+use std::old_io::fs::File;
+use std::old_io::{InvalidInput, IoError, IoResult};
 use rustc_serialize::json::decode;
 
 /// Configuration data.
