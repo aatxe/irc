@@ -4,7 +4,7 @@
 #![unstable]
 #![warn(missing_docs)]
 
-#![feature(slicing_syntax)]
+#![feature(collections, core, io, path, slicing_syntax)]
 #[cfg(feature = "ctcp")] extern crate time;
 #[cfg(feature = "encode")] extern crate encoding;
 extern crate "rustc-serialize" as rustc_serialize;
