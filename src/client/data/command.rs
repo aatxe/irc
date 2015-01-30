@@ -203,7 +203,7 @@ pub enum Command<'a> {
 
     // Capabilities extension to IRCv3
     /// CAP COMMAND :[param]
-    #[experimental = "This command is not entirely specification compliant."]
+    #[unstable = "This command is not entirely specification compliant."]
     CAP(CapSubCommand, Option<&'a str>),
 }
 

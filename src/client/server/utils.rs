@@ -169,7 +169,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a CTCP-escaped message to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[unstable = "Feature is relatively new."]
+    #[stable]
     #[cfg(feature = "ctcp")]
     pub fn send_ctcp(&self, target: &str, msg: &str) -> IoResult<()> {
         self.send_privmsg(target, &format!("\u{001}{}\u{001}", msg)[])
@@ -177,7 +177,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends an action command to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[unstable = "Feature is relatively new."]
+    #[stable]
     #[cfg(feature = "ctcp")]
     pub fn send_action(&self, target: &str, msg: &str) -> IoResult<()> {
         self.send_ctcp(target, &format!("ACTION {}", msg)[])
@@ -185,7 +185,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a finger request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[unstable = "Feature is relatively new."]
+    #[stable]
     #[cfg(feature = "ctcp")]
     pub fn send_finger(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "FINGER")
@@ -193,7 +193,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a version request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[unstable = "Feature is relatively new."]
+    #[stable]
     #[cfg(feature = "ctcp")]
     pub fn send_version(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "VERSION")
@@ -201,7 +201,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a source request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[unstable = "Feature is relatively new."]
+    #[stable]
     #[cfg(feature = "ctcp")]
     pub fn send_source(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "SOURCE")
@@ -209,7 +209,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a user info request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[unstable = "Feature is relatively new."]
+    #[stable]
     #[cfg(feature = "ctcp")]
     pub fn send_user_info(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "USERINFO")
@@ -217,7 +217,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a finger request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[unstable = "Feature is relatively new."]
+    #[stable]
     #[cfg(feature = "ctcp")]
     pub fn send_ctcp_ping(&self, target: &str) -> IoResult<()> {
         let time = get_time();
@@ -226,7 +226,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Sends a time request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[unstable = "Feature is relatively new."]
+    #[stable]
     #[cfg(feature = "ctcp")]
     pub fn send_time(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "TIME")

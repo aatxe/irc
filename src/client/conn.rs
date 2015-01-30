@@ -117,7 +117,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     }
 
     /// Sends a Message over this connection.
-    #[experimental = "Design is very new."]
+    #[stable]
     #[cfg(feature = "encode")]
     pub fn send<M: ToMessage>(&self, to_msg: M, encoding: &str) -> IoResult<()> {
         let encoding = match encoding_from_whatwg_label(encoding) {
@@ -143,7 +143,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
     }
 
     /// Sends a message over this connection. 
-    #[experimental = "Design is very new."]
+    #[stable]
     #[cfg(not(feature = "encode"))]
     pub fn send<M: ToMessage>(&self, to_msg: M) -> IoResult<()> {
         let mut writer = self.writer.lock().unwrap();

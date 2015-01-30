@@ -37,7 +37,7 @@ impl Message {
     }
 
     /// Gets the nickname of the message source, if it exists. 
-    #[experimental = "Feature is new."]
+    #[stable]
     pub fn get_source_nickname(&self) -> Option<&str> {
         self.prefix.as_ref().and_then(|s| s.find('!').map(|i| &s[..i]))
     }
@@ -103,7 +103,7 @@ impl FromStr for Message {
 }
 
 /// A trait representing the ability to be converted into a Message.
-#[experimental = "Design is new."]
+#[stable]
 pub trait ToMessage {
     /// Converts this to a Message.
     fn to_message(&self) -> Message;

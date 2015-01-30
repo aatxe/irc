@@ -1,2 +1,2 @@
 //! A simple, thread-safe IRC server library.
-#![experimental]
+#![unstable = "This has yet to be written."]

@@ -2,7 +2,6 @@
 #![crate_name = "irc"]
 #![crate_type = "lib"]
 #![unstable]
-#![allow(unstable)]
 #![warn(missing_docs)]
 
 #![feature(slicing_syntax)]

@@ -70,7 +70,7 @@ impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     }
 
     /// Reconnects to the IRC server.
-    #[unstable = "Feature is relatively new."]
+    #[stable]
     pub fn reconnect(&self) -> IoResult<()> {
         self.conn.reconnect(self.config().server(), self.config.port())
     }
@@ -253,10 +253,10 @@ pub struct ServerIterator<'a, T: IrcReader, U: IrcWriter> {
     server: &'a IrcServer<T, U>
 }
 
-#[experimental = "Design is liable to change to accomodate new functionality."]
+#[unstable = "Design is liable to change to accomodate new functionality."]
 impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
     /// Creates a new ServerIterator for the desired IrcServer.
-    #[experimental = "Design is liable to change to accomodate new functionality."]
+    #[unstable = "Design is liable to change to accomodate new functionality."]
     pub fn new(server: &IrcServer<T, U>) -> ServerIterator<T, U> {
         ServerIterator { server: server }
     }
@@ -275,7 +275,7 @@ impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
 }
 
 impl<'a, T: IrcReader, U: IrcWriter> Iterator for ServerIterator<'a, T, U> {
-    #[unstable = "Design changed fairly recently."]
+    #[stable]
     type Item = IoResult<Message>;
     fn next(&mut self) -> Option<IoResult<Message>> {
         let res = self.get_next_line().and_then(|msg|
