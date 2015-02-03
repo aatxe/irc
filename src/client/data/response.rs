@@ -7,7 +7,7 @@ use client::data::message::Message;
 
 /// List of all server responses as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812).
 /// All commands are documented with their expected form from the RFC.
-#[derive(Copy, Show, PartialEq, FromPrimitive)]
+#[derive(Copy, Debug, PartialEq, FromPrimitive)]
 #[repr(u16)]
 #[stable]
 pub enum Response {
@@ -435,7 +435,7 @@ impl Response {
     /// Gets a response from a message.
     #[stable]
     pub fn from_message(m: &Message) -> Option<Response> { 
-        m.command.parse() 
+        m.command.parse().ok()
     }
 
     /// Determines whether or not this response is an error response.
@@ -446,11 +446,12 @@ impl Response {
 }
 
 impl FromStr for Response {
-    fn from_str(s: &str) -> Option<Response> {
-        if let Some(respcode) = s.parse() {
-            FromPrimitive::from_u16(respcode)
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Response, &'static str> {
+        if let Ok(respcode) = s.parse() {
+            FromPrimitive::from_u16(respcode).ok_or("Failed to convert response code to u16.")
         } else {
-            None
+            Err("Failed to parse response code.")
         }   
     }
 }

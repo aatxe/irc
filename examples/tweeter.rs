@@ -1,5 +1,4 @@
-#![feature(slicing_syntax)]
-#![allow(unstable)]
+#![feature(io, slicing_syntax, std_misc)]
 extern crate irc;
 
 use std::default::Default;

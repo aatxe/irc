@@ -280,14 +280,14 @@ impl<'a, T: IrcReader, U: IrcWriter> Iterator for ServerIterator<'a, T, U> {
     fn next(&mut self) -> Option<IoResult<Message>> {
         let res = self.get_next_line().and_then(|msg|
              match msg.parse() {
-                Some(msg) => {
+                Ok(msg) => {
                     self.server.handle_message(&msg);
                     Ok(msg)
                 },
-                None => Err(IoError {
+                Err(m) => Err(IoError {
                     kind: IoErrorKind::InvalidInput,
                     desc: "Failed to parse message.",
-                    detail: Some(msg)
+                    detail: Some(format!("{} (Message: {})", m, msg))
                 })
             }
         );

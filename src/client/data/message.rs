@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 /// IRC Message data.
 #[stable]
-#[derive(Clone, PartialEq, Show)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Message {
     /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
     #[stable]
@@ -72,9 +72,10 @@ impl ToMessage for Message {
 }
 
 impl FromStr for Message {
-    fn from_str(s: &str) -> Option<Message> {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Message, &'static str> {
         let mut state = s.clone();
-        if s.len() == 0 { return None }
+        if s.len() == 0 { return Err("Cannot parse an empty string as a message.") }
         let prefix = if state.starts_with(":") {
             let prefix = state.find(' ').map(|i| &state[1..i]);
             state = state.find(' ').map_or("", |i| &state[i+1..]);
@@ -94,11 +95,11 @@ impl FromStr for Message {
                 state = state.find(' ').map_or("", |i| &state[i+1..]);
                 cmd
             }
-            _ => return None
+            _ => return Err("Cannot parse a message without a command.")
         };
         if suffix.is_none() { state = &state[..state.len() - 2] }
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| s.len() != 0).collect();
-        Some(Message::new(prefix, command, if args.len() > 0 { Some(args) } else { None }, suffix))
+        Ok(Message::new(prefix, command, if args.len() > 0 { Some(args) } else { None }, suffix))
     }
 }
 
@@ -167,14 +168,14 @@ mod test {
             args: vec![format!("test")],
             suffix: Some(format!("Testing!")),
         };
-        assert_eq!("PRIVMSG test :Testing!\r\n".parse(), Some(message));
+        assert_eq!("PRIVMSG test :Testing!\r\n".parse(), Ok(message));
         let message = Message {
             prefix: Some(format!("test!test@test")),
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
             suffix: Some(format!("Still testing!")),
         };
-        assert_eq!(":test!test@test PRIVMSG test :Still testing!\r\n".parse(), Some(message));
+        assert_eq!(":test!test@test PRIVMSG test :Still testing!\r\n".parse(), Ok(message));
     }
 
     #[test]

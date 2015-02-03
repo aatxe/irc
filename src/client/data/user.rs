@@ -7,7 +7,7 @@ use std::str::FromStr;
 
 /// IRC User data.
 #[stable]
-#[derive(Clone, Show)]
+#[derive(Clone, Debug)]
 pub struct User {
     /// The user's nickname.
     /// This is the only detail used in determining the equality of two users.
@@ -113,7 +113,7 @@ impl PartialEq for User {
 
 /// The user's access level.
 #[stable]
-#[derive(Copy, PartialEq, Clone, Show)]
+#[derive(Copy, PartialEq, Clone, Debug)]
 pub enum AccessLevel {
     /// The channel owner (~).
     #[stable]
@@ -174,15 +174,16 @@ impl PartialOrd for AccessLevel {
 }
 
 impl FromStr for AccessLevel {
-    fn from_str(s: &str) -> Option<AccessLevel> {
-        if s.len() == 0 { None } else {
-            Some(match s.char_at(0) {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<AccessLevel, &'static str> {
+        if s.len() == 0 { Err("No access level in an empty string.") } else {
+            Ok(match s.char_at(0) {
                 '~' => AccessLevel::Owner,
                 '&' => AccessLevel::Admin,
                 '@' => AccessLevel::Oper,
                 '%' => AccessLevel::HalfOp,
                 '+' => AccessLevel::Voice,
-                 _  => return None,
+                 _  => return Err("Failed to parse access level."),
             })
         }
     }
@@ -206,7 +207,7 @@ impl<'a> Iterator for AccessLevelIterator<'a> {
         if self.value.len() > 0 {
             self.value = &self.value[1..];
         }
-        ret
+        ret.ok()
     }
 }
 
@@ -217,13 +218,13 @@ mod test {
 
     #[test]
     fn parse_access_level() {
-        assert!("member".parse::<AccessLevel>().is_none());
+        assert!("member".parse::<AccessLevel>().is_err());
         assert_eq!("~owner".parse::<AccessLevel>().unwrap(), Owner);
         assert_eq!("&admin".parse::<AccessLevel>().unwrap(), Admin);
         assert_eq!("@oper".parse::<AccessLevel>().unwrap(), Oper);
         assert_eq!("%halfop".parse::<AccessLevel>().unwrap(), HalfOp);
         assert_eq!("+voice".parse::<AccessLevel>().unwrap(), Voice);
-        assert!("".parse::<AccessLevel>().is_none());
+        assert!("".parse::<AccessLevel>().is_err());
     }
 
     #[test]

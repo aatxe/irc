@@ -9,7 +9,7 @@ use client::data::message::{Message, ToMessage};
 /// [capabilities extension](https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01).
 /// Additionally, this includes some common additional commands from popular IRCds.
 #[stable]
-#[derive(Show, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum Command<'a> {
     // 3.1 Connection Registration
     /// PASS :password
@@ -992,7 +992,7 @@ impl<'a> Command<'a> {
             }
         } else if let "CAP" = &m.command[] {
             if m.args.len() != 1 { return Err(invalid_input()) }
-            if let Some(cmd) = m.args[0].parse() {
+            if let Ok(cmd) = m.args[0].parse() {
                 match m.suffix {
                     Some(ref suffix) => Command::CAP(cmd, Some(&suffix[])),
                     None => Command::CAP(cmd, None),
@@ -1008,7 +1008,7 @@ impl<'a> Command<'a> {
 
 /// A list of all of the subcommands for the capabilities extension.
 #[stable]
-#[derive(Copy, Show, PartialEq)]
+#[derive(Copy, Debug, PartialEq)]
 pub enum CapSubCommand {
     /// Requests a list of the server's capabilities.
     #[stable]
@@ -1051,16 +1051,17 @@ impl CapSubCommand {
 }
 
 impl FromStr for CapSubCommand {
-    fn from_str(s: &str) -> Option<CapSubCommand> {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<CapSubCommand, &'static str> {
         match s {
-            "LS"    => Some(CapSubCommand::LS),
-            "LIST"  => Some(CapSubCommand::LIST),
-            "REQ"   => Some(CapSubCommand::REQ),
-            "ACK"   => Some(CapSubCommand::ACK),
-            "NAK"   => Some(CapSubCommand::NAK),
-            "CLEAR" => Some(CapSubCommand::CLEAR),
-            "END"   => Some(CapSubCommand::END),
-            _       => None,
+            "LS"    => Ok(CapSubCommand::LS),
+            "LIST"  => Ok(CapSubCommand::LIST),
+            "REQ"   => Ok(CapSubCommand::REQ),
+            "ACK"   => Ok(CapSubCommand::ACK),
+            "NAK"   => Ok(CapSubCommand::NAK),
+            "CLEAR" => Ok(CapSubCommand::CLEAR),
+            "END"   => Ok(CapSubCommand::END),
+            _       => Err("Failed to parse CAP subcommand."),
         }
     }
 }
