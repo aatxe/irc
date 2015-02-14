@@ -1,4 +1,4 @@
-# irc [![Build Status](https://travis-ci.org/aatxe/irc.svg?branch=master)](https://travis-ci.org/aatxe/irc) #
+# irc [![Build Status](https://travis-ci.org/aatxe/irc.svg?branch=master)](https://travis-ci.org/aatxe/irc) [![Crates.io](https://img.shields.io/crates/v/irc.svg)](https://crates.io/crates/irc) #
 A thread-safe IRC library in Rust. The client portion is compliant with 
 [RFC 2812](http://tools.ietf.org/html/rfc2812) and includes some additional, common features. The 
 server portion is still a work in progress. You can find up-to-date, ready-to-use documentation 
