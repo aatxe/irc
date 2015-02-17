@@ -237,7 +237,6 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 mod test {
     use super::Wrapper;
     use std::default::Default;
-    use std::old_io::MemWriter;
     use std::old_io::util::NullReader;
     use client::conn::Connection;
     use client::data::Config;
@@ -247,7 +246,7 @@ mod test {
     #[test]
     fn identify() {
         let server = IrcServer::from_connection(test_config(), 
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.identify().unwrap();
@@ -262,7 +261,7 @@ mod test {
             nickname: Some(format!("test")),
             password: Some(format!("password")),
             .. Default::default()
-        }, Connection::new(NullReader, MemWriter::new()));
+        }, Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.identify().unwrap();
@@ -271,10 +270,10 @@ mod test {
         PASS :password\r\nNICK :test\r\nUSER test 0 * :test\r\n");
     }
 
-#[test]
+    #[test]
     fn send_pong() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_pong("irc.test.net").unwrap();
@@ -286,7 +285,7 @@ mod test {
     #[test]
     fn send_join() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_join("#test,#test2,#test3").unwrap();
@@ -298,7 +297,7 @@ mod test {
     #[test]
     fn send_oper() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_oper("test", "test").unwrap();
@@ -310,7 +309,7 @@ mod test {
     #[test]
     fn send_privmsg() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_privmsg("#test", "Hi, everybody!").unwrap();
@@ -322,7 +321,7 @@ mod test {
     #[test]
     fn send_notice() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_notice("#test", "Hi, everybody!").unwrap();
@@ -334,7 +333,7 @@ mod test {
     #[test]
     fn send_topic_no_topic() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_topic("#test", "").unwrap();
@@ -346,7 +345,7 @@ mod test {
     #[test]
     fn send_topic() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_topic("#test", "Testing stuff.").unwrap();
@@ -358,7 +357,7 @@ mod test {
     #[test]
     fn send_kill() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_kill("test", "Testing kills.").unwrap();
@@ -370,7 +369,7 @@ mod test {
     #[test]
     fn send_kick_no_message() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_kick("#test", "test", "").unwrap();
@@ -382,7 +381,7 @@ mod test {
     #[test]
     fn send_kick() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_kick("#test", "test", "Testing kicks.").unwrap();
@@ -394,7 +393,7 @@ mod test {
     #[test]
     fn send_mode_no_modeparams() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_mode("#test", "+i", "").unwrap();
@@ -406,7 +405,7 @@ mod test {
     #[test]
     fn send_mode() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_mode("#test", "+o", "test").unwrap();
@@ -418,7 +417,7 @@ mod test {
     #[test]
     fn send_samode_no_modeparams() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_samode("#test", "+i", "").unwrap();
@@ -430,7 +429,7 @@ mod test {
     #[test]
     fn send_samode() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_samode("#test", "+o", "test").unwrap();
@@ -442,7 +441,7 @@ mod test {
     #[test]
     fn send_sanick() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_sanick("test", "test2").unwrap();
@@ -454,7 +453,7 @@ mod test {
     #[test]
     fn send_invite() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_invite("test", "#test").unwrap();
@@ -467,7 +466,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn send_ctcp() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_ctcp("test", "MESSAGE").unwrap();
@@ -480,7 +479,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn send_action() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_action("test", "tests.").unwrap();
@@ -493,7 +492,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn send_finger() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_finger("test").unwrap();
@@ -506,7 +505,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn send_version() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_version("test").unwrap();
@@ -519,7 +518,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn send_source() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_source("test").unwrap();
@@ -532,7 +531,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn send_user_info() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_user_info("test").unwrap();
@@ -545,7 +544,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn send_ctcp_ping() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_ctcp_ping("test").unwrap();
@@ -560,7 +559,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn send_time() {
         let server = IrcServer::from_connection(test_config(),
-                     Connection::new(NullReader, MemWriter::new()));
+                     Connection::new(NullReader, Vec::new()));
         {
             let wrapper = Wrapper::new(&server);
             wrapper.send_time("test").unwrap();

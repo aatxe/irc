@@ -305,7 +305,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Iterator for ServerIterator<'a, T, U> {
 mod test {
     use super::{IrcServer, Server};
     use std::default::Default;
-    use std::old_io::{MemReader, MemWriter};
+    use std::old_io::MemReader;
     use std::old_io::util::{NullReader, NullWriter};
     use client::conn::Connection;
     use client::data::{Config, User};
@@ -324,8 +324,8 @@ mod test {
         }
     }
 
-    pub fn get_server_value<T: IrcReader>(server: IrcServer<T, MemWriter>) -> String {
-        let vec = server.conn().writer().get_ref().to_vec();
+    pub fn get_server_value<T: IrcReader>(server: IrcServer<T, Vec<u8>>) -> String {
+        let vec = server.conn().writer().clone();
         String::from_utf8(vec).unwrap()
     }
 
@@ -347,7 +347,7 @@ mod test {
     fn handle_message() {
         let value = "PING :irc.test.net\r\n:irc.test.net 376 test :End of /MOTD command.\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-           MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+           MemReader::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -364,7 +364,7 @@ mod test {
             channels: Some(vec![format!("#test"), format!("#test2")]),
             .. Default::default()
         }, Connection::new(
-           MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+           MemReader::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -382,7 +382,7 @@ mod test {
             channels: Some(vec![format!("#test"), format!("#test2")]),
             .. Default::default()
         }, Connection::new(
-           MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+           MemReader::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -395,7 +395,7 @@ mod test {
     fn nickname_in_use() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-           MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+           MemReader::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -409,7 +409,7 @@ mod test {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-           MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+           MemReader::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -419,7 +419,7 @@ mod test {
     #[test]
     fn send() {
         let server = IrcServer::from_connection(test_config(), Connection::new(
-           NullReader, MemWriter::new()
+           NullReader, Vec::new()
         ));
         assert!(server.send(PRIVMSG("#test", "Hi there!")).is_ok());
         assert_eq!(&get_server_value(server)[], "PRIVMSG #test :Hi there!\r\n");
@@ -498,7 +498,7 @@ mod test {
     fn finger_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+            MemReader::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -512,7 +512,7 @@ mod test {
     fn version_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}VERSION\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+            MemReader::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -526,7 +526,7 @@ mod test {
     fn source_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}SOURCE\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+            MemReader::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -541,7 +541,7 @@ mod test {
     fn ctcp_ping_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}PING test\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+            MemReader::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -554,7 +554,7 @@ mod test {
     fn time_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}TIME\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+            MemReader::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -569,7 +569,7 @@ mod test {
     fn user_info_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}USERINFO\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+            MemReader::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
