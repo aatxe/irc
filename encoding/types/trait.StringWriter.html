@@ -41,12 +41,12 @@
     </nav>
 
     <section id='main' class="content trait">
-<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='trait' href=''>StringWriter</a><wbr><a class='stability Unstable' title=''>Unstable</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='trait' href=''>StringWriter</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-482' href='../../src/encoding/types.rs.html#104-118'>[src]</a></span></h1>
+        </span><a id='src-484' href='../../src/encoding/types.rs.html#104-118'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait StringWriter {
-    fn <a href='#tymethod.write_char' class='fnname'>write_char</a>(&amp;mut self, c: <a href='http://doc.rust-lang.org/nightly/core/primitive.char.html'>char</a>);
+    fn <a href='#tymethod.write_char' class='fnname'>write_char</a>(&amp;mut self, c: <a href='http://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>);
     fn <a href='#tymethod.write_str' class='fnname'>write_str</a>(&amp;mut self, s: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>);
 
     fn <a href='#method.writer_hint' class='fnname'>writer_hint</a>(&amp;mut self, _expectedlen: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) { ... }
@@ -54,12 +54,12 @@
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.write_char' class='method'><a class='stability Unstable' title='Unstable'></a><code>fn <a href='#tymethod.write_char' class='fnname'>write_char</a>(&amp;mut self, c: <a href='http://doc.rust-lang.org/nightly/core/primitive.char.html'>char</a>)</code></h3><div class='docblock'><p>Writes a single character.</p>
-</div><h3 id='tymethod.write_str' class='method'><a class='stability Unstable' title='Unstable'></a><code>fn <a href='#tymethod.write_str' class='fnname'>write_str</a>(&amp;mut self, s: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h3><div class='docblock'><p>Writes a string.</p>
+        <h3 id='tymethod.write_char' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#tymethod.write_char' class='fnname'>write_char</a>(&amp;mut self, c: <a href='http://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>)</code></h3><div class='docblock'><p>Writes a single character.</p>
+</div><h3 id='tymethod.write_str' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#tymethod.write_str' class='fnname'>write_str</a>(&amp;mut self, s: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h3><div class='docblock'><p>Writes a string.</p>
 </div></div>
             <h2 id='provided-methods'>Provided Methods</h2>
             <div class='methods'>
-        <h3 id='method.writer_hint' class='method'><a class='stability Unstable' title='Unstable'></a><code>fn <a href='#method.writer_hint' class='fnname'>writer_hint</a>(&amp;mut self, _expectedlen: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h3><div class='docblock'><p>Hints an expected lower bound on the length (in bytes) of the output
+        <h3 id='method.writer_hint' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.writer_hint' class='fnname'>writer_hint</a>(&amp;mut self, _expectedlen: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h3><div class='docblock'><p>Hints an expected lower bound on the length (in bytes) of the output
 until the next call to <code>writer_hint</code>,
 so that the writer can reserve the memory for writing.
 <code>RawDecoder</code>s are recommended but not required to call this method
@@ -68,7 +68,7 @@ By default this method does nothing.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><a class='stability Unstable' title='Unstable'></a><code>impl <a class='trait' href='../../encoding/types/trait.StringWriter.html' title='encoding::types::StringWriter'>StringWriter</a> for <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></li>
+    <li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../encoding/types/trait.StringWriter.html' title='encoding::types::StringWriter'>StringWriter</a> for <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></li>
 </ul><script type="text/javascript" async
                               src="../../implementors/encoding/types/trait.StringWriter.js">
                       </script></section>

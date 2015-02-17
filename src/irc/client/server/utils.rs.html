@@ -610,16 +610,11 @@
 <span id="568">568</span>
 <span id="569">569</span>
 <span id="570">570</span>
-<span id="571">571</span>
-<span id="572">572</span>
-<span id="573">573</span>
-<span id="574">574</span>
-<span id="575">575</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Utilities and shortcuts for working with IRC servers.</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>IoResult</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::<span class='ident'>IoResult</span>;
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::{<span class='ident'>Command</span>, <span class='ident'>Config</span>, <span class='ident'>User</span>};
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>CAP</span>, <span class='ident'>INVITE</span>, <span class='ident'>JOIN</span>, <span class='ident'>KICK</span>, <span class='ident'>KILL</span>, <span class='ident'>MODE</span>, <span class='ident'>NICK</span>, <span class='ident'>NOTICE</span>};
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>OPER</span>, <span class='ident'>PASS</span>, <span class='ident'>PONG</span>, <span class='ident'>PRIVMSG</span>, <span class='ident'>QUIT</span>, <span class='ident'>SAMODE</span>, <span class='ident'>SANICK</span>, <span class='ident'>TOPIC</span>, <span class='ident'>USER</span>};
@@ -787,7 +782,7 @@
 
     <span class='doccomment'>/// Sends a CTCP-escaped message to the specified target.</span>
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Feature is relatively new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_ctcp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_privmsg</span>(<span class='ident'>target</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;\u{001}{}\u{001}&quot;</span>, <span class='ident'>msg</span>)[])
@@ -795,7 +790,7 @@
 
     <span class='doccomment'>/// Sends an action command to the specified target.</span>
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Feature is relatively new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_action</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;ACTION {}&quot;</span>, <span class='ident'>msg</span>)[])
@@ -803,7 +798,7 @@
 
     <span class='doccomment'>/// Sends a finger request to the specified target.</span>
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Feature is relatively new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_finger</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='string'>&quot;FINGER&quot;</span>)
@@ -811,7 +806,7 @@
 
     <span class='doccomment'>/// Sends a version request to the specified target.</span>
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Feature is relatively new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_version</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='string'>&quot;VERSION&quot;</span>)
@@ -819,7 +814,7 @@
 
     <span class='doccomment'>/// Sends a source request to the specified target.</span>
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Feature is relatively new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_source</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='string'>&quot;SOURCE&quot;</span>)
@@ -827,7 +822,7 @@
 
     <span class='doccomment'>/// Sends a user info request to the specified target.</span>
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Feature is relatively new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_user_info</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='string'>&quot;USERINFO&quot;</span>)
@@ -835,7 +830,7 @@
 
     <span class='doccomment'>/// Sends a finger request to the specified target.</span>
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Feature is relatively new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_ctcp_ping</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>time</span> <span class='op'>=</span> <span class='ident'>get_time</span>();
@@ -844,7 +839,7 @@
 
     <span class='doccomment'>/// Sends a time request to the specified target.</span>
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Feature is relatively new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_time</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='string'>&quot;TIME&quot;</span>)
@@ -855,8 +850,7 @@
 <span class='kw'>mod</span> <span class='ident'>test</span> {
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>Wrapper</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>default</span>::<span class='ident'>Default</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>MemWriter</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>util</span>::<span class='ident'>NullReader</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::<span class='ident'>util</span>::<span class='ident'>NullReader</span>;
     <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>conn</span>::<span class='ident'>Connection</span>;
     <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Config</span>;
     <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>server</span>::<span class='ident'>IrcServer</span>;
@@ -865,7 +859,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>identify</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(), 
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>identify</span>().<span class='ident'>unwrap</span>();
@@ -877,14 +871,10 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>identify_with_password</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>Config</span> {
-            <span class='ident'>owners</span>: <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)]),
             <span class='ident'>nickname</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)),
-            <span class='ident'>alt_nicks</span>: <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test2&quot;</span>)]),
-            <span class='ident'>server</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;irc.test.net&quot;</span>)),
             <span class='ident'>password</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;password&quot;</span>)),
-            <span class='ident'>channels</span>: <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;#test&quot;</span>), <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;#test2&quot;</span>)]),
             .. <span class='ident'>Default</span>::<span class='ident'>default</span>()
-        }, <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+        }, <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>identify</span>().<span class='ident'>unwrap</span>();
@@ -896,7 +886,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_pong</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_pong</span>(<span class='string'>&quot;irc.test.net&quot;</span>).<span class='ident'>unwrap</span>();
@@ -908,7 +898,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_join</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_join</span>(<span class='string'>&quot;#test,#test2,#test3&quot;</span>).<span class='ident'>unwrap</span>();
@@ -920,7 +910,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_oper</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_oper</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
@@ -932,7 +922,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_privmsg</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_privmsg</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;Hi, everybody!&quot;</span>).<span class='ident'>unwrap</span>();
@@ -944,7 +934,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_notice</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_notice</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;Hi, everybody!&quot;</span>).<span class='ident'>unwrap</span>();
@@ -956,7 +946,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_topic_no_topic</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_topic</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
@@ -968,7 +958,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_topic</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_topic</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;Testing stuff.&quot;</span>).<span class='ident'>unwrap</span>();
@@ -980,7 +970,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_kill</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_kill</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;Testing kills.&quot;</span>).<span class='ident'>unwrap</span>();
@@ -992,7 +982,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_kick_no_message</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_kick</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1004,7 +994,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_kick</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_kick</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;Testing kicks.&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1016,7 +1006,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_mode_no_modeparams</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_mode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+i&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1028,7 +1018,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_mode</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_mode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+o&quot;</span>, <span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1040,7 +1030,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_samode_no_modeparams</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_samode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+i&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1052,7 +1042,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_samode</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_samode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+o&quot;</span>, <span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1064,7 +1054,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_sanick</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_sanick</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;test2&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1076,7 +1066,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_invite</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_invite</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;#test&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1089,7 +1079,7 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_ctcp</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_ctcp</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;MESSAGE&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1102,7 +1092,7 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_action</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_action</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;tests.&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1115,7 +1105,7 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_finger</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_finger</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1128,7 +1118,7 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_version</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_version</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1141,7 +1131,7 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_source</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_source</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1154,7 +1144,7 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_user_info</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_user_info</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1167,7 +1157,7 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_ctcp_ping</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_ctcp_ping</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
@@ -1182,7 +1172,7 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_time</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>MemWriter</span>::<span class='ident'>new</span>()));
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
         {
             <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
             <span class='ident'>wrapper</span>.<span class='ident'>send_time</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();

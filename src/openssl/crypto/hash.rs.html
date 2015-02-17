@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.2.17/src/crypto/hash.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.3.6/src/crypto/hash.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>hash.rs.html -- source</title>
@@ -274,16 +274,115 @@
 <span id="232">232</span>
 <span id="233">233</span>
 <span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>libc</span>::<span class='ident'>c_uint</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>repeat</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::{<span class='ident'>IoError</span>, <span class='ident'>Writer</span>};
 
 <span class='kw'>use</span> <span class='ident'>ffi</span>;
 
+<span class='doccomment'>/// Message digest (hash) type.</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Copy</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>HashType</span> {
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Type</span> {
     <span class='ident'>MD5</span>,
     <span class='ident'>SHA1</span>,
     <span class='ident'>SHA224</span>,
@@ -293,220 +392,319 @@
     <span class='ident'>RIPEMD160</span>
 }
 
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>evpmd</span>(<span class='ident'>t</span>: <span class='ident'>HashType</span>) <span class='op'>-&gt;</span> (<span class='op'>*</span><span class='kw'>const</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_MD</span>, <span class='ident'>u32</span>) {
-    <span class='kw'>unsafe</span> {
-        <span class='kw'>match</span> <span class='ident'>t</span> {
-            <span class='ident'>HashType</span>::<span class='ident'>MD5</span> <span class='op'>=&gt;</span> (<span class='ident'>ffi</span>::<span class='ident'>EVP_md5</span>(), <span class='number'>16</span>),
-            <span class='ident'>HashType</span>::<span class='ident'>SHA1</span> <span class='op'>=&gt;</span> (<span class='ident'>ffi</span>::<span class='ident'>EVP_sha1</span>(), <span class='number'>20</span>),
-            <span class='ident'>HashType</span>::<span class='ident'>SHA224</span> <span class='op'>=&gt;</span> (<span class='ident'>ffi</span>::<span class='ident'>EVP_sha224</span>(), <span class='number'>28</span>),
-            <span class='ident'>HashType</span>::<span class='ident'>SHA256</span> <span class='op'>=&gt;</span> (<span class='ident'>ffi</span>::<span class='ident'>EVP_sha256</span>(), <span class='number'>32</span>),
-            <span class='ident'>HashType</span>::<span class='ident'>SHA384</span> <span class='op'>=&gt;</span> (<span class='ident'>ffi</span>::<span class='ident'>EVP_sha384</span>(), <span class='number'>48</span>),
-            <span class='ident'>HashType</span>::<span class='ident'>SHA512</span> <span class='op'>=&gt;</span> (<span class='ident'>ffi</span>::<span class='ident'>EVP_sha512</span>(), <span class='number'>64</span>),
-            <span class='ident'>HashType</span>::<span class='ident'>RIPEMD160</span> <span class='op'>=&gt;</span> (<span class='ident'>ffi</span>::<span class='ident'>EVP_ripemd160</span>(), <span class='number'>20</span>),
+<span class='kw'>impl</span> <span class='ident'>Type</span> {
+    <span class='doccomment'>/// Returns the length of the message digest.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>md_len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>usize</span> {
+        <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>Type</span>::<span class='op'>*</span>;
+        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
+            <span class='ident'>MD5</span> <span class='op'>=&gt;</span> <span class='number'>16</span>,
+            <span class='ident'>SHA1</span> <span class='op'>=&gt;</span> <span class='number'>20</span>,
+            <span class='ident'>SHA224</span> <span class='op'>=&gt;</span> <span class='number'>28</span>,
+            <span class='ident'>SHA256</span> <span class='op'>=&gt;</span> <span class='number'>32</span>,
+            <span class='ident'>SHA384</span> <span class='op'>=&gt;</span> <span class='number'>48</span>,
+            <span class='ident'>SHA512</span> <span class='op'>=&gt;</span> <span class='number'>64</span>,
+            <span class='ident'>RIPEMD160</span> <span class='op'>=&gt;</span> <span class='number'>20</span>,
+        }
+    }
+
+    <span class='doccomment'>/// Internal interface subject to removal.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>evp_md</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_MD</span> {
+        <span class='kw'>unsafe</span> {
+            <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>Type</span>::<span class='op'>*</span>;
+            <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
+                <span class='ident'>MD5</span> <span class='op'>=&gt;</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_md5</span>(),
+                <span class='ident'>SHA1</span> <span class='op'>=&gt;</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_sha1</span>(),
+                <span class='ident'>SHA224</span> <span class='op'>=&gt;</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_sha224</span>(),
+                <span class='ident'>SHA256</span> <span class='op'>=&gt;</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_sha256</span>(),
+                <span class='ident'>SHA384</span> <span class='op'>=&gt;</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_sha384</span>(),
+                <span class='ident'>SHA512</span> <span class='op'>=&gt;</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_sha512</span>(),
+                <span class='ident'>RIPEMD160</span> <span class='op'>=&gt;</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_ripemd160</span>(),
+            }
         }
     }
 }
 
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>HasherContext</span> {
-    <span class='ident'>ptr</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_MD_CTX</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Copy</span>)]</span>
+<span class='kw'>enum</span> <span class='ident'>State</span> {
+    <span class='ident'>Reset</span>,
+    <span class='ident'>Updated</span>,
+    <span class='ident'>Finalized</span>,
 }
 
-<span class='kw'>impl</span> <span class='ident'>HasherContext</span> {
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>HasherContext</span> {
+<span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>State</span>::<span class='op'>*</span>;
+
+<span class='doccomment'>/// Provides message digest (hash) computation.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// # Examples</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Calculate a hash in one go.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ```</span>
+<span class='doccomment'>/// use openssl::crypto::hash::{hash, Type};</span>
+<span class='doccomment'>/// let data = b&quot;\x42\xF4\x97\xE0&quot;;</span>
+<span class='doccomment'>/// let spec = b&quot;\x7c\x43\x0f\x17\x8a\xef\xdf\x14\x87\xfe\xe7\x14\x4e\x96\x41\xe2&quot;;</span>
+<span class='doccomment'>/// let res = hash(Type::MD5, data);</span>
+<span class='doccomment'>/// assert_eq!(res, spec);</span>
+<span class='doccomment'>/// ```</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Use the `Writer` trait to supply the input in chunks.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ```</span>
+<span class='doccomment'>/// use std::old_io::Writer;</span>
+<span class='doccomment'>/// use openssl::crypto::hash::{Hasher, Type};</span>
+<span class='doccomment'>/// let data = [b&quot;\x42\xF4&quot;, b&quot;\x97\xE0&quot;];</span>
+<span class='doccomment'>/// let spec = b&quot;\x7c\x43\x0f\x17\x8a\xef\xdf\x14\x87\xfe\xe7\x14\x4e\x96\x41\xe2&quot;;</span>
+<span class='doccomment'>/// let mut h = Hasher::new(Type::MD5);</span>
+<span class='doccomment'>/// h.write_all(data[0]);</span>
+<span class='doccomment'>/// h.write_all(data[1]);</span>
+<span class='doccomment'>/// let res = h.finish();</span>
+<span class='doccomment'>/// assert_eq!(res, spec);</span>
+<span class='doccomment'>/// ```</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// # Warning</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Don&#39;t actually use MD5 and SHA-1 hashes, they&#39;re not secure anymore.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Don&#39;t ever hash passwords, use `crypto::pkcs5` or bcrypt/scrypt instead.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Hasher</span> {
+    <span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_MD_CTX</span>,
+    <span class='ident'>md</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_MD</span>,
+    <span class='ident'>type_</span>: <span class='ident'>Type</span>,
+    <span class='ident'>state</span>: <span class='ident'>State</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>Hasher</span> {
+    <span class='doccomment'>/// Creates a new `Hasher` with the specified hash type.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>ty</span>: <span class='ident'>Type</span>) <span class='op'>-&gt;</span> <span class='ident'>Hasher</span> {
         <span class='ident'>ffi</span>::<span class='ident'>init</span>();
 
-        <span class='kw'>unsafe</span> {
-            <span class='ident'>HasherContext</span> { <span class='ident'>ptr</span>: <span class='ident'>ffi</span>::<span class='ident'>EVP_MD_CTX_create</span>() }
+        <span class='kw'>let</span> <span class='ident'>ctx</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
+            <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_MD_CTX_create</span>();
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>r</span>.<span class='ident'>is_null</span>());
+            <span class='ident'>r</span>
+        };
+        <span class='kw'>let</span> <span class='ident'>md</span> <span class='op'>=</span> <span class='ident'>ty</span>.<span class='ident'>evp_md</span>();
+
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>h</span> <span class='op'>=</span> <span class='ident'>Hasher</span> { <span class='ident'>ctx</span>: <span class='ident'>ctx</span>, <span class='ident'>md</span>: <span class='ident'>md</span>, <span class='ident'>type_</span>: <span class='ident'>ty</span>, <span class='ident'>state</span>: <span class='ident'>Finalized</span> };
+        <span class='ident'>h</span>.<span class='ident'>init</span>();
+        <span class='ident'>h</span>
+    }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>init</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>state</span> {
+            <span class='ident'>Reset</span> <span class='op'>=&gt;</span> <span class='kw'>return</span>,
+            <span class='ident'>Updated</span> <span class='op'>=&gt;</span> { <span class='self'>self</span>.<span class='ident'>finalize</span>(); },
+            <span class='ident'>Finalized</span> <span class='op'>=&gt;</span> (),
         }
+        <span class='kw'>unsafe</span> {
+            <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_DigestInit_ex</span>(<span class='self'>self</span>.<span class='ident'>ctx</span>, <span class='self'>self</span>.<span class='ident'>md</span>, <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> _);
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>r</span>, <span class='number'>1</span>);
+        }
+        <span class='self'>self</span>.<span class='ident'>state</span> <span class='op'>=</span> <span class='ident'>Reset</span>;
+    }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>update</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>data</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>state</span> <span class='op'>==</span> <span class='ident'>Finalized</span> {
+            <span class='self'>self</span>.<span class='ident'>init</span>();
+        }
+        <span class='kw'>unsafe</span> {
+            <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_DigestUpdate</span>(<span class='self'>self</span>.<span class='ident'>ctx</span>, <span class='ident'>data</span>.<span class='ident'>as_ptr</span>(),
+                                          <span class='ident'>data</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>c_uint</span>);
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>r</span>, <span class='number'>1</span>);
+        }
+        <span class='self'>self</span>.<span class='ident'>state</span> <span class='op'>=</span> <span class='ident'>Updated</span>;
+    }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>finalize</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>state</span> <span class='op'>==</span> <span class='ident'>Finalized</span> {
+            <span class='self'>self</span>.<span class='ident'>init</span>();
+        }
+        <span class='kw'>let</span> <span class='ident'>md_len</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>type_</span>.<span class='ident'>md_len</span>();
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>res</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>repeat</span>(<span class='number'>0</span>).<span class='ident'>take</span>(<span class='ident'>md_len</span>).<span class='ident'>collect</span>();
+        <span class='kw'>unsafe</span> {
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='number'>0</span>;
+            <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_DigestFinal_ex</span>(<span class='self'>self</span>.<span class='ident'>ctx</span>, <span class='ident'>res</span>.<span class='ident'>as_mut_ptr</span>(), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>len</span>);
+            <span class='self'>self</span>.<span class='ident'>state</span> <span class='op'>=</span> <span class='ident'>Finalized</span>;
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>len</span> <span class='kw'>as</span> <span class='ident'>usize</span>, <span class='ident'>md_len</span>);
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>r</span>, <span class='number'>1</span>);
+        }
+        <span class='ident'>res</span>
+    }
+
+    <span class='doccomment'>/// Returns the hash of the data written since creation or</span>
+    <span class='doccomment'>/// the last `finish` and resets the hasher.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>finish</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>finalize</span>()
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>HasherContext</span> {
-    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>unsafe</span> {
-            <span class='ident'>ffi</span>::<span class='ident'>EVP_MD_CTX_destroy</span>(<span class='self'>self</span>.<span class='ident'>ptr</span>);
-        }
-    }
-}
-
-<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Hasher</span> {
-    <span class='ident'>evp</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_MD</span>,
-    <span class='ident'>ctx</span>: <span class='ident'>HasherContext</span>,
-    <span class='ident'>len</span>: <span class='ident'>u32</span>,
-}
-
-<span class='kw'>impl</span> <span class='ident'>io</span>::<span class='ident'>Writer</span> <span class='kw'>for</span> <span class='ident'>Hasher</span> {
-    <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+<span class='kw'>impl</span> <span class='ident'>Writer</span> <span class='kw'>for</span> <span class='ident'>Hasher</span> {
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>update</span>(<span class='ident'>buf</span>);
         <span class='prelude-val'>Ok</span>(())
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>Hasher</span> {
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>ht</span>: <span class='ident'>HashType</span>) <span class='op'>-&gt;</span> <span class='ident'>Hasher</span> {
-        <span class='kw'>let</span> <span class='ident'>ctx</span> <span class='op'>=</span> <span class='ident'>HasherContext</span>::<span class='ident'>new</span>();
-        <span class='ident'>Hasher</span>::<span class='ident'>with_context</span>(<span class='ident'>ctx</span>, <span class='ident'>ht</span>)
-    }
-
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>with_context</span>(<span class='ident'>ctx</span>: <span class='ident'>HasherContext</span>, <span class='ident'>ht</span>: <span class='ident'>HashType</span>) <span class='op'>-&gt;</span> <span class='ident'>Hasher</span> {
-        <span class='kw'>let</span> (<span class='ident'>evp</span>, <span class='ident'>mdlen</span>) <span class='op'>=</span> <span class='ident'>evpmd</span>(<span class='ident'>ht</span>);
-        <span class='kw'>unsafe</span> {
-            <span class='ident'>ffi</span>::<span class='ident'>EVP_DigestInit_ex</span>(<span class='ident'>ctx</span>.<span class='ident'>ptr</span>, <span class='ident'>evp</span>, <span class='number'>0</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> _);
-        }
-
-        <span class='ident'>Hasher</span> { <span class='ident'>evp</span>: <span class='ident'>evp</span>, <span class='ident'>ctx</span>: <span class='ident'>ctx</span>, <span class='ident'>len</span>: <span class='ident'>mdlen</span> }
-    }
-
-    <span class='doccomment'>/// Update this hasher with more input bytes</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>update</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>data</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) {
-        <span class='kw'>unsafe</span> {
-            <span class='ident'>ffi</span>::<span class='ident'>EVP_DigestUpdate</span>(<span class='self'>self</span>.<span class='ident'>ctx</span>.<span class='ident'>ptr</span>, <span class='ident'>data</span>.<span class='ident'>as_ptr</span>(), <span class='ident'>data</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>c_uint</span>);
-        }
-    }
-
-    <span class='doccomment'>/**
-     * Return the digest of all bytes added to this hasher since its last
-     * initialization
-     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>finalize</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> (<span class='ident'>res</span>, _) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>finalize_reuse</span>();
-        <span class='ident'>res</span>
-    }
-
-    <span class='doccomment'>/**
-     * Return the digest of all bytes added to this hasher since its last
-     * initialization and its context for reuse
-     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>finalize_reuse</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>HasherContext</span>) {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>repeat</span>(<span class='number'>0u8</span>).<span class='ident'>take</span>(<span class='self'>self</span>.<span class='ident'>len</span> <span class='kw'>as</span> <span class='ident'>usize</span>).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>();
-        <span class='kw'>unsafe</span> {
-            <span class='ident'>ffi</span>::<span class='ident'>EVP_DigestFinal_ex</span>(<span class='self'>self</span>.<span class='ident'>ctx</span>.<span class='ident'>ptr</span>, <span class='ident'>res</span>.<span class='ident'>as_mut_ptr</span>(), <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>())
+<span class='kw'>impl</span> <span class='ident'>Clone</span> <span class='kw'>for</span> <span class='ident'>Hasher</span> {
+    <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Hasher</span> {
+        <span class='kw'>let</span> <span class='ident'>ctx</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
+            <span class='kw'>let</span> <span class='ident'>ctx</span> <span class='op'>=</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_MD_CTX_create</span>();
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>ctx</span>.<span class='ident'>is_null</span>());
+            <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>ffi</span>::<span class='ident'>EVP_MD_CTX_copy_ex</span>(<span class='ident'>ctx</span>, <span class='self'>self</span>.<span class='ident'>ctx</span>);
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>r</span>, <span class='number'>1</span>);
+            <span class='ident'>ctx</span>
         };
-        (<span class='ident'>res</span>, <span class='self'>self</span>.<span class='ident'>ctx</span>)
+        <span class='ident'>Hasher</span> { <span class='ident'>ctx</span>: <span class='ident'>ctx</span>, <span class='ident'>md</span>: <span class='self'>self</span>.<span class='ident'>md</span>, <span class='ident'>type_</span>: <span class='self'>self</span>.<span class='ident'>type_</span>, <span class='ident'>state</span>: <span class='self'>self</span>.<span class='ident'>state</span> }
     }
 }
 
-<span class='doccomment'>/**
- * Hashes the supplied input data using hash t, returning the resulting hash
- * value
- */</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>hash</span>(<span class='ident'>t</span>: <span class='ident'>HashType</span>, <span class='ident'>data</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {
+<span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>Hasher</span> {
+    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
+        <span class='kw'>unsafe</span> {
+            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>state</span> <span class='op'>!=</span> <span class='ident'>Finalized</span> {
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>repeat</span>(<span class='number'>0</span>).<span class='ident'>take</span>(<span class='self'>self</span>.<span class='ident'>type_</span>.<span class='ident'>md_len</span>()).<span class='ident'>collect</span>();
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='number'>0</span>;
+                <span class='ident'>ffi</span>::<span class='ident'>EVP_DigestFinal_ex</span>(<span class='self'>self</span>.<span class='ident'>ctx</span>, <span class='ident'>buf</span>.<span class='ident'>as_mut_ptr</span>(), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>len</span>);
+            }
+            <span class='ident'>ffi</span>::<span class='ident'>EVP_MD_CTX_destroy</span>(<span class='self'>self</span>.<span class='ident'>ctx</span>);
+        }
+    }
+}
+
+<span class='doccomment'>/// Computes the hash of the `data` with the hash `t`.</span>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>hash</span>(<span class='ident'>t</span>: <span class='ident'>Type</span>, <span class='ident'>data</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>h</span> <span class='op'>=</span> <span class='ident'>Hasher</span>::<span class='ident'>new</span>(<span class='ident'>t</span>);
-    <span class='ident'>h</span>.<span class='ident'>update</span>(<span class='ident'>data</span>);
-    <span class='ident'>h</span>.<span class='ident'>finalize</span>()
+    <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>h</span>.<span class='ident'>write_all</span>(<span class='ident'>data</span>);
+    <span class='ident'>h</span>.<span class='ident'>finish</span>()
 }
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
     <span class='kw'>use</span> <span class='ident'>serialize</span>::<span class='ident'>hex</span>::{<span class='ident'>FromHex</span>, <span class='ident'>ToHex</span>};
+    <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>hash</span>, <span class='ident'>Hasher</span>, <span class='ident'>Type</span>};
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::<span class='ident'>Writer</span>;
 
-    <span class='kw'>struct</span> <span class='ident'>HashTest</span> {
-        <span class='ident'>input</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>,
-        <span class='ident'>expected_output</span>: <span class='ident'>String</span>
+    <span class='kw'>fn</span> <span class='ident'>hash_test</span>(<span class='ident'>hashtype</span>: <span class='ident'>Type</span>, <span class='ident'>hashtest</span>: <span class='kw-2'>&amp;</span>(<span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='kw-2'>&amp;</span><span class='ident'>str</span>)) {
+        <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>hash</span>(<span class='ident'>hashtype</span>, <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>hashtest</span>.<span class='number'>0</span>.<span class='ident'>from_hex</span>().<span class='ident'>unwrap</span>());
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>to_hex</span>(), <span class='ident'>hashtest</span>.<span class='number'>1</span>);
     }
 
-    <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>non_snake_case</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>HashTest</span>(<span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>HashTest</span> {
-        <span class='ident'>HashTest</span> { <span class='ident'>input</span>: <span class='ident'>input</span>.<span class='ident'>from_hex</span>().<span class='ident'>unwrap</span>(),
-                   <span class='ident'>expected_output</span>: <span class='ident'>output</span>.<span class='ident'>to_string</span>() }
-    }
-
-    <span class='kw'>fn</span> <span class='ident'>compare</span>(<span class='ident'>calced_raw</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>hashtest</span>: <span class='kw-2'>&amp;</span><span class='ident'>HashTest</span>) {
-        <span class='kw'>let</span> <span class='ident'>calced</span> <span class='op'>=</span> <span class='ident'>calced_raw</span>.<span class='ident'>as_slice</span>().<span class='ident'>to_hex</span>().<span class='ident'>to_string</span>();
-
-        <span class='kw'>if</span> <span class='ident'>calced</span> <span class='op'>!=</span> <span class='ident'>hashtest</span>.<span class='ident'>expected_output</span> {
-            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Test failed - {} != {}&quot;</span>, <span class='ident'>calced</span>, <span class='ident'>hashtest</span>.<span class='ident'>expected_output</span>);
-        }
-
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>calced</span> <span class='op'>==</span> <span class='ident'>hashtest</span>.<span class='ident'>expected_output</span>);
-    }
-
-    <span class='kw'>fn</span> <span class='ident'>hash_test</span>(<span class='ident'>hashtype</span>: <span class='ident'>super</span>::<span class='ident'>HashType</span>, <span class='ident'>hashtest</span>: <span class='kw-2'>&amp;</span><span class='ident'>HashTest</span>) {
-        <span class='kw'>let</span> <span class='ident'>calced_raw</span> <span class='op'>=</span> <span class='ident'>super</span>::<span class='ident'>hash</span>(<span class='ident'>hashtype</span>, <span class='ident'>hashtest</span>.<span class='ident'>input</span>.<span class='ident'>as_slice</span>());
-        <span class='ident'>compare</span>(<span class='ident'>calced_raw</span>, <span class='ident'>hashtest</span>);
-    }
-
-    <span class='kw'>fn</span> <span class='ident'>hash_reuse_test</span>(<span class='ident'>ctx</span>: <span class='ident'>super</span>::<span class='ident'>HasherContext</span>, <span class='ident'>hashtype</span>: <span class='ident'>super</span>::<span class='ident'>HashType</span>,
-                       <span class='ident'>hashtest</span>: <span class='kw-2'>&amp;</span><span class='ident'>HashTest</span>) <span class='op'>-&gt;</span> <span class='ident'>super</span>::<span class='ident'>HasherContext</span> {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>h</span> <span class='op'>=</span> <span class='ident'>super</span>::<span class='ident'>Hasher</span>::<span class='ident'>with_context</span>(<span class='ident'>ctx</span>, <span class='ident'>hashtype</span>);
-        <span class='ident'>h</span>.<span class='ident'>update</span>(<span class='ident'>hashtest</span>.<span class='ident'>input</span>.<span class='ident'>as_slice</span>());
-        <span class='kw'>let</span> (<span class='ident'>calced_raw</span>, <span class='ident'>ctx</span>) <span class='op'>=</span> <span class='ident'>h</span>.<span class='ident'>finalize_reuse</span>();
-
-        <span class='ident'>compare</span>(<span class='ident'>calced_raw</span>, <span class='ident'>hashtest</span>);
-
-        <span class='ident'>ctx</span>
-    }
-
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>hash_writer</span>(<span class='ident'>t</span>: <span class='ident'>super</span>::<span class='ident'>HashType</span>, <span class='ident'>data</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>h</span> <span class='op'>=</span> <span class='ident'>super</span>::<span class='ident'>Hasher</span>::<span class='ident'>new</span>(<span class='ident'>t</span>);
-        <span class='ident'>h</span>.<span class='ident'>write</span>(<span class='ident'>data</span>).<span class='ident'>unwrap</span>();
-        <span class='ident'>h</span>.<span class='ident'>finalize</span>()
+    <span class='kw'>fn</span> <span class='ident'>hash_recycle_test</span>(<span class='ident'>h</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Hasher</span>, <span class='ident'>hashtest</span>: <span class='kw-2'>&amp;</span>(<span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='kw-2'>&amp;</span><span class='ident'>str</span>)) {
+        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>h</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>hashtest</span>.<span class='number'>0</span>.<span class='ident'>from_hex</span>().<span class='ident'>unwrap</span>());
+        <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>h</span>.<span class='ident'>finish</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>to_hex</span>(), <span class='ident'>hashtest</span>.<span class='number'>1</span>);
     }
 
     <span class='comment'>// Test vectors from http://www.nsrl.nist.gov/testdata/</span>
+    <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>non_upper_case_globals</span>)]</span>
+    <span class='kw'>const</span> <span class='ident'>md5_tests</span>: [(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>); <span class='number'>13</span>] <span class='op'>=</span> [
+        (<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;d41d8cd98f00b204e9800998ecf8427e&quot;</span>),
+        (<span class='string'>&quot;7F&quot;</span>, <span class='string'>&quot;83acb6e67e50e31db6ed341dd2de1595&quot;</span>),
+        (<span class='string'>&quot;EC9C&quot;</span>, <span class='string'>&quot;0b07f0d4ca797d8ac58874f887cb0b68&quot;</span>),
+        (<span class='string'>&quot;FEE57A&quot;</span>, <span class='string'>&quot;e0d583171eb06d56198fc0ef22173907&quot;</span>),
+        (<span class='string'>&quot;42F497E0&quot;</span>, <span class='string'>&quot;7c430f178aefdf1487fee7144e9641e2&quot;</span>),
+        (<span class='string'>&quot;C53B777F1C&quot;</span>, <span class='string'>&quot;75ef141d64cb37ec423da2d9d440c925&quot;</span>),
+        (<span class='string'>&quot;89D5B576327B&quot;</span>, <span class='string'>&quot;ebbaf15eb0ed784c6faa9dc32831bf33&quot;</span>),
+        (<span class='string'>&quot;5D4CCE781EB190&quot;</span>, <span class='string'>&quot;ce175c4b08172019f05e6b5279889f2c&quot;</span>),
+        (<span class='string'>&quot;81901FE94932D7B9&quot;</span>, <span class='string'>&quot;cd4d2f62b8cdb3a0cf968a735a239281&quot;</span>),
+        (<span class='string'>&quot;C9FFDEE7788EFB4EC9&quot;</span>, <span class='string'>&quot;e0841a231ab698db30c6c0f3f246c014&quot;</span>),
+        (<span class='string'>&quot;66AC4B7EBA95E53DC10B&quot;</span>, <span class='string'>&quot;a3b3cea71910d9af56742aa0bb2fe329&quot;</span>),
+        (<span class='string'>&quot;A510CD18F7A56852EB0319&quot;</span>, <span class='string'>&quot;577e216843dd11573574d3fb209b97d8&quot;</span>),
+        (<span class='string'>&quot;AAED18DBE8938C19ED734A8D&quot;</span>, <span class='string'>&quot;6f80fb775f27e0a4ce5c2f42fc72c5f1&quot;</span>)
+    ];
+
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_md5</span>() {
-        <span class='kw'>let</span> <span class='ident'>tests</span> <span class='op'>=</span> [
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;&quot;</span>, <span class='string'>&quot;d41d8cd98f00b204e9800998ecf8427e&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;7F&quot;</span>, <span class='string'>&quot;83acb6e67e50e31db6ed341dd2de1595&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;EC9C&quot;</span>, <span class='string'>&quot;0b07f0d4ca797d8ac58874f887cb0b68&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;FEE57A&quot;</span>, <span class='string'>&quot;e0d583171eb06d56198fc0ef22173907&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;42F497E0&quot;</span>, <span class='string'>&quot;7c430f178aefdf1487fee7144e9641e2&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;C53B777F1C&quot;</span>, <span class='string'>&quot;75ef141d64cb37ec423da2d9d440c925&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;89D5B576327B&quot;</span>, <span class='string'>&quot;ebbaf15eb0ed784c6faa9dc32831bf33&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;5D4CCE781EB190&quot;</span>, <span class='string'>&quot;ce175c4b08172019f05e6b5279889f2c&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;81901FE94932D7B9&quot;</span>, <span class='string'>&quot;cd4d2f62b8cdb3a0cf968a735a239281&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;C9FFDEE7788EFB4EC9&quot;</span>, <span class='string'>&quot;e0841a231ab698db30c6c0f3f246c014&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;66AC4B7EBA95E53DC10B&quot;</span>, <span class='string'>&quot;a3b3cea71910d9af56742aa0bb2fe329&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;A510CD18F7A56852EB0319&quot;</span>, <span class='string'>&quot;577e216843dd11573574d3fb209b97d8&quot;</span>),
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;AAED18DBE8938C19ED734A8D&quot;</span>, <span class='string'>&quot;6f80fb775f27e0a4ce5c2f42fc72c5f1&quot;</span>)];
-
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ctx</span> <span class='op'>=</span> <span class='ident'>super</span>::<span class='ident'>HasherContext</span>::<span class='ident'>new</span>();
-
-        <span class='kw'>for</span> <span class='ident'>test</span> <span class='kw'>in</span> <span class='ident'>tests</span>.<span class='ident'>iter</span>() {
-            <span class='ident'>ctx</span> <span class='op'>=</span> <span class='ident'>hash_reuse_test</span>(<span class='ident'>ctx</span>, <span class='ident'>super</span>::<span class='ident'>HashType</span>::<span class='ident'>MD5</span>, <span class='ident'>test</span>);
+        <span class='kw'>for</span> <span class='ident'>test</span> <span class='kw'>in</span> <span class='ident'>md5_tests</span>.<span class='ident'>iter</span>() {
+            <span class='ident'>hash_test</span>(<span class='ident'>Type</span>::<span class='ident'>MD5</span>, <span class='ident'>test</span>);
         }
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_md5_recycle</span>() {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>h</span> <span class='op'>=</span> <span class='ident'>Hasher</span>::<span class='ident'>new</span>(<span class='ident'>Type</span>::<span class='ident'>MD5</span>);
+        <span class='kw'>for</span> <span class='ident'>test</span> <span class='kw'>in</span> <span class='ident'>md5_tests</span>.<span class='ident'>iter</span>() {
+            <span class='ident'>hash_recycle_test</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>h</span>, <span class='ident'>test</span>);
+        }
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_finish_twice</span>() {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>h</span> <span class='op'>=</span> <span class='ident'>Hasher</span>::<span class='ident'>new</span>(<span class='ident'>Type</span>::<span class='ident'>MD5</span>);
+        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>h</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>md5_tests</span>[<span class='number'>6</span>].<span class='number'>0</span>.<span class='ident'>from_hex</span>().<span class='ident'>unwrap</span>());
+        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>h</span>.<span class='ident'>finish</span>();
+        <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>h</span>.<span class='ident'>finish</span>();
+        <span class='kw'>let</span> <span class='ident'>null</span> <span class='op'>=</span> <span class='ident'>hash</span>(<span class='ident'>Type</span>::<span class='ident'>MD5</span>, <span class='kw-2'>&amp;</span>[]);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>res</span>, <span class='ident'>null</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>test_clone</span>() {
+        <span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='number'>7</span>;
+        <span class='kw'>let</span> <span class='ident'>inp</span> <span class='op'>=</span> <span class='ident'>md5_tests</span>[<span class='ident'>i</span>].<span class='number'>0</span>.<span class='ident'>from_hex</span>().<span class='ident'>unwrap</span>();
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>inp</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>2</span>);
+        <span class='kw'>let</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>inp</span>.<span class='ident'>len</span>() <span class='op'>/</span> <span class='number'>2</span>;
+        <span class='kw'>let</span> <span class='ident'>h0</span> <span class='op'>=</span> <span class='ident'>Hasher</span>::<span class='ident'>new</span>(<span class='ident'>Type</span>::<span class='ident'>MD5</span>);
+
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Clone a new hasher&quot;</span>);
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>h1</span> <span class='op'>=</span> <span class='ident'>h0</span>.<span class='ident'>clone</span>();
+        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>h1</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>inp</span>[..<span class='ident'>p</span>]);
+        {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Clone an updated hasher&quot;</span>);
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>h2</span> <span class='op'>=</span> <span class='ident'>h1</span>.<span class='ident'>clone</span>();
+            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>h2</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>inp</span>[<span class='ident'>p</span>..]);
+            <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>h2</span>.<span class='ident'>finish</span>();
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>to_hex</span>(), <span class='ident'>md5_tests</span>[<span class='ident'>i</span>].<span class='number'>1</span>);
+        }
+        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>h1</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>inp</span>[<span class='ident'>p</span>..]);
+        <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>h1</span>.<span class='ident'>finish</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>to_hex</span>(), <span class='ident'>md5_tests</span>[<span class='ident'>i</span>].<span class='number'>1</span>);
+
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Clone a finished hasher&quot;</span>);
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>h3</span> <span class='op'>=</span> <span class='ident'>h1</span>.<span class='ident'>clone</span>();
+        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>h3</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>md5_tests</span>[<span class='ident'>i</span> <span class='op'>+</span> <span class='number'>1</span>].<span class='number'>0</span>.<span class='ident'>from_hex</span>().<span class='ident'>unwrap</span>());
+        <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>h3</span>.<span class='ident'>finish</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>res</span>.<span class='ident'>to_hex</span>(), <span class='ident'>md5_tests</span>[<span class='ident'>i</span> <span class='op'>+</span> <span class='number'>1</span>].<span class='number'>1</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_sha1</span>() {
         <span class='kw'>let</span> <span class='ident'>tests</span> <span class='op'>=</span> [
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;616263&quot;</span>, <span class='string'>&quot;a9993e364706816aba3e25717850c26c9cd0d89d&quot;</span>),
+            (<span class='string'>&quot;616263&quot;</span>, <span class='string'>&quot;a9993e364706816aba3e25717850c26c9cd0d89d&quot;</span>),
             ];
 
         <span class='kw'>for</span> <span class='ident'>test</span> <span class='kw'>in</span> <span class='ident'>tests</span>.<span class='ident'>iter</span>() {
-            <span class='ident'>hash_test</span>(<span class='ident'>super</span>::<span class='ident'>HashType</span>::<span class='ident'>SHA1</span>, <span class='ident'>test</span>);
+            <span class='ident'>hash_test</span>(<span class='ident'>Type</span>::<span class='ident'>SHA1</span>, <span class='ident'>test</span>);
         }
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_sha256</span>() {
         <span class='kw'>let</span> <span class='ident'>tests</span> <span class='op'>=</span> [
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;616263&quot;</span>, <span class='string'>&quot;ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad&quot;</span>)
+            (<span class='string'>&quot;616263&quot;</span>, <span class='string'>&quot;ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad&quot;</span>)
             ];
 
         <span class='kw'>for</span> <span class='ident'>test</span> <span class='kw'>in</span> <span class='ident'>tests</span>.<span class='ident'>iter</span>() {
-            <span class='ident'>hash_test</span>(<span class='ident'>super</span>::<span class='ident'>HashType</span>::<span class='ident'>SHA256</span>, <span class='ident'>test</span>);
+            <span class='ident'>hash_test</span>(<span class='ident'>Type</span>::<span class='ident'>SHA256</span>, <span class='ident'>test</span>);
         }
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_ripemd160</span>() {
         <span class='kw'>let</span> <span class='ident'>tests</span> <span class='op'>=</span> [
-            <span class='ident'>HashTest</span>(<span class='string'>&quot;616263&quot;</span>, <span class='string'>&quot;8eb208f7e05d987a9b044a8e98c6b087f15a0bfc&quot;</span>)
+            (<span class='string'>&quot;616263&quot;</span>, <span class='string'>&quot;8eb208f7e05d987a9b044a8e98c6b087f15a0bfc&quot;</span>)
             ];
 
         <span class='kw'>for</span> <span class='ident'>test</span> <span class='kw'>in</span> <span class='ident'>tests</span>.<span class='ident'>iter</span>() {
-            <span class='ident'>hash_test</span>(<span class='ident'>super</span>::<span class='ident'>HashType</span>::<span class='ident'>RIPEMD160</span>, <span class='ident'>test</span>);
+            <span class='ident'>hash_test</span>(<span class='ident'>Type</span>::<span class='ident'>RIPEMD160</span>, <span class='ident'>test</span>);
         }
-    }
-
-    <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>test_writer</span>() {
-        <span class='kw'>let</span> <span class='ident'>tv</span> <span class='op'>=</span> <span class='string'>&quot;rust-openssl&quot;</span>.<span class='ident'>as_bytes</span>();
-        <span class='kw'>let</span> <span class='ident'>ht</span> <span class='op'>=</span> <span class='ident'>super</span>::<span class='ident'>HashType</span>::<span class='ident'>RIPEMD160</span>;
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>hash_writer</span>(<span class='ident'>ht</span>, <span class='ident'>tv</span>) <span class='op'>==</span> <span class='ident'>super</span>::<span class='ident'>hash</span>(<span class='ident'>ht</span>, <span class='ident'>tv</span>));
     }
 }
 </pre>

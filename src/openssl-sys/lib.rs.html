@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-sys-0.2.17/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-sys-0.3.6/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -545,9 +545,23 @@
 <span id="503">503</span>
 <span id="504">504</span>
 <span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
 </pre><pre class='rust '>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>non_camel_case_types</span>, <span class='ident'>non_upper_case_globals</span>, <span class='ident'>non_snake_case</span>)]</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>, <span class='ident'>unstable</span>)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>core</span>, <span class='ident'>io</span>, <span class='ident'>libc</span>, <span class='ident'>path</span>, <span class='ident'>std_misc</span>, <span class='ident'>env</span>)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>doc</span>(<span class='ident'>html_root_url</span><span class='op'>=</span><span class='string'>&quot;https://sfackler.github.io/rust-openssl/doc/openssl-sys&quot;</span>)]</span>
 
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libc</span>;
 
@@ -918,6 +932,7 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>EVP_DigestFinal_ex</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>EVP_MD_CTX</span>, <span class='ident'>res</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>, <span class='ident'>n</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>EVP_MD_CTX_create</span>() <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>EVP_MD_CTX</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>EVP_MD_CTX_copy_ex</span>(<span class='ident'>dst</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>EVP_MD_CTX</span>, <span class='ident'>src</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>EVP_MD_CTX</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>EVP_MD_CTX_destroy</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>EVP_MD_CTX</span>);
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>EVP_PKEY_new</span>() <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>EVP_PKEY</span>;
@@ -927,10 +942,19 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>EVP_PKEY_set1_RSA</span>(<span class='ident'>k</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>EVP_PKEY</span>, <span class='ident'>r</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>RSA</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>HMAC_CTX_init</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>HMAC_CTX</span>);
+    <span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;use HMAC_Init_ex_shim instead&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>HMAC_Init_ex</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>HMAC_CTX</span>, <span class='ident'>key</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>, <span class='ident'>keylen</span>: <span class='ident'>c_int</span>, <span class='ident'>md</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>EVP_MD</span>, <span class='ident'>imple</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>ENGINE</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
+    <span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;use HMAC_Final_shim instead&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>HMAC_Final</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>HMAC_CTX</span>, <span class='ident'>output</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>, <span class='ident'>len</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_uint</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
+    <span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;use HMAC_Update_shim instead&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>HMAC_Update</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>HMAC_CTX</span>, <span class='ident'>input</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>, <span class='ident'>len</span>: <span class='ident'>c_uint</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>HMAC_CTX_cleanup</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>HMAC_CTX</span>);
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>HMAC_CTX_copy</span>(<span class='ident'>dst</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>HMAC_CTX</span>, <span class='ident'>src</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>HMAC_CTX</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
+
+    <span class='comment'>// Pre-1.0 versions of these didn&#39;t return anything, so the shims bridge that gap</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>HMAC_Init_ex_shim</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>HMAC_CTX</span>, <span class='ident'>key</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>, <span class='ident'>keylen</span>: <span class='ident'>c_int</span>, <span class='ident'>md</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>EVP_MD</span>, <span class='ident'>imple</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>ENGINE</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>HMAC_Final_shim</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>HMAC_CTX</span>, <span class='ident'>output</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>u8</span>, <span class='ident'>len</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_uint</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>HMAC_Update_shim</span>(<span class='ident'>ctx</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>HMAC_CTX</span>, <span class='ident'>input</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>u8</span>, <span class='ident'>len</span>: <span class='ident'>c_uint</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
 
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>PEM_read_bio_X509</span>(<span class='ident'>bio</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>BIO</span>, <span class='ident'>out</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>X509</span>, <span class='ident'>callback</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PasswordCallback</span><span class='op'>&gt;</span>,

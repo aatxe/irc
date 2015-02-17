@@ -41,10 +41,10 @@
     </nav>
 
     <section id='main' class="content enum">
-<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='enum' href=''>DecoderTrap</a><wbr><a class='stability Stable' title=''>Stable</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='enum' href=''>DecoderTrap</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-1115' href='../../src/encoding/types.rs.html#368-381'>[src]</a></span></h1>
+        </span><a id='src-1117' href='../../src/encoding/types.rs.html#368-381'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum DecoderTrap {
     Strict,
     Replace,
@@ -57,7 +57,7 @@ Corresponds to WHATWG &quot;fatal&quot; error algorithm.</p>
 </div></td></tr><tr><td id='variant.Replace'><a class='stability Unmarked' title='No stability level'></a><code>Replace</code></td><td><div class='docblock'><p>Replaces an error with a U+FFFD (decoder).
 Corresponds to WHATWG &quot;replacement&quot; error algorithm.</p>
 </div></td></tr><tr><td id='variant.Ignore'><a class='stability Unmarked' title='No stability level'></a><code>Ignore</code></td><td><div class='docblock'><p>Silently ignores an error, effectively replacing it with an empty sequence.</p>
-</div></td></tr><tr><td id='variant.Call'><a class='stability Unstable' title='Unstable'></a><code>Call</code></td><td><div class='docblock'><p>Calls given function to handle decoder errors.
+</div></td></tr><tr><td id='variant.Call'><a class='stability Unmarked' title='No stability level'></a><code>Call</code></td><td><div class='docblock'><p>Calls given function to handle decoder errors.
 The function is given the current decoder, input and output writer,
 and should return true only when it is fine to keep going.</p>
 </div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a></code></h3><div class='impl-items'></div></section>

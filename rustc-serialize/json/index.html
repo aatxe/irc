@@ -44,7 +44,7 @@
 <h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>rustc-serialize</a>::<wbr><a class='mod' href=''>json</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-15188' href='../../src/rustc-serialize/json.rs.html#14-4023'>[src]</a></span></h1>
+        </span><a id='src-15649' href='../../src/rustc-serialize/json.rs.html#14-3892'>[src]</a></span></h1>
 <div class='docblock'><p>JSON parsing and serialization</p>
 
 <h1 id="what-is-json?" class='section-header'><a
@@ -225,6 +225,38 @@ which is required for custom mappings.</p>
     <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>json_str</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
 }
 </pre>
+
+<h2 id="parsing-a-str-to-json-and-reading-the-result" class='section-header'><a
+                           href="#parsing-a-str-to-json-and-reading-the-result">Parsing a <code>str</code> to <code>Json</code> and reading the result</a></h2><pre id='rust-example-rendered' class='rust '>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;rustc-serialize&quot;</span> <span class='kw'>as</span> <span class='ident'>rustc_serialize</span>;
+<span class='kw'>use</span> <span class='ident'>rustc_serialize</span>::<span class='ident'>json</span>::<span class='ident'>Json</span>;
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>Json</span>::<span class='ident'>from_str</span>(<span class='string'>&quot;{\&quot;foo\&quot;: 13, \&quot;bar\&quot;: \&quot;baz\&quot;}&quot;</span>).<span class='ident'>unwrap</span>();
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;data: {}&quot;</span>, <span class='ident'>data</span>);
+    <span class='comment'>// data: {&quot;bar&quot;:&quot;baz&quot;,&quot;foo&quot;:13}</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;object? {}&quot;</span>, <span class='ident'>data</span>.<span class='ident'>is_object</span>());
+    <span class='comment'>// object? true</span>
+
+    <span class='kw'>let</span> <span class='ident'>obj</span> <span class='op'>=</span> <span class='ident'>data</span>.<span class='ident'>as_object</span>().<span class='ident'>unwrap</span>();
+    <span class='kw'>let</span> <span class='ident'>foo</span> <span class='op'>=</span> <span class='ident'>obj</span>.<span class='ident'>get</span>(<span class='string'>&quot;foo&quot;</span>).<span class='ident'>unwrap</span>();
+
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;array? {:?}&quot;</span>, <span class='ident'>foo</span>.<span class='ident'>as_array</span>());
+    <span class='comment'>// array? None</span>
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;u64? {:?}&quot;</span>, <span class='ident'>foo</span>.<span class='ident'>as_u64</span>());
+    <span class='comment'>// u64? Some(13u64)</span>
+
+    <span class='kw'>for</span> (<span class='ident'>key</span>, <span class='ident'>value</span>) <span class='kw'>in</span> <span class='ident'>obj</span>.<span class='ident'>iter</span>() {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}: {}&quot;</span>, <span class='ident'>key</span>, <span class='kw'>match</span> <span class='op'>*</span><span class='ident'>value</span> {
+            <span class='ident'>Json</span>::<span class='ident'>U64</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{} (u64)&quot;</span>, <span class='ident'>v</span>),
+            <span class='ident'>Json</span>::<span class='ident'>String</span>(<span class='kw-2'>ref</span> <span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{} (string)&quot;</span>, <span class='ident'>v</span>),
+            _ <span class='op'>=&gt;</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;other&quot;</span>)
+        });
+    }
+    <span class='comment'>// bar: baz (string)</span>
+    <span class='comment'>// foo: 13 (u64)</span>
+}
+</pre>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
                     <tr>
@@ -265,14 +297,6 @@ which is required for custom mappings.</p>
                                title='rustc-serialize::json::Parser'>Parser</a></td>
                         <td class='docblock short'><p>A streaming JSON parser implemented as an iterator of JsonEvent, consuming
 an iterator of char.</p>
-</td>
-                    </tr>
-                
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.PrettyEncoder.html'
-                               title='rustc-serialize::json::PrettyEncoder'>PrettyEncoder</a></td>
-                        <td class='docblock short'><p>Another encoder for JSON, but prints out human-readable JSON instead of
-compact data</p>
 </td>
                     </tr>
                 

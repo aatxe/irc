@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-sys-0.2.17/src/probe.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-sys-0.3.6/src/probe.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>probe.rs.html -- source</title>
@@ -113,8 +113,8 @@
 <span id="71">71</span>
 <span id="72">72</span>
 </pre><pre class='rust '>
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>fs</span>::<span class='ident'>PathExtensions</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>env</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::<span class='ident'>fs</span>::<span class='ident'>PathExtensions</span>;
 
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ProbeResult</span> {
     <span class='kw'>pub</span> <span class='ident'>cert_file</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;</span>,
@@ -156,17 +156,17 @@
 
     <span class='kw'>fn</span> <span class='ident'>put</span>(<span class='ident'>var</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>path</span>: <span class='ident'>Path</span>) {
         <span class='comment'>// Don&#39;t stomp over what anyone else has set</span>
-        <span class='kw'>match</span> <span class='ident'>os</span>::<span class='ident'>getenv</span>(<span class='ident'>var</span>) {
-            <span class='prelude-val'>Some</span>(..) <span class='op'>=&gt;</span> {}
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>os</span>::<span class='ident'>setenv</span>(<span class='ident'>var</span>, <span class='ident'>path</span>),
+        <span class='kw'>match</span> <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='ident'>var</span>) {
+            <span class='prelude-val'>Ok</span>(..) <span class='op'>=&gt;</span> {}
+            <span class='prelude-val'>Err</span>(..) <span class='op'>=&gt;</span> <span class='ident'>env</span>::<span class='ident'>set_var</span>(<span class='ident'>var</span>, <span class='kw-2'>&amp;</span><span class='ident'>path</span>),
         }
     }
 }
 
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>probe</span>() <span class='op'>-&gt;</span> <span class='ident'>ProbeResult</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>ProbeResult</span> {
-        <span class='ident'>cert_file</span>: <span class='ident'>os</span>::<span class='ident'>getenv</span>(<span class='string'>&quot;SSL_CERT_FILE&quot;</span>).<span class='ident'>map</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>),
-        <span class='ident'>cert_dir</span>: <span class='ident'>os</span>::<span class='ident'>getenv</span>(<span class='string'>&quot;SSL_CERT_DIR&quot;</span>).<span class='ident'>map</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>),
+        <span class='ident'>cert_file</span>: <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='string'>&quot;SSL_CERT_FILE&quot;</span>).<span class='ident'>ok</span>().<span class='ident'>map</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>),
+        <span class='ident'>cert_dir</span>: <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='string'>&quot;SSL_CERT_DIR&quot;</span>).<span class='ident'>ok</span>().<span class='ident'>map</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>),
     };
     <span class='kw'>for</span> <span class='ident'>certs_dir</span> <span class='kw'>in</span> <span class='ident'>find_certs_dirs</span>().<span class='ident'>iter</span>() {
         <span class='comment'>// cert.pem looks to be an openssl 1.0.1 thing, while</span>

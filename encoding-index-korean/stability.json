@@ -1,1 +1,1 @@
-{"name":"encoding-index-korean","counts":{"deprecated":0,"experimental":0,"unstable":0,"stable":3,"frozen":0,"locked":0,"unmarked":1},"submodules":[{"name":"euc_kr","counts":{"deprecated":0,"experimental":0,"unstable":0,"stable":3,"frozen":0,"locked":0,"unmarked":0},"submodules":[]}]}
+{"name":"encoding-index-korean","counts":{"unstable":0,"stable":0,"unmarked":4},"submodules":[{"name":"euc_kr","counts":{"unstable":0,"stable":0,"unmarked":3},"submodules":[]}]}

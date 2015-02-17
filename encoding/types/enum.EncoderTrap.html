@@ -41,10 +41,10 @@
     </nav>
 
     <section id='main' class="content enum">
-<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='enum' href=''>EncoderTrap</a><wbr><a class='stability Stable' title=''>Stable</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='enum' href=''>EncoderTrap</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-1179' href='../../src/encoding/types.rs.html#398-416'>[src]</a></span></h1>
+        </span><a id='src-1181' href='../../src/encoding/types.rs.html#398-416'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum EncoderTrap {
     Strict,
     Replace,
@@ -61,7 +61,7 @@ Corresponds to WHATWG &quot;URL&quot; error algorithms.</p>
 </div></td></tr><tr><td id='variant.NcrEscape'><a class='stability Unmarked' title='No stability level'></a><code>NcrEscape</code></td><td><div class='docblock'><p>Replaces an error with XML numeric character references (e.g. <code>&amp;#1234;</code>).
 The encoder trap fails when NCRs cannot be represented in given encoding.
 Corresponds to WHATWG &quot;<form>&quot; error algorithms.</p>
-</div></td></tr><tr><td id='variant.Call'><a class='stability Unstable' title='Unstable'></a><code>Call</code></td><td><div class='docblock'><p>Calls given function to handle encoder errors.
+</div></td></tr><tr><td id='variant.Call'><a class='stability Unmarked' title='No stability level'></a><code>Call</code></td><td><div class='docblock'><p>Calls given function to handle encoder errors.
 The function is given the current encoder, input and output writer,
 and should return true only when it is fine to keep going.</p>
 </div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></h3><div class='impl-items'></div></section>

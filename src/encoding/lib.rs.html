@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.18/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.23/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -281,13 +281,6 @@
 <span id="239">239</span>
 <span id="240">240</span>
 <span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
 </pre><pre class='rust '>
 <span class='comment'>// This is a part of rust-encoding.</span>
 <span class='comment'>// Copyright (c) 2013-2015, Kang Seonghoon.</span>
@@ -295,7 +288,7 @@
 
 <span class='doccomment'>/*!
 
-# Encoding 0.2.18
+# Encoding 0.2.23
 
 Character encoding support for Rust. (also known as `rust-encoding`)
 It is based on [WHATWG Encoding Standard](http://encoding.spec.whatwg.org/),
@@ -306,7 +299,6 @@ and also provides an advanced interface for error detection and recovery.
 To encode a string:
 
 ~~~~ {.rust}
-# #![allow(unstable)]
 use encoding::{Encoding, EncoderTrap};
 use encoding::all::ISO_8859_1;
 
@@ -317,7 +309,6 @@ assert_eq!(ISO_8859_1.encode(&quot;caf\u{e9}&quot;, EncoderTrap::Strict),
 To encode a string with unrepresentable characters:
 
 ~~~~ {.rust}
-# #![allow(unstable)]
 use encoding::{Encoding, EncoderTrap};
 use encoding::all::ISO_8859_2;
 
@@ -333,7 +324,6 @@ assert_eq!(ISO_8859_2.encode(&quot;Acme\u{a9}&quot;, EncoderTrap::NcrEscape),
 To decode a byte sequence:
 
 ~~~~ {.rust}
-# #![allow(unstable)]
 use encoding::{Encoding, DecoderTrap};
 use encoding::all::ISO_8859_1;
 
@@ -344,7 +334,6 @@ assert_eq!(ISO_8859_1.decode(&amp;[99,97,102,233], DecoderTrap::Strict),
 To decode a byte sequence with invalid sequences:
 
 ~~~~ {.rust}
-# #![allow(unstable)]
 use encoding::{Encoding, DecoderTrap};
 use encoding::all::ISO_8859_6;
 
@@ -358,7 +347,6 @@ assert_eq!(ISO_8859_6.decode(&amp;[65,99,109,101,169], DecoderTrap::Ignore),
 A practical example of custom encoder traps:
 
 ~~~~ {.rust}
-# #![allow(unstable)]
 use encoding::{Encoding, ByteWriter, EncoderTrap, DecoderTrap};
 use encoding::types::RawEncoder;
 use encoding::all::ASCII;
@@ -374,15 +362,14 @@ fn hex_ncr_escape(_encoder: &amp;mut RawEncoder, input: &amp;str, output: &amp;m
 static HEX_NCR_ESCAPE: EncoderTrap = EncoderTrap::Call(hex_ncr_escape);
 
 let orig = &quot;Hello, 世界!&quot;.to_string();
-let encoded = ASCII.encode(orig.as_slice(), HEX_NCR_ESCAPE).unwrap();
-assert_eq!(ASCII.decode(encoded.as_slice(), DecoderTrap::Strict),
+let encoded = ASCII.encode(&amp;orig[], HEX_NCR_ESCAPE).unwrap();
+assert_eq!(ASCII.decode(&amp;encoded[], DecoderTrap::Strict),
            Ok(&quot;Hello, &amp;#x4e16;&amp;#x754c;!&quot;.to_string()));
 ~~~~
 
 Getting the encoding from the string label, as specified in WHATWG Encoding standard:
 
 ~~~~ {.rust}
-# #![allow(unstable)]
 use encoding::{Encoding, DecoderTrap};
 use encoding::label::encoding_from_whatwg_label;
 use encoding::all::WINDOWS_949;
@@ -469,9 +456,8 @@ Whenever in doubt, look at the source code and specifications for detailed expla
 
 */</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>slicing_syntax</span>)]</span>
-
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>unstable</span>)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>core</span>, <span class='ident'>collections</span>)]</span> <span class='comment'>// lib stability features as per RFC #507</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>test</span>, <span class='ident'>feature</span>(<span class='ident'>path</span>, <span class='ident'>env</span>, <span class='ident'>io</span>, <span class='ident'>test</span>))]</span> <span class='comment'>// ditto</span>
 
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;encoding-index-singlebyte&quot;</span> <span class='kw'>as</span> <span class='ident'>index_singlebyte</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;encoding-index-korean&quot;</span> <span class='kw'>as</span> <span class='ident'>index_korean</span>;

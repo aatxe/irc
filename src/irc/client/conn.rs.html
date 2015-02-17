@@ -393,8 +393,8 @@
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>ToOwned</span>;
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>error</span>::<span class='ident'>Error</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>BufferedReader</span>, <span class='ident'>BufferedWriter</span>, <span class='ident'>IoResult</span>, <span class='ident'>TcpStream</span>};
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>any</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>, <span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>))]</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>IoError</span>, <span class='ident'>IoErrorKind</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::{<span class='ident'>BufferedReader</span>, <span class='ident'>BufferedWriter</span>, <span class='ident'>IoResult</span>, <span class='ident'>TcpStream</span>};
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>any</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>, <span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>))]</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::{<span class='ident'>IoError</span>, <span class='ident'>IoErrorKind</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::{<span class='ident'>Mutex</span>, <span class='ident'>MutexGuard</span>};
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>DecoderTrap</span>, <span class='ident'>EncoderTrap</span>, <span class='ident'>Encoding</span>};
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>label</span>::<span class='ident'>encoding_from_whatwg_label</span>;
@@ -457,7 +457,7 @@
     }
 
     <span class='doccomment'>/// Reconnects to the specified server, dropping the current connection.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Feature is relatively new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>reconnect</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>host</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>port</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>use_ssl</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>get_ref</span>() {
             <span class='kw-2'>&amp;</span><span class='ident'>NetStream</span>::<span class='ident'>UnsecuredTcpStream</span>(_) <span class='op'>=&gt;</span>  <span class='boolval'>false</span>,
@@ -475,13 +475,13 @@
     }
 
     <span class='doccomment'>/// Sets the keepalive for the network stream.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Feature is relatively new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Rust IO has not stabilized.&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_keepalive</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>delay_in_seconds</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>mod_stream</span>(<span class='op'>|</span><span class='ident'>tcp</span><span class='op'>|</span> <span class='ident'>tcp</span>.<span class='ident'>set_keepalive</span>(<span class='ident'>delay_in_seconds</span>))
     }
 
     <span class='doccomment'>/// Sets the timeout for the network stream.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Feature is relatively new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Rust IO has not stabilized.&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_timeout</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>timeout_ms</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>u64</span><span class='op'>&gt;</span>) {
         <span class='self'>self</span>.<span class='ident'>mod_stream</span>(<span class='op'>|</span><span class='ident'>tcp</span><span class='op'>|</span> <span class='prelude-val'>Ok</span>(<span class='ident'>tcp</span>.<span class='ident'>set_timeout</span>(<span class='ident'>timeout_ms</span>))).<span class='ident'>unwrap</span>(); <span class='comment'>// this cannot fail.</span>
     }
@@ -508,7 +508,7 @@
     }
 
     <span class='doccomment'>/// Sends a Message over this connection.</span>
-    <span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;Design is very new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send</span><span class='op'>&lt;</span><span class='ident'>M</span>: <span class='ident'>ToMessage</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>to_msg</span>: <span class='ident'>M</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>encoding</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>encoding_from_whatwg_label</span>(<span class='ident'>encoding</span>) {
@@ -529,12 +529,12 @@
             })
         };
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>writer</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>writer</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>writer</span>.<span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>[]));
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>writer</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>[]));
         <span class='ident'>writer</span>.<span class='ident'>flush</span>()
     }
 
     <span class='doccomment'>/// Sends a message over this connection. </span>
-    <span class='attribute'>#[<span class='ident'>experimental</span> <span class='op'>=</span> <span class='string'>&quot;Design is very new.&quot;</span>]</span>
+    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send</span><span class='op'>&lt;</span><span class='ident'>M</span>: <span class='ident'>ToMessage</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>to_msg</span>: <span class='ident'>M</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>writer</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>writer</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
@@ -623,11 +623,11 @@
 }
 
 <span class='kw'>impl</span> <span class='ident'>Writer</span> <span class='kw'>for</span> <span class='ident'>NetStream</span> {
-    <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='kw'>match</span> <span class='self'>self</span> {
-            <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>NetStream</span>::<span class='ident'>UnsecuredTcpStream</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>stream</span>) <span class='op'>=&gt;</span> <span class='ident'>stream</span>.<span class='ident'>write</span>(<span class='ident'>buf</span>),
+            <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>NetStream</span>::<span class='ident'>UnsecuredTcpStream</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>stream</span>) <span class='op'>=&gt;</span> <span class='ident'>stream</span>.<span class='ident'>write_all</span>(<span class='ident'>buf</span>),
             <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span>
-            <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>NetStream</span>::<span class='ident'>SslTcpStream</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>stream</span>) <span class='op'>=&gt;</span> <span class='ident'>stream</span>.<span class='ident'>write</span>(<span class='ident'>buf</span>),
+            <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>NetStream</span>::<span class='ident'>SslTcpStream</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>stream</span>) <span class='op'>=&gt;</span> <span class='ident'>stream</span>.<span class='ident'>write_all</span>(<span class='ident'>buf</span>),
         }
     }
 }
@@ -635,8 +635,8 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>Connection</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>MemReader</span>, <span class='ident'>MemWriter</span>};
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>util</span>::{<span class='ident'>NullReader</span>, <span class='ident'>NullWriter</span>};
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::{<span class='ident'>MemReader</span>, <span class='ident'>MemWriter</span>};
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::<span class='ident'>util</span>::{<span class='ident'>NullReader</span>, <span class='ident'>NullWriter</span>};
     <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>message</span>::<span class='ident'>Message</span>;
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>DecoderTrap</span>, <span class='ident'>Encoding</span>};
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::{<span class='ident'>ISO_8859_15</span>, <span class='ident'>UTF_8</span>};

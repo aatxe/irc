@@ -44,10 +44,10 @@
 <h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>encoding</a><wbr></span><span class='out-of-band'><a href='stability.html'>[stability]</a> <span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-0' href='../src/encoding/lib.rs.html#5-248'>[src]</a></span></h1>
+        </span><a id='src-0' href='../src/encoding/lib.rs.html#5-241'>[src]</a></span></h1>
 <div class='docblock'>
-<h1 id="encoding-0.2.18" class='section-header'><a
-                           href="#encoding-0.2.18">Encoding 0.2.18</a></h1>
+<h1 id="encoding-0.2.23" class='section-header'><a
+                           href="#encoding-0.2.23">Encoding 0.2.23</a></h1>
 <p>Character encoding support for Rust. (also known as <code>rust-encoding</code>)
 It is based on <a href="http://encoding.spec.whatwg.org/">WHATWG Encoding Standard</a>,
 and also provides an advanced interface for error detection and recovery.</p>
@@ -115,8 +115,8 @@ and also provides an advanced interface for error detection and recovery.</p>
 <span class='kw'>static</span> <span class='ident'>HEX_NCR_ESCAPE</span>: <span class='ident'>EncoderTrap</span> <span class='op'>=</span> <span class='ident'>EncoderTrap</span>::<span class='ident'>Call</span>(<span class='ident'>hex_ncr_escape</span>);
 
 <span class='kw'>let</span> <span class='ident'>orig</span> <span class='op'>=</span> <span class='string'>&quot;Hello, 世界!&quot;</span>.<span class='ident'>to_string</span>();
-<span class='kw'>let</span> <span class='ident'>encoded</span> <span class='op'>=</span> <span class='ident'>ASCII</span>.<span class='ident'>encode</span>(<span class='ident'>orig</span>.<span class='ident'>as_slice</span>(), <span class='ident'>HEX_NCR_ESCAPE</span>).<span class='ident'>unwrap</span>();
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ASCII</span>.<span class='ident'>decode</span>(<span class='ident'>encoded</span>.<span class='ident'>as_slice</span>(), <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>),
+<span class='kw'>let</span> <span class='ident'>encoded</span> <span class='op'>=</span> <span class='ident'>ASCII</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='ident'>orig</span>[], <span class='ident'>HEX_NCR_ESCAPE</span>).<span class='ident'>unwrap</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ASCII</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span><span class='ident'>encoded</span>[], <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>),
            <span class='prelude-val'>Ok</span>(<span class='string'>&quot;Hello, &amp;#x4e16;&amp;#x754c;!&quot;</span>.<span class='ident'>to_string</span>()));
 </pre>
 
@@ -228,7 +228,7 @@ Whenever in doubt, look at the source code and specifications for detailed expla
                     </tr>
                 
                     <tr>
-                        <td><a class='stability Unstable' title='Unstable'></a><a class='mod' href='codec/index.html'
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='codec/index.html'
                                title='encoding::codec'>codec</a></td>
                         <td class='docblock short'><p>Codec implementations.</p>
 </td>
