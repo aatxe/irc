@@ -148,8 +148,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                     )).unwrap();
                 }
                 if self.config.umodes() != "" {
-                    self.send(MODE(
-                        self.config.nickname(), self.config.umodes(), None)).unwrap();
+                    self.send(MODE(self.config.nickname(), self.config.umodes(), None)).unwrap();
                 }
                 for chan in self.config.channels().into_iter() {
                     self.send(JOIN(&chan[], None)).unwrap();
