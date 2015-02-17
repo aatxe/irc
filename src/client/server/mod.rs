@@ -6,7 +6,7 @@ use std::old_io::{BufferedReader, BufferedWriter, IoError, IoErrorKind, IoResult
 use std::sync::{Mutex, RwLock};
 use client::conn::{Connection, NetStream};
 use client::data::{Command, Config, Message, Response, User};
-use client::data::Command::{JOIN, NICK, NICKSERV, PONG};
+use client::data::Command::{JOIN, NICK, NICKSERV, PONG, MODE};
 use client::data::kinds::{IrcReader, IrcWriter};
 #[cfg(feature = "ctcp")] use time::now;
 
@@ -146,6 +146,10 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                     self.send(NICKSERV(
                         &format!("IDENTIFY {}", self.config.nick_password())[]
                     )).unwrap();
+                }
+                if self.config.umodes() != "" {
+                    self.send(MODE(
+                        self.config.nickname(), self.config.umodes(), None)).unwrap();
                 }
                 for chan in self.config.channels().into_iter() {
                     self.send(JOIN(&chan[], None)).unwrap();
