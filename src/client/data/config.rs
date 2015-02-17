@@ -29,8 +29,6 @@ pub struct Config {
     /// The bot's real name.
     #[stable]
     pub realname: Option<String>,
-    /// User modes to set on connect. Example: "+RB-x"
-    pub umodes: Option<String>,
     /// The server to connect to.
     #[stable]
     pub server: Option<String>,
@@ -51,6 +49,9 @@ pub struct Config {
     /// A list of channels to join on connection.
     #[stable]
     pub channels: Option<Vec<String>>,
+    /// User modes to set on connect. Example: "+RB-x"
+    #[unstable]
+    pub umodes: Option<String>,
     /// The text that'll be sent in response to CTCP USERINFO requests.
     #[stable]
     pub user_info: Option<String>,
@@ -121,13 +122,6 @@ impl Config {
         self.realname.as_ref().map(|s| &s[]).unwrap_or(self.nickname())
     }
 
-    /// Gets the user modes set on connect specified in the configuration.
-    /// This defaults to an empty string when not specified.
-    #[stable]
-    pub fn umodes(&self) -> &str {
-        self.umodes.as_ref().map(|s| &s[]).unwrap_or("")
-    }
-
     /// Gets the address of the server specified in the configuration.
     /// This panics when not specified.
     #[stable]
@@ -173,6 +167,14 @@ impl Config {
     pub fn channels(&self) -> Vec<&str> {
         self.channels.as_ref().map(|v| v.iter().map(|s| &s[]).collect()).unwrap_or(vec![])    
     }
+
+    /// Gets the user modes to set on connect specified in the configuration.
+    /// This defaults to an empty string when not specified.
+    #[unstable = "Feature is still relatively new."]
+    pub fn umodes(&self) -> &str {
+        self.umodes.as_ref().map(|s| &s[]).unwrap_or("")
+    }
+
 
     /// Gets the string to be sent in response to CTCP USERINFO requests.
     /// This defaults to an empty string when not specified.
