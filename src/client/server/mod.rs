@@ -374,6 +374,24 @@ mod test {
     }
 
     #[test]
+    fn handle_end_motd_with_umodes() {
+        let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
+        let server = IrcServer::from_connection(Config {
+            nickname: Some(format!("test")),
+            umodes: Some(format!("+B")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            .. Default::default()
+        }, Connection::new(
+           MemReader::new(value.as_bytes().to_vec()), MemWriter::new()
+        ));
+        for message in server.iter() {
+            println!("{:?}", message);
+        }
+        assert_eq!(&get_server_value(server)[],
+        "MODE test +B\r\nJOIN #test\r\nJOIN #test2\r\n");
+    }
+
+    #[test]
     fn nickname_in_use() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.";
         let server = IrcServer::from_connection(test_config(), Connection::new(
