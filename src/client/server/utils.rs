@@ -259,12 +259,8 @@ mod test {
     #[test]
     fn identify_with_password() {
         let server = IrcServer::from_connection(Config {
-            owners: Some(vec![format!("test")]),
             nickname: Some(format!("test")),
-            alt_nicks: Some(vec![format!("test2")]),
-            server: Some(format!("irc.test.net")),
             password: Some(format!("password")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
             .. Default::default()
         }, Connection::new(NullReader, MemWriter::new()));
         {
@@ -275,7 +271,7 @@ mod test {
         PASS :password\r\nNICK :test\r\nUSER test 0 * :test\r\n");
     }
 
-    #[test]
+#[test]
     fn send_pong() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, MemWriter::new()));
