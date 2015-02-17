@@ -178,7 +178,7 @@ impl Config {
 
     /// Gets the string to be sent in response to CTCP USERINFO requests.
     /// This defaults to an empty string when not specified.
-    #[unstable = "Feature is still relatively new."]
+    #[stable]
     pub fn user_info(&self) -> &str {
         self.user_info.as_ref().map(|s| &s[]).unwrap_or("")
     }

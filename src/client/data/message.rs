@@ -1,5 +1,5 @@
 //! Messages to and from the server.
-#![unstable = "New features were added recently."]
+#![stable]
 use std::borrow::ToOwned;
 use std::str::FromStr;
 

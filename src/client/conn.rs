@@ -66,7 +66,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     }
 
     /// Reconnects to the specified server, dropping the current connection.
-    #[unstable = "Feature is relatively new."]
+    #[stable]
     pub fn reconnect(&self, host: &str, port: u16) -> IoResult<()> {
         let use_ssl = match self.reader.lock().unwrap().get_ref() {
             &NetStream::UnsecuredTcpStream(_) =>  false,
@@ -84,13 +84,13 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     }
 
     /// Sets the keepalive for the network stream.
-    #[unstable = "Feature is relatively new."]
+    #[unstable = "Rust IO has not stabilized."]
     pub fn set_keepalive(&self, delay_in_seconds: Option<usize>) -> IoResult<()> {
         self.mod_stream(|tcp| tcp.set_keepalive(delay_in_seconds))
     }
 
     /// Sets the timeout for the network stream.
-    #[unstable = "Feature is relatively new."]
+    #[unstable = "Rust IO has not stabilized."]
     pub fn set_timeout(&self, timeout_ms: Option<u64>) {
         self.mod_stream(|tcp| Ok(tcp.set_timeout(timeout_ms))).unwrap(); // this cannot fail.
     }
