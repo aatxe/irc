@@ -30,7 +30,5 @@ fn main() {
 ```
 
 ## Contributing ##
-Contributions to this library would be immensely appreciated. As this project is public domain, 
-all prospective contributors must 
-[sign the Contributor License Agreement](https://www.clahub.com/agreements/aatxe/irc), a 
-public domain dedication.
+Contributions to this library would be immensely appreciated. It should be noted that as this is a
+public domain project, any contributions will thus be released into the public domain as well.
