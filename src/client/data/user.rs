@@ -45,7 +45,7 @@ impl User {
     /// Gets the nickname of the user.
     #[stable]
     pub fn get_name(&self) -> &str {
-        &self.name[]
+        &self.name
     }
 
     /// Gets the user's highest access level.
@@ -88,7 +88,7 @@ impl User {
 
     /// Removes an access level from the list, and updates the highest level if necessary.
     fn sub_access_level(&mut self, level: AccessLevel) {
-        if let Some(n) = self.access_levels[].position_elem(&level) {
+        if let Some(n) = self.access_levels[..].position_elem(&level) {
             self.access_levels.swap_remove(n);
         }
         if level == self.highest_access_level() {

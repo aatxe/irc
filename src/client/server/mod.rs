@@ -128,7 +128,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
             if resp == Response::RPL_NAMREPLY {
                 if cfg!(not(feature = "nochanlists")) {
                     if let Some(users) = msg.suffix.clone() {
-                        if let [_, _, ref chan] = &msg.args[] {
+                        if let [_, _, ref chan] = &msg.args[..] {
                             for user in users.split_str(" ") {
                                 if match self.chanlists.lock().unwrap().get_mut(chan) {
                                     Some(vec) => { vec.push(User::new(user)); false },
@@ -144,14 +144,14 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
             } else if resp == Response::RPL_ENDOFMOTD || resp == Response::ERR_NOMOTD {
                 if self.config.nick_password() != "" {
                     self.send(NICKSERV(
-                        &format!("IDENTIFY {}", self.config.nick_password())[]
+                        &format!("IDENTIFY {}", self.config.nick_password())[..]
                     )).unwrap();
                 }
                 if self.config.umodes() != "" {
                     self.send(MODE(self.config.nickname(), self.config.umodes(), None)).unwrap();
                 }
                 for chan in self.config.channels().into_iter() {
-                    self.send(JOIN(&chan[], None)).unwrap();
+                    self.send(JOIN(&chan[..], None)).unwrap();
                 }
             } else if resp == Response::ERR_NICKNAMEINUSE ||
                       resp == Response::ERR_ERRONEOUSNICKNAME {
@@ -166,18 +166,18 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
             }
             return
         }
-        if &msg.command[] == "PING" {
-            self.send(PONG(&msg.suffix.as_ref().unwrap()[], None)).unwrap();
+        if &msg.command[..] == "PING" {
+            self.send(PONG(&msg.suffix.as_ref().unwrap()[..], None)).unwrap();
         } else if cfg!(not(feature = "nochanlists")) && 
-                  (&msg.command[] == "JOIN" || &msg.command[] == "PART") {
+                  (&msg.command[..] == "JOIN" || &msg.command[..] == "PART") {
             let chan = match msg.suffix {
-                Some(ref suffix) => &suffix[],
-                None => &msg.args[0][],
+                Some(ref suffix) => &suffix[..],
+                None => &msg.args[0][..],
             };
             if let Some(vec) = self.chanlists.lock().unwrap().get_mut(&String::from_str(chan)) {
                 if let Some(ref src) = msg.prefix {
                     if let Some(i) = src.find('!') {
-                        if &msg.command[] == "JOIN" {
+                        if &msg.command[..] == "JOIN" {
                             vec.push(User::new(&src[..i]));
                         } else {
                             if let Some(n) = vec.as_slice().position_elem(&User::new(&src[..i])) {
@@ -187,11 +187,11 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                     }
                 }
             }
-        } else if let ("MODE", [ref chan, ref mode, ref user]) = (&msg.command[], &msg.args[]) {
+        } else if let ("MODE", [ref chan, ref mode, ref user]) = (&msg.command[..], &msg.args[..]) {
             if cfg!(not(feature = "nochanlists")) {
                 if let Some(vec) = self.chanlists.lock().unwrap().get_mut(chan) {
-                    if let Some(n) = vec.as_slice().position_elem(&User::new(&user[])) {
-                        vec[n].update_access_level(&mode[]);
+                    if let Some(n) = vec.as_slice().position_elem(&User::new(&user[..])) {
+                        vec[n].update_access_level(&mode[..]);
                     }
                 }
             }
@@ -204,11 +204,11 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     #[cfg(feature = "ctcp")]
     fn handle_ctcp(&self, msg: &Message) {
         let source = match msg.prefix {
-            Some(ref source) => source.find('!').map_or(&source[], |i| &source[..i]),
+            Some(ref source) => source.find('!').map_or(&source[..], |i| &source[..i]),
             None => "",
         };
-        if let ("PRIVMSG", [ref target]) = (&msg.command[], &msg.args[]) {
-            let resp = if target.starts_with("#") { &target[] } else { source };
+        if let ("PRIVMSG", [ref target]) = (&msg.command[..], &msg.args[..]) {
+            let resp = if target.starts_with("#") { &target[..] } else { source };
             match msg.suffix {
                 Some(ref msg) if msg.starts_with("\u{001}") => {
                     let tokens: Vec<_> = {
@@ -222,16 +222,16 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                     match tokens[0] {
                         "FINGER" => self.send_ctcp(resp, &format!("FINGER :{} ({})",
                                                                   self.config.real_name(),
-                                                                  self.config.username())[]),
+                                                                  self.config.username())),
                         "VERSION" => self.send_ctcp(resp, "VERSION irc:git:Rust"),
                         "SOURCE" => {
                             self.send_ctcp(resp, "SOURCE https://github.com/aatxe/irc");
                             self.send_ctcp(resp, "SOURCE");
                         },
-                        "PING" => self.send_ctcp(resp, &format!("PING {}", tokens[1])[]),
-                        "TIME" => self.send_ctcp(resp, &format!("TIME :{}", now().rfc822z())[]),
+                        "PING" => self.send_ctcp(resp, &format!("PING {}", tokens[1])),
+                        "TIME" => self.send_ctcp(resp, &format!("TIME :{}", now().rfc822z())),
                         "USERINFO" => self.send_ctcp(resp, &format!("USERINFO :{}",
-                                                                    self.config.user_info())[]),
+                                                                    self.config.user_info())),
                         _ => {}
                     }
                 },
@@ -243,7 +243,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     /// Sends a CTCP-escaped message.
     #[cfg(feature = "ctcp")]
     fn send_ctcp(&self, target: &str, msg: &str) {
-        self.send(Command::NOTICE(target, &format!("\u{001}{}\u{001}", msg)[])).unwrap();
+        self.send(Command::NOTICE(target, &format!("\u{001}{}\u{001}", msg)[..])).unwrap();
     }
 
     /// Handles CTCP requests if the CTCP feature is enabled.
@@ -338,9 +338,9 @@ mod test {
         ));
         let mut messages = String::new();
         for message in server.iter() {
-            messages.push_str(&message.unwrap().into_string()[]);
+            messages.push_str(&message.unwrap().into_string());
         }
-        assert_eq!(&messages[], exp);
+        assert_eq!(&messages, exp);
     }
 
     #[test]
@@ -352,7 +352,7 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[..],
         "PONG :irc.test.net\r\nJOIN #test\r\nJOIN #test2\r\n");
     }
 
@@ -369,7 +369,7 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[..],
         "NICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n");
     }
 
@@ -387,7 +387,7 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[..],
         "MODE test +B\r\nJOIN #test\r\nJOIN #test2\r\n");
     }
 
@@ -400,7 +400,7 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[], "NICK :test2\r\n");
+        assert_eq!(&get_server_value(server)[..], "NICK :test2\r\n");
     }
 
     #[test]
@@ -422,7 +422,7 @@ mod test {
            NullReader, Vec::new()
         ));
         assert!(server.send(PRIVMSG("#test", "Hi there!")).is_ok());
-        assert_eq!(&get_server_value(server)[], "PRIVMSG #test :Hi there!\r\n");
+        assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\r\n");
     }
 
     #[cfg(not(feature = "nochanlists"))]
@@ -503,7 +503,7 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[], "NOTICE test :\u{001}FINGER :test (test)\u{001}\
+        assert_eq!(&get_server_value(server)[..], "NOTICE test :\u{001}FINGER :test (test)\u{001}\
                    \r\n");
     }
 
@@ -517,7 +517,7 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[], "NOTICE test :\u{001}VERSION irc:git:Rust\u{001}\
+        assert_eq!(&get_server_value(server)[..], "NOTICE test :\u{001}VERSION irc:git:Rust\u{001}\
                    \r\n");
     }
 
@@ -531,7 +531,7 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[],
+        assert_eq!(&get_server_value(server)[..],
         "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n\
          NOTICE test :\u{001}SOURCE\u{001}\r\n");
     }
@@ -546,7 +546,7 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[], "NOTICE test :\u{001}PING test\u{001}\r\n");
+        assert_eq!(&get_server_value(server)[..], "NOTICE test :\u{001}PING test\u{001}\r\n");
     }
 
     #[test]
@@ -574,7 +574,7 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[], "NOTICE test :\u{001}USERINFO :Testing.\u{001}\
+        assert_eq!(&get_server_value(server)[..], "NOTICE test :\u{001}USERINFO :Testing.\u{001}\
                    \r\n");
     }
 }

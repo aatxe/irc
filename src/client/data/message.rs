@@ -48,17 +48,17 @@ impl Message {
         let mut ret = String::new();
         if let Some(ref prefix) = self.prefix {
             ret.push(':');
-            ret.push_str(&prefix[]);
+            ret.push_str(&prefix);
             ret.push(' ');
         }
-        ret.push_str(&self.command[]);
+        ret.push_str(&self.command);
         for arg in self.args.iter() {
             ret.push(' ');
-            ret.push_str(&arg[]);
+            ret.push_str(&arg);
         }
         if let Some(ref suffix) = self.suffix {
             ret.push_str(" :");
-            ret.push_str(&suffix[]);
+            ret.push_str(&suffix);
         }
         ret.push_str("\r\n");
         ret

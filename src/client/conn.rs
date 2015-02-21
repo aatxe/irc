@@ -36,7 +36,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
 
     /// connects to the specified server and returns a reader-writer pair.
     fn connect_internal(host: &str, port: u16) -> IoResult<NetReaderWriterPair> {
-        let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[]));
+        let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[..]));
         Ok((BufferedReader::new(NetStream::UnsecuredTcpStream(socket.clone())),
             BufferedWriter::new(NetStream::UnsecuredTcpStream(socket))))
     }
@@ -52,7 +52,7 @@ impl Connection<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
     /// Connects over SSL to the specified server and returns a reader-writer pair.
     #[cfg(feature = "ssl")]
     fn connect_ssl_internal(host: &str, port: u16) -> IoResult<NetReaderWriterPair> {
-        let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[]));
+        let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[..]));
         let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Tlsv1)));
         let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
         Ok((BufferedReader::new(NetStream::SslTcpStream(ssl_socket.clone())),
@@ -129,7 +129,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
             })
         };
         let msg = to_msg.to_message();
-        let data = match encoding.encode(&msg.into_string()[], EncoderTrap::Replace) {
+        let data = match encoding.encode(&msg.into_string(), EncoderTrap::Replace) {
             Ok(data) => data,
             Err(data) => return Err(IoError {
                 kind: IoErrorKind::InvalidInput,
@@ -138,7 +138,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
             })
         };
         let mut writer = self.writer.lock().unwrap();
-        try!(writer.write_all(&data[]));
+        try!(writer.write_all(&data));
         writer.flush()
     }
 
@@ -164,7 +164,7 @@ impl<T: IrcReader, U: IrcWriter> Connection<T, U> {
             })
         };
         self.reader.lock().unwrap().read_until(b'\n').and_then(|line|
-            match encoding.decode(&line[], DecoderTrap::Replace) {
+            match encoding.decode(&line, DecoderTrap::Replace) {
                 Ok(data) => Ok(data),
                 Err(data) => Err(IoError {
                     kind: IoErrorKind::InvalidInput,
