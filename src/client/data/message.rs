@@ -150,14 +150,14 @@ mod test {
             args: vec![format!("test")],
             suffix: Some(format!("Testing!")),
         };
-        assert_eq!(&message.into_string()[], "PRIVMSG test :Testing!\r\n");
+        assert_eq!(&message.into_string()[..], "PRIVMSG test :Testing!\r\n");
         let message = Message {
             prefix: Some(format!("test!test@test")),
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
             suffix: Some(format!("Still testing!")),
         };
-        assert_eq!(&message.into_string()[], ":test!test@test PRIVMSG test :Still testing!\r\n");
+        assert_eq!(&message.into_string()[..], ":test!test@test PRIVMSG test :Still testing!\r\n");
     }
 
     #[test]

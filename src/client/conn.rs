@@ -258,7 +258,7 @@ mod test {
             Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("Testing!"))
         ).is_ok());
         let data = String::from_utf8(conn.writer().get_ref().to_vec()).unwrap();
-        assert_eq!(&data[], "PRIVMSG test :Testing!\r\n");
+        assert_eq!(&data[..], "PRIVMSG test :Testing!\r\n");
     }
     
     #[test]
@@ -268,7 +268,7 @@ mod test {
         let conn = Connection::new(NullReader, MemWriter::new());
         assert!(conn.send(exp).is_ok());
         let data = String::from_utf8(conn.writer().get_ref().to_vec()).unwrap();
-        assert_eq!(&data[], exp);
+        assert_eq!(&data[..], exp);
     }
 
     #[test]
@@ -279,7 +279,7 @@ mod test {
             Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("€ŠšŽžŒœŸ")), "UTF-8"
         ).is_ok());
         let data = UTF_8.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
-        assert_eq!(&data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
+        assert_eq!(&data[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 
     #[test]
@@ -289,7 +289,7 @@ mod test {
         let conn = Connection::new(NullReader, MemWriter::new());
         assert!(conn.send(exp, "UTF-8").is_ok());
         let data = UTF_8.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
-        assert_eq!(&data[], exp);
+        assert_eq!(&data[..], exp);
     }
 
     #[test]
@@ -300,7 +300,7 @@ mod test {
             Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("€ŠšŽžŒœŸ")), "l9"
         ).is_ok());
         let data = ISO_8859_15.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
-        assert_eq!(&data[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
+        assert_eq!(&data[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 
     #[test]
@@ -310,7 +310,7 @@ mod test {
         let conn = Connection::new(NullReader, MemWriter::new());
         assert!(conn.send(exp, "l9").is_ok());
         let data = ISO_8859_15.decode(conn.writer().get_ref(), DecoderTrap::Strict).unwrap();
-        assert_eq!(&data[], exp);
+        assert_eq!(&data[..], exp);
     }
 
     #[test]
@@ -319,7 +319,7 @@ mod test {
         let conn = Connection::new(
             MemReader::new("PRIVMSG test :Testing!\r\n".as_bytes().to_vec()), NullWriter
         );
-        assert_eq!(&conn.recv().unwrap()[], "PRIVMSG test :Testing!\r\n");
+        assert_eq!(&conn.recv().unwrap()[..], "PRIVMSG test :Testing!\r\n");
     }
 
     #[test]
@@ -328,7 +328,7 @@ mod test {
         let conn = Connection::new(
             MemReader::new(b"PRIVMSG test :Testing!\r\n".to_vec()), NullWriter
         );
-        assert_eq!(&conn.recv("UTF-8").unwrap()[], "PRIVMSG test :Testing!\r\n");
+        assert_eq!(&conn.recv("UTF-8").unwrap()[..], "PRIVMSG test :Testing!\r\n");
     }
 
     #[test]
@@ -343,6 +343,6 @@ mod test {
                 vec
             }), NullWriter
         );
-        assert_eq!(&conn.recv("l9").unwrap()[], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
+        assert_eq!(&conn.recv("l9").unwrap()[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 }

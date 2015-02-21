@@ -144,14 +144,14 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
             } else if resp == Response::RPL_ENDOFMOTD || resp == Response::ERR_NOMOTD {
                 if self.config.nick_password() != "" {
                     self.send(NICKSERV(
-                        &format!("IDENTIFY {}", self.config.nick_password())[..]
+                        &format!("IDENTIFY {}", self.config.nick_password())
                     )).unwrap();
                 }
                 if self.config.umodes() != "" {
                     self.send(MODE(self.config.nickname(), self.config.umodes(), None)).unwrap();
                 }
                 for chan in self.config.channels().into_iter() {
-                    self.send(JOIN(&chan[..], None)).unwrap();
+                    self.send(JOIN(&chan, None)).unwrap();
                 }
             } else if resp == Response::ERR_NICKNAMEINUSE ||
                       resp == Response::ERR_ERRONEOUSNICKNAME {
@@ -190,8 +190,8 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
         } else if let ("MODE", [ref chan, ref mode, ref user]) = (&msg.command[..], &msg.args[..]) {
             if cfg!(not(feature = "nochanlists")) {
                 if let Some(vec) = self.chanlists.lock().unwrap().get_mut(chan) {
-                    if let Some(n) = vec.as_slice().position_elem(&User::new(&user[..])) {
-                        vec[n].update_access_level(&mode[..]);
+                    if let Some(n) = vec.as_slice().position_elem(&User::new(&user)) {
+                        vec[n].update_access_level(&mode);
                     }
                 }
             }
