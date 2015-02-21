@@ -175,7 +175,6 @@ impl Config {
         self.umodes.as_ref().map(|s| &s[..]).unwrap_or("")
     }
 
-
     /// Gets the string to be sent in response to CTCP USERINFO requests.
     /// This defaults to an empty string when not specified.
     #[stable]

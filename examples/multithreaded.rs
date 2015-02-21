@@ -1,9 +1,8 @@
-#![feature(slicing_syntax, std_misc)]
 extern crate irc;
 
 use std::default::Default;
 use std::sync::Arc;
-use std::thread::Thread;
+use std::thread::spawn;
 use irc::client::data::config::Config;
 use irc::client::server::{IrcServer, Server};
 use irc::client::server::utils::Wrapper;
@@ -21,7 +20,7 @@ fn main() {
     server.identify().unwrap();
     let server = irc_server.clone();
     // We won't use a wrapper here because we don't need the added functionality.
-    let _ = Thread::scoped(move || { 
+    let _ = spawn(move || { 
         for msg in server.iter() {
             print!("{}", msg.unwrap().into_string());
         }

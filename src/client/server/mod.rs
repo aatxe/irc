@@ -340,7 +340,7 @@ mod test {
         for message in server.iter() {
             messages.push_str(&message.unwrap().into_string());
         }
-        assert_eq!(&messages, exp);
+        assert_eq!(&messages[..], exp);
     }
 
     #[test]

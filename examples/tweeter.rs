@@ -1,10 +1,10 @@
-#![feature(io, slicing_syntax, std_misc)]
+#![feature(old_io, std_misc)]
 extern crate irc;
 
 use std::default::Default;
 use std::old_io::timer::sleep;
 use std::sync::Arc;
-use std::thread::Thread;
+use std::thread::spawn;
 use std::time::duration::Duration;
 use irc::client::data::config::Config;
 use irc::client::server::{IrcServer, Server};
@@ -23,7 +23,7 @@ fn main() {
     let server = Wrapper::new(&*irc_server2);
     server.identify().unwrap();
     // Let's set up a loop that just prints the messages.
-    Thread::spawn(move || { 
+    spawn(move || { 
         irc_server.iter().map(|m| print!("{}", m.unwrap().into_string())).count(); 
     });
     loop {
