@@ -144,14 +144,15 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
             } else if resp == Response::RPL_ENDOFMOTD || resp == Response::ERR_NOMOTD {
                 if self.config.nick_password() != "" {
                     self.send(NICKSERV(
-                        &format!("IDENTIFY {}", self.config.nick_password())
+                        format!("IDENTIFY {}", self.config.nick_password())
                     )).unwrap();
                 }
                 if self.config.umodes() != "" {
-                    self.send(MODE(self.config.nickname(), self.config.umodes(), None)).unwrap();
+                    self.send(MODE(self.config.nickname().to_owned(),
+                                   self.config.umodes().to_owned(), None)).unwrap();
                 }
                 for chan in self.config.channels().into_iter() {
-                    self.send(JOIN(&chan, None)).unwrap();
+                    self.send(JOIN(chan.to_owned(), None)).unwrap();
                 }
             } else if resp == Response::ERR_NICKNAMEINUSE ||
                       resp == Response::ERR_ERRONEOUSNICKNAME {
@@ -160,14 +161,14 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                 if *index >= alt_nicks.len() {
                     panic!("All specified nicknames were in use.")
                 } else {
-                    self.send(NICK(alt_nicks[*index])).unwrap();
+                    self.send(NICK(alt_nicks[*index].to_owned())).unwrap();
                     *index += 1;
                 }
             }
             return
         }
         if &msg.command[..] == "PING" {
-            self.send(PONG(&msg.suffix.as_ref().unwrap()[..], None)).unwrap();
+            self.send(PONG(msg.suffix.as_ref().unwrap().to_owned(), None)).unwrap();
         } else if cfg!(not(feature = "nochanlists")) && 
                   (&msg.command[..] == "JOIN" || &msg.command[..] == "PART") {
             let chan = match msg.suffix {
@@ -243,7 +244,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
     /// Sends a CTCP-escaped message.
     #[cfg(feature = "ctcp")]
     fn send_ctcp(&self, target: &str, msg: &str) {
-        self.send(Command::NOTICE(target, &format!("\u{001}{}\u{001}", msg)[..])).unwrap();
+        self.send(Command::NOTICE(target.to_owned(), format!("\u{001}{}\u{001}", msg))).unwrap();
     }
 
     /// Handles CTCP requests if the CTCP feature is enabled.
@@ -421,7 +422,7 @@ mod test {
         let server = IrcServer::from_connection(test_config(), Connection::new(
            NullReader, Vec::new()
         ));
-        assert!(server.send(PRIVMSG("#test", "Hi there!")).is_ok());
+        assert!(server.send(PRIVMSG(format!("#test"), format!("Hi there!"))).is_ok());
         assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\r\n");
     }
 
