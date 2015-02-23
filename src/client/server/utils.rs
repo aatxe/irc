@@ -2,6 +2,7 @@
 #![stable]
 
 use std::old_io::IoResult;
+use std::borrow::ToOwned;
 use client::data::{Command, Config, User};
 use client::data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
 use client::data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
@@ -47,40 +48,40 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     #[unstable = "Capabilities requests may be moved outside of identify."]
     pub fn identify(&self) -> IoResult<()> {
         // We'll issue a CAP REQ for multi-prefix support to improve access level tracking.
-        try!(self.server.send(CAP(REQ, Some("multi-prefix"))));
+        try!(self.server.send(CAP(REQ, Some("multi-prefix".to_owned()))));
         try!(self.server.send(CAP(END, None))); // Then, send a CAP END to end the negotiation.
         if self.server.config().password() != "" {
-            try!(self.server.send(PASS(self.server.config().password())));
+            try!(self.server.send(PASS(self.server.config().password().to_owned())));
         }
-        try!(self.server.send(NICK(self.server.config().nickname())));
-        try!(self.server.send(USER(self.server.config().username(), "0",
-                              self.server.config().real_name())));
+        try!(self.server.send(NICK(self.server.config().nickname().to_owned())));
+        try!(self.server.send(USER(self.server.config().username().to_owned(), "0".to_owned(),
+                              self.server.config().real_name().to_owned())));
         Ok(())
     }
 
     /// Sends a PONG with the specified message.
     #[stable]
     pub fn send_pong(&self, msg: &str) -> IoResult<()> {
-        self.server.send(PONG(msg, None))
+        self.server.send(PONG(msg.to_owned(), None))
     }
 
     /// Joins the specified channel or chanlist.
     #[stable]
     pub fn send_join(&self, chanlist: &str) -> IoResult<()> {
-        self.server.send(JOIN(chanlist, None))
+        self.server.send(JOIN(chanlist.to_owned(), None))
     }
 
     /// Attempts to oper up using the specified username and password.
     #[stable]
     pub fn send_oper(&self, username: &str, password: &str) -> IoResult<()> {
-        self.server.send(OPER(username, password))
+        self.server.send(OPER(username.to_owned(), password.to_owned()))
     }
 
     /// Sends a message to the specified target.
     #[stable]
     pub fn send_privmsg(&self, target: &str, message: &str) -> IoResult<()> {
         for line in message.split_str("\r\n") {
-            try!(self.server.send(PRIVMSG(target, line)))
+            try!(self.server.send(PRIVMSG(target.to_owned(), line.to_owned())))
         }
         Ok(())
     }
@@ -89,7 +90,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     #[stable]
     pub fn send_notice(&self, target: &str, message: &str) -> IoResult<()> {
         for line in message.split_str("\r\n") {
-            try!(self.server.send(NOTICE(target, line)))
+            try!(self.server.send(NOTICE(target.to_owned(), line.to_owned())))
         }
         Ok(())
     }
@@ -98,27 +99,27 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// If `topic` is an empty string, it won't be included in the message.
     #[unstable = "Design may change."]
     pub fn send_topic(&self, channel: &str, topic: &str) -> IoResult<()> {
-        self.server.send(TOPIC(channel, if topic.len() == 0 {
+        self.server.send(TOPIC(channel.to_owned(), if topic.len() == 0 {
             None
         } else {
-            Some(topic)
+            Some(topic.to_owned())
         }))
     }
 
     /// Kills the target with the provided message.
     #[stable]
     pub fn send_kill(&self, target: &str, message: &str) -> IoResult<()> {
-        self.server.send(KILL(target, message))
+        self.server.send(KILL(target.to_owned(), message.to_owned()))
     }
 
     /// Kicks the listed nicknames from the listed channels with a comment.
     /// If `message` is an empty string, it won't be included in the message.
     #[unstable = "Design may change."]
     pub fn send_kick(&self, chanlist: &str, nicklist: &str, message: &str) -> IoResult<()> {
-        self.server.send(KICK(chanlist, nicklist, if message.len() == 0 {
+        self.server.send(KICK(chanlist.to_owned(), nicklist.to_owned(), if message.len() == 0 {
             None
         } else {
-            Some(message)
+            Some(message.to_owned())
         }))
     }
 
@@ -126,10 +127,10 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// If `modeparmas` is an empty string, it won't be included in the message.
     #[unstable = "Design may change."]
     pub fn send_mode(&self, target: &str, mode: &str, modeparams: &str) -> IoResult<()> {
-        self.server.send(MODE(target, mode, if modeparams.len() == 0 {
+        self.server.send(MODE(target.to_owned(), mode.to_owned(), if modeparams.len() == 0 {
             None
         } else {
-            Some(modeparams)
+            Some(modeparams.to_owned())
         }))
     }
 
@@ -137,23 +138,23 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// If `modeparams` is an empty string, it won't be included in the message.
     #[unstable = "Design may change."]
     pub fn send_samode(&self, target: &str, mode: &str, modeparams: &str) -> IoResult<()> {
-        self.server.send(SAMODE(target, mode, if modeparams.len() == 0 {
+        self.server.send(SAMODE(target.to_owned(), mode.to_owned(), if modeparams.len() == 0 {
             None
         } else {
-            Some(modeparams)
+            Some(modeparams.to_owned())
         }))
     }
 
     /// Forces a user to change from the old nickname to the new nickname.
     #[stable]
     pub fn send_sanick(&self, old_nick: &str, new_nick: &str) -> IoResult<()> {
-        self.server.send(SANICK(old_nick, new_nick))
+        self.server.send(SANICK(old_nick.to_owned(), new_nick.to_owned()))
     }
 
     /// Invites a user to the specified channel.
     #[stable]
     pub fn send_invite(&self, nick: &str, chan: &str) -> IoResult<()> {
-        self.server.send(INVITE(nick, chan))
+        self.server.send(INVITE(nick.to_owned(), chan.to_owned()))
     }
 
     /// Quits the server entirely with a message. 
@@ -161,9 +162,9 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     #[unstable = "Design may change."]
     pub fn send_quit(&self, msg: &str) -> IoResult<()> {
         self.server.send(QUIT(Some(if msg.len() == 0 {
-            "Powered by Rust."
+            "Powered by Rust.".to_owned()
         } else {
-            msg
+            msg.to_owned()
         })))
     }
 

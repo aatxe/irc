@@ -28,7 +28,7 @@ fn main() {
                             Ok(Command::PRIVMSG(_, msg)) => if msg.contains("bye") { 
                                 server.send_quit("").unwrap() 
                             },
-                            Ok(Command::ERROR(msg)) if msg.contains("Quit") => quit = true,
+                            Ok(Command::ERROR(ref msg)) if msg.contains("Quit") => quit = true,
                             _ => (),
                         }
                     },
