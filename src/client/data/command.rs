@@ -1145,6 +1145,12 @@ impl Command {
             return Err(invalid_input())
         })
     }
+
+    /// Converts an `IoResult<Message>` holding a Message into an `IoResult<Command>`
+    #[unstable = "This feature is still relatively new."]
+    pub fn from_message_io(m: IoResult<Message>) -> IoResult<Command> {
+        m.and_then(|msg| Command::from_message(&msg))
+    }
 }
 
 /// A list of all of the subcommands for the capabilities extension.

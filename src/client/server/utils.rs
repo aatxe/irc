@@ -9,7 +9,7 @@ use client::data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOP
 use client::data::command::CapSubCommand::{END, REQ};
 use client::data::kinds::{IrcReader, IrcWriter};
 #[cfg(feature = "ctcp")] use time::get_time;
-use client::server::{Server, ServerIterator};
+use client::server::{Server, ServerIterator, ServerCmdIterator};
 
 /// Functionality-providing wrapper for Server.
 /// Wrappers are currently not thread-safe, and should be created per-thread, as needed.
@@ -29,6 +29,10 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for Wrapper<'a, T, U> {
 
     fn iter(&'a self) -> ServerIterator<'a, T, U> {
         self.server.iter()
+    }
+
+    fn iter_cmd(&'a self) -> ServerCmdIterator<'a, T, U> {
+        self.server.iter_cmd()
     }
 
     fn list_users(&self, chan: &str) -> Option<Vec<User>> {
