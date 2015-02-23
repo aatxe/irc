@@ -16,8 +16,7 @@ documentation. You'll also be able to find a small template to get a feel for th
 ```rust
 extern crate irc;
 
-use irc::client::server::{IrcServer, Server};
-use irc::client::server::utils::Wrapper;
+use irc::client::prelude::*;
 
 fn main() {
     let irc_server = IrcServer::new("config.json").unwrap();
