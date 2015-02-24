@@ -10,7 +10,7 @@ pub mod prelude {
     #![unstable = "Prelude is newly added, and contents have not yet firmed up."]
 
     pub use client::server::{IrcServer, Server};
-    pub use client::server::utils::Wrapper;
+    pub use client::server::utils::ServerExt;
     pub use client::data::{Command, Config, Message, Response, ToMessage};
     pub use client::data::kinds::{IrcReader, IrcWriter};
 }

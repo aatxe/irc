@@ -1,4 +1,6 @@
-//! Interface for working with IRC Servers
+//! Interface for working with IRC Servers.
+//!
+//! There are currently two recommended ways to work
 #![stable]
 use std::borrow::ToOwned;
 use std::collections::HashMap;
@@ -229,17 +231,18 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                         msg[1..end].split_str(" ").collect()
                     };
                     match tokens[0] {
-                        "FINGER" => self.send_ctcp(resp, &format!("FINGER :{} ({})",
+                        "FINGER" => self.send_ctcp_internal(resp, &format!("FINGER :{} ({})",
                                                                   self.config.real_name(),
                                                                   self.config.username())),
-                        "VERSION" => self.send_ctcp(resp, "VERSION irc:git:Rust"),
+                        "VERSION" => self.send_ctcp_internal(resp, "VERSION irc:git:Rust"),
                         "SOURCE" => {
-                            self.send_ctcp(resp, "SOURCE https://github.com/aatxe/irc");
-                            self.send_ctcp(resp, "SOURCE");
+                            self.send_ctcp_internal(resp, "SOURCE https://github.com/aatxe/irc");
+                            self.send_ctcp_internal(resp, "SOURCE");
                         },
-                        "PING" => self.send_ctcp(resp, &format!("PING {}", tokens[1])),
-                        "TIME" => self.send_ctcp(resp, &format!("TIME :{}", now().rfc822z())),
-                        "USERINFO" => self.send_ctcp(resp, &format!("USERINFO :{}",
+                        "PING" => self.send_ctcp_internal(resp, &format!("PING {}", tokens[1])),
+                        "TIME" => self.send_ctcp_internal(resp, &format!("TIME :{}", 
+                                                                now().rfc822z())),
+                        "USERINFO" => self.send_ctcp_internal(resp, &format!("USERINFO :{}",
                                                                     self.config.user_info())),
                         _ => {}
                     }
@@ -251,7 +254,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
 
     /// Sends a CTCP-escaped message.
     #[cfg(feature = "ctcp")]
-    fn send_ctcp(&self, target: &str, msg: &str) {
+    fn send_ctcp_internal(&self, target: &str, msg: &str) {
         self.send(Command::NOTICE(target.to_owned(), format!("\u{001}{}\u{001}", msg))).unwrap();
     }
 
@@ -266,8 +269,6 @@ pub struct ServerIterator<'a, T: IrcReader, U: IrcWriter> {
 }
 
 /// An Iterator over an IrcServer's incoming Commands.
-/// Commands and Messages are interchangeable. This is just a convenient way to get
-/// a sanitized, already-parsed IRC message.
 pub type ServerCmdIterator<'a, T, U> =
     Map<ServerIterator<'a, T, U>, fn(IoResult<Message>) -> IoResult<Command>>;
 

@@ -3,98 +3,63 @@
 
 use std::old_io::IoResult;
 use std::borrow::ToOwned;
-use client::data::{Command, Config, User};
 use client::data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
 use client::data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
 use client::data::command::CapSubCommand::{END, REQ};
 use client::data::kinds::{IrcReader, IrcWriter};
 #[cfg(feature = "ctcp")] use time::get_time;
-use client::server::{Server, ServerIterator, ServerCmdIterator};
+use client::server::Server;
 
-/// Functionality-providing wrapper for Server.
-/// Wrappers are currently not thread-safe, and should be created per-thread, as needed.
-#[stable]
-pub struct Wrapper<'a, T: IrcReader, U: IrcWriter> {
-    server: &'a (Server<'a, T, U> + 'a)
-}
-
-impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for Wrapper<'a, T, U> {
-    fn config(&self) -> &Config {
-        self.server.config()
-    }
-
-    fn send(&self, command: Command) -> IoResult<()> {
-        self.server.send(command)
-    }
-
-    fn iter(&'a self) -> ServerIterator<'a, T, U> {
-        self.server.iter()
-    }
-
-    fn iter_cmd(&'a self) -> ServerCmdIterator<'a, T, U> {
-        self.server.iter_cmd()
-    }
-
-    fn list_users(&self, chan: &str) -> Option<Vec<User>> {
-        self.server.list_users(chan)
-    }
-}
-
+/// Extensions for Server capabilities that make it easier to work directly with the protocol.
 #[unstable = "More functionality will be added."]
-impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
-    /// Creates a new Wrapper from the given Server.
-    #[stable]
-    pub fn new(server: &'a Server<'a, T, U>) -> Wrapper<'a, T, U> {
-        Wrapper { server: server }
-    }
-
+pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
     /// Sends a NICK and USER to identify.
     #[unstable = "Capabilities requests may be moved outside of identify."]
-    pub fn identify(&self) -> IoResult<()> {
+    fn identify(&self) -> IoResult<()> {
         // We'll issue a CAP REQ for multi-prefix support to improve access level tracking.
-        try!(self.server.send(CAP(REQ, Some("multi-prefix".to_owned()))));
-        try!(self.server.send(CAP(END, None))); // Then, send a CAP END to end the negotiation.
-        if self.server.config().password() != "" {
-            try!(self.server.send(PASS(self.server.config().password().to_owned())));
+        try!(self.send(CAP(REQ, Some("multi-prefix".to_owned()))));
+        try!(self.send(CAP(END, None))); // Then, send a CAP END to end the negotiation.
+        if self.config().password() != "" {
+            try!(self.send(PASS(self.config().password().to_owned())));
         }
-        try!(self.server.send(NICK(self.server.config().nickname().to_owned())));
-        try!(self.server.send(USER(self.server.config().username().to_owned(), "0".to_owned(),
-                              self.server.config().real_name().to_owned())));
+        try!(self.send(NICK(self.config().nickname().to_owned())));
+        try!(self.send(USER(self.config().username().to_owned(), "0".to_owned(),
+                            self.config().real_name().to_owned())));
         Ok(())
     }
 
     /// Sends a PONG with the specified message.
     #[stable]
-    pub fn send_pong(&self, msg: &str) -> IoResult<()> {
-        self.server.send(PONG(msg.to_owned(), None))
+    fn send_pong(&self, msg: &str) -> IoResult<()> {
+        self.send(PONG(msg.to_owned(), None))
     }
 
     /// Joins the specified channel or chanlist.
     #[stable]
-    pub fn send_join(&self, chanlist: &str) -> IoResult<()> {
-        self.server.send(JOIN(chanlist.to_owned(), None))
+    fn send_join(&self, chanlist: &str) -> IoResult<()> {
+        self.send(JOIN(chanlist.to_owned(), None))
     }
 
     /// Attempts to oper up using the specified username and password.
     #[stable]
-    pub fn send_oper(&self, username: &str, password: &str) -> IoResult<()> {
-        self.server.send(OPER(username.to_owned(), password.to_owned()))
+    fn send_oper(&self, username: &str, password: &str) -> IoResult<()> {
+        self.send(OPER(username.to_owned(), password.to_owned()))
     }
 
     /// Sends a message to the specified target.
     #[stable]
-    pub fn send_privmsg(&self, target: &str, message: &str) -> IoResult<()> {
+    fn send_privmsg(&self, target: &str, message: &str) -> IoResult<()> {
         for line in message.split_str("\r\n") {
-            try!(self.server.send(PRIVMSG(target.to_owned(), line.to_owned())))
+            try!(self.send(PRIVMSG(target.to_owned(), line.to_owned())))
         }
         Ok(())
     }
 
     /// Sends a notice to the specified target.
     #[stable]
-    pub fn send_notice(&self, target: &str, message: &str) -> IoResult<()> {
+    fn send_notice(&self, target: &str, message: &str) -> IoResult<()> {
         for line in message.split_str("\r\n") {
-            try!(self.server.send(NOTICE(target.to_owned(), line.to_owned())))
+            try!(self.send(NOTICE(target.to_owned(), line.to_owned())))
         }
         Ok(())
     }
@@ -102,8 +67,8 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// Sets the topic of a channel or requests the current one.
     /// If `topic` is an empty string, it won't be included in the message.
     #[unstable = "Design may change."]
-    pub fn send_topic(&self, channel: &str, topic: &str) -> IoResult<()> {
-        self.server.send(TOPIC(channel.to_owned(), if topic.len() == 0 {
+    fn send_topic(&self, channel: &str, topic: &str) -> IoResult<()> {
+        self.send(TOPIC(channel.to_owned(), if topic.len() == 0 {
             None
         } else {
             Some(topic.to_owned())
@@ -112,15 +77,15 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Kills the target with the provided message.
     #[stable]
-    pub fn send_kill(&self, target: &str, message: &str) -> IoResult<()> {
-        self.server.send(KILL(target.to_owned(), message.to_owned()))
+    fn send_kill(&self, target: &str, message: &str) -> IoResult<()> {
+        self.send(KILL(target.to_owned(), message.to_owned()))
     }
 
     /// Kicks the listed nicknames from the listed channels with a comment.
     /// If `message` is an empty string, it won't be included in the message.
     #[unstable = "Design may change."]
-    pub fn send_kick(&self, chanlist: &str, nicklist: &str, message: &str) -> IoResult<()> {
-        self.server.send(KICK(chanlist.to_owned(), nicklist.to_owned(), if message.len() == 0 {
+    fn send_kick(&self, chanlist: &str, nicklist: &str, message: &str) -> IoResult<()> {
+        self.send(KICK(chanlist.to_owned(), nicklist.to_owned(), if message.len() == 0 {
             None
         } else {
             Some(message.to_owned())
@@ -130,8 +95,8 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// Changes the mode of the target.
     /// If `modeparmas` is an empty string, it won't be included in the message.
     #[unstable = "Design may change."]
-    pub fn send_mode(&self, target: &str, mode: &str, modeparams: &str) -> IoResult<()> {
-        self.server.send(MODE(target.to_owned(), mode.to_owned(), if modeparams.len() == 0 {
+    fn send_mode(&self, target: &str, mode: &str, modeparams: &str) -> IoResult<()> {
+        self.send(MODE(target.to_owned(), mode.to_owned(), if modeparams.len() == 0 {
             None
         } else {
             Some(modeparams.to_owned())
@@ -141,8 +106,8 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// Changes the mode of the target by force.
     /// If `modeparams` is an empty string, it won't be included in the message.
     #[unstable = "Design may change."]
-    pub fn send_samode(&self, target: &str, mode: &str, modeparams: &str) -> IoResult<()> {
-        self.server.send(SAMODE(target.to_owned(), mode.to_owned(), if modeparams.len() == 0 {
+    fn send_samode(&self, target: &str, mode: &str, modeparams: &str) -> IoResult<()> {
+        self.send(SAMODE(target.to_owned(), mode.to_owned(), if modeparams.len() == 0 {
             None
         } else {
             Some(modeparams.to_owned())
@@ -151,21 +116,21 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
 
     /// Forces a user to change from the old nickname to the new nickname.
     #[stable]
-    pub fn send_sanick(&self, old_nick: &str, new_nick: &str) -> IoResult<()> {
-        self.server.send(SANICK(old_nick.to_owned(), new_nick.to_owned()))
+    fn send_sanick(&self, old_nick: &str, new_nick: &str) -> IoResult<()> {
+        self.send(SANICK(old_nick.to_owned(), new_nick.to_owned()))
     }
 
     /// Invites a user to the specified channel.
     #[stable]
-    pub fn send_invite(&self, nick: &str, chan: &str) -> IoResult<()> {
-        self.server.send(INVITE(nick.to_owned(), chan.to_owned()))
+    fn send_invite(&self, nick: &str, chan: &str) -> IoResult<()> {
+        self.send(INVITE(nick.to_owned(), chan.to_owned()))
     }
 
     /// Quits the server entirely with a message. 
     /// This defaults to `Powered by Rust.` if none is specified.
     #[unstable = "Design may change."]
-    pub fn send_quit(&self, msg: &str) -> IoResult<()> {
-        self.server.send(QUIT(Some(if msg.len() == 0 {
+    fn send_quit(&self, msg: &str) -> IoResult<()> {
+        self.send(QUIT(Some(if msg.len() == 0 {
             "Powered by Rust.".to_owned()
         } else {
             msg.to_owned()
@@ -176,7 +141,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// This requires the CTCP feature to be enabled.
     #[stable]
     #[cfg(feature = "ctcp")]
-    pub fn send_ctcp(&self, target: &str, msg: &str) -> IoResult<()> {
+    fn send_ctcp(&self, target: &str, msg: &str) -> IoResult<()> {
         self.send_privmsg(target, &format!("\u{001}{}\u{001}", msg)[..])
     }
 
@@ -184,7 +149,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// This requires the CTCP feature to be enabled.
     #[stable]
     #[cfg(feature = "ctcp")]
-    pub fn send_action(&self, target: &str, msg: &str) -> IoResult<()> {
+    fn send_action(&self, target: &str, msg: &str) -> IoResult<()> {
         self.send_ctcp(target, &format!("ACTION {}", msg)[..])
     }
 
@@ -192,7 +157,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// This requires the CTCP feature to be enabled.
     #[stable]
     #[cfg(feature = "ctcp")]
-    pub fn send_finger(&self, target: &str) -> IoResult<()> {
+    fn send_finger(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "FINGER")
     }
 
@@ -200,7 +165,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// This requires the CTCP feature to be enabled.
     #[stable]
     #[cfg(feature = "ctcp")]
-    pub fn send_version(&self, target: &str) -> IoResult<()> {
+    fn send_version(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "VERSION")
     }
 
@@ -208,7 +173,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// This requires the CTCP feature to be enabled.
     #[stable]
     #[cfg(feature = "ctcp")]
-    pub fn send_source(&self, target: &str) -> IoResult<()> {
+    fn send_source(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "SOURCE")
     }
 
@@ -216,7 +181,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// This requires the CTCP feature to be enabled.
     #[stable]
     #[cfg(feature = "ctcp")]
-    pub fn send_user_info(&self, target: &str) -> IoResult<()> {
+    fn send_user_info(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "USERINFO")
     }
 
@@ -224,7 +189,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// This requires the CTCP feature to be enabled.
     #[stable]
     #[cfg(feature = "ctcp")]
-    pub fn send_ctcp_ping(&self, target: &str) -> IoResult<()> {
+    fn send_ctcp_ping(&self, target: &str) -> IoResult<()> {
         let time = get_time();
         self.send_ctcp(target, &format!("PING {}.{}", time.sec, time.nsec)[..])
     }
@@ -233,14 +198,16 @@ impl<'a, T: IrcReader, U: IrcWriter> Wrapper<'a, T, U> {
     /// This requires the CTCP feature to be enabled.
     #[stable]
     #[cfg(feature = "ctcp")]
-    pub fn send_time(&self, target: &str) -> IoResult<()> {
+    fn send_time(&self, target: &str) -> IoResult<()> {
         self.send_ctcp(target, "TIME")
     }
 }
 
+impl<'a, T: IrcReader, U: IrcWriter, K: Server<'a, T, U>> ServerExt<'a, T, U> for K {}
+
 #[cfg(test)]
 mod test {
-    use super::Wrapper;
+    use super::ServerExt;
     use std::default::Default;
     use std::old_io::util::NullReader;
     use client::conn::Connection;
@@ -252,10 +219,7 @@ mod test {
     fn identify() {
         let server = IrcServer::from_connection(test_config(), 
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.identify().unwrap();
-        }
+        server.identify().unwrap();
         assert_eq!(&get_server_value(server)[..],
         "CAP REQ :multi-prefix\r\nCAP END\r\nNICK :test\r\nUSER test 0 * :test\r\n");
     }
@@ -267,10 +231,7 @@ mod test {
             password: Some(format!("password")),
             .. Default::default()
         }, Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.identify().unwrap();
-        }
+        server.identify().unwrap();
         assert_eq!(&get_server_value(server)[..], "CAP REQ :multi-prefix\r\nCAP END\r\n\
         PASS :password\r\nNICK :test\r\nUSER test 0 * :test\r\n");
     }
@@ -279,192 +240,128 @@ mod test {
     fn send_pong() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_pong("irc.test.net").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "PONG :irc.test.net\r\n");
+        server.send_pong("irc.test.net").unwrap();
+        assert_eq!(&get_server_value(server)[..], "PONG :irc.test.net\r\n");
     }
 
     #[test]
     fn send_join() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_join("#test,#test2,#test3").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "JOIN #test,#test2,#test3\r\n");
+        server.send_join("#test,#test2,#test3").unwrap();
+        assert_eq!(&get_server_value(server)[..], "JOIN #test,#test2,#test3\r\n");
     }
 
     #[test]
     fn send_oper() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_oper("test", "test").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "OPER test :test\r\n");
+        server.send_oper("test", "test").unwrap();
+        assert_eq!(&get_server_value(server)[..], "OPER test :test\r\n");
     }
 
     #[test]
     fn send_privmsg() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_privmsg("#test", "Hi, everybody!").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "PRIVMSG #test :Hi, everybody!\r\n");
+        server.send_privmsg("#test", "Hi, everybody!").unwrap();
+        assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi, everybody!\r\n");
     }
 
     #[test]
     fn send_notice() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_notice("#test", "Hi, everybody!").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "NOTICE #test :Hi, everybody!\r\n");
+        server.send_notice("#test", "Hi, everybody!").unwrap();
+        assert_eq!(&get_server_value(server)[..], "NOTICE #test :Hi, everybody!\r\n");
     }
 
     #[test]
     fn send_topic_no_topic() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_topic("#test", "").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "TOPIC #test\r\n");
+        server.send_topic("#test", "").unwrap();
+        assert_eq!(&get_server_value(server)[..], "TOPIC #test\r\n");
     }
 
     #[test]
     fn send_topic() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_topic("#test", "Testing stuff.").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "TOPIC #test :Testing stuff.\r\n");
+        server.send_topic("#test", "Testing stuff.").unwrap();
+        assert_eq!(&get_server_value(server)[..], "TOPIC #test :Testing stuff.\r\n");
     }
 
     #[test]
     fn send_kill() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_kill("test", "Testing kills.").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "KILL test :Testing kills.\r\n");
+        server.send_kill("test", "Testing kills.").unwrap();
+        assert_eq!(&get_server_value(server)[..], "KILL test :Testing kills.\r\n");
     }
 
     #[test]
     fn send_kick_no_message() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_kick("#test", "test", "").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "KICK #test test\r\n");
+        server.send_kick("#test", "test", "").unwrap();
+        assert_eq!(&get_server_value(server)[..], "KICK #test test\r\n");
     }
 
     #[test]
     fn send_kick() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_kick("#test", "test", "Testing kicks.").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "KICK #test test :Testing kicks.\r\n");
+        server.send_kick("#test", "test", "Testing kicks.").unwrap();
+        assert_eq!(&get_server_value(server)[..], "KICK #test test :Testing kicks.\r\n");
     }
 
     #[test]
     fn send_mode_no_modeparams() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_mode("#test", "+i", "").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "MODE #test +i\r\n");
+        server.send_mode("#test", "+i", "").unwrap();
+        assert_eq!(&get_server_value(server)[..], "MODE #test +i\r\n");
     }
 
     #[test]
     fn send_mode() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_mode("#test", "+o", "test").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "MODE #test +o test\r\n");
+        server.send_mode("#test", "+o", "test").unwrap();
+        assert_eq!(&get_server_value(server)[..], "MODE #test +o test\r\n");
     }
 
     #[test]
     fn send_samode_no_modeparams() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_samode("#test", "+i", "").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "SAMODE #test +i\r\n");
+        server.send_samode("#test", "+i", "").unwrap();
+        assert_eq!(&get_server_value(server)[..], "SAMODE #test +i\r\n");
     }
 
     #[test]
     fn send_samode() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_samode("#test", "+o", "test").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "SAMODE #test +o test\r\n");
+        server.send_samode("#test", "+o", "test").unwrap();
+        assert_eq!(&get_server_value(server)[..], "SAMODE #test +o test\r\n");
     }
 
     #[test]
     fn send_sanick() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_sanick("test", "test2").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "SANICK test test2\r\n");
+        server.send_sanick("test", "test2").unwrap();
+        assert_eq!(&get_server_value(server)[..], "SANICK test test2\r\n");
     }
 
     #[test]
     fn send_invite() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_invite("test", "#test").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "INVITE test #test\r\n");
+        server.send_invite("test", "#test").unwrap();
+        assert_eq!(&get_server_value(server)[..], "INVITE test #test\r\n");
     }
 
     #[test]
@@ -472,12 +369,8 @@ mod test {
     fn send_ctcp() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_ctcp("test", "MESSAGE").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "PRIVMSG test :\u{001}MESSAGE\u{001}\r\n");
+        server.send_ctcp("test", "MESSAGE").unwrap();
+        assert_eq!(&get_server_value(server)[..], "PRIVMSG test :\u{001}MESSAGE\u{001}\r\n");
     }
 
     #[test]
@@ -485,12 +378,8 @@ mod test {
     fn send_action() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_action("test", "tests.").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "PRIVMSG test :\u{001}ACTION tests.\u{001}\r\n");
+        server.send_action("test", "tests.").unwrap();
+        assert_eq!(&get_server_value(server)[..], "PRIVMSG test :\u{001}ACTION tests.\u{001}\r\n");
     }
 
     #[test]
@@ -498,12 +387,8 @@ mod test {
     fn send_finger() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_finger("test").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "PRIVMSG test :\u{001}FINGER\u{001}\r\n");
+        server.send_finger("test").unwrap();
+        assert_eq!(&get_server_value(server)[..], "PRIVMSG test :\u{001}FINGER\u{001}\r\n");
     }
 
     #[test]
@@ -511,12 +396,8 @@ mod test {
     fn send_version() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_version("test").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "PRIVMSG test :\u{001}VERSION\u{001}\r\n");
+        server.send_version("test").unwrap();
+        assert_eq!(&get_server_value(server)[..], "PRIVMSG test :\u{001}VERSION\u{001}\r\n");
     }
 
     #[test]
@@ -524,12 +405,8 @@ mod test {
     fn send_source() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_source("test").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "PRIVMSG test :\u{001}SOURCE\u{001}\r\n");
+        server.send_source("test").unwrap();
+        assert_eq!(&get_server_value(server)[..], "PRIVMSG test :\u{001}SOURCE\u{001}\r\n");
     }
 
     #[test]
@@ -537,12 +414,8 @@ mod test {
     fn send_user_info() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_user_info("test").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "PRIVMSG test :\u{001}USERINFO\u{001}\r\n");
+        server.send_user_info("test").unwrap();
+        assert_eq!(&get_server_value(server)[..], "PRIVMSG test :\u{001}USERINFO\u{001}\r\n");
     }
 
     #[test]
@@ -550,10 +423,7 @@ mod test {
     fn send_ctcp_ping() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_ctcp_ping("test").unwrap();
-        }
+        server.send_ctcp_ping("test").unwrap();
         let val = get_server_value(server);
         println!("{}", val);
         assert!(val.starts_with("PRIVMSG test :\u{001}PING "));
@@ -565,11 +435,7 @@ mod test {
     fn send_time() {
         let server = IrcServer::from_connection(test_config(),
                      Connection::new(NullReader, Vec::new()));
-        {
-            let wrapper = Wrapper::new(&server);
-            wrapper.send_time("test").unwrap();
-        }
-        assert_eq!(&get_server_value(server)[..],
-        "PRIVMSG test :\u{001}TIME\u{001}\r\n");
+        server.send_time("test").unwrap();
+        assert_eq!(&get_server_value(server)[..], "PRIVMSG test :\u{001}TIME\u{001}\r\n");
     }
 }
