@@ -4,6 +4,7 @@ use std::borrow::ToOwned;
 use std::collections::HashMap;
 use std::old_io::{BufferedReader, BufferedWriter, IoError, IoErrorKind, IoResult};
 use std::sync::{Mutex, RwLock};
+use std::iter::Map;
 use client::conn::{Connection, NetStream};
 use client::data::{Command, Config, Message, Response, User};
 use client::data::Command::{JOIN, NICK, NICKSERV, PONG, MODE};
@@ -24,6 +25,9 @@ pub trait Server<'a, T, U> {
     /// Gets an Iterator over Messages received by this Server.
     #[stable]
     fn iter(&'a self) -> ServerIterator<'a, T, U>;
+    /// Gets an Iterator over Commands received by this Server.
+    #[unstable = "Feature is still relatively new."]
+    fn iter_cmd(&'a self) -> ServerCmdIterator<'a, T, U>;
     /// Gets a list of Users in the specified channel. This will be none if the channel is not
     /// being tracked, or if tracking is not supported altogether.
     #[stable]
@@ -93,6 +97,10 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for IrcServer<T, U> {
 
     fn iter(&'a self) -> ServerIterator<'a, T, U> {
         ServerIterator::new(self)
+    }
+
+    fn iter_cmd(&'a self) -> ServerCmdIterator<'a, T, U> {
+        self.iter().map(Command::from_message_io)
     }
 
     #[cfg(not(feature = "nochanlists"))]
@@ -257,6 +265,12 @@ pub struct ServerIterator<'a, T: IrcReader, U: IrcWriter> {
     server: &'a IrcServer<T, U>
 }
 
+/// An Iterator over an IrcServer's incoming Commands.
+/// Commands and Messages are interchangeable. This is just a convenient way to get
+/// a sanitized, already-parsed IRC message.
+pub type ServerCmdIterator<'a, T, U> =
+    Map<ServerIterator<'a, T, U>, fn(IoResult<Message>) -> IoResult<Command>>;
+
 #[unstable = "Design is liable to change to accomodate new functionality."]
 impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
     /// Creates a new ServerIterator for the desired IrcServer.
@@ -312,6 +326,7 @@ mod test {
     use client::data::{Config, User};
     use client::data::command::Command::PRIVMSG;
     use client::data::kinds::IrcReader;
+    use client::data::message::ToMessage;
 
     pub fn test_config() -> Config {
         Config {
@@ -340,6 +355,20 @@ mod test {
         let mut messages = String::new();
         for message in server.iter() {
             messages.push_str(&message.unwrap().into_string());
+        }
+        assert_eq!(&messages[..], exp);
+    }
+
+    #[test]
+    fn iterator_cmd() {
+        let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n\
+                   JOIN #test\r\n";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            MemReader::new(exp.as_bytes().to_vec()), NullWriter
+        ));
+        let mut messages = String::new();
+        for command in server.iter_cmd() {
+            messages.push_str(&command.unwrap().to_message().into_string());
         }
         assert_eq!(&messages[..], exp);
     }
