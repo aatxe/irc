@@ -854,7 +854,8 @@ impl Command {
                 } else if m.args.len() == 1 {
                     Command::WHOWAS(m.args[0].clone(), None, Some(suffix.clone()))
                 } else if m.args.len() == 2 {
-                    Command::WHOWAS(m.args[0].clone(), Some(m.args[1].clone()), Some(suffix.clone()))
+                    Command::WHOWAS(m.args[0].clone(), Some(m.args[1].clone()), 
+                                    Some(suffix.clone()))
                 } else {
                     return Err(invalid_input())
                 },
@@ -863,7 +864,8 @@ impl Command {
                 } else if m.args.len() == 2 {
                     Command::WHOWAS(m.args[0].clone(), None, Some(m.args[1].clone()))
                 } else if m.args.len() == 3 {
-                    Command::WHOWAS(m.args[0].clone(), Some(m.args[1].clone()), Some(m.args[2].clone()))
+                    Command::WHOWAS(m.args[0].clone(), Some(m.args[1].clone()), 
+                                    Some(m.args[2].clone()))
                 } else {
                     return Err(invalid_input())
                 }
@@ -956,7 +958,8 @@ impl Command {
                 } else if m.args.len() == 1 {
                     Command::SUMMON(m.args[0].clone(), Some(suffix.clone()), None)
                 } else if m.args.len() == 2 {
-                    Command::SUMMON(m.args[0].clone(), Some(m.args[1].clone()), Some(suffix.clone()))
+                    Command::SUMMON(m.args[0].clone(), Some(m.args[1].clone()), 
+                                    Some(suffix.clone()))
                 } else {
                     return Err(invalid_input())
                 },
@@ -965,7 +968,8 @@ impl Command {
                 } else if m.args.len() == 2 {
                     Command::SUMMON(m.args[0].clone(), Some(m.args[1].clone()), None)
                 } else if m.args.len() == 3 {
-                    Command::SUMMON(m.args[0].clone(), Some(m.args[1].clone()), Some(m.args[2].clone()))
+                    Command::SUMMON(m.args[0].clone(), Some(m.args[1].clone()), 
+                                    Some(m.args[2].clone()))
                 } else {
                     return Err(invalid_input())
                 }
