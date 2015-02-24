@@ -3,11 +3,6 @@ extern crate irc;
 use std::default::Default;
 use irc::client::prelude::*;
 
-// This is the same as simple.rs, except we use an Iterator over Commands
-// instead of an Iterator over Messages. A Command is basically a parsed Message,
-// so Commands and Messages are interchangeable. It is up to the library user to
-// choose one.
-
 fn main() {
     let config = Config {
         nickname: Some(format!("pickles")),
@@ -21,22 +16,13 @@ fn main() {
     let server = Wrapper::new(&irc_server);     
     server.identify().unwrap();
     for command in server.iter_cmd() {
-        // Ignore errors
-        // Use of unwrap() with iter_cmd() is discouraged because iter_cmd() is still unstable
-        // and has trouble converting some custom Messages into Commands
-        match command {
-            Ok(cmd) => {
-                print!("{}", cmd.to_message().into_string());
-                match cmd {
-                    Command::PRIVMSG(target, text) => {
-                        if text[..].contains("pickles") {
-                            server.send_privmsg(&target[..], "Hi!").unwrap();
-                        }
-                    },
-                    _ => ()
-                }
-            },
-            Err(_) => ()
-        };
+        // Use of unwrap() on the results of iter_cmd() is currently discouraged on servers where
+        // the v3 capabilities extension is enabled, and the current lapse in specification 
+        // compliance on that specific command will then cause the program to panic.
+        if let Ok(Command::PRIVMSG(chan, msg)) = command { // Ignore errors.
+            if msg.contains("pickles") {
+                server.send_privmsg(&chan, "Hi!").unwrap();
+            }
+        }
     }
 }
