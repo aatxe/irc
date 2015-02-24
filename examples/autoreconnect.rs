@@ -12,11 +12,10 @@ fn main() {
         channels: Some(vec![format!("#vana")]),
         .. Default::default()
     };
-    let irc_server = Arc::new(IrcServer::from_config(config).unwrap());
-    irc_server.conn().set_keepalive(Some(5)).unwrap();
-    // The wrapper provides us with methods like send_privmsg(...) and identify(...)
+    let server = Arc::new(IrcServer::from_config(config).unwrap());
+    server.conn().set_keepalive(Some(5)).unwrap();
+    let server = server.clone();
     let _ = spawn(move || { 
-        let server = Wrapper::new(&*irc_server);
         server.identify().unwrap();
         loop {
             let mut quit = false;
@@ -36,7 +35,7 @@ fn main() {
                 }
             }
             if quit { break }
-            irc_server.reconnect().unwrap();
+            server.reconnect().unwrap();
             server.identify().unwrap();
         }
     }).join(); 

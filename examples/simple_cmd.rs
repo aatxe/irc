@@ -11,9 +11,7 @@ fn main() {
         channels: Some(vec![format!("#vana")]),
         .. Default::default()
     };
-    let irc_server = IrcServer::from_config(config).unwrap();
-    // The wrapper provides us with methods like send_privmsg(...) and identify(...)
-    let server = Wrapper::new(&irc_server);     
+    let server = IrcServer::from_config(config).unwrap();    
     server.identify().unwrap();
     for command in server.iter_cmd() {
         // Use of unwrap() on the results of iter_cmd() is currently discouraged on servers where

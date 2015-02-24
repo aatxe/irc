@@ -12,9 +12,7 @@ fn main() {
         use_ssl: Some(true),
         .. Default::default()
     };
-    let irc_server = IrcServer::from_config(config).unwrap();
-    // The wrapper provides us with methods like send_privmsg(...) and identify(...)
-    let server = Wrapper::new(&irc_server);
+    let server = IrcServer::from_config(config).unwrap();
     server.identify().unwrap();
     for message in server.iter() {
         let message = message.unwrap(); // We'll just panic if there's an error.

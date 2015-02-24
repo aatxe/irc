@@ -19,8 +19,7 @@ extern crate irc;
 use irc::client::prelude::*;
 
 fn main() {
-    let irc_server = IrcServer::new("config.json").unwrap();
-    let server = Wrapper::new(&irc_server);
+    let server = IrcServer::new("config.json").unwrap();
     server.identify().unwrap();
     for message in server.iter() {
         // Do message processing.

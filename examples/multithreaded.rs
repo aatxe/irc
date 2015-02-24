@@ -12,12 +12,9 @@ fn main() {
         channels: Some(vec![format!("#vana")]),
         .. Default::default()
     };
-    let irc_server = Arc::new(IrcServer::from_config(config).unwrap());
-    // The wrapper provides us with methods like send_privmsg(...) and identify(...)
-    let server = Wrapper::new(&*irc_server);
+    let server = Arc::new(IrcServer::from_config(config).unwrap());
     server.identify().unwrap();
-    let server = irc_server.clone();
-    // We won't use a wrapper here because we don't need the added functionality.
+    let server = server.clone();
     let _ = spawn(move || { 
         for msg in server.iter() {
             print!("{}", msg.unwrap().into_string());
