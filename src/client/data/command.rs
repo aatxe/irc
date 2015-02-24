@@ -202,8 +202,8 @@ pub enum Command {
     MEMOSERV(String),
 
     // Capabilities extension to IRCv3
-    /// CAP COMMAND :[param]
-    #[unstable = "This command is not entirely specification compliant."]
+    /// CAP [*] COMMAND [*] :[param]
+    #[unstable = "Feature recently changed to hopefully be specification-compliant."]
     CAP(Option<String>, CapSubCommand, Option<String>, Option<String>),
 }
 
