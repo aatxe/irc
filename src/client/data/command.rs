@@ -348,14 +348,13 @@ impl ToMessage for Command {
             Command::MEMOSERV(ref m) => Message::new(None, "MEMOSERV", Some(vec![&m]), None),
 
             Command::CAP(None, ref s, None, ref p) => 
-                Message::new(None, "CAP", Some(vec![s.to_str()]), p.as_ref().map(|m| &m[..])),
+                Message::new(None, "CAP", Some(vec![s.str()]), p.as_ref().map(|m| &m[..])),
             Command::CAP(Some(ref k), ref s, None, ref  p) => 
-                Message::new(None, "CAP", Some(vec![&k, s.to_str()]), p.as_ref().map(|m| &m[..])),
+                Message::new(None, "CAP", Some(vec![&k, s.str()]), p.as_ref().map(|m| &m[..])),
             Command::CAP(None, ref s, Some(ref c), ref p) =>
-                Message::new(None, "CAP", Some(vec![s.to_str(), &c]), p.as_ref().map(|m| &m[..])),
+                Message::new(None, "CAP", Some(vec![s.str(), &c]), p.as_ref().map(|m| &m[..])),
             Command::CAP(Some(ref k), ref s, Some(ref c), ref p) => 
-                Message::new(None, "CAP", Some(vec![&k, s.to_str(), &c]), 
-                             p.as_ref().map(|m| &m[..])),
+                Message::new(None, "CAP", Some(vec![&k, s.str(), &c]), p.as_ref().map(|m| &m[..])),
         }
     }
 }
@@ -1128,6 +1127,11 @@ impl CapSubCommand {
             &CapSubCommand::CLEAR => "CLEAR",
             &CapSubCommand::END   => "END",
         }
+    }
+
+    // This makes some earlier lines shorter.
+    fn str(&self) -> &str {
+        self.to_str()
     }
 }
 
