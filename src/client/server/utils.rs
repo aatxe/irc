@@ -17,8 +17,8 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
     #[unstable = "Capabilities requests may be moved outside of identify."]
     fn identify(&self) -> IoResult<()> {
         // We'll issue a CAP REQ for multi-prefix support to improve access level tracking.
-        try!(self.send(CAP(REQ, Some("multi-prefix".to_owned()))));
-        try!(self.send(CAP(END, None))); // Then, send a CAP END to end the negotiation.
+        try!(self.send(CAP(None, REQ, None, Some("multi-prefix".to_owned()))));
+        try!(self.send(CAP(None, END, None, None))); // Then, send a CAP END to end the negotiation.
         if self.config().password() != "" {
             try!(self.send(PASS(self.config().password().to_owned())));
         }

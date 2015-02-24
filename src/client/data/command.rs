@@ -204,7 +204,7 @@ pub enum Command {
     // Capabilities extension to IRCv3
     /// CAP COMMAND :[param]
     #[unstable = "This command is not entirely specification compliant."]
-    CAP(CapSubCommand, Option<String>),
+    CAP(Option<String>, CapSubCommand, Option<String>, Option<String>),
 }
 
 impl ToMessage for Command {
@@ -455,8 +455,18 @@ impl ToMessage for Command {
 
             Command::MEMOSERV(ref m) => Message::new(None, "MEMOSERV", Some(vec![&m[..]]), None),
 
-            Command::CAP(ref s, ref p) => Message::new(None, "CAP", Some(vec![s.to_str()]),
-                                                       (*p).as_ref().map(|m| m.as_slice()))
+            Command::CAP(None, ref s, None, ref p) => Message::new(None, "CAP", 
+                                                                   Some(vec![s.to_str()]),
+                                                      p.as_ref().map(|m| m.as_slice())),
+            Command::CAP(Some(ref k), ref s, None, ref  p) => Message::new(None, "CAP", 
+                                                              Some(vec![&k, s.to_str()]),
+                                                              p.as_ref().map(|m| m.as_slice())),
+            Command::CAP(None, ref s, Some(ref c), ref p) => Message::new(None, "CAP", 
+                                                             Some(vec![s.to_str(), &c]),
+                                                             p.as_ref().map(|m| m.as_slice())),
+            Command::CAP(Some(ref k), ref s, Some(ref c), ref p) => Message::new(None, "CAP", 
+                                                             Some(vec![&k, s.to_str(), &c]),
+                                                             p.as_ref().map(|m| m.as_slice())),
         }
     }
 }
@@ -1136,11 +1146,42 @@ impl Command {
                 }
             }
         } else if let "CAP" = &m.command[..] {
-            if m.args.len() != 1 { return Err(invalid_input()) }
-            if let Ok(cmd) = m.args[0].parse() {
-                match m.suffix {
-                    Some(ref suffix) => Command::CAP(cmd, Some(suffix.clone())),
-                    None => Command::CAP(cmd, None),
+            if m.args.len() == 1 {
+                if let Ok(cmd) = m.args[0].parse() {
+                    match m.suffix {
+                        Some(ref suffix) => Command::CAP(None, cmd, None, Some(suffix.clone())),
+                        None => Command::CAP(None, cmd, None, None),
+                    }
+                } else {
+                    return Err(invalid_input())
+                }
+            } else if m.args.len() == 2 {
+                if let Ok(cmd) = m.args[0].parse() {
+                    match m.suffix {
+                        Some(ref suffix) => Command::CAP(None, cmd, Some(m.args[1].clone()), 
+                                                         Some(suffix.clone())),
+                        None => Command::CAP(None, cmd, Some(m.args[1].clone()), None),
+                    }
+                } else if let Ok(cmd) = m.args[1].parse() {
+                    match m.suffix {
+                        Some(ref suffix) => Command::CAP(Some(m.args[0].clone()), cmd, None,
+                                                         Some(suffix.clone())),
+                        None => Command::CAP(Some(m.args[0].clone()), cmd, None, None),
+                    }
+                } else {
+                    return Err(invalid_input())
+                }
+            } else if m.args.len() == 3 {
+                if let Ok(cmd) = m.args[1].parse() {
+                    match m.suffix {
+                        Some(ref suffix) => Command::CAP(Some(m.args[0].clone()), cmd, 
+                                                         Some(m.args[2].clone()),
+                                                         Some(suffix.clone())),
+                        None => Command::CAP(Some(m.args[0].clone()), cmd, Some(m.args[2].clone()),
+                                             None),
+                    }
+                } else {
+                    return Err(invalid_input())
                 }
             } else {
                 return Err(invalid_input())
