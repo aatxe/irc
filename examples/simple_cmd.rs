@@ -2,7 +2,6 @@ extern crate irc;
 
 use std::default::Default;
 use irc::client::prelude::*;
-use irc::client::data::message::ToMessage;
 
 // This is the same as simple.rs, except we use an Iterator over Commands
 // instead of an Iterator over Messages. A Command is basically a parsed Message,

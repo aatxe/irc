@@ -11,6 +11,6 @@ pub mod prelude {
 
     pub use client::server::{IrcServer, Server};
     pub use client::server::utils::Wrapper;
-    pub use client::data::{Command, Config, Message, Response};
+    pub use client::data::{Command, Config, Message, Response, ToMessage};
     pub use client::data::kinds::{IrcReader, IrcWriter};
 }
