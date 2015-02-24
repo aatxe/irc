@@ -1150,7 +1150,7 @@ impl Command {
         })
     }
 
-    /// Converts an `IoResult<Message>` holding a Message into an `IoResult<Command>`
+    /// Converts a potential Message result into a potential Command result.
     #[unstable = "This feature is still relatively new."]
     pub fn from_message_io(m: IoResult<Message>) -> IoResult<Command> {
         m.and_then(|msg| Command::from_message(&msg))
