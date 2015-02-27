@@ -139,7 +139,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                 if cfg!(not(feature = "nochanlists")) {
                     if let Some(users) = msg.suffix.clone() {
                         if let [_, _, ref chan] = &msg.args[..] {
-                            for user in users.split_str(" ") {
+                            for user in users.split(" ") {
                                 if match self.chanlists.lock().unwrap().get_mut(chan) {
                                     Some(vec) => { vec.push(User::new(user)); false },
                                     None => true,
@@ -228,7 +228,7 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
                         } else {
                             msg.len()
                         };
-                        msg[1..end].split_str(" ").collect()
+                        msg[1..end].split(" ").collect()
                     };
                     match tokens[0] {
                         "FINGER" => self.send_ctcp_internal(resp, &format!("FINGER :{} ({})",

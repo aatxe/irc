@@ -49,7 +49,7 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
     /// Sends a message to the specified target.
     #[stable]
     fn send_privmsg(&self, target: &str, message: &str) -> IoResult<()> {
-        for line in message.split_str("\r\n") {
+        for line in message.split("\r\n") {
             try!(self.send(PRIVMSG(target.to_owned(), line.to_owned())))
         }
         Ok(())
@@ -58,7 +58,7 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
     /// Sends a notice to the specified target.
     #[stable]
     fn send_notice(&self, target: &str, message: &str) -> IoResult<()> {
-        for line in message.split_str("\r\n") {
+        for line in message.split("\r\n") {
             try!(self.send(NOTICE(target.to_owned(), line.to_owned())))
         }
         Ok(())
