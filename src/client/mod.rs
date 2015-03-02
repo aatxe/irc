@@ -12,5 +12,14 @@ pub mod prelude {
     pub use client::server::{IrcServer, Server};
     pub use client::server::utils::ServerExt;
     pub use client::data::{Command, Config, Message, Response, ToMessage};
-    pub use client::data::kinds::{IrcReader, IrcWriter};
+    pub use client::data::kinds::{IrcRead, IrcWrite};
+}
+
+#[cfg(test)]
+pub mod test {
+    use std::io::{BufReader, Empty, empty};
+    
+    pub fn buf_empty() -> BufReader<Empty> {
+        BufReader::new(empty())
+    }
 }

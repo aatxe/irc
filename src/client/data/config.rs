@@ -2,9 +2,10 @@
 #![stable]
 use std::borrow::ToOwned;
 use std::collections::HashMap;
-use std::error::Error;
-use std::old_io::fs::File;
-use std::old_io::{InvalidInput, IoError, IoResult};
+use std::error::Error as StdError;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::{Error, ErrorKind, Result};
 use rustc_serialize::json::decode;
 
 /// Configuration data.
@@ -64,19 +65,19 @@ pub struct Config {
 impl Config {
     /// Loads a JSON configuration from the desired path.
     #[stable]
-    pub fn load(path: Path) -> IoResult<Config> {
+    pub fn load(path: Path) -> Result<Config> {
         let mut file = try!(File::open(&path));
-        let data = try!(file.read_to_string());
-        decode(&data[..]).map_err(|e| IoError {
-            kind: InvalidInput,
-            desc: "Failed to decode configuration file.",
-            detail: Some(e.description().to_owned()),
-        })
+        let mut data = String::new();
+        try!(file.read_to_string(&mut data));
+        decode(&data[..]).map_err(|e| 
+            Error::new(ErrorKind::InvalidInput, "Failed to decode configuration file.",
+                       Some(e.description().to_owned()))
+        )
     }
 
     /// Loads a JSON configuration using the string as a UTF-8 path.
     #[stable]
-    pub fn load_utf8(path: &str) -> IoResult<Config> {
+    pub fn load_utf8(path: &str) -> Result<Config> {
         Config::load(Path::new(path))
     }
 

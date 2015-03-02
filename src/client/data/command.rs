@@ -1,6 +1,7 @@
 //! Enumeration of all available client commands.
 #![stable]
-use std::old_io::{InvalidInput, IoError, IoResult};
+use std::io::{Error, ErrorKind, Result};
+use std::result::Result as StdResult;
 use std::str::FromStr;
 use client::data::message::{Message, ToMessage};
 
@@ -363,7 +364,7 @@ impl ToMessage for Command {
 impl Command {
     /// Converts a Message into a Command.
     #[stable]
-    pub fn from_message(m: &Message) -> IoResult<Command> {
+    pub fn from_message(m: &Message) -> Result<Command> {
         Ok(if let "PASS" = &m.command[..] {
             match m.suffix {
                 Some(ref suffix) => {
@@ -1081,7 +1082,7 @@ impl Command {
 
     /// Converts a potential Message result into a potential Command result.
     #[unstable = "This feature is still relatively new."]
-    pub fn from_message_io(m: IoResult<Message>) -> IoResult<Command> {
+    pub fn from_message_io(m: Result<Message>) -> Result<Command> {
         m.and_then(|msg| Command::from_message(&msg))
     }
 }
@@ -1137,7 +1138,7 @@ impl CapSubCommand {
 
 impl FromStr for CapSubCommand {
     type Err = &'static str;
-    fn from_str(s: &str) -> Result<CapSubCommand, &'static str> {
+    fn from_str(s: &str) -> StdResult<CapSubCommand, &'static str> {
         match s {
             "LS"    => Ok(CapSubCommand::LS),
             "LIST"  => Ok(CapSubCommand::LIST),
@@ -1152,10 +1153,6 @@ impl FromStr for CapSubCommand {
 }
 
 /// Produces an invalid_input IoError.
-fn invalid_input() -> IoError {
-    IoError {
-        kind: InvalidInput,
-        desc: "Failed to parse malformed message as command.",
-        detail: None
-    }
+fn invalid_input() -> Error {
+    Error::new(ErrorKind::InvalidInput, "Failed to parse malformed message as command.", None)
 }

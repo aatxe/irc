@@ -4,13 +4,13 @@
 #![stable]
 use std::borrow::ToOwned;
 use std::collections::HashMap;
-use std::old_io::{BufferedReader, BufferedWriter, IoError, IoErrorKind, IoResult};
+use std::io::{BufReader, BufWriter, Error, ErrorKind, Result};
 use std::sync::{Mutex, RwLock};
 use std::iter::Map;
 use client::conn::{Connection, NetStream};
 use client::data::{Command, Config, Message, Response, User};
 use client::data::Command::{JOIN, NICK, NICKSERV, PONG, MODE};
-use client::data::kinds::{IrcReader, IrcWriter};
+use client::data::kinds::{IrcRead, IrcWrite};
 #[cfg(feature = "ctcp")] use time::now;
 
 pub mod utils;
@@ -23,7 +23,7 @@ pub trait Server<'a, T, U> {
     fn config(&self) -> &Config;
     /// Sends a Command to this Server.
     #[stable]
-    fn send(&self, command: Command) -> IoResult<()>;
+    fn send(&self, command: Command) -> Result<()>;
     /// Gets an Iterator over Messages received by this Server.
     #[stable]
     fn iter(&'a self) -> ServerIterator<'a, T, U>;
@@ -38,7 +38,7 @@ pub trait Server<'a, T, U> {
 
 /// A thread-safe implementation of an IRC Server connection.
 #[stable]
-pub struct IrcServer<T: IrcReader, U: IrcWriter> {
+pub struct IrcServer<T: IrcRead, U: IrcWrite> {
     /// The thread-safe IRC connection.
     conn: Connection<T, U>,
     /// The configuration used with this connection.
@@ -51,21 +51,21 @@ pub struct IrcServer<T: IrcReader, U: IrcWriter> {
 
 /// An IrcServer over a buffered NetStream.
 #[stable]
-pub type NetIrcServer = IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>>;
+pub type NetIrcServer = IrcServer<BufReader<NetStream>, BufWriter<NetStream>>;
 
 #[stable]
-impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
+impl IrcServer<BufReader<NetStream>, BufWriter<NetStream>> {
     /// Creates a new IRC Server connection from the configuration at the specified path,
     /// connecting immediately.
     #[stable]
-    pub fn new(config: &str) -> IoResult<NetIrcServer> {
+    pub fn new(config: &str) -> Result<NetIrcServer> {
         IrcServer::from_config(try!(Config::load_utf8(config)))
     }
 
     /// Creates a new IRC server connection from the specified configuration, connecting
     /// immediately.
     #[stable]
-    pub fn from_config(config: Config) -> IoResult<NetIrcServer> {
+    pub fn from_config(config: Config) -> Result<NetIrcServer> {
         let conn = try!(if config.use_ssl() {
             Connection::connect_ssl(config.server(), config.port())
         } else {
@@ -77,23 +77,23 @@ impl IrcServer<BufferedReader<NetStream>, BufferedWriter<NetStream>> {
 
     /// Reconnects to the IRC server.
     #[stable]
-    pub fn reconnect(&self) -> IoResult<()> {
+    pub fn reconnect(&self) -> Result<()> {
         self.conn.reconnect(self.config().server(), self.config.port())
     }
 }
 
-impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for IrcServer<T, U> {
+impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for IrcServer<T, U> {
     fn config(&self) -> &Config {
         &self.config
     }
 
     #[cfg(feature = "encode")]
-    fn send(&self, cmd: Command) -> IoResult<()> {
+    fn send(&self, cmd: Command) -> Result<()> {
         self.conn.send(cmd, self.config.encoding())
     }
 
     #[cfg(not(feature = "encode"))]
-    fn send(&self, cmd: Command) -> IoResult<()> {
+    fn send(&self, cmd: Command) -> Result<()> {
         self.conn.send(cmd)
     }
 
@@ -118,7 +118,7 @@ impl<'a, T: IrcReader, U: IrcWriter> Server<'a, T, U> for IrcServer<T, U> {
 }
 
 #[stable]
-impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
+impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
     /// Creates an IRC server from the specified configuration, and any arbitrary Connection.
     #[stable]
     pub fn from_connection(config: Config, conn: Connection<T, U>) -> IrcServer<T, U> {
@@ -264,16 +264,16 @@ impl<T: IrcReader, U: IrcWriter> IrcServer<T, U> {
 
 /// An Iterator over an IrcServer's incoming Messages.
 #[stable]
-pub struct ServerIterator<'a, T: IrcReader, U: IrcWriter> {
+pub struct ServerIterator<'a, T: IrcRead, U: IrcWrite> {
     server: &'a IrcServer<T, U>
 }
 
 /// An Iterator over an IrcServer's incoming Commands.
 pub type ServerCmdIterator<'a, T, U> =
-    Map<ServerIterator<'a, T, U>, fn(IoResult<Message>) -> IoResult<Command>>;
+    Map<ServerIterator<'a, T, U>, fn(Result<Message>) -> Result<Command>>;
 
 #[unstable = "Design is liable to change to accomodate new functionality."]
-impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
+impl<'a, T: IrcRead, U: IrcWrite> ServerIterator<'a, T, U> {
     /// Creates a new ServerIterator for the desired IrcServer.
     #[unstable = "Design is liable to change to accomodate new functionality."]
     pub fn new(server: &IrcServer<T, U>) -> ServerIterator<T, U> {
@@ -282,36 +282,35 @@ impl<'a, T: IrcReader, U: IrcWriter> ServerIterator<'a, T, U> {
 
     /// Gets the next line from the connection.
     #[cfg(feature = "encode")]
-    fn get_next_line(&self) -> IoResult<String> {
+    fn get_next_line(&self) -> Result<String> {
         self.server.conn.recv(self.server.config.encoding())
     }
 
     /// Gets the next line from the connection.
     #[cfg(not(feature = "encode"))]
-    fn get_next_line(&self) -> IoResult<String> {
+    fn get_next_line(&self) -> Result<String> {
         self.server.conn.recv()
     }
 }
 
-impl<'a, T: IrcReader, U: IrcWriter> Iterator for ServerIterator<'a, T, U> {
+impl<'a, T: IrcRead, U: IrcWrite> Iterator for ServerIterator<'a, T, U> {
     #[stable]
-    type Item = IoResult<Message>;
-    fn next(&mut self) -> Option<IoResult<Message>> {
+    type Item = Result<Message>;
+    fn next(&mut self) -> Option<Result<Message>> {
         let res = self.get_next_line().and_then(|msg|
              match msg.parse() {
                 Ok(msg) => {
                     self.server.handle_message(&msg);
                     Ok(msg)
                 },
-                Err(m) => Err(IoError {
-                    kind: IoErrorKind::InvalidInput,
-                    desc: "Failed to parse message.",
-                    detail: Some(format!("{} (Message: {})", m, msg))
-                })
+                Err(m) => Err(Error::new(ErrorKind::InvalidInput, "Failed to parse message.",
+                                         Some(format!("{} (Message: {})", m, msg))))
             }
         );
         match res {
-            Err(ref err) if err.kind == IoErrorKind::EndOfFile => None,
+            Err(ref err) if err.kind() == ErrorKind::ConnectionAborted => None,
+            Err(ref err) if err.kind() == ErrorKind::ConnectionReset   => None,
+            Err(ref err) if err.description() == "EOF" => None,
             _ => Some(res)
         }
     }
@@ -321,13 +320,13 @@ impl<'a, T: IrcReader, U: IrcWriter> Iterator for ServerIterator<'a, T, U> {
 mod test {
     use super::{IrcServer, Server};
     use std::default::Default;
-    use std::old_io::MemReader;
-    use std::old_io::util::{NullReader, NullWriter};
+    use std::io::{Cursor, sink};
     use client::conn::Connection;
     use client::data::{Config, User};
     use client::data::command::Command::PRIVMSG;
-    use client::data::kinds::IrcReader;
+    use client::data::kinds::IrcRead;
     use client::data::message::ToMessage;
+    use client::test::buf_empty;
 
     pub fn test_config() -> Config {
         Config {
@@ -341,7 +340,7 @@ mod test {
         }
     }
 
-    pub fn get_server_value<T: IrcReader>(server: IrcServer<T, Vec<u8>>) -> String {
+    pub fn get_server_value<T: IrcRead>(server: IrcServer<T, Vec<u8>>) -> String {
         let vec = server.conn().writer().clone();
         String::from_utf8(vec).unwrap()
     }
@@ -351,7 +350,7 @@ mod test {
         let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n\
                    :test!test@test JOIN #test\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(exp.as_bytes().to_vec()), NullWriter
+            Cursor::new(exp.as_bytes().to_vec()), sink()
         ));
         let mut messages = String::new();
         for message in server.iter() {
@@ -365,7 +364,7 @@ mod test {
         let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n\
                    JOIN #test\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(exp.as_bytes().to_vec()), NullWriter
+            Cursor::new(exp.as_bytes().to_vec()), sink()
         ));
         let mut messages = String::new();
         for command in server.iter_cmd() {
@@ -378,7 +377,7 @@ mod test {
     fn handle_message() {
         let value = "PING :irc.test.net\r\n:irc.test.net 376 test :End of /MOTD command.\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-           MemReader::new(value.as_bytes().to_vec()), Vec::new()
+           Cursor::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -395,7 +394,7 @@ mod test {
             channels: Some(vec![format!("#test"), format!("#test2")]),
             .. Default::default()
         }, Connection::new(
-           MemReader::new(value.as_bytes().to_vec()), Vec::new()
+           Cursor::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -413,7 +412,7 @@ mod test {
             channels: Some(vec![format!("#test"), format!("#test2")]),
             .. Default::default()
         }, Connection::new(
-           MemReader::new(value.as_bytes().to_vec()), Vec::new()
+           Cursor::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -426,7 +425,7 @@ mod test {
     fn nickname_in_use() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-           MemReader::new(value.as_bytes().to_vec()), Vec::new()
+           Cursor::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -440,7 +439,7 @@ mod test {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-           MemReader::new(value.as_bytes().to_vec()), Vec::new()
+           Cursor::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -450,7 +449,7 @@ mod test {
     #[test]
     fn send() {
         let server = IrcServer::from_connection(test_config(), Connection::new(
-           NullReader, Vec::new()
+           buf_empty(), Vec::new()
         ));
         assert!(server.send(PRIVMSG(format!("#test"), format!("Hi there!"))).is_ok());
         assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\r\n");
@@ -461,7 +460,7 @@ mod test {
     fn user_tracking_names() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-           MemReader::new(value.as_bytes().to_vec()), NullWriter
+           Cursor::new(value.as_bytes().to_vec()), sink()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -476,7 +475,7 @@ mod test {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :test2!test@test JOIN #test\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), NullWriter
+            Cursor::new(value.as_bytes().to_vec()), sink()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -491,7 +490,7 @@ mod test {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test PART #test\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), NullWriter
+            Cursor::new(value.as_bytes().to_vec()), sink()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -506,7 +505,7 @@ mod test {
         let value = ":irc.test.net 353 test = #test :+test ~owner &admin\r\n\
                      :test!test@test MODE #test +o test\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), NullWriter
+            Cursor::new(value.as_bytes().to_vec()), sink()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -529,7 +528,7 @@ mod test {
     fn finger_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), Vec::new()
+            Cursor::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -543,7 +542,7 @@ mod test {
     fn version_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}VERSION\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), Vec::new()
+            Cursor::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -557,7 +556,7 @@ mod test {
     fn source_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}SOURCE\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), Vec::new()
+            Cursor::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -572,7 +571,7 @@ mod test {
     fn ctcp_ping_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}PING test\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), Vec::new()
+            Cursor::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -585,7 +584,7 @@ mod test {
     fn time_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}TIME\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), Vec::new()
+            Cursor::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
@@ -600,7 +599,7 @@ mod test {
     fn user_info_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}USERINFO\u{001}\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
-            MemReader::new(value.as_bytes().to_vec()), Vec::new()
+            Cursor::new(value.as_bytes().to_vec()), Vec::new()
         ));
         for message in server.iter() {
             println!("{:?}", message);
