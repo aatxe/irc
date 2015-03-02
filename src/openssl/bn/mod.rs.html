@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.3.6/src/bn/mod.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/Documents/Programming/Rust/rust-openssl/openssl/src/bn/mod.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>mod.rs.html -- source</title>
@@ -646,7 +646,7 @@
 <span id="604">604</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>c_int</span>, <span class='ident'>c_ulong</span>, <span class='ident'>c_void</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::{<span class='ident'>CString</span>, <span class='ident'>c_str_to_bytes</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::{<span class='ident'>CStr</span>, <span class='ident'>CString</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::<span class='ident'>Ordering</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::{<span class='ident'>fmt</span>, <span class='ident'>ptr</span>};
 
@@ -735,7 +735,7 @@
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_dec_str</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BigNum</span>, <span class='ident'>SslError</span><span class='op'>&gt;</span> {
         <span class='ident'>BigNum</span>::<span class='ident'>new</span>().<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> <span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>from_slice</span>(<span class='ident'>s</span>.<span class='ident'>as_bytes</span>());
+            <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>s</span>.<span class='ident'>as_bytes</span>()).<span class='ident'>unwrap</span>();
             <span class='macro'>try_ssl</span><span class='macro'>!</span>(<span class='ident'>ffi</span>::<span class='ident'>BN_dec2bn</span>(<span class='ident'>v</span>.<span class='ident'>raw_ptr</span>(), <span class='ident'>c_str</span>.<span class='ident'>as_ptr</span>()));
             <span class='prelude-val'>Ok</span>(<span class='ident'>v</span>)
         })
@@ -743,7 +743,7 @@
 
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_hex_str</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BigNum</span>, <span class='ident'>SslError</span><span class='op'>&gt;</span> {
         <span class='ident'>BigNum</span>::<span class='ident'>new</span>().<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> <span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>from_slice</span>(<span class='ident'>s</span>.<span class='ident'>as_bytes</span>());
+            <span class='kw'>let</span> <span class='ident'>c_str</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>s</span>.<span class='ident'>as_bytes</span>()).<span class='ident'>unwrap</span>();
             <span class='macro'>try_ssl</span><span class='macro'>!</span>(<span class='ident'>ffi</span>::<span class='ident'>BN_hex2bn</span>(<span class='ident'>v</span>.<span class='ident'>raw_ptr</span>(), <span class='ident'>c_str</span>.<span class='ident'>as_ptr</span>()));
             <span class='prelude-val'>Ok</span>(<span class='ident'>v</span>)
         })
@@ -1068,7 +1068,7 @@
         <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>ffi</span>::<span class='ident'>BN_bn2dec</span>(<span class='self'>self</span>.<span class='ident'>raw</span>());
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>buf</span>.<span class='ident'>is_null</span>());
-            <span class='kw'>let</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>c_str_to_bytes</span>(<span class='kw-2'>&amp;</span><span class='ident'>buf</span>).<span class='ident'>to_vec</span>()).<span class='ident'>unwrap</span>();
+            <span class='kw'>let</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>CStr</span>::<span class='ident'>from_ptr</span>(<span class='ident'>buf</span>).<span class='ident'>to_bytes</span>().<span class='ident'>to_vec</span>()).<span class='ident'>unwrap</span>();
             <span class='ident'>ffi</span>::<span class='ident'>CRYPTO_free</span>(<span class='ident'>buf</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>);
             <span class='ident'>str</span>
         }
@@ -1078,7 +1078,7 @@
         <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>ffi</span>::<span class='ident'>BN_bn2hex</span>(<span class='self'>self</span>.<span class='ident'>raw</span>());
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='op'>!</span><span class='ident'>buf</span>.<span class='ident'>is_null</span>());
-            <span class='kw'>let</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>c_str_to_bytes</span>(<span class='kw-2'>&amp;</span><span class='ident'>buf</span>).<span class='ident'>to_vec</span>()).<span class='ident'>unwrap</span>();
+            <span class='kw'>let</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>CStr</span>::<span class='ident'>from_ptr</span>(<span class='ident'>buf</span>).<span class='ident'>to_bytes</span>().<span class='ident'>to_vec</span>()).<span class='ident'>unwrap</span>();
             <span class='ident'>ffi</span>::<span class='ident'>CRYPTO_free</span>(<span class='ident'>buf</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>);
             <span class='ident'>str</span>
         }

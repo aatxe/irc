@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `EncoderError` enum in crate `rustc-serialize`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, EncoderError">
+
+    <title>rustc-serialize::json::EncoderError - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    <link rel="shortcut icon" href="http://www.rust-lang.org/favicon.ico">
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../rustc-serialize/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>rustc-serialize</a>::<wbr><a href='index.html'>json</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.AsJson.html' title=''>AsJson</a><a class='struct ' href='struct.AsPrettyJson.html' title=''>AsPrettyJson</a><a class='struct ' href='struct.Builder.html' title='A Builder consumes a json::Parser to create a generic Json structure.'>Builder</a><a class='struct ' href='struct.Decoder.html' title='A structure to decode JSON to values in rust.'>Decoder</a><a class='struct ' href='struct.Encoder.html' title='A structure for implementing serialization to JSON.'>Encoder</a><a class='struct ' href='struct.Parser.html' title='A streaming JSON parser implemented as an iterator of JsonEvent, consuming an iterator of char.'>Parser</a><a class='struct ' href='struct.PrettyJson.html' title=''>PrettyJson</a><a class='struct ' href='struct.Stack.html' title='A Stack represents the current position of the parser in the logical structure of the JSON stream. For example foo.bar[3].x'>Stack</a></div><div class='block enum'><h2>Enums</h2><a class='enum ' href='enum.DecoderError.html' title=''>DecoderError</a><a class='enum current' href='enum.EncoderError.html' title=''>EncoderError</a><a class='enum ' href='enum.ErrorCode.html' title='The errors that can arise while parsing a JSON stream.'>ErrorCode</a><a class='enum ' href='enum.Json.html' title='Represents a json value'>Json</a><a class='enum ' href='enum.JsonEvent.html' title='The output of the streaming parser.'>JsonEvent</a><a class='enum ' href='enum.ParserError.html' title=''>ParserError</a><a class='enum ' href='enum.StackElement.html' title='StackElements compose a Stack. For example, Key(&quot;foo&quot;), Key(&quot;bar&quot;), Index(3) and Key(&quot;x&quot;) are the StackElements compositing the stack that represents foo.bar[3].x'>StackElement</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.ToJson.html' title='A trait for converting values to JSON'>ToJson</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.as_json.html' title='Create an `AsJson` wrapper which can be used to print a value as JSON on-the-fly via `write!`'>as_json</a><a class='fn ' href='fn.as_pretty_json.html' title='Create an `AsPrettyJson` wrapper which can be used to print a value as JSON on-the-fly via `write!`'>as_pretty_json</a><a class='fn ' href='fn.decode.html' title='Shortcut function to decode a JSON `&amp;str` into an object'>decode</a><a class='fn ' href='fn.encode.html' title='Shortcut function to encode a `T` into a JSON `String`'>encode</a><a class='fn ' href='fn.error_str.html' title='Returns a readable error string for a given error code.'>error_str</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>rustc-serialize</a>::<wbr><a href='index.html'>json</a>::<wbr><a class='enum' href=''>EncoderError</a><wbr></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-17934' href='../../src/rustc-serialize/json.rs.html#323-326'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum EncoderError {
+    FmtError(<a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Error.html' title='core::fmt::Error'>Error</a>),
+    BadHashmapKey,
+}</pre><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.FmtError'><a class='stability Unmarked' title='No stability level'></a><code>FmtError</code></td><td></td></tr><tr><td id='variant.BadHashmapKey'><a class='stability Unmarked' title='No stability level'></a><code>BadHashmapKey</code></td><td></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Unstable' title='Unstable: the exact API of this trait may change'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/error/trait.Error.html' title='core::error::Error'>StdError</a> for <a class='enum' href='../../rustc-serialize/json/enum.EncoderError.html' title='rustc-serialize::json::EncoderError'>EncoderError</a></code></h3><div class='impl-items'><h4 id='method.description' class='method'><a class='stability Unstable' title='Unstable: the exact API of this trait may change'></a><code>fn <a href='#method.description' class='fnname'>description</a>(&amp;self) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<h4 id='method.cause' class='tymethod'><a class='stability Unstable' title='Unstable: the exact API of this trait may change'></a><code>fn <a href='#tymethod.cause' class='fnname'>cause</a>(&amp;self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='trait' href='http://doc.rust-lang.org/nightly/core/error/trait.Error.html' title='core::error::Error'>Error</a>&gt;</code></h4>
+</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='enum' href='../../rustc-serialize/json/enum.EncoderError.html' title='rustc-serialize::json::EncoderError'>EncoderError</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/error/trait.FromError.html' title='core::error::FromError'>FromError</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Error.html' title='core::fmt::Error'>Error</a>&gt; for <a class='enum' href='../../rustc-serialize/json/enum.EncoderError.html' title='rustc-serialize::json::EncoderError'>EncoderError</a></code></h3><div class='impl-items'><h4 id='method.from_error' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.from_error' class='fnname'>from_error</a>(err: <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Error.html' title='core::fmt::Error'>Error</a>) -&gt; <a class='enum' href='../../rustc-serialize/json/enum.EncoderError.html' title='rustc-serialize::json::EncoderError'>EncoderError</a></code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../rustc-serialize/json/enum.EncoderError.html' title='rustc-serialize::json::EncoderError'>EncoderError</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../../rustc-serialize/json/enum.EncoderError.html' title='rustc-serialize::json::EncoderError'>EncoderError</a></code></h3><div class='impl-items'></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "rustc-serialize";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

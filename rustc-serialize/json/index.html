@@ -42,9 +42,8 @@
 
     <section id='main' class="content mod">
 <h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>rustc-serialize</a>::<wbr><a class='mod' href=''>json</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]
-            </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-15649' href='../../src/rustc-serialize/json.rs.html#14-3892'>[src]</a></span></h1>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-14216' href='../../src/rustc-serialize/json.rs.html#14-3913'>[src]</a></span></h1>
 <div class='docblock'><p>JSON parsing and serialization</p>
 
 <h1 id="what-is-json?" class='section-header'><a
@@ -58,8 +57,10 @@ JavaScript have made it a widely used format.</p>
 for more details):</p>
 
 <ul>
+<li><code>I64</code>: equivalent to rust&#39;s <code>i64</code></li>
+<li><code>U64</code>: equivalent to rust&#39;s <code>u64</code></li>
+<li><code>F64</code>: equivalent to rust&#39;s <code>f64</code></li>
 <li><code>Boolean</code>: equivalent to rust&#39;s <code>bool</code></li>
-<li><code>Number</code>: equivalent to rust&#39;s <code>f64</code></li>
 <li><code>String</code>: equivalent to rust&#39;s <code>String</code></li>
 <li><code>Array</code>: equivalent to rust&#39;s <code>Vec&lt;T&gt;</code>, but also allowing objects of
 different types in the
@@ -138,7 +139,7 @@ from JSON using the serialization API, using the derived serialization code.</p>
     <span class='kw'>let</span> <span class='ident'>encoded</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='ident'>object</span>).<span class='ident'>unwrap</span>();
 
     <span class='comment'>// Deserialize using `json::decode`</span>
-    <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>encoded</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
+    <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span><span class='ident'>encoded</span>).<span class='ident'>unwrap</span>();
 }
 </pre>
 
@@ -222,7 +223,7 @@ which is required for custom mappings.</p>
     <span class='kw'>let</span> <span class='ident'>json_str</span>: <span class='ident'>String</span> <span class='op'>=</span> <span class='ident'>json_obj</span>.<span class='ident'>to_string</span>();
 
     <span class='comment'>// Deserialize like before</span>
-    <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='ident'>json_str</span>.<span class='ident'>as_slice</span>()).<span class='ident'>unwrap</span>();
+    <span class='kw'>let</span> <span class='ident'>decoded</span>: <span class='ident'>TestStruct</span> <span class='op'>=</span> <span class='ident'>json</span>::<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span><span class='ident'>json_str</span>).<span class='ident'>unwrap</span>();
 }
 </pre>
 

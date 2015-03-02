@@ -480,229 +480,69 @@
 <span id="438">438</span>
 <span id="439">439</span>
 <span id="440">440</span>
-<span id="441">441</span>
-<span id="442">442</span>
-<span id="443">443</span>
-<span id="444">444</span>
-<span id="445">445</span>
-<span id="446">446</span>
-<span id="447">447</span>
-<span id="448">448</span>
-<span id="449">449</span>
-<span id="450">450</span>
-<span id="451">451</span>
-<span id="452">452</span>
-<span id="453">453</span>
-<span id="454">454</span>
-<span id="455">455</span>
-<span id="456">456</span>
-<span id="457">457</span>
-<span id="458">458</span>
-<span id="459">459</span>
-<span id="460">460</span>
-<span id="461">461</span>
-<span id="462">462</span>
-<span id="463">463</span>
-<span id="464">464</span>
-<span id="465">465</span>
-<span id="466">466</span>
-<span id="467">467</span>
-<span id="468">468</span>
-<span id="469">469</span>
-<span id="470">470</span>
-<span id="471">471</span>
-<span id="472">472</span>
-<span id="473">473</span>
-<span id="474">474</span>
-<span id="475">475</span>
-<span id="476">476</span>
-<span id="477">477</span>
-<span id="478">478</span>
-<span id="479">479</span>
-<span id="480">480</span>
-<span id="481">481</span>
-<span id="482">482</span>
-<span id="483">483</span>
-<span id="484">484</span>
-<span id="485">485</span>
-<span id="486">486</span>
-<span id="487">487</span>
-<span id="488">488</span>
-<span id="489">489</span>
-<span id="490">490</span>
-<span id="491">491</span>
-<span id="492">492</span>
-<span id="493">493</span>
-<span id="494">494</span>
-<span id="495">495</span>
-<span id="496">496</span>
-<span id="497">497</span>
-<span id="498">498</span>
-<span id="499">499</span>
-<span id="500">500</span>
-<span id="501">501</span>
-<span id="502">502</span>
-<span id="503">503</span>
-<span id="504">504</span>
-<span id="505">505</span>
-<span id="506">506</span>
-<span id="507">507</span>
-<span id="508">508</span>
-<span id="509">509</span>
-<span id="510">510</span>
-<span id="511">511</span>
-<span id="512">512</span>
-<span id="513">513</span>
-<span id="514">514</span>
-<span id="515">515</span>
-<span id="516">516</span>
-<span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
-<span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
-<span id="529">529</span>
-<span id="530">530</span>
-<span id="531">531</span>
-<span id="532">532</span>
-<span id="533">533</span>
-<span id="534">534</span>
-<span id="535">535</span>
-<span id="536">536</span>
-<span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
-<span id="543">543</span>
-<span id="544">544</span>
-<span id="545">545</span>
-<span id="546">546</span>
-<span id="547">547</span>
-<span id="548">548</span>
-<span id="549">549</span>
-<span id="550">550</span>
-<span id="551">551</span>
-<span id="552">552</span>
-<span id="553">553</span>
-<span id="554">554</span>
-<span id="555">555</span>
-<span id="556">556</span>
-<span id="557">557</span>
-<span id="558">558</span>
-<span id="559">559</span>
-<span id="560">560</span>
-<span id="561">561</span>
-<span id="562">562</span>
-<span id="563">563</span>
-<span id="564">564</span>
-<span id="565">565</span>
-<span id="566">566</span>
-<span id="567">567</span>
-<span id="568">568</span>
-<span id="569">569</span>
-<span id="570">570</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Utilities and shortcuts for working with IRC servers.</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::<span class='ident'>IoResult</span>;
-<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::{<span class='ident'>Command</span>, <span class='ident'>Config</span>, <span class='ident'>User</span>};
-<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>CAP</span>, <span class='ident'>INVITE</span>, <span class='ident'>JOIN</span>, <span class='ident'>KICK</span>, <span class='ident'>KILL</span>, <span class='ident'>MODE</span>, <span class='ident'>NICK</span>, <span class='ident'>NOTICE</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>ToOwned</span>;
+<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='comment'>/*CAP,*/</span> <span class='ident'>INVITE</span>, <span class='ident'>JOIN</span>, <span class='ident'>KICK</span>, <span class='ident'>KILL</span>, <span class='ident'>MODE</span>, <span class='ident'>NICK</span>, <span class='ident'>NOTICE</span>};
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>OPER</span>, <span class='ident'>PASS</span>, <span class='ident'>PONG</span>, <span class='ident'>PRIVMSG</span>, <span class='ident'>QUIT</span>, <span class='ident'>SAMODE</span>, <span class='ident'>SANICK</span>, <span class='ident'>TOPIC</span>, <span class='ident'>USER</span>};
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>command</span>::<span class='ident'>CapSubCommand</span>::{<span class='ident'>END</span>, <span class='ident'>REQ</span>};
-<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>kinds</span>::{<span class='ident'>IrcReader</span>, <span class='ident'>IrcWriter</span>};
+<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>kinds</span>::{<span class='ident'>IrcRead</span>, <span class='ident'>IrcWrite</span>};
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>time</span>::<span class='ident'>get_time</span>;
-<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>server</span>::{<span class='ident'>Server</span>, <span class='ident'>ServerIterator</span>};
+<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>server</span>::<span class='ident'>Server</span>;
 
-<span class='doccomment'>/// Functionality-providing wrapper for Server.</span>
-<span class='doccomment'>/// Wrappers are currently not thread-safe, and should be created per-thread, as needed.</span>
-<span class='attribute'>#[<span class='ident'>stable</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Wrapper</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>IrcReader</span>, <span class='ident'>U</span>: <span class='ident'>IrcWriter</span><span class='op'>&gt;</span> {
-    <span class='ident'>server</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> (<span class='ident'>Server</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span> <span class='op'>+</span> <span class='lifetime'>&#39;a</span>)
-}
-
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>IrcReader</span>, <span class='ident'>U</span>: <span class='ident'>IrcWriter</span><span class='op'>&gt;</span> <span class='ident'>Server</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Wrapper</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>config</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>Config</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>()
-    }
-
-    <span class='kw'>fn</span> <span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>command</span>: <span class='ident'>Command</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>command</span>)
-    }
-
-    <span class='kw'>fn</span> <span class='ident'>iter</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ServerIterator</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>iter</span>()
-    }
-
-    <span class='kw'>fn</span> <span class='ident'>list_users</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>chan</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>User</span><span class='op'>&gt;&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>list_users</span>(<span class='ident'>chan</span>)
-    }
-}
-
+<span class='doccomment'>/// Extensions for Server capabilities that make it easier to work directly with the protocol.</span>
 <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;More functionality will be added.&quot;</span>]</span>
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>IrcReader</span>, <span class='ident'>U</span>: <span class='ident'>IrcWriter</span><span class='op'>&gt;</span> <span class='ident'>Wrapper</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span> {
-    <span class='doccomment'>/// Creates a new Wrapper from the given Server.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>server</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Server</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Wrapper</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span> {
-        <span class='ident'>Wrapper</span> { <span class='ident'>server</span>: <span class='ident'>server</span> }
-    }
-
+<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>ServerExt</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span>: <span class='ident'>Server</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Sends a NICK and USER to identify.</span>
     <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Capabilities requests may be moved outside of identify.&quot;</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>identify</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>identify</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='comment'>// We&#39;ll issue a CAP REQ for multi-prefix support to improve access level tracking.</span>
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>CAP</span>(<span class='ident'>REQ</span>, <span class='prelude-val'>Some</span>(<span class='string'>&quot;multi-prefix&quot;</span>))));
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>CAP</span>(<span class='ident'>END</span>, <span class='prelude-val'>None</span>))); <span class='comment'>// Then, send a CAP END to end the negotiation.</span>
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>password</span>() <span class='op'>!=</span> <span class='string'>&quot;&quot;</span> {
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>PASS</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>password</span>())));
+        <span class='comment'>/*try!(self.send(CAP(None, REQ, None, Some(&quot;multi-prefix&quot;.to_owned()))));
+        try!(self.send(CAP(None, END, None, None))); // Then, send a CAP END to end the negotiation.*/</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>().<span class='ident'>password</span>() <span class='op'>!=</span> <span class='string'>&quot;&quot;</span> {
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>PASS</span>(<span class='self'>self</span>.<span class='ident'>config</span>().<span class='ident'>password</span>().<span class='ident'>to_owned</span>())));
         }
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>NICK</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>nickname</span>())));
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>USER</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>username</span>(), <span class='string'>&quot;0&quot;</span>,
-                              <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>real_name</span>())));
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>NICK</span>(<span class='self'>self</span>.<span class='ident'>config</span>().<span class='ident'>nickname</span>().<span class='ident'>to_owned</span>())));
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>USER</span>(<span class='self'>self</span>.<span class='ident'>config</span>().<span class='ident'>username</span>().<span class='ident'>to_owned</span>(), <span class='string'>&quot;0&quot;</span>.<span class='ident'>to_owned</span>(),
+                            <span class='self'>self</span>.<span class='ident'>config</span>().<span class='ident'>real_name</span>().<span class='ident'>to_owned</span>())));
         <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='doccomment'>/// Sends a PONG with the specified message.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_pong</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>PONG</span>(<span class='ident'>msg</span>, <span class='prelude-val'>None</span>))
+    <span class='kw'>fn</span> <span class='ident'>send_pong</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>PONG</span>(<span class='ident'>msg</span>.<span class='ident'>to_owned</span>(), <span class='prelude-val'>None</span>))
     }
 
     <span class='doccomment'>/// Joins the specified channel or chanlist.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_join</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>chanlist</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>JOIN</span>(<span class='ident'>chanlist</span>, <span class='prelude-val'>None</span>))
+    <span class='kw'>fn</span> <span class='ident'>send_join</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>chanlist</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>JOIN</span>(<span class='ident'>chanlist</span>.<span class='ident'>to_owned</span>(), <span class='prelude-val'>None</span>))
     }
 
     <span class='doccomment'>/// Attempts to oper up using the specified username and password.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_oper</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>username</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>password</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>OPER</span>(<span class='ident'>username</span>, <span class='ident'>password</span>))
+    <span class='kw'>fn</span> <span class='ident'>send_oper</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>username</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>password</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>OPER</span>(<span class='ident'>username</span>.<span class='ident'>to_owned</span>(), <span class='ident'>password</span>.<span class='ident'>to_owned</span>()))
     }
 
     <span class='doccomment'>/// Sends a message to the specified target.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_privmsg</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>message</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>for</span> <span class='ident'>line</span> <span class='kw'>in</span> <span class='ident'>message</span>.<span class='ident'>split_str</span>(<span class='string'>&quot;\r\n&quot;</span>) {
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>PRIVMSG</span>(<span class='ident'>target</span>, <span class='ident'>line</span>)))
+    <span class='kw'>fn</span> <span class='ident'>send_privmsg</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>message</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='kw'>for</span> <span class='ident'>line</span> <span class='kw'>in</span> <span class='ident'>message</span>.<span class='ident'>split</span>(<span class='string'>&quot;\r\n&quot;</span>) {
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>PRIVMSG</span>(<span class='ident'>target</span>.<span class='ident'>to_owned</span>(), <span class='ident'>line</span>.<span class='ident'>to_owned</span>())))
         }
         <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='doccomment'>/// Sends a notice to the specified target.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_notice</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>message</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>for</span> <span class='ident'>line</span> <span class='kw'>in</span> <span class='ident'>message</span>.<span class='ident'>split_str</span>(<span class='string'>&quot;\r\n&quot;</span>) {
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>NOTICE</span>(<span class='ident'>target</span>, <span class='ident'>line</span>)))
+    <span class='kw'>fn</span> <span class='ident'>send_notice</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>message</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='kw'>for</span> <span class='ident'>line</span> <span class='kw'>in</span> <span class='ident'>message</span>.<span class='ident'>split</span>(<span class='string'>&quot;\r\n&quot;</span>) {
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>NOTICE</span>(<span class='ident'>target</span>.<span class='ident'>to_owned</span>(), <span class='ident'>line</span>.<span class='ident'>to_owned</span>())))
         }
         <span class='prelude-val'>Ok</span>(())
     }
@@ -710,73 +550,73 @@
     <span class='doccomment'>/// Sets the topic of a channel or requests the current one.</span>
     <span class='doccomment'>/// If `topic` is an empty string, it won&#39;t be included in the message.</span>
     <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Design may change.&quot;</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_topic</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>channel</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>topic</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>TOPIC</span>(<span class='ident'>channel</span>, <span class='kw'>if</span> <span class='ident'>topic</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+    <span class='kw'>fn</span> <span class='ident'>send_topic</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>channel</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>topic</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>TOPIC</span>(<span class='ident'>channel</span>.<span class='ident'>to_owned</span>(), <span class='kw'>if</span> <span class='ident'>topic</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
             <span class='prelude-val'>None</span>
         } <span class='kw'>else</span> {
-            <span class='prelude-val'>Some</span>(<span class='ident'>topic</span>)
+            <span class='prelude-val'>Some</span>(<span class='ident'>topic</span>.<span class='ident'>to_owned</span>())
         }))
     }
 
     <span class='doccomment'>/// Kills the target with the provided message.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_kill</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>message</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>KILL</span>(<span class='ident'>target</span>, <span class='ident'>message</span>))
+    <span class='kw'>fn</span> <span class='ident'>send_kill</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>message</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>KILL</span>(<span class='ident'>target</span>.<span class='ident'>to_owned</span>(), <span class='ident'>message</span>.<span class='ident'>to_owned</span>()))
     }
 
     <span class='doccomment'>/// Kicks the listed nicknames from the listed channels with a comment.</span>
     <span class='doccomment'>/// If `message` is an empty string, it won&#39;t be included in the message.</span>
     <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Design may change.&quot;</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_kick</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>chanlist</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>nicklist</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>message</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>KICK</span>(<span class='ident'>chanlist</span>, <span class='ident'>nicklist</span>, <span class='kw'>if</span> <span class='ident'>message</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+    <span class='kw'>fn</span> <span class='ident'>send_kick</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>chanlist</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>nicklist</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>message</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>KICK</span>(<span class='ident'>chanlist</span>.<span class='ident'>to_owned</span>(), <span class='ident'>nicklist</span>.<span class='ident'>to_owned</span>(), <span class='kw'>if</span> <span class='ident'>message</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
             <span class='prelude-val'>None</span>
         } <span class='kw'>else</span> {
-            <span class='prelude-val'>Some</span>(<span class='ident'>message</span>)
+            <span class='prelude-val'>Some</span>(<span class='ident'>message</span>.<span class='ident'>to_owned</span>())
         }))
     }
 
     <span class='doccomment'>/// Changes the mode of the target.</span>
     <span class='doccomment'>/// If `modeparmas` is an empty string, it won&#39;t be included in the message.</span>
     <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Design may change.&quot;</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_mode</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>mode</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>modeparams</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>MODE</span>(<span class='ident'>target</span>, <span class='ident'>mode</span>, <span class='kw'>if</span> <span class='ident'>modeparams</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+    <span class='kw'>fn</span> <span class='ident'>send_mode</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>mode</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>modeparams</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>MODE</span>(<span class='ident'>target</span>.<span class='ident'>to_owned</span>(), <span class='ident'>mode</span>.<span class='ident'>to_owned</span>(), <span class='kw'>if</span> <span class='ident'>modeparams</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
             <span class='prelude-val'>None</span>
         } <span class='kw'>else</span> {
-            <span class='prelude-val'>Some</span>(<span class='ident'>modeparams</span>)
+            <span class='prelude-val'>Some</span>(<span class='ident'>modeparams</span>.<span class='ident'>to_owned</span>())
         }))
     }
 
     <span class='doccomment'>/// Changes the mode of the target by force.</span>
     <span class='doccomment'>/// If `modeparams` is an empty string, it won&#39;t be included in the message.</span>
     <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Design may change.&quot;</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_samode</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>mode</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>modeparams</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>SAMODE</span>(<span class='ident'>target</span>, <span class='ident'>mode</span>, <span class='kw'>if</span> <span class='ident'>modeparams</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+    <span class='kw'>fn</span> <span class='ident'>send_samode</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>mode</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>modeparams</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>SAMODE</span>(<span class='ident'>target</span>.<span class='ident'>to_owned</span>(), <span class='ident'>mode</span>.<span class='ident'>to_owned</span>(), <span class='kw'>if</span> <span class='ident'>modeparams</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
             <span class='prelude-val'>None</span>
         } <span class='kw'>else</span> {
-            <span class='prelude-val'>Some</span>(<span class='ident'>modeparams</span>)
+            <span class='prelude-val'>Some</span>(<span class='ident'>modeparams</span>.<span class='ident'>to_owned</span>())
         }))
     }
 
     <span class='doccomment'>/// Forces a user to change from the old nickname to the new nickname.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_sanick</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>old_nick</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>new_nick</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>SANICK</span>(<span class='ident'>old_nick</span>, <span class='ident'>new_nick</span>))
+    <span class='kw'>fn</span> <span class='ident'>send_sanick</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>old_nick</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>new_nick</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>SANICK</span>(<span class='ident'>old_nick</span>.<span class='ident'>to_owned</span>(), <span class='ident'>new_nick</span>.<span class='ident'>to_owned</span>()))
     }
 
     <span class='doccomment'>/// Invites a user to the specified channel.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_invite</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>nick</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>chan</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>INVITE</span>(<span class='ident'>nick</span>, <span class='ident'>chan</span>))
+    <span class='kw'>fn</span> <span class='ident'>send_invite</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>nick</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>chan</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>INVITE</span>(<span class='ident'>nick</span>.<span class='ident'>to_owned</span>(), <span class='ident'>chan</span>.<span class='ident'>to_owned</span>()))
     }
 
     <span class='doccomment'>/// Quits the server entirely with a message. </span>
     <span class='doccomment'>/// This defaults to `Powered by Rust.` if none is specified.</span>
     <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;Design may change.&quot;</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_quit</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>server</span>.<span class='ident'>send</span>(<span class='ident'>QUIT</span>(<span class='prelude-val'>Some</span>(<span class='kw'>if</span> <span class='ident'>msg</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
-            <span class='string'>&quot;Powered by Rust.&quot;</span>
+    <span class='kw'>fn</span> <span class='ident'>send_quit</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>QUIT</span>(<span class='prelude-val'>Some</span>(<span class='kw'>if</span> <span class='ident'>msg</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='string'>&quot;Powered by Rust.&quot;</span>.<span class='ident'>to_owned</span>()
         } <span class='kw'>else</span> {
-            <span class='ident'>msg</span>
+            <span class='ident'>msg</span>.<span class='ident'>to_owned</span>()
         })))
     }
 
@@ -784,23 +624,23 @@
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_ctcp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>send_privmsg</span>(<span class='ident'>target</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;\u{001}{}\u{001}&quot;</span>, <span class='ident'>msg</span>)[])
+    <span class='kw'>fn</span> <span class='ident'>send_ctcp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send_privmsg</span>(<span class='ident'>target</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;\u{001}{}\u{001}&quot;</span>, <span class='ident'>msg</span>)[..])
     }
 
     <span class='doccomment'>/// Sends an action command to the specified target.</span>
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_action</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;ACTION {}&quot;</span>, <span class='ident'>msg</span>)[])
+    <span class='kw'>fn</span> <span class='ident'>send_action</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;ACTION {}&quot;</span>, <span class='ident'>msg</span>)[..])
     }
 
     <span class='doccomment'>/// Sends a finger request to the specified target.</span>
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_finger</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>send_finger</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='string'>&quot;FINGER&quot;</span>)
     }
 
@@ -808,7 +648,7 @@
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_version</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>send_version</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='string'>&quot;VERSION&quot;</span>)
     }
 
@@ -816,7 +656,7 @@
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_source</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>send_source</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='string'>&quot;SOURCE&quot;</span>)
     }
 
@@ -824,7 +664,7 @@
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_user_info</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>send_user_info</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='string'>&quot;USERINFO&quot;</span>)
     }
 
@@ -832,25 +672,26 @@
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_ctcp_ping</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>send_ctcp_ping</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>time</span> <span class='op'>=</span> <span class='ident'>get_time</span>();
-        <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;PING {}.{}&quot;</span>, <span class='ident'>time</span>.<span class='ident'>sec</span>, <span class='ident'>time</span>.<span class='ident'>nsec</span>)[])
+        <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;PING {}.{}&quot;</span>, <span class='ident'>time</span>.<span class='ident'>sec</span>, <span class='ident'>time</span>.<span class='ident'>nsec</span>)[..])
     }
 
     <span class='doccomment'>/// Sends a time request to the specified target.</span>
     <span class='doccomment'>/// This requires the CTCP feature to be enabled.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send_time</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>IoResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>send_time</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>send_ctcp</span>(<span class='ident'>target</span>, <span class='string'>&quot;TIME&quot;</span>)
     }
 }
 
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>: <span class='ident'>IrcRead</span>, <span class='ident'>U</span>: <span class='ident'>IrcWrite</span>, <span class='ident'>K</span>: <span class='ident'>Server</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;&gt;</span> <span class='ident'>ServerExt</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>K</span> {}
+
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>Wrapper</span>;
+    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>ServerExt</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>default</span>::<span class='ident'>Default</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::<span class='ident'>util</span>::<span class='ident'>NullReader</span>;
     <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>conn</span>::<span class='ident'>Connection</span>;
     <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Config</span>;
     <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>server</span>::<span class='ident'>IrcServer</span>;
@@ -859,12 +700,9 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>identify</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(), 
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>identify</span>().<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>identify</span>().<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..],
         <span class='string'>&quot;CAP REQ :multi-prefix\r\nCAP END\r\nNICK :test\r\nUSER test 0 * :test\r\n&quot;</span>);
     }
 
@@ -874,294 +712,200 @@
             <span class='ident'>nickname</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)),
             <span class='ident'>password</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;password&quot;</span>)),
             .. <span class='ident'>Default</span>::<span class='ident'>default</span>()
-        }, <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>identify</span>().<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[], <span class='string'>&quot;CAP REQ :multi-prefix\r\nCAP END\r\n\
+        }, <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>identify</span>().<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;CAP REQ :multi-prefix\r\nCAP END\r\n\
         PASS :password\r\nNICK :test\r\nUSER test 0 * :test\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_pong</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_pong</span>(<span class='string'>&quot;irc.test.net&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;PONG :irc.test.net\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_pong</span>(<span class='string'>&quot;irc.test.net&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;PONG :irc.test.net\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_join</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_join</span>(<span class='string'>&quot;#test,#test2,#test3&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;JOIN #test,#test2,#test3\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_join</span>(<span class='string'>&quot;#test,#test2,#test3&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;JOIN #test,#test2,#test3\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_oper</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_oper</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;OPER test :test\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_oper</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;OPER test :test\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_privmsg</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_privmsg</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;Hi, everybody!&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;PRIVMSG #test :Hi, everybody!\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_privmsg</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;Hi, everybody!&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;PRIVMSG #test :Hi, everybody!\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_notice</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_notice</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;Hi, everybody!&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;NOTICE #test :Hi, everybody!\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_notice</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;Hi, everybody!&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;NOTICE #test :Hi, everybody!\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_topic_no_topic</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_topic</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;TOPIC #test\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_topic</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;TOPIC #test\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_topic</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_topic</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;Testing stuff.&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;TOPIC #test :Testing stuff.\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_topic</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;Testing stuff.&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;TOPIC #test :Testing stuff.\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_kill</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_kill</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;Testing kills.&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;KILL test :Testing kills.\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_kill</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;Testing kills.&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;KILL test :Testing kills.\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_kick_no_message</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_kick</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;KICK #test test\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_kick</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;KICK #test test\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_kick</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_kick</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;Testing kicks.&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;KICK #test test :Testing kicks.\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_kick</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;Testing kicks.&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;KICK #test test :Testing kicks.\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_mode_no_modeparams</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_mode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+i&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;MODE #test +i\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_mode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+i&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;MODE #test +i\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_mode</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_mode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+o&quot;</span>, <span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;MODE #test +o test\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_mode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+o&quot;</span>, <span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;MODE #test +o test\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_samode_no_modeparams</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_samode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+i&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;SAMODE #test +i\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_samode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+i&quot;</span>, <span class='string'>&quot;&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;SAMODE #test +i\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_samode</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_samode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+o&quot;</span>, <span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;SAMODE #test +o test\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_samode</span>(<span class='string'>&quot;#test&quot;</span>, <span class='string'>&quot;+o&quot;</span>, <span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;SAMODE #test +o test\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_sanick</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_sanick</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;test2&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;SANICK test test2\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_sanick</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;test2&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;SANICK test test2\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>send_invite</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_invite</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;#test&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;INVITE test #test\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_invite</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;#test&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;INVITE test #test\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_ctcp</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_ctcp</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;MESSAGE&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;PRIVMSG test :\u{001}MESSAGE\u{001}\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_ctcp</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;MESSAGE&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;PRIVMSG test :\u{001}MESSAGE\u{001}\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_action</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_action</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;tests.&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;PRIVMSG test :\u{001}ACTION tests.\u{001}\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_action</span>(<span class='string'>&quot;test&quot;</span>, <span class='string'>&quot;tests.&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;PRIVMSG test :\u{001}ACTION tests.\u{001}\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_finger</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_finger</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;PRIVMSG test :\u{001}FINGER\u{001}\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_finger</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;PRIVMSG test :\u{001}FINGER\u{001}\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_version</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_version</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;PRIVMSG test :\u{001}VERSION\u{001}\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_version</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;PRIVMSG test :\u{001}VERSION\u{001}\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_source</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_source</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;PRIVMSG test :\u{001}SOURCE\u{001}\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_source</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;PRIVMSG test :\u{001}SOURCE\u{001}\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_user_info</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_user_info</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;PRIVMSG test :\u{001}USERINFO\u{001}\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_user_info</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;PRIVMSG test :\u{001}USERINFO\u{001}\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_ctcp_ping</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_ctcp_ping</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
-        }
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_ctcp_ping</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>let</span> <span class='ident'>val</span> <span class='op'>=</span> <span class='ident'>get_server_value</span>(<span class='ident'>server</span>);
         <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>val</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>val</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;PRIVMSG test :\u{001}PING &quot;</span>));
@@ -1172,13 +916,9 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ctcp&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_time</span>() {
         <span class='kw'>let</span> <span class='ident'>server</span> <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>from_connection</span>(<span class='ident'>test_config</span>(),
-                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>NullReader</span>, <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
-        {
-            <span class='kw'>let</span> <span class='ident'>wrapper</span> <span class='op'>=</span> <span class='ident'>Wrapper</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>server</span>);
-            <span class='ident'>wrapper</span>.<span class='ident'>send_time</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
-        }
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[],
-        <span class='string'>&quot;PRIVMSG test :\u{001}TIME\u{001}\r\n&quot;</span>);
+                     <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+        <span class='ident'>server</span>.<span class='ident'>send_time</span>(<span class='string'>&quot;test&quot;</span>).<span class='ident'>unwrap</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>get_server_value</span>(<span class='ident'>server</span>)[..], <span class='string'>&quot;PRIVMSG test :\u{001}TIME\u{001}\r\n&quot;</span>);
     }
 }
 </pre>

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.3.6/src/x509/mod.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/Documents/Programming/Rust/rust-openssl/openssl/src/x509/mod.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>mod.rs.html -- source</title>
@@ -565,8 +565,12 @@
 <span id="523">523</span>
 <span id="524">524</span>
 <span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>c_char</span>, <span class='ident'>c_int</span>, <span class='ident'>c_long</span>, <span class='ident'>c_uint</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::<span class='ident'>Ordering</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>CString</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>repeat</span>;
@@ -718,8 +722,10 @@
 <span class='doccomment'>/// ```</span>
 <span class='doccomment'>/// # #[allow(unstable)]</span>
 <span class='doccomment'>/// # fn main() {</span>
-<span class='doccomment'>/// use std::old_io::{File, Open, Write};</span>
-<span class='doccomment'>/// # use std::old_io::fs;</span>
+<span class='doccomment'>/// use std::fs;</span>
+<span class='doccomment'>/// use std::fs::File;</span>
+<span class='doccomment'>/// use std::io::prelude::*;</span>
+<span class='doccomment'>/// use std::path::Path;</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// use openssl::crypto::hash::Type;</span>
 <span class='doccomment'>/// use openssl::x509::{KeyUsage, X509Generator};</span>
@@ -733,15 +739,15 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// let (cert, pkey) = gen.generate().unwrap();</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// let cert_path = Path::new(&quot;doc_cert.pem&quot;);</span>
-<span class='doccomment'>/// let mut file = File::open_mode(&amp;cert_path, Open, Write).unwrap();</span>
+<span class='doccomment'>/// let cert_path = &quot;doc_cert.pem&quot;;</span>
+<span class='doccomment'>/// let mut file = File::create(cert_path).unwrap();</span>
 <span class='doccomment'>/// assert!(cert.write_pem(&amp;mut file).is_ok());</span>
-<span class='doccomment'>/// # let _ = fs::unlink(&amp;cert_path);</span>
+<span class='doccomment'>/// # let _ = fs::remove_file(cert_path);</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// let pkey_path = Path::new(&quot;doc_key.pem&quot;);</span>
-<span class='doccomment'>/// let mut file = File::open_mode(&amp;pkey_path, Open, Write).unwrap();</span>
+<span class='doccomment'>/// let pkey_path = &quot;doc_key.pem&quot;;</span>
+<span class='doccomment'>/// let mut file = File::create(pkey_path).unwrap();</span>
 <span class='doccomment'>/// assert!(pkey.write_pem(&amp;mut file).is_ok());</span>
-<span class='doccomment'>/// # let _ = fs::unlink(&amp;pkey_path);</span>
+<span class='doccomment'>/// # let _ = fs::remove_file(pkey_path);</span>
 <span class='doccomment'>/// # }</span>
 <span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>X509Generator</span> {
@@ -815,7 +821,7 @@
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ctx</span>: <span class='ident'>ffi</span>::<span class='ident'>X509V3_CTX</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>zeroed</span>();
             <span class='ident'>ffi</span>::<span class='ident'>X509V3_set_ctx</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ctx</span>, <span class='ident'>x509</span>, <span class='ident'>x509</span>,
                                 <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(), <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(), <span class='number'>0</span>);
-            <span class='kw'>let</span> <span class='ident'>value</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>from_slice</span>(<span class='ident'>value</span>.<span class='ident'>as_bytes</span>());
+            <span class='kw'>let</span> <span class='ident'>value</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>value</span>.<span class='ident'>as_bytes</span>()).<span class='ident'>unwrap</span>();
             <span class='kw'>let</span> <span class='ident'>ext</span> <span class='op'>=</span> <span class='ident'>ffi</span>::<span class='ident'>X509V3_EXT_conf_nid</span>(<span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(),
                                                <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='kw-2'>&amp;</span><span class='ident'>ctx</span>),
                                                <span class='ident'>extension</span>,
@@ -833,8 +839,8 @@
     <span class='kw'>fn</span> <span class='ident'>add_name</span>(<span class='ident'>name</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>ffi</span>::<span class='ident'>X509_NAME</span>, <span class='ident'>key</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>value</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>SslError</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>value_len</span> <span class='op'>=</span> <span class='ident'>value</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>c_int</span>;
         <span class='macro'>lift_ssl</span><span class='macro'>!</span>(<span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='ident'>key</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>from_slice</span>(<span class='ident'>key</span>.<span class='ident'>as_bytes</span>());
-            <span class='kw'>let</span> <span class='ident'>value</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>from_slice</span>(<span class='ident'>value</span>.<span class='ident'>as_bytes</span>());
+            <span class='kw'>let</span> <span class='ident'>key</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>key</span>.<span class='ident'>as_bytes</span>()).<span class='ident'>unwrap</span>();
+            <span class='kw'>let</span> <span class='ident'>value</span> <span class='op'>=</span> <span class='ident'>CString</span>::<span class='ident'>new</span>(<span class='ident'>value</span>.<span class='ident'>as_bytes</span>()).<span class='ident'>unwrap</span>();
             <span class='ident'>ffi</span>::<span class='ident'>X509_NAME_add_entry_by_txt</span>(<span class='ident'>name</span>, <span class='ident'>key</span>.<span class='ident'>as_ptr</span>(), <span class='ident'>ffi</span>::<span class='ident'>MBSTRING_UTF8</span>,
                                             <span class='ident'>value</span>.<span class='ident'>as_ptr</span>(), <span class='ident'>value_len</span>, <span class='op'>-</span><span class='number'>1</span>, <span class='number'>0</span>)
         })
@@ -937,10 +943,9 @@
     }
 
     <span class='doccomment'>/// Reads certificate from PEM, takes ownership of handle</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_pem</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span>(<span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>R</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>X509</span><span class='op'>&lt;</span><span class='lifetime'>&#39;ctx</span><span class='op'>&gt;</span>, <span class='ident'>SslError</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>R</span>: <span class='ident'>Reader</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_pem</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span>(<span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>R</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>X509</span><span class='op'>&lt;</span><span class='lifetime'>&#39;ctx</span><span class='op'>&gt;</span>, <span class='ident'>SslError</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>R</span>: <span class='ident'>Read</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mem_bio</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>MemBio</span>::<span class='ident'>new</span>());
-        <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>reader</span>.<span class='ident'>read_to_end</span>().<span class='ident'>map_err</span>(<span class='ident'>StreamError</span>));
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>mem_bio</span>.<span class='ident'>write_all</span>(<span class='ident'>buf</span>.<span class='ident'>as_slice</span>()).<span class='ident'>map_err</span>(<span class='ident'>StreamError</span>));
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>io</span>::<span class='ident'>copy</span>(<span class='ident'>reader</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>mem_bio</span>).<span class='ident'>map_err</span>(<span class='ident'>StreamError</span>));
 
         <span class='kw'>unsafe</span> {
             <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='macro'>try_ssl_null</span><span class='macro'>!</span>(<span class='ident'>ffi</span>::<span class='ident'>PEM_read_bio_X509</span>(<span class='ident'>mem_bio</span>.<span class='ident'>get_handle</span>(),
@@ -980,14 +985,13 @@
     }
 
     <span class='doccomment'>/// Writes certificate as PEM</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write_pem</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>SslError</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>W</span>: <span class='ident'>Writer</span>{
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>write_pem</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>SslError</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>W</span>: <span class='ident'>Write</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mem_bio</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>MemBio</span>::<span class='ident'>new</span>());
         <span class='kw'>unsafe</span> {
             <span class='macro'>try_ssl</span><span class='macro'>!</span>(<span class='ident'>ffi</span>::<span class='ident'>PEM_write_bio_X509</span>(<span class='ident'>mem_bio</span>.<span class='ident'>get_handle</span>(),
                                              <span class='self'>self</span>.<span class='ident'>handle</span>));
         }
-        <span class='kw'>let</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>mem_bio</span>.<span class='ident'>read_to_end</span>().<span class='ident'>map_err</span>(<span class='ident'>StreamError</span>));
-        <span class='ident'>writer</span>.<span class='ident'>write_all</span>(<span class='ident'>buf</span>.<span class='ident'>as_slice</span>()).<span class='ident'>map_err</span>(<span class='ident'>StreamError</span>)
+        <span class='ident'>io</span>::<span class='ident'>copy</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>mem_bio</span>, <span class='ident'>writer</span>).<span class='ident'>map_err</span>(<span class='ident'>StreamError</span>).<span class='ident'>map</span>(<span class='op'>|</span>_<span class='op'>|</span> ())
     }
 }
 

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/pkg-config-0.2.1/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/pkg-config-0.3.0/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -267,6 +267,7 @@
 <span id="225">225</span>
 <span id="226">226</span>
 <span id="227">227</span>
+<span id="228">228</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! A build dependency for Cargo libraries to find system artifacts through the</span>
 <span class='doccomment'>//! `pkg-config` utility.</span>
@@ -320,17 +321,18 @@
 <span class='doccomment'>//! }</span>
 <span class='doccomment'>//! ```</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>env</span>, <span class='ident'>io</span>, <span class='ident'>path</span>, <span class='ident'>unicode</span>)]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>env</span>, <span class='ident'>path</span>, <span class='ident'>unicode</span>, <span class='ident'>process</span>, <span class='ident'>fs</span>)]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>test</span>, <span class='ident'>deny</span>(<span class='ident'>warnings</span>))]</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::<span class='ident'>Command</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::<span class='ident'>fs</span>::<span class='ident'>PathExtensions</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>env</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::{<span class='ident'>PathBuf</span>, <span class='ident'>Path</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>process</span>::<span class='ident'>Command</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>PathExt</span>;
 
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>target_supported</span>() <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='string'>&quot;HOST&quot;</span>) <span class='op'>==</span> <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='string'>&quot;TARGET&quot;</span>) <span class='op'>||</span>
-        <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='string'>&quot;PKG_CONFIG_ALLOW_CROSS&quot;</span>).<span class='ident'>is_ok</span>()
+        <span class='ident'>env</span>::<span class='ident'>var_os</span>(<span class='string'>&quot;PKG_CONFIG_ALLOW_CROSS&quot;</span>).<span class='ident'>is_some</span>()
 }
 
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
@@ -342,10 +344,10 @@
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Library</span> {
     <span class='kw'>pub</span> <span class='ident'>libs</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
-    <span class='kw'>pub</span> <span class='ident'>link_paths</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>link_paths</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>PathBuf</span><span class='op'>&gt;</span>,
     <span class='kw'>pub</span> <span class='ident'>frameworks</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
-    <span class='kw'>pub</span> <span class='ident'>framework_paths</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;</span>,
-    <span class='kw'>pub</span> <span class='ident'>include_paths</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>framework_paths</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>PathBuf</span><span class='op'>&gt;</span>,
+    <span class='kw'>pub</span> <span class='ident'>include_paths</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>PathBuf</span><span class='op'>&gt;</span>,
     <span class='ident'>_priv</span>: (),
 }
 
@@ -384,7 +386,7 @@
     <span class='doccomment'>/// This will use all configuration previously set to specify how</span>
     <span class='doccomment'>/// `pkg-config` is run.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Library</span>, <span class='ident'>String</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_NO_PKG_CONFIG&quot;</span>, <span class='ident'>envify</span>(<span class='ident'>name</span>))).<span class='ident'>is_ok</span>() {
+        <span class='kw'>if</span> <span class='ident'>env</span>::<span class='ident'>var_os</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_NO_PKG_CONFIG&quot;</span>, <span class='ident'>envify</span>(<span class='ident'>name</span>))).<span class='ident'>is_some</span>() {
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;pkg-config requested to be aborted for {}&quot;</span>, <span class='ident'>name</span>))
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>target_supported</span>() {
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;pkg-config doesn&#39;t handle cross compilation. Use \
@@ -399,14 +401,14 @@
         <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;--libs&quot;</span>).<span class='ident'>arg</span>(<span class='string'>&quot;--cflags&quot;</span>)
            .<span class='ident'>env</span>(<span class='string'>&quot;PKG_CONFIG_ALLOW_SYSTEM_LIBS&quot;</span>, <span class='string'>&quot;1&quot;</span>);
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>atleast_version</span> {
-            <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>v</span>) <span class='op'>=&gt;</span> { <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{} &gt;= {}&quot;</span>, <span class='ident'>name</span>, <span class='ident'>v</span>)); }
+            <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>v</span>) <span class='op'>=&gt;</span> { <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{} &gt;= {}&quot;</span>, <span class='ident'>name</span>, <span class='ident'>v</span>)); }
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> { <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='ident'>name</span>); }
         }
         <span class='kw'>let</span> <span class='ident'>out</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>cmd</span>.<span class='ident'>output</span>().<span class='ident'>map_err</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> {
             <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;failed to run `{:?}`: {}&quot;</span>, <span class='ident'>cmd</span>, <span class='ident'>e</span>)
         }));
-        <span class='kw'>let</span> <span class='ident'>stdout</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='kw-2'>&amp;</span><span class='ident'>out</span>.<span class='ident'>output</span>).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>stderr</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='kw-2'>&amp;</span><span class='ident'>out</span>.<span class='ident'>error</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>stdout</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='kw-2'>&amp;</span><span class='ident'>out</span>.<span class='ident'>stdout</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>stderr</span> <span class='op'>=</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='kw-2'>&amp;</span><span class='ident'>out</span>.<span class='ident'>stderr</span>).<span class='ident'>unwrap</span>();
         <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>out</span>.<span class='ident'>status</span>.<span class='ident'>success</span>() {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;`{:?}` did not exit successfully: {}&quot;</span>, <span class='ident'>cmd</span>,
                                   <span class='ident'>out</span>.<span class='ident'>status</span>);
@@ -436,19 +438,19 @@
         <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='ident'>flag</span>, <span class='ident'>val</span>) <span class='kw'>in</span> <span class='ident'>parts</span>.<span class='ident'>iter</span>() {
             <span class='kw'>if</span> <span class='ident'>flag</span> <span class='op'>==</span> <span class='string'>&quot;-L&quot;</span> {
                 <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-flags=-L native={}&quot;</span>, <span class='ident'>val</span>);
-                <span class='ident'>dirs</span>.<span class='ident'>push</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>val</span>));
-                <span class='ident'>ret</span>.<span class='ident'>link_paths</span>.<span class='ident'>push</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>val</span>));
+                <span class='ident'>dirs</span>.<span class='ident'>push</span>(<span class='ident'>PathBuf</span>::<span class='ident'>new</span>(<span class='ident'>val</span>));
+                <span class='ident'>ret</span>.<span class='ident'>link_paths</span>.<span class='ident'>push</span>(<span class='ident'>PathBuf</span>::<span class='ident'>new</span>(<span class='ident'>val</span>));
             } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>flag</span> <span class='op'>==</span> <span class='string'>&quot;-F&quot;</span> {
                 <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-flags=-L framework={}&quot;</span>, <span class='ident'>val</span>);
-                <span class='ident'>ret</span>.<span class='ident'>framework_paths</span>.<span class='ident'>push</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>val</span>));
+                <span class='ident'>ret</span>.<span class='ident'>framework_paths</span>.<span class='ident'>push</span>(<span class='ident'>PathBuf</span>::<span class='ident'>new</span>(<span class='ident'>val</span>));
             } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>flag</span> <span class='op'>==</span> <span class='string'>&quot;-I&quot;</span> {
-                <span class='ident'>ret</span>.<span class='ident'>include_paths</span>.<span class='ident'>push</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='ident'>val</span>));
+                <span class='ident'>ret</span>.<span class='ident'>include_paths</span>.<span class='ident'>push</span>(<span class='ident'>PathBuf</span>::<span class='ident'>new</span>(<span class='ident'>val</span>));
             }
         }
         <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='ident'>flag</span>, <span class='ident'>val</span>) <span class='kw'>in</span> <span class='ident'>parts</span>.<span class='ident'>iter</span>() {
             <span class='kw'>if</span> <span class='ident'>flag</span> <span class='op'>==</span> <span class='string'>&quot;-l&quot;</span> {
                 <span class='ident'>ret</span>.<span class='ident'>libs</span>.<span class='ident'>push</span>(<span class='ident'>val</span>.<span class='ident'>to_string</span>());
-                <span class='kw'>if</span> <span class='ident'>statik</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>is_system_lib</span>(<span class='ident'>val</span>, <span class='kw-2'>&amp;</span><span class='ident'>dirs</span>[]) {
+                <span class='kw'>if</span> <span class='ident'>statik</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>is_system_lib</span>(<span class='ident'>val</span>, <span class='kw-2'>&amp;</span><span class='ident'>dirs</span>) {
                     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-flags=-l static={}&quot;</span>, <span class='ident'>val</span>);
                 } <span class='kw'>else</span> {
                     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-flags=-l {}&quot;</span>, <span class='ident'>val</span>);
@@ -470,13 +472,13 @@
 
 <span class='kw'>fn</span> <span class='ident'>infer_static</span>(<span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='ident'>name</span> <span class='op'>=</span> <span class='ident'>envify</span>(<span class='ident'>name</span>);
-    <span class='kw'>if</span> <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_STATIC&quot;</span>, <span class='ident'>name</span>)).<span class='ident'>is_ok</span>() {
+    <span class='kw'>if</span> <span class='ident'>env</span>::<span class='ident'>var_os</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_STATIC&quot;</span>, <span class='ident'>name</span>)).<span class='ident'>is_some</span>() {
         <span class='boolval'>true</span>
-    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_DYNAMIC&quot;</span>, <span class='ident'>name</span>)).<span class='ident'>is_ok</span>() {
+    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>env</span>::<span class='ident'>var_os</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_DYNAMIC&quot;</span>, <span class='ident'>name</span>)).<span class='ident'>is_some</span>() {
         <span class='boolval'>false</span>
-    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='string'>&quot;PKG_CONFIG_ALL_STATIC&quot;</span>).<span class='ident'>is_ok</span>() {
+    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>env</span>::<span class='ident'>var_os</span>(<span class='string'>&quot;PKG_CONFIG_ALL_STATIC&quot;</span>).<span class='ident'>is_some</span>() {
         <span class='boolval'>true</span>
-    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>env</span>::<span class='ident'>var</span>(<span class='string'>&quot;PKG_CONFIG_ALL_DYNAMIC&quot;</span>).<span class='ident'>is_ok</span>() {
+    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>env</span>::<span class='ident'>var_os</span>(<span class='string'>&quot;PKG_CONFIG_ALL_DYNAMIC&quot;</span>).<span class='ident'>is_some</span>() {
         <span class='boolval'>false</span>
     } <span class='kw'>else</span> {
         <span class='boolval'>false</span>
@@ -488,11 +490,11 @@
         .<span class='ident'>collect</span>()
 }
 
-<span class='kw'>fn</span> <span class='ident'>is_system_lib</span>(<span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>dirs</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>Path</span>]) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+<span class='kw'>fn</span> <span class='ident'>is_system_lib</span>(<span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>dirs</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>PathBuf</span>]) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='ident'>libname</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;lib{}.a&quot;</span>, <span class='ident'>name</span>);
     <span class='kw'>let</span> <span class='ident'>root</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;/usr&quot;</span>);
     <span class='op'>!</span><span class='ident'>dirs</span>.<span class='ident'>iter</span>().<span class='ident'>any</span>(<span class='op'>|</span><span class='ident'>d</span><span class='op'>|</span> {
-        <span class='op'>!</span><span class='ident'>root</span>.<span class='ident'>is_ancestor_of</span>(<span class='ident'>d</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>d</span>.<span class='ident'>join</span>(<span class='kw-2'>&amp;</span><span class='ident'>libname</span>).<span class='ident'>exists</span>()
+        <span class='op'>!</span><span class='ident'>d</span>.<span class='ident'>starts_with</span>(<span class='ident'>root</span>) <span class='op'>&amp;&amp;</span> <span class='ident'>d</span>.<span class='ident'>join</span>(<span class='kw-2'>&amp;</span><span class='ident'>libname</span>).<span class='ident'>exists</span>()
     })
 }
 </pre>

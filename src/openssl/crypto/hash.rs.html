@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.3.6/src/crypto/hash.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/Documents/Programming/Rust/rust-openssl/openssl/src/crypto/hash.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>hash.rs.html -- source</title>
@@ -373,10 +373,16 @@
 <span id="331">331</span>
 <span id="332">332</span>
 <span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>libc</span>::<span class='ident'>c_uint</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>repeat</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::{<span class='ident'>IoError</span>, <span class='ident'>Writer</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 
 <span class='kw'>use</span> <span class='ident'>ffi</span>;
 
@@ -449,10 +455,10 @@
 <span class='doccomment'>/// assert_eq!(res, spec);</span>
 <span class='doccomment'>/// ```</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// Use the `Writer` trait to supply the input in chunks.</span>
+<span class='doccomment'>/// Use the `Write` trait to supply the input in chunks.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// ```</span>
-<span class='doccomment'>/// use std::old_io::Writer;</span>
+<span class='doccomment'>/// use std::io::prelude::*;</span>
 <span class='doccomment'>/// use openssl::crypto::hash::{Hasher, Type};</span>
 <span class='doccomment'>/// let data = [b&quot;\x42\xF4&quot;, b&quot;\x97\xE0&quot;];</span>
 <span class='doccomment'>/// let spec = b&quot;\x7c\x43\x0f\x17\x8a\xef\xdf\x14\x87\xfe\xe7\x14\x4e\x96\x41\xe2&quot;;</span>
@@ -544,10 +550,14 @@
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>Writer</span> <span class='kw'>for</span> <span class='ident'>Hasher</span> {
+<span class='kw'>impl</span> <span class='ident'>Write</span> <span class='kw'>for</span> <span class='ident'>Hasher</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>IoError</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>update</span>(<span class='ident'>buf</span>);
+        <span class='prelude-val'>Ok</span>(<span class='ident'>buf</span>.<span class='ident'>len</span>())
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>flush</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='prelude-val'>Ok</span>(())
     }
 }
@@ -589,7 +599,7 @@
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
     <span class='kw'>use</span> <span class='ident'>serialize</span>::<span class='ident'>hex</span>::{<span class='ident'>FromHex</span>, <span class='ident'>ToHex</span>};
     <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>hash</span>, <span class='ident'>Hasher</span>, <span class='ident'>Type</span>};
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>old_io</span>::<span class='ident'>Writer</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
     <span class='kw'>fn</span> <span class='ident'>hash_test</span>(<span class='ident'>hashtype</span>: <span class='ident'>Type</span>, <span class='ident'>hashtest</span>: <span class='kw-2'>&amp;</span>(<span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='kw-2'>&amp;</span><span class='ident'>str</span>)) {
         <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>hash</span>(<span class='ident'>hashtype</span>, <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>hashtest</span>.<span class='number'>0</span>.<span class='ident'>from_hex</span>().<span class='ident'>unwrap</span>());

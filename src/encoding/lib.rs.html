@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.23/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.24/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -288,7 +288,7 @@
 
 <span class='doccomment'>/*!
 
-# Encoding 0.2.23
+# Encoding 0.2.24
 
 Character encoding support for Rust. (also known as `rust-encoding`)
 It is based on [WHATWG Encoding Standard](http://encoding.spec.whatwg.org/),
@@ -362,8 +362,8 @@ fn hex_ncr_escape(_encoder: &amp;mut RawEncoder, input: &amp;str, output: &amp;m
 static HEX_NCR_ESCAPE: EncoderTrap = EncoderTrap::Call(hex_ncr_escape);
 
 let orig = &quot;Hello, 世界!&quot;.to_string();
-let encoded = ASCII.encode(&amp;orig[], HEX_NCR_ESCAPE).unwrap();
-assert_eq!(ASCII.decode(&amp;encoded[], DecoderTrap::Strict),
+let encoded = ASCII.encode(&amp;orig, HEX_NCR_ESCAPE).unwrap();
+assert_eq!(ASCII.decode(&amp;encoded, DecoderTrap::Strict),
            Ok(&quot;Hello, &amp;#x4e16;&amp;#x754c;!&quot;.to_string()));
 ~~~~
 
@@ -457,7 +457,7 @@ Whenever in doubt, look at the source code and specifications for detailed expla
 */</span>
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>core</span>, <span class='ident'>collections</span>)]</span> <span class='comment'>// lib stability features as per RFC #507</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>test</span>, <span class='ident'>feature</span>(<span class='ident'>path</span>, <span class='ident'>env</span>, <span class='ident'>io</span>, <span class='ident'>test</span>))]</span> <span class='comment'>// ditto</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>test</span>, <span class='ident'>feature</span>(<span class='ident'>env</span>, <span class='ident'>old_io</span>, <span class='ident'>old_path</span>, <span class='ident'>test</span>))]</span> <span class='comment'>// ditto</span>
 
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;encoding-index-singlebyte&quot;</span> <span class='kw'>as</span> <span class='ident'>index_singlebyte</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;encoding-index-korean&quot;</span> <span class='kw'>as</span> <span class='ident'>index_korean</span>;
@@ -510,17 +510,17 @@ Whenever in doubt, look at the source code and specifications for detailed expla
                 <span class='ident'>input</span>, <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>, <span class='ident'>all</span>::<span class='ident'>ISO_8859_1</span> <span class='kw'>as</span> <span class='ident'>EncodingRef</span>);
             <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>result</span>.<span class='ident'>unwrap</span>();
             <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>used_encoding</span>.<span class='ident'>name</span>(), <span class='ident'>expected_encoding</span>);
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>result</span>[], <span class='ident'>expected_result</span>);
+            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>result</span>[..], <span class='ident'>expected_result</span>);
         }
 
-        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0xEF</span>, <span class='number'>0xBB</span>, <span class='number'>0xBF</span>, <span class='number'>0xC3</span>, <span class='number'>0xA9</span>][], <span class='string'>&quot;é&quot;</span>, <span class='string'>&quot;utf-8&quot;</span>);
-        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0xC3</span>, <span class='number'>0xA9</span>][], <span class='string'>&quot;Ã©&quot;</span>, <span class='string'>&quot;iso-8859-1&quot;</span>);
+        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0xEF</span>, <span class='number'>0xBB</span>, <span class='number'>0xBF</span>, <span class='number'>0xC3</span>, <span class='number'>0xA9</span>], <span class='string'>&quot;é&quot;</span>, <span class='string'>&quot;utf-8&quot;</span>);
+        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0xC3</span>, <span class='number'>0xA9</span>], <span class='string'>&quot;Ã©&quot;</span>, <span class='string'>&quot;iso-8859-1&quot;</span>);
 
-        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0xFE</span>, <span class='number'>0xFF</span>, <span class='number'>0x00</span>, <span class='number'>0xE9</span>][], <span class='string'>&quot;é&quot;</span>, <span class='string'>&quot;utf-16be&quot;</span>);
-        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0x00</span>, <span class='number'>0xE9</span>][], <span class='string'>&quot;\x00é&quot;</span>, <span class='string'>&quot;iso-8859-1&quot;</span>);
+        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0xFE</span>, <span class='number'>0xFF</span>, <span class='number'>0x00</span>, <span class='number'>0xE9</span>], <span class='string'>&quot;é&quot;</span>, <span class='string'>&quot;utf-16be&quot;</span>);
+        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0x00</span>, <span class='number'>0xE9</span>], <span class='string'>&quot;\x00é&quot;</span>, <span class='string'>&quot;iso-8859-1&quot;</span>);
 
-        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0xFF</span>, <span class='number'>0xFE</span>, <span class='number'>0xE9</span>, <span class='number'>0x00</span>][], <span class='string'>&quot;é&quot;</span>, <span class='string'>&quot;utf-16le&quot;</span>);
-        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0xE9</span>, <span class='number'>0x00</span>][], <span class='string'>&quot;é\x00&quot;</span>, <span class='string'>&quot;iso-8859-1&quot;</span>);
+        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0xFF</span>, <span class='number'>0xFE</span>, <span class='number'>0xE9</span>, <span class='number'>0x00</span>], <span class='string'>&quot;é&quot;</span>, <span class='string'>&quot;utf-16le&quot;</span>);
+        <span class='ident'>test_one</span>(<span class='kw-2'>&amp;</span>[<span class='number'>0xE9</span>, <span class='number'>0x00</span>], <span class='string'>&quot;é\x00&quot;</span>, <span class='string'>&quot;iso-8859-1&quot;</span>);
     }
 }
 </pre>

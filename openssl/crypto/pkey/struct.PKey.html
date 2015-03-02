@@ -42,9 +42,8 @@
 
     <section id='main' class="content struct">
 <h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>openssl</a>::<wbr><a href='../index.html'>crypto</a>::<wbr><a href='index.html'>pkey</a>::<wbr><a class='struct' href=''>PKey</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]
-            </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-6573' href='../../../src/openssl/crypto/pkey.rs.html#53-56'>[src]</a></span></h1>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-6214' href='../../../src/openssl/crypto/pkey.rs.html#54-57'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct PKey {
     // some fields omitted
 }</pre><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='struct' href='../../../openssl/crypto/pkey/struct.PKey.html' title='openssl::crypto::pkey::PKey'>PKey</a></code></h3><div class='docblock'><p>Represents a public key, optionally with a private key attached.</p>
@@ -60,7 +59,7 @@ load_priv().</p>
 </div><h4 id='method.load_priv' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.load_priv' class='fnname'>load_priv</a>(&amp;mut self, s: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h4>
 <div class='docblock'><p>Loads a serialized form of the public and private keys, as produced by
 save_priv().</p>
-</div><h4 id='method.write_pem' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.write_pem' class='fnname'>write_pem</a>(&amp;self, writer: &amp;mut <a class='trait' href='http://doc.rust-lang.org/nightly/std/old_io/trait.Writer.html' title='std::old_io::Writer'>Writer</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../../../openssl/ssl/error/enum.SslError.html' title='openssl::ssl::error::SslError'>SslError</a>&gt;</code></h4>
+</div><h4 id='method.write_pem' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.write_pem' class='fnname'>write_pem</a>&lt;W: <a class='trait' href='http://doc.rust-lang.org/nightly/std/io/trait.Write.html' title='std::io::Write'>Write</a>&gt;(&amp;self, writer: &amp;mut W) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../../../openssl/ssl/error/enum.SslError.html' title='openssl::ssl::error::SslError'>SslError</a>&gt;</code></h4>
 <div class='docblock'><p>Stores private key as a PEM</p>
 </div><h4 id='method.size' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.size' class='fnname'>size</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
 <div class='docblock'><p>Returns the size of the public key modulus.</p>

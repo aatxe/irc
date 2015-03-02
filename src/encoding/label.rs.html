@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.23/src/label.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.24/src/label.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>label.rs.html -- source</title>
@@ -402,10 +402,10 @@
 <span class='doccomment'>/// Implements &quot;get an encoding&quot; algorithm: http://encoding.spec.whatwg.org/#concept-encoding-get</span>
 <span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>encoding_from_whatwg_label</span>(<span class='ident'>label</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>EncodingRef</span><span class='op'>&gt;</span> {
-    <span class='kw'>let</span> <span class='ident'>label</span> <span class='op'>=</span> <span class='ident'>label</span>.<span class='ident'>trim_matches</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&#39; &#39;</span>, <span class='string'>&#39;\n&#39;</span>, <span class='string'>&#39;\r&#39;</span>, <span class='string'>&#39;\t&#39;</span>, <span class='string'>&#39;\x0C&#39;</span>][]);
+    <span class='kw'>let</span> <span class='ident'>label</span> <span class='op'>=</span> <span class='ident'>label</span>.<span class='ident'>trim_matches</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&#39; &#39;</span>, <span class='string'>&#39;\n&#39;</span>, <span class='string'>&#39;\r&#39;</span>, <span class='string'>&#39;\t&#39;</span>, <span class='string'>&#39;\x0C&#39;</span>][..]);
     <span class='kw'>let</span> <span class='ident'>label</span>: <span class='ident'>String</span> <span class='op'>=</span>
         <span class='ident'>label</span>.<span class='ident'>chars</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>c</span><span class='op'>|</span> <span class='kw'>match</span> <span class='ident'>c</span> { <span class='string'>&#39;A&#39;</span>...<span class='string'>&#39;Z&#39;</span> <span class='op'>=&gt;</span> (<span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>u8</span> <span class='op'>+</span> <span class='number'>32</span>) <span class='kw'>as</span> <span class='ident'>char</span>, _ <span class='op'>=&gt;</span> <span class='ident'>c</span> }).<span class='ident'>collect</span>();
-    <span class='kw'>match</span> <span class='kw-2'>&amp;</span><span class='ident'>label</span>[] {
+    <span class='kw'>match</span> <span class='kw-2'>&amp;</span><span class='ident'>label</span>[..] {
         <span class='string'>&quot;unicode-1-1-utf-8&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;utf-8&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;utf8&quot;</span> <span class='op'>=&gt;</span>

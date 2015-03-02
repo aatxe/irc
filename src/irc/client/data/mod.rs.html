@@ -69,9 +69,6 @@
 <span id="27">27</span>
 <span id="28">28</span>
 <span id="29">29</span>
-<span id="30">30</span>
-<span id="31">31</span>
-<span id="32">32</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Data related to IRC functionality.</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
@@ -85,19 +82,16 @@
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>kinds</span> {
     <span class='doccomment'>//! Trait definitions of appropriate Writers and Buffers for use with this library.</span>
     <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
 
     <span class='doccomment'>/// Trait describing all possible Writers for this library.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>IrcWriter</span>: <span class='ident'>Writer</span> <span class='op'>+</span> <span class='ident'>Sized</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {}
-    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>IrcWriter</span> <span class='kw'>for</span> <span class='ident'>T</span> <span class='kw'>where</span> <span class='ident'>T</span>: <span class='ident'>Writer</span> <span class='op'>+</span> <span class='ident'>Sized</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {}
+    <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>IrcWrite</span>: <span class='ident'>Write</span> <span class='op'>+</span> <span class='ident'>Sized</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {}
+    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>IrcWrite</span> <span class='kw'>for</span> <span class='ident'>T</span> <span class='kw'>where</span> <span class='ident'>T</span>: <span class='ident'>Write</span> <span class='op'>+</span> <span class='ident'>Sized</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {}
     <span class='doccomment'>/// Trait describing all possible Readers for this library.</span>
     <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>IrcReader</span>: <span class='ident'>Buffer</span> <span class='op'>+</span> <span class='ident'>Sized</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {}
-    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>IrcReader</span> <span class='kw'>for</span> <span class='ident'>T</span> <span class='kw'>where</span> <span class='ident'>T</span>: <span class='ident'>Buffer</span> <span class='op'>+</span> <span class='ident'>Sized</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {}
-    <span class='doccomment'>/// Trait describing all possible Streams for this library.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;May be removed.&quot;</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>IrcStream</span>: <span class='ident'>IrcWriter</span> <span class='op'>+</span> <span class='ident'>IrcReader</span> {}
-    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>IrcStream</span> <span class='kw'>for</span> <span class='ident'>T</span> <span class='kw'>where</span> <span class='ident'>T</span>: <span class='ident'>IrcWriter</span> <span class='op'>+</span> <span class='ident'>IrcReader</span> {}
+    <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>IrcRead</span>: <span class='ident'>BufRead</span> <span class='op'>+</span> <span class='ident'>Sized</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {}
+    <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='ident'>IrcRead</span> <span class='kw'>for</span> <span class='ident'>T</span> <span class='kw'>where</span> <span class='ident'>T</span>: <span class='ident'>BufRead</span> <span class='op'>+</span> <span class='ident'>Sized</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {}
 }
 
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>command</span>;

@@ -42,16 +42,15 @@
 
     <section id='main' class="content struct">
 <h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>rustc-serialize</a>::<wbr><a href='index.html'>json</a>::<wbr><a class='struct' href=''>Encoder</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]
-            </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-20430' href='../../src/rustc-serialize/json.rs.html#538-542'>[src]</a></span></h1>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-18789' href='../../src/rustc-serialize/json.rs.html#540-544'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Encoder&lt;'a&gt; {
     // some fields omitted
 }</pre><div class='docblock'><p>A structure for implementing serialization to JSON.</p>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl&lt;'a&gt; <a class='struct' href='../../rustc-serialize/json/struct.Encoder.html' title='rustc-serialize::json::Encoder'>Encoder</a>&lt;'a&gt;</code></h3><div class='impl-items'><h4 id='method.new_pretty' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.new_pretty' class='fnname'>new_pretty</a>(writer: &amp;'a mut <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Writer.html' title='core::fmt::Writer'>Writer</a>) -&gt; <a class='struct' href='../../rustc-serialize/json/struct.Encoder.html' title='rustc-serialize::json::Encoder'>Encoder</a>&lt;'a&gt;</code></h4>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl&lt;'a&gt; <a class='struct' href='../../rustc-serialize/json/struct.Encoder.html' title='rustc-serialize::json::Encoder'>Encoder</a>&lt;'a&gt;</code></h3><div class='impl-items'><h4 id='method.new_pretty' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.new_pretty' class='fnname'>new_pretty</a>(writer: &amp;'a mut <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Write.html' title='core::fmt::Write'>Write</a>) -&gt; <a class='struct' href='../../rustc-serialize/json/struct.Encoder.html' title='rustc-serialize::json::Encoder'>Encoder</a>&lt;'a&gt;</code></h4>
 <div class='docblock'><p>Creates a new encoder whose output will be written in human-readable
 JSON to the specified writer</p>
-</div><h4 id='method.new' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.new' class='fnname'>new</a>(writer: &amp;'a mut <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Writer.html' title='core::fmt::Writer'>Writer</a>) -&gt; <a class='struct' href='../../rustc-serialize/json/struct.Encoder.html' title='rustc-serialize::json::Encoder'>Encoder</a>&lt;'a&gt;</code></h4>
+</div><h4 id='method.new' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.new' class='fnname'>new</a>(writer: &amp;'a mut <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Write.html' title='core::fmt::Write'>Write</a>) -&gt; <a class='struct' href='../../rustc-serialize/json/struct.Encoder.html' title='rustc-serialize::json::Encoder'>Encoder</a>&lt;'a&gt;</code></h4>
 <div class='docblock'><p>Creates a new encoder whose output will be written in compact
 JSON to the specified writer</p>
 </div><h4 id='method.set_indent' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.set_indent' class='fnname'>set_indent</a>(&amp;mut self, new_indent: <a href='http://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>

@@ -42,12 +42,11 @@
 
     <section id='main' class="content struct">
 <h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='struct' href=''>CodecError</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]
-            </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-390' href='../../src/encoding/types.rs.html#58-68'>[src]</a></span></h1>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-383' href='../../src/encoding/types.rs.html#58-68'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct CodecError {
     pub upto: <a href='http://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a>,
-    pub cause: <a class='type' href='http://doc.rust-lang.org/nightly/collections/string/type.CowString.html' title='collections::string::CowString'>CowString</a>&lt;'static&gt;,
+    pub cause: <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;,
 }</pre><div class='docblock'><p>Error information from either encoder or decoder.</p>
 </div><h2 class='fields'>Fields</h2>
 <table><tr><td id='structfield.upto'><a class='stability Unmarked' title='No stability level'></a><code>upto</code></td><td><div class='docblock'><p>The byte position of the first remaining byte, with respect to the <em>current</em> input.

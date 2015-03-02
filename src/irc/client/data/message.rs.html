@@ -295,17 +295,17 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
         <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>prefix</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>prefix</span> {
             <span class='ident'>ret</span>.<span class='ident'>push</span>(<span class='string'>&#39;:&#39;</span>);
-            <span class='ident'>ret</span>.<span class='ident'>push_str</span>(<span class='kw-2'>&amp;</span><span class='ident'>prefix</span>[]);
+            <span class='ident'>ret</span>.<span class='ident'>push_str</span>(<span class='kw-2'>&amp;</span><span class='ident'>prefix</span>);
             <span class='ident'>ret</span>.<span class='ident'>push</span>(<span class='string'>&#39; &#39;</span>);
         }
-        <span class='ident'>ret</span>.<span class='ident'>push_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>command</span>[]);
+        <span class='ident'>ret</span>.<span class='ident'>push_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>command</span>);
         <span class='kw'>for</span> <span class='ident'>arg</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>args</span>.<span class='ident'>iter</span>() {
             <span class='ident'>ret</span>.<span class='ident'>push</span>(<span class='string'>&#39; &#39;</span>);
-            <span class='ident'>ret</span>.<span class='ident'>push_str</span>(<span class='kw-2'>&amp;</span><span class='ident'>arg</span>[]);
+            <span class='ident'>ret</span>.<span class='ident'>push_str</span>(<span class='kw-2'>&amp;</span><span class='ident'>arg</span>);
         }
         <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>suffix</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>suffix</span> {
             <span class='ident'>ret</span>.<span class='ident'>push_str</span>(<span class='string'>&quot; :&quot;</span>);
-            <span class='ident'>ret</span>.<span class='ident'>push_str</span>(<span class='kw-2'>&amp;</span><span class='ident'>suffix</span>[]);
+            <span class='ident'>ret</span>.<span class='ident'>push_str</span>(<span class='kw-2'>&amp;</span><span class='ident'>suffix</span>);
         }
         <span class='ident'>ret</span>.<span class='ident'>push_str</span>(<span class='string'>&quot;\r\n&quot;</span>);
         <span class='ident'>ret</span>
@@ -397,14 +397,14 @@
             <span class='ident'>args</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)],
             <span class='ident'>suffix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Testing!&quot;</span>)),
         };
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>message</span>.<span class='ident'>into_string</span>()[], <span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>message</span>.<span class='ident'>into_string</span>()[..], <span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>);
         <span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>Message</span> {
             <span class='ident'>prefix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test!test@test&quot;</span>)),
             <span class='ident'>command</span>: <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;PRIVMSG&quot;</span>),
             <span class='ident'>args</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)],
             <span class='ident'>suffix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Still testing!&quot;</span>)),
         };
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>message</span>.<span class='ident'>into_string</span>()[], <span class='string'>&quot;:test!test@test PRIVMSG test :Still testing!\r\n&quot;</span>);
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>message</span>.<span class='ident'>into_string</span>()[..], <span class='string'>&quot;:test!test@test PRIVMSG test :Still testing!\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>

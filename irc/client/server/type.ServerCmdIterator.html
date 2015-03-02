@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ServerCmdIterator` type in crate `irc`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ServerCmdIterator">
+
+    <title>irc::client::server::ServerCmdIterator - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>client</a>::<wbr><a href='index.html'>server</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='utils/index.html' title='Utilities and shortcuts for working with IRC servers.'>utils</a></div><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.IrcServer.html' title='A thread-safe implementation of an IRC Server connection.'>IrcServer</a><a class='struct ' href='struct.ServerIterator.html' title='An Iterator over an IrcServer&#39;s incoming Messages.'>ServerIterator</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.Server.html' title='Trait describing core Server functionality.'>Server</a></div>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content type">
+<h1 class='fqn'><span class='in-band'><a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>client</a>::<wbr><a href='index.html'>server</a>::<wbr><a class='type' href=''>ServerCmdIterator</a><wbr></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-27964' href='../../../src/irc/client/server/mod.rs.html#272-273'>[src]</a></span></h1>
+<pre class='rust typedef'>type ServerCmdIterator&lt;'a, T, U&gt; = <a class='struct' href='http://doc.rust-lang.org/nightly/core/iter/struct.Map.html' title='core::iter::Map'>Map</a>&lt;<a class='struct' href='../../../irc/client/server/struct.ServerIterator.html' title='irc::client::server::ServerIterator'>ServerIterator</a>&lt;'a, T, U&gt;, fn(<a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>&gt;) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='enum' href='../../../irc/client/data/command/enum.Command.html' title='irc::client::data::command::Command'>Command</a>&gt;&gt;;</pre><div class='docblock'><p>An Iterator over an IrcServer&#39;s incoming Commands.</p>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "irc";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>
