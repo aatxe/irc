@@ -6,6 +6,7 @@ use std::error::Error as StdError;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{Error, ErrorKind, Result};
+use std::path::Path;
 use rustc_serialize::json::decode;
 
 /// Configuration data.
@@ -65,7 +66,7 @@ pub struct Config {
 impl Config {
     /// Loads a JSON configuration from the desired path.
     #[stable]
-    pub fn load(path: Path) -> Result<Config> {
+    pub fn load(path: &Path) -> Result<Config> {
         let mut file = try!(File::open(&path));
         let mut data = String::new();
         try!(file.read_to_string(&mut data));
