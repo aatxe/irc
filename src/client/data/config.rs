@@ -67,7 +67,7 @@ impl Config {
     /// Loads a JSON configuration from the desired path.
     #[stable]
     pub fn load(path: &Path) -> Result<Config> {
-        let mut file = try!(File::open(&path));
+        let mut file = try!(File::open(path));
         let mut data = String::new();
         try!(file.read_to_string(&mut data));
         decode(&data[..]).map_err(|e| 
@@ -198,6 +198,7 @@ mod test {
     use super::Config;
     use std::collections::HashMap;
     use std::default::Default;
+    use std::path::Path;
 
     #[test]
     fn load() {
