@@ -83,9 +83,9 @@ impl FromStr for Message {
         } else {
             None
         };
-        let suffix = if state.contains(":") {
-            let suffix = state.find(':').map(|i| &state[i+1..state.len()-2]);
-            state = state.find(':').map_or("", |i| &state[..i]);
+        let suffix = if state.contains(" :") {
+            let suffix = state.find(" :").map(|i| &state[i+2..state.len()-2]);
+            state = state.find(" :").map_or("", |i| &state[..i+1]);
             suffix
         } else {
             None
@@ -194,6 +194,19 @@ mod test {
             suffix: Some(format!("Still testing!")),
         };
         assert_eq!(":test!test@test PRIVMSG test :Still testing!\r\n".to_message(), message);
+    }
+
+    #[test]
+    fn to_message_with_colon_in_arg() {
+        // Apparently, UnrealIRCd (and perhaps some others) send some messages that include
+        // colons within individual parameters. So, let's make sure it parses correctly.
+        let message = Message {
+            prefix: Some(format!("test!test@test")),
+            command: format!("COMMAND"),
+            args: vec![format!("ARG:test")],
+            suffix: Some(format!("Still testing!")),
+        };
+        assert_eq!(":test!test@test COMMAND ARG:test :Still testing!\r\n".to_message(), message);
     }
 
     #[test]
