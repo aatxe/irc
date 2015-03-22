@@ -210,7 +210,7 @@ mod test {
     }
 
     #[test]
-    #[should_fail]
+    #[should_panic]
     fn to_message_invalid_format() {
         ":invalid :message".to_message();
     }

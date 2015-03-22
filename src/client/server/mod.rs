@@ -4,6 +4,7 @@
 #![stable]
 use std::borrow::ToOwned;
 use std::collections::HashMap;
+use std::error::Error as StdError;
 use std::io::{BufReader, BufWriter, Error, ErrorKind, Result};
 use std::sync::{Mutex, RwLock};
 use std::iter::Map;
@@ -434,7 +435,7 @@ mod test {
     }
 
     #[test]
-    #[should_fail(message = "All specified nicknames were in use.")]
+    #[should_panic(message = "All specified nicknames were in use.")]
     fn ran_out_of_nicknames() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";

@@ -1,10 +1,9 @@
-#![feature(old_io, std_misc)]
+#![feature(std_misc, thread_sleep)]
 extern crate irc;
 
 use std::default::Default;
-use std::old_io::timer::sleep;
 use std::sync::Arc;
-use std::thread::spawn;
+use std::thread::{sleep, spawn};
 use std::time::duration::Duration;
 use irc::client::prelude::*;
 
