@@ -192,7 +192,7 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
                         if &msg.command[..] == "JOIN" {
                             vec.push(User::new(&src[..i]));
                         } else {
-                            if let Some(n) = vec.as_slice().position_elem(&User::new(&src[..i])) {
+                            if let Some(n) = vec.position_elem(&User::new(&src[..i])) {
                                 vec.swap_remove(n);
                             }
                         }
@@ -202,7 +202,7 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
         } else if let ("MODE", [ref chan, ref mode, ref user]) = (&msg.command[..], &msg.args[..]) {
             if cfg!(not(feature = "nochanlists")) {
                 if let Some(vec) = self.chanlists.lock().unwrap().get_mut(chan) {
-                    if let Some(n) = vec.as_slice().position_elem(&User::new(&user)) {
+                    if let Some(n) = vec.position_elem(&User::new(&user)) {
                         vec[n].update_access_level(&mode);
                     }
                 }

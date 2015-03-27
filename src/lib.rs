@@ -7,7 +7,7 @@
 #![feature(collections, core, io, str_char, tcp)]
 #[cfg(feature = "ctcp")] extern crate time;
 #[cfg(feature = "encode")] extern crate encoding;
-extern crate "rustc-serialize" as rustc_serialize;
+extern crate rustc_serialize;
 #[cfg(feature = "ssl")] extern crate openssl;
 
 pub mod client;

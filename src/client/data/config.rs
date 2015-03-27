@@ -189,7 +189,7 @@ impl Config {
     /// This will also panic if used and there are no options.
     #[stable]
     pub fn get_option(&self, option: &str) -> &str {
-        self.options.as_ref().map(|o| &o[option.to_owned()][..]).unwrap()
+        self.options.as_ref().map(|o| &o[&option.to_owned()][..]).unwrap()
     }
 }
 
