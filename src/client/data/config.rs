@@ -2,7 +2,6 @@
 #![stable]
 use std::borrow::ToOwned;
 use std::collections::HashMap;
-use std::error::Error as StdError;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{Error, ErrorKind, Result};
@@ -70,9 +69,8 @@ impl Config {
         let mut file = try!(File::open(path));
         let mut data = String::new();
         try!(file.read_to_string(&mut data));
-        decode(&data[..]).map_err(|e| 
-            Error::new(ErrorKind::InvalidInput, "Failed to decode configuration file.",
-                       Some(e.description().to_owned()))
+        decode(&data[..]).map_err(|_| 
+            Error::new(ErrorKind::InvalidInput, "Failed to decode configuration file.")
         )
     }
 
@@ -219,7 +217,7 @@ mod test {
             user_info: None,
             options: Some(HashMap::new()),
         };
-        assert_eq!(Config::load(Path::new("client_config.json")), Ok(cfg));
+        assert_eq!(Config::load(Path::new("client_config.json")).unwrap(), cfg);
     }
 
     #[test]
@@ -241,7 +239,7 @@ mod test {
             user_info: None,
             options: Some(HashMap::new()),
         };
-        assert_eq!(Config::load_utf8("client_config.json"), Ok(cfg));
+        assert_eq!(Config::load_utf8("client_config.json").unwrap(), cfg);
     }
 
 

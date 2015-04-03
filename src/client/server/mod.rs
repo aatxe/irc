@@ -304,8 +304,9 @@ impl<'a, T: IrcRead, U: IrcWrite> Iterator for ServerIterator<'a, T, U> {
                     self.server.handle_message(&msg);
                     Ok(msg)
                 },
-                Err(m) => Err(Error::new(ErrorKind::InvalidInput, "Failed to parse message.",
-                                         Some(format!("{} (Message: {})", m, msg))))
+                Err(_) => Err(Error::new(ErrorKind::InvalidInput, 
+                    &format!("Failed to parse message. (Message: {})", msg)[..]
+                ))
             }
         );
         match res {

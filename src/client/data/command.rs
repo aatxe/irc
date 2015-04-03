@@ -1154,5 +1154,5 @@ impl FromStr for CapSubCommand {
 
 /// Produces an invalid_input IoError.
 fn invalid_input() -> Error {
-    Error::new(ErrorKind::InvalidInput, "Failed to parse malformed message as command.", None)
+    Error::new(ErrorKind::InvalidInput, "Failed to parse malformed message as command.")
 }

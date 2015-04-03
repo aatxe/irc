@@ -1,10 +1,9 @@
 //! Thread-safe connections on IrcStreams.
 #![stable]
-#[cfg(feature = "ssl")] use std::borrow::ToOwned;
-#[cfg(feature = "ssl")] use std::error::Error;
+#[cfg(feature = "ssl")] use std::error::Error as StdError;
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter, Result};
-use std::io::Error as IoError;
+use std::io::Error;
 use std::io::ErrorKind;
 use std::net::TcpStream;
 #[cfg(feature = "ssl")] use std::result::Result as StdResult;
@@ -120,15 +119,15 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
     pub fn send<M: ToMessage>(&self, to_msg: M, encoding: &str) -> Result<()> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
-            None => return Err(IoError::new(ErrorKind::InvalidInput, "Failed to find encoder.", 
-                                            Some(format!("Invalid encoder: {}", encoding))))
+            None => return Err(Error::new(
+                ErrorKind::InvalidInput, &format!("Failed to find encoder. ({})", encoding)[..]
+            ))
         };
         let msg = to_msg.to_message();
         let data = match encoding.encode(&msg.into_string(), EncoderTrap::Replace) {
             Ok(data) => data,
-            Err(data) => return Err(IoError::new(
-                ErrorKind::InvalidInput, "Failed to encode message.", 
-                Some(format!("Failed to encode {} as {}.", data, encoding.name()))
+            Err(data) => return Err(Error::new(ErrorKind::InvalidInput, 
+                &format!("Failed to encode {} as {}.", data, encoding.name())[..]
             ))
         };
         let mut writer = self.writer.lock().unwrap();
@@ -151,16 +150,18 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
     pub fn recv(&self, encoding: &str) -> Result<String> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
-            None => return Err(IoError::new(ErrorKind::InvalidInput, "Failed to find decoder.", 
-                                            Some(format!("Invalid decoder: {}", encoding))))
+            None => return Err(Error::new(
+                ErrorKind::InvalidInput, &format!("Failed to find decoder. ({})", encoding)[..]
+            ))
         };
         let mut buf = Vec::new();
         self.reader.lock().unwrap().read_until(b'\n', &mut buf).and_then(|_|
             match encoding.decode(&buf, DecoderTrap::Replace) {
-                _ if buf.is_empty() => Err(IoError::new(ErrorKind::Other, "EOF", None)),
+                _ if buf.is_empty() => Err(Error::new(ErrorKind::Other, "EOF")),
                 Ok(data) => Ok(data),
-                Err(data) => Err(IoError::new(ErrorKind::InvalidInput, "Failed to decode message.",
-                    Some(format!("Failed to decode {} as {}.", data, encoding.name()))))
+                Err(data) => return Err(Error::new(ErrorKind::InvalidInput, 
+                    &format!("Failed to decode {} as {}.", data, encoding.name())[..]
+                ))
             }
         )
     }
@@ -172,7 +173,7 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
         let mut ret = String::new();
         try!(self.reader.lock().unwrap().read_line(&mut ret));
         if ret.is_empty() {
-            Err(IoError::new(ErrorKind::Other, "EOF", None))
+            Err(Error::new(ErrorKind::Other, "EOF"))
         } else {
             Ok(ret)
         }
@@ -196,8 +197,9 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
 fn ssl_to_io<T>(res: StdResult<T, SslError>) -> Result<T> {
     match res {
         Ok(x) => Ok(x),
-        Err(e) => Err(IoError::new(ErrorKind::Other, "An SSL error occurred.", 
-                                   Some(e.description().to_owned()))),
+        Err(e) => Err(Error::new(ErrorKind::Other, 
+            &format!("An SSL error occurred. ({})", e.description())[..]
+        )),
     }
 }
 
