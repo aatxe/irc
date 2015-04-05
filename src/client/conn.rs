@@ -86,6 +86,9 @@ impl Connection<BufReader<NetStream>, BufWriter<NetStream>> {
         Ok(())
     }
 
+    
+    /*
+    FIXME: removed until set_keepalive is stabilized.
     /// Sets the keepalive for the network stream.
     #[unstable = "Rust IO has not stabilized."]
     pub fn set_keepalive(&self, delay_in_seconds: Option<u32>) -> Result<()> {
@@ -100,6 +103,7 @@ impl Connection<BufReader<NetStream>, BufWriter<NetStream>> {
             &mut NetStream::SslTcpStream(ref mut ssl) => f(ssl.get_mut()),
         }
     }
+    */
 }
 
 #[stable]
@@ -337,15 +341,14 @@ mod test {
     #[test]
     #[cfg(feature = "encode")]
     fn recv_iso885915() {
-        let conn = Connection::new(
-            Cursor::new({
-                let mut vec = Vec::new();
-                vec.push_all(b"PRIVMSG test :");
-                vec.push_all(&[0xA4, 0xA6, 0xA8, 0xB4, 0xB8, 0xBC, 0xBD, 0xBE]);
-                vec.push_all(b"\r\n");
-                vec
-            }), sink()
-        );
+        let data = [0xA4, 0xA6, 0xA8, 0xB4, 0xB8, 0xBC, 0xBD, 0xBE];
+        let conn = Connection::new(Cursor::new({
+            let mut vec = Vec::new();
+            vec.extend("PRIVMSG test :".as_bytes());
+            vec.extend(data.iter());
+            vec.extend("\r\n".as_bytes());
+            vec.into_iter().map(|b| *b).collect::<Vec<_>>()
+        }), sink());
         assert_eq!(&conn.recv("l9").unwrap()[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 }

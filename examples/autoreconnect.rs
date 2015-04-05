@@ -13,7 +13,8 @@ fn main() {
         .. Default::default()
     };
     let server = Arc::new(IrcServer::from_config(config).unwrap());
-    server.conn().set_keepalive(Some(5)).unwrap();
+    // FIXME: if set_keepalive is stabilized, this can be readded. 
+    // server.conn().set_keepalive(Some(5)).unwrap();
     let server = server.clone();
     let _ = spawn(move || { 
         server.identify().unwrap();

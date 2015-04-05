@@ -139,7 +139,9 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
             if resp == Response::RPL_NAMREPLY {
                 if cfg!(not(feature = "nochanlists")) {
                     if let Some(users) = msg.suffix.clone() {
-                        if let [_, _, ref chan] = &msg.args[..] {
+                        if msg.args.len() == 3 { 
+                            // TODO: replace with slice pattern matching when/if stable
+                            let ref chan = msg.args[2];
                             for user in users.split(" ") {
                                 if match self.chanlists.lock().unwrap().get_mut(chan) {
                                     Some(vec) => { vec.push(User::new(user)); false },
@@ -186,23 +188,26 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
                 Some(ref suffix) => &suffix[..],
                 None => &msg.args[0][..],
             };
-            if let Some(vec) = self.chanlists.lock().unwrap().get_mut(&String::from_str(chan)) {
+            if let Some(vec) = self.chanlists.lock().unwrap().get_mut(&chan.to_string()) {
                 if let Some(ref src) = msg.prefix {
                     if let Some(i) = src.find('!') {
                         if &msg.command[..] == "JOIN" {
                             vec.push(User::new(&src[..i]));
                         } else {
-                            if let Some(n) = vec.position_elem(&User::new(&src[..i])) {
+                            if let Some(n) = vec.iter().position(|x| x.get_name() == &src[..i]) {
                                 vec.swap_remove(n);
                             }
                         }
                     }
                 }
             }
-        } else if let ("MODE", [ref chan, ref mode, ref user]) = (&msg.command[..], &msg.args[..]) {
+        } else if let ("MODE", 3) = (&msg.command[..], msg.args.len()) {
+            let ref chan = msg.args[0]; // TODO: replace with slice pattern matching when/if stable
+            let ref mode = msg.args[1];
+            let ref user = msg.args[2];
             if cfg!(not(feature = "nochanlists")) {
                 if let Some(vec) = self.chanlists.lock().unwrap().get_mut(chan) {
-                    if let Some(n) = vec.position_elem(&User::new(&user)) {
+                    if let Some(n) = vec.iter().position(|x| &x.get_name() == user) {
                         vec[n].update_access_level(&mode);
                     }
                 }
@@ -219,7 +224,9 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
             Some(ref source) => source.find('!').map_or(&source[..], |i| &source[..i]),
             None => "",
         };
-        if let ("PRIVMSG", [ref target]) = (&msg.command[..], &msg.args[..]) {
+        if let ("PRIVMSG", 1) = (&msg.command[..], msg.args.len()) {
+            // TODO: replace with slice pattern matching when/if stable
+            let ref target = msg.args[0];
             let resp = if target.starts_with("#") { &target[..] } else { source };
             match msg.suffix {
                 Some(ref msg) if msg.starts_with("\u{001}") => {

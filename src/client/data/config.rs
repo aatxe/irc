@@ -83,7 +83,7 @@ impl Config {
     /// Determines whether or not the nickname provided is the owner of the bot.
     #[stable]
     pub fn is_owner(&self, nickname: &str) -> bool {
-        self.owners.as_ref().map(|o| o.contains(&String::from_str(nickname))).unwrap()
+        self.owners.as_ref().map(|o| o.contains(&nickname.to_string())).unwrap()
     }
 
     /// Gets the nickname specified in the configuration.

@@ -1089,7 +1089,7 @@ impl Command {
 
 /// A list of all of the subcommands for the capabilities extension.
 #[stable]
-#[derive(Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CapSubCommand {
     /// Requests a list of the server's capabilities.
     #[stable]

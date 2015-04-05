@@ -88,7 +88,7 @@ impl User {
 
     /// Removes an access level from the list, and updates the highest level if necessary.
     fn sub_access_level(&mut self, level: AccessLevel) {
-        if let Some(n) = self.access_levels[..].position_elem(&level) {
+        if let Some(n) = self.access_levels.iter().position(|x| *x == level) {
             self.access_levels.swap_remove(n);
         }
         if level == self.highest_access_level() {
@@ -176,15 +176,14 @@ impl PartialOrd for AccessLevel {
 impl FromStr for AccessLevel {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<AccessLevel, &'static str> {
-        if s.len() == 0 { Err("No access level in an empty string.") } else {
-            Ok(match s.char_at(0) {
-                '~' => AccessLevel::Owner,
-                '&' => AccessLevel::Admin,
-                '@' => AccessLevel::Oper,
-                '%' => AccessLevel::HalfOp,
-                '+' => AccessLevel::Voice,
-                 _  => return Err("Failed to parse access level."),
-            })
+        match s.chars().next() {
+            Some('~') => Ok(AccessLevel::Owner),
+            Some('&') => Ok(AccessLevel::Admin),
+            Some('@') => Ok(AccessLevel::Oper),
+            Some('%') => Ok(AccessLevel::HalfOp),
+            Some('+') => Ok(AccessLevel::Voice),
+            None => Err("No access level in an empty string."),
+             _  =>Err("Failed to parse access level."),
         }
     }
 }
