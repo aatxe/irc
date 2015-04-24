@@ -1,31 +1,23 @@
 //! Messages to and from the server.
-#![stable]
 use std::borrow::ToOwned;
 use std::str::FromStr;
 
 /// IRC Message data.
-#[stable]
 #[derive(Clone, PartialEq, Debug)]
 pub struct Message {
     /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
-    #[stable]
     pub prefix: Option<String>,
     /// The IRC command as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
-    #[stable]
     pub command: String,
     /// The command arguments.
-    #[stable]
     pub args: Vec<String>,
     /// The message suffix as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
     /// This is the only part of the message that is allowed to contain spaces.
-    #[stable]
     pub suffix: Option<String>,
 }
 
-#[stable]
 impl Message {
     /// Creates a new Message.
-    #[stable]
     pub fn new(prefix: Option<&str>, command: &str, args: Option<Vec<&str>>, suffix: Option<&str>)
         -> Message {
         Message {
@@ -37,13 +29,11 @@ impl Message {
     }
 
     /// Gets the nickname of the message source, if it exists. 
-    #[stable]
     pub fn get_source_nickname(&self) -> Option<&str> {
         self.prefix.as_ref().and_then(|s| s.find('!').map(|i| &s[..i]))
     }
 
     /// Converts a Message into a String according to the IRC protocol.
-    #[stable]
     pub fn into_string(&self) -> String {
         let mut ret = String::new();
         if let Some(ref prefix) = self.prefix {
@@ -104,7 +94,6 @@ impl FromStr for Message {
 }
 
 /// A trait representing the ability to be converted into a Message.
-#[stable]
 pub trait ToMessage {
     /// Converts this to a Message.
     fn to_message(&self) -> Message;

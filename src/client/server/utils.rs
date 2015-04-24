@@ -1,5 +1,4 @@
 //! Utilities and shortcuts for working with IRC servers.
-#![stable]
 
 use std::io::Result;
 use std::borrow::ToOwned;
@@ -11,10 +10,8 @@ use client::data::kinds::{IrcRead, IrcWrite};
 use client::server::Server;
 
 /// Extensions for Server capabilities that make it easier to work directly with the protocol.
-#[unstable = "More functionality will be added."]
 pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
     /// Sends a NICK and USER to identify.
-    #[unstable = "Capabilities requests may be moved outside of identify."]
     fn identify(&self) -> Result<()> {
         // We'll issue a CAP REQ for multi-prefix support to improve access level tracking.
         try!(self.send(CAP(None, REQ, None, Some("multi-prefix".to_owned()))));
@@ -29,25 +26,21 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
     }
 
     /// Sends a PONG with the specified message.
-    #[stable]
     fn send_pong(&self, msg: &str) -> Result<()> {
         self.send(PONG(msg.to_owned(), None))
     }
 
     /// Joins the specified channel or chanlist.
-    #[stable]
     fn send_join(&self, chanlist: &str) -> Result<()> {
         self.send(JOIN(chanlist.to_owned(), None))
     }
 
     /// Attempts to oper up using the specified username and password.
-    #[stable]
     fn send_oper(&self, username: &str, password: &str) -> Result<()> {
         self.send(OPER(username.to_owned(), password.to_owned()))
     }
 
     /// Sends a message to the specified target.
-    #[stable]
     fn send_privmsg(&self, target: &str, message: &str) -> Result<()> {
         for line in message.split("\r\n") {
             try!(self.send(PRIVMSG(target.to_owned(), line.to_owned())))
@@ -56,7 +49,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
     }
 
     /// Sends a notice to the specified target.
-    #[stable]
     fn send_notice(&self, target: &str, message: &str) -> Result<()> {
         for line in message.split("\r\n") {
             try!(self.send(NOTICE(target.to_owned(), line.to_owned())))
@@ -66,7 +58,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Sets the topic of a channel or requests the current one.
     /// If `topic` is an empty string, it won't be included in the message.
-    #[unstable = "Design may change."]
     fn send_topic(&self, channel: &str, topic: &str) -> Result<()> {
         self.send(TOPIC(channel.to_owned(), if topic.len() == 0 {
             None
@@ -76,14 +67,12 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
     }
 
     /// Kills the target with the provided message.
-    #[stable]
     fn send_kill(&self, target: &str, message: &str) -> Result<()> {
         self.send(KILL(target.to_owned(), message.to_owned()))
     }
 
     /// Kicks the listed nicknames from the listed channels with a comment.
     /// If `message` is an empty string, it won't be included in the message.
-    #[unstable = "Design may change."]
     fn send_kick(&self, chanlist: &str, nicklist: &str, message: &str) -> Result<()> {
         self.send(KICK(chanlist.to_owned(), nicklist.to_owned(), if message.len() == 0 {
             None
@@ -94,7 +83,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Changes the mode of the target.
     /// If `modeparmas` is an empty string, it won't be included in the message.
-    #[unstable = "Design may change."]
     fn send_mode(&self, target: &str, mode: &str, modeparams: &str) -> Result<()> {
         self.send(MODE(target.to_owned(), mode.to_owned(), if modeparams.len() == 0 {
             None
@@ -105,7 +93,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Changes the mode of the target by force.
     /// If `modeparams` is an empty string, it won't be included in the message.
-    #[unstable = "Design may change."]
     fn send_samode(&self, target: &str, mode: &str, modeparams: &str) -> Result<()> {
         self.send(SAMODE(target.to_owned(), mode.to_owned(), if modeparams.len() == 0 {
             None
@@ -115,20 +102,17 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
     }
 
     /// Forces a user to change from the old nickname to the new nickname.
-    #[stable]
     fn send_sanick(&self, old_nick: &str, new_nick: &str) -> Result<()> {
         self.send(SANICK(old_nick.to_owned(), new_nick.to_owned()))
     }
 
     /// Invites a user to the specified channel.
-    #[stable]
     fn send_invite(&self, nick: &str, chan: &str) -> Result<()> {
         self.send(INVITE(nick.to_owned(), chan.to_owned()))
     }
 
     /// Quits the server entirely with a message. 
     /// This defaults to `Powered by Rust.` if none is specified.
-    #[unstable = "Design may change."]
     fn send_quit(&self, msg: &str) -> Result<()> {
         self.send(QUIT(Some(if msg.len() == 0 {
             "Powered by Rust.".to_owned()
@@ -139,7 +123,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Sends a CTCP-escaped message to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[stable]
     #[cfg(feature = "ctcp")]
     fn send_ctcp(&self, target: &str, msg: &str) -> Result<()> {
         self.send_privmsg(target, &format!("\u{001}{}\u{001}", msg)[..])
@@ -147,7 +130,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Sends an action command to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[stable]
     #[cfg(feature = "ctcp")]
     fn send_action(&self, target: &str, msg: &str) -> Result<()> {
         self.send_ctcp(target, &format!("ACTION {}", msg)[..])
@@ -155,7 +137,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Sends a finger request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[stable]
     #[cfg(feature = "ctcp")]
     fn send_finger(&self, target: &str) -> Result<()> {
         self.send_ctcp(target, "FINGER")
@@ -163,7 +144,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Sends a version request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[stable]
     #[cfg(feature = "ctcp")]
     fn send_version(&self, target: &str) -> Result<()> {
         self.send_ctcp(target, "VERSION")
@@ -171,7 +151,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Sends a source request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[stable]
     #[cfg(feature = "ctcp")]
     fn send_source(&self, target: &str) -> Result<()> {
         self.send_ctcp(target, "SOURCE")
@@ -179,7 +158,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Sends a user info request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[stable]
     #[cfg(feature = "ctcp")]
     fn send_user_info(&self, target: &str) -> Result<()> {
         self.send_ctcp(target, "USERINFO")
@@ -187,7 +165,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Sends a finger request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[stable]
     #[cfg(feature = "ctcp")]
     fn send_ctcp_ping(&self, target: &str) -> Result<()> {
         let time = get_time();
@@ -196,7 +173,6 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Sends a time request to the specified target.
     /// This requires the CTCP feature to be enabled.
-    #[stable]
     #[cfg(feature = "ctcp")]
     fn send_time(&self, target: &str) -> Result<()> {
         self.send_ctcp(target, "TIME")

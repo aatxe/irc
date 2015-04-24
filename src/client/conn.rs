@@ -1,5 +1,4 @@
 //! Thread-safe connections on IrcStreams.
-#![stable]
 #[cfg(feature = "ssl")] use std::error::Error as StdError;
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter, Result};
@@ -16,22 +15,18 @@ use client::data::message::ToMessage;
 #[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
 
 /// A thread-safe connection.
-#[stable]
 pub struct Connection<T: IrcRead, U: IrcWrite> {
     reader: Mutex<T>,
     writer: Mutex<U>,
 }
 
 /// A Connection over a buffered NetStream.
-#[stable]
 pub type NetConnection = Connection<BufReader<NetStream>, BufWriter<NetStream>>;
 /// An internal type
 type NetReadWritePair = (BufReader<NetStream>, BufWriter<NetStream>);
 
-#[stable]
 impl Connection<BufReader<NetStream>, BufWriter<NetStream>> {
     /// Creates a thread-safe TCP connection to the specified server.
-    #[stable]
     pub fn connect(host: &str, port: u16) -> Result<NetConnection> {
         let (reader, writer) = try!(Connection::connect_internal(host, port));
         Ok(Connection::new(reader, writer))
@@ -46,7 +41,6 @@ impl Connection<BufReader<NetStream>, BufWriter<NetStream>> {
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
     /// If the library is compiled without SSL support, this method panics.
-    #[stable]
     pub fn connect_ssl(host: &str, port: u16) -> Result<NetConnection> {
         let (reader, writer) = try!(Connection::connect_ssl_internal(host, port));
         Ok(Connection::new(reader, writer))
@@ -69,7 +63,6 @@ impl Connection<BufReader<NetStream>, BufWriter<NetStream>> {
     }
 
     /// Reconnects to the specified server, dropping the current connection.
-    #[stable]
     pub fn reconnect(&self, host: &str, port: u16) -> Result<()> {
         let use_ssl = match self.reader.lock().unwrap().get_ref() {
             &NetStream::UnsecuredTcpStream(_) =>  false,
@@ -106,10 +99,8 @@ impl Connection<BufReader<NetStream>, BufWriter<NetStream>> {
     */
 }
 
-#[stable]
 impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
     /// Creates a new connection from an IrcReader and an IrcWriter.
-    #[stable]
     pub fn new(reader: T, writer: U) -> Connection<T, U> {
         Connection {
             reader: Mutex::new(reader),
@@ -118,7 +109,6 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
     }
 
     /// Sends a Message over this connection.
-    #[stable]
     #[cfg(feature = "encode")]
     pub fn send<M: ToMessage>(&self, to_msg: M, encoding: &str) -> Result<()> {
         let encoding = match encoding_from_whatwg_label(encoding) {
@@ -140,7 +130,6 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
     }
 
     /// Sends a message over this connection. 
-    #[stable]
     #[cfg(not(feature = "encode"))]
     pub fn send<M: ToMessage>(&self, to_msg: M) -> Result<()> {
         let mut writer = self.writer.lock().unwrap();
@@ -149,7 +138,6 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
     }
 
     /// Receives a single line from this connection.
-    #[stable]
     #[cfg(feature = "encoding")]
     pub fn recv(&self, encoding: &str) -> Result<String> {
         let encoding = match encoding_from_whatwg_label(encoding) {
@@ -171,7 +159,6 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
     }
 
     /// Receives a single line from this connection.
-    #[stable]
     #[cfg(not(feature = "encoding"))]
     pub fn recv(&self) -> Result<String> {
         let mut ret = String::new();
@@ -184,13 +171,11 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
     }
 
     /// Acquires the Reader lock.
-    #[stable]
     pub fn reader<'a>(&'a self) -> MutexGuard<'a, T> {
         self.reader.lock().unwrap()
     }
 
     /// Acquires the Writer lock.
-    #[stable]
     pub fn writer<'a>(&'a self) -> MutexGuard<'a, U> {
         self.writer.lock().unwrap()
     }
@@ -208,15 +193,12 @@ fn ssl_to_io<T>(res: StdResult<T, SslError>) -> Result<T> {
 }
 
 /// An abstraction over different networked streams.
-#[stable]
 pub enum NetStream {
     /// An unsecured TcpStream.
-    #[stable]
     UnsecuredTcpStream(TcpStream),
     /// An SSL-secured TcpStream.
     /// This is only available when compiled with SSL support.
     #[cfg(feature = "ssl")]
-    #[stable]
     SslTcpStream(SslStream<TcpStream>),
 }
 

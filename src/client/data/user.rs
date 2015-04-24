@@ -1,12 +1,10 @@
 //! Data for tracking user information.
-#![unstable]
 use std::borrow::ToOwned;
 use std::cmp::Ordering;
 use std::cmp::Ordering::{Less, Equal, Greater};
 use std::str::FromStr;
 
 /// IRC User data.
-#[stable]
 #[derive(Clone, Debug)]
 pub struct User {
     /// The user's nickname.
@@ -17,10 +15,8 @@ pub struct User {
     access_levels: Vec<AccessLevel>,
 }
 
-#[stable]
 impl User {
     /// Creates a new User.
-    #[stable]
     pub fn new(name: &str) -> User {
         let ranks: Vec<_> = AccessLevelIterator::new(name).collect();
         User {
@@ -43,25 +39,21 @@ impl User {
     }
 
     /// Gets the nickname of the user.
-    #[stable]
     pub fn get_name(&self) -> &str {
         &self.name
     }
 
     /// Gets the user's highest access level.
-    #[unstable = "API may change."]
     pub fn highest_access_level(&self) -> AccessLevel {
         self.highest_access_level
     }
 
     /// Gets all the user's access levels.
-    #[unstable = "API may change."]
     pub fn access_levels(&self) -> Vec<AccessLevel> {
         self.access_levels.clone()
     }
 
     /// Updates the user's access level.
-    #[unstable = "API may change."]
     pub fn update_access_level(&mut self, mode: &str) {
         match mode {
             "+q" => self.add_access_level(AccessLevel::Owner),
@@ -112,26 +104,19 @@ impl PartialEq for User {
 }
 
 /// The user's access level.
-#[stable]
 #[derive(Copy, PartialEq, Clone, Debug)]
 pub enum AccessLevel {
     /// The channel owner (~).
-    #[stable]
     Owner,
     /// A channel administrator (&).
-    #[stable]
     Admin,
     /// A channel operator (@),
-    #[stable]
     Oper,
     /// A channel half-oper (%),
-    #[stable]
     HalfOp,
     /// A user with voice (+),
-    #[stable]
     Voice,
     /// A normal user,
-    #[stable]
     Member,
 }
 

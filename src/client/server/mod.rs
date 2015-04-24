@@ -1,7 +1,6 @@
 //! Interface for working with IRC Servers.
 //!
 //! There are currently two recommended ways to work
-#![stable]
 use std::borrow::ToOwned;
 use std::collections::HashMap;
 use std::error::Error as StdError;
@@ -17,28 +16,21 @@ use client::data::kinds::{IrcRead, IrcWrite};
 pub mod utils;
 
 /// Trait describing core Server functionality.
-#[stable]
 pub trait Server<'a, T, U> {
     /// Gets the configuration being used with this Server.
-    #[stable]
     fn config(&self) -> &Config;
     /// Sends a Command to this Server.
-    #[stable]
     fn send(&self, command: Command) -> Result<()>;
     /// Gets an Iterator over Messages received by this Server.
-    #[stable]
     fn iter(&'a self) -> ServerIterator<'a, T, U>;
     /// Gets an Iterator over Commands received by this Server.
-    #[unstable = "Feature is still relatively new."]
     fn iter_cmd(&'a self) -> ServerCmdIterator<'a, T, U>;
     /// Gets a list of Users in the specified channel. This will be none if the channel is not
     /// being tracked, or if tracking is not supported altogether.
-    #[stable]
     fn list_users(&self, channel: &str) -> Option<Vec<User>>;
 }
 
 /// A thread-safe implementation of an IRC Server connection.
-#[stable]
 pub struct IrcServer<T: IrcRead, U: IrcWrite> {
     /// The thread-safe IRC connection.
     conn: Connection<T, U>,
@@ -51,21 +43,17 @@ pub struct IrcServer<T: IrcRead, U: IrcWrite> {
 }
 
 /// An IrcServer over a buffered NetStream.
-#[stable]
 pub type NetIrcServer = IrcServer<BufReader<NetStream>, BufWriter<NetStream>>;
 
-#[stable]
 impl IrcServer<BufReader<NetStream>, BufWriter<NetStream>> {
     /// Creates a new IRC Server connection from the configuration at the specified path,
     /// connecting immediately.
-    #[stable]
     pub fn new(config: &str) -> Result<NetIrcServer> {
         IrcServer::from_config(try!(Config::load_utf8(config)))
     }
 
     /// Creates a new IRC server connection from the specified configuration, connecting
     /// immediately.
-    #[stable]
     pub fn from_config(config: Config) -> Result<NetIrcServer> {
         let conn = try!(if config.use_ssl() {
             Connection::connect_ssl(config.server(), config.port())
@@ -77,7 +65,6 @@ impl IrcServer<BufReader<NetStream>, BufWriter<NetStream>> {
     }
 
     /// Reconnects to the IRC server.
-    #[stable]
     pub fn reconnect(&self) -> Result<()> {
         self.conn.reconnect(self.config().server(), self.config.port())
     }
@@ -118,17 +105,14 @@ impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for IrcServer<T, U> {
     }
 }
 
-#[stable]
 impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
     /// Creates an IRC server from the specified configuration, and any arbitrary Connection.
-    #[stable]
     pub fn from_connection(config: Config, conn: Connection<T, U>) -> IrcServer<T, U> {
         IrcServer { conn: conn, config: config, chanlists: Mutex::new(HashMap::new()),
                     alt_nick_index: RwLock::new(0) }
     }
 
     /// Gets a reference to the IRC server's connection.
-    #[stable]
     pub fn conn(&self) -> &Connection<T, U> {
         &self.conn
     }
@@ -271,7 +255,6 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
 }
 
 /// An Iterator over an IrcServer's incoming Messages.
-#[stable]
 pub struct ServerIterator<'a, T: IrcRead, U: IrcWrite> {
     server: &'a IrcServer<T, U>
 }
@@ -280,10 +263,8 @@ pub struct ServerIterator<'a, T: IrcRead, U: IrcWrite> {
 pub type ServerCmdIterator<'a, T, U> =
     Map<ServerIterator<'a, T, U>, fn(Result<Message>) -> Result<Command>>;
 
-#[unstable = "Design is liable to change to accomodate new functionality."]
 impl<'a, T: IrcRead, U: IrcWrite> ServerIterator<'a, T, U> {
     /// Creates a new ServerIterator for the desired IrcServer.
-    #[unstable = "Design is liable to change to accomodate new functionality."]
     pub fn new(server: &IrcServer<T, U>) -> ServerIterator<T, U> {
         ServerIterator { server: server }
     }
@@ -302,7 +283,6 @@ impl<'a, T: IrcRead, U: IrcWrite> ServerIterator<'a, T, U> {
 }
 
 impl<'a, T: IrcRead, U: IrcWrite> Iterator for ServerIterator<'a, T, U> {
-    #[stable]
     type Item = Result<Message>;
     fn next(&mut self) -> Option<Result<Message>> {
         let res = self.get_next_line().and_then(|msg|

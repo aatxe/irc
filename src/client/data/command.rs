@@ -1,5 +1,4 @@
 //! Enumeration of all available client commands.
-#![stable]
 use std::io::{Error, ErrorKind, Result};
 use std::result::Result as StdResult;
 use std::str::FromStr;
@@ -9,202 +8,144 @@ use client::data::message::{Message, ToMessage};
 /// also includes commands from the
 /// [capabilities extension](https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01).
 /// Additionally, this includes some common additional commands from popular IRCds.
-#[stable]
 #[derive(Debug, PartialEq)]
 pub enum Command {
     // 3.1 Connection Registration
     /// PASS :password
-    #[stable]
     PASS(String),
     /// NICK :nickname
-    #[stable]
     NICK(String),
     /// USER user mode * :realname
-    #[stable]
     USER(String, String, String),
     /// OPER name :password
-    #[stable]
     OPER(String, String),
     /// MODE nickname modes
     /// MODE channel modes [modeparams]
-    #[stable]
     MODE(String, String, Option<String>),
     /// SERVICE nickname reserved distribution type reserved :info
-    #[stable]
     SERVICE(String, String, String, String, String, String),
     /// QUIT :comment
-    #[stable]
     QUIT(Option<String>),
     /// SQUIT server :comment
-    #[stable]
     SQUIT(String, String),
 
     // 3.2 Channel operations
     /// JOIN chanlist [chankeys]
-    #[stable]
     JOIN(String, Option<String>),
     /// PART chanlist :[comment]
-    #[stable]
     PART(String, Option<String>),
     // MODE is already defined.
     // MODE(String, String, Option<String>),
     /// TOPIC channel :[topic]
-    #[stable]
     TOPIC(String, Option<String>),
     /// NAMES [chanlist :[target]]
-    #[stable]
     NAMES(Option<String>, Option<String>),
     /// LIST [chanlist :[target]]
-    #[stable]
     LIST(Option<String>, Option<String>),
     /// INVITE nickname channel
-    #[stable]
     INVITE(String, String),
     /// KICK chanlist userlist :[comment]
-    #[stable]
     KICK(String, String, Option<String>),
 
     // 3.3 Sending messages
     /// PRIVMSG msgtarget :message
-    #[stable]
     PRIVMSG(String, String),
     /// NOTICE msgtarget :message
-    #[stable]
     NOTICE(String, String),
 
     // 3.4 Server queries and commands
     /// MOTD :[target]
-    #[stable]
     MOTD(Option<String>),
     /// LUSERS [mask :[target]]
-    #[stable]
     LUSERS(Option<String>, Option<String>),
     /// VERSION :[target]
-    #[stable]
     VERSION(Option<String>),
     /// STATS [query :[target]]
-    #[stable]
     STATS(Option<String>, Option<String>),
     /// LINKS [[remote server] server :mask]
-    #[stable]
     LINKS(Option<String>, Option<String>),
     /// TIME :[target]
-    #[stable]
     TIME(Option<String>),
     /// CONNECT target server port :[remote server]
-    #[stable]
     CONNECT(String, String, Option<String>),
     /// TRACE :[target]
-    #[stable]
     TRACE(Option<String>),
     /// ADMIN :[target]
-    #[stable]
     ADMIN(Option<String>),
     /// INFO :[target]
-    #[stable]
     INFO(Option<String>),
 
     // 3.5 Service Query and Commands
     /// SERVLIST [mask :[type]]
-    #[stable]
     SERVLIST(Option<String>, Option<String>),
     /// SQUERY servicename text
-    #[stable]
     SQUERY(String, String),
 
     // 3.6 User based queries
     /// WHO [mask ["o"]]
-    #[stable]
     WHO(Option<String>, Option<bool>),
     /// WHOIS [target] masklist
-    #[stable]
     WHOIS(Option<String>, String),
     /// WHOWAS nicklist [count :[target]]
-    #[stable]
     WHOWAS(String, Option<String>, Option<String>),
 
     // 3.7 Miscellaneous messages
     /// KILL nickname :comment
-    #[stable]
     KILL(String, String),
     /// PING server1 :[server2]
-    #[stable]
     PING(String, Option<String>),
     /// PONG server :[server2]
-    #[stable]
     PONG(String, Option<String>),
     /// ERROR :message
-    #[stable]
     ERROR(String),
 
 
     // 4 Optional Features
     /// AWAY :[message]
-    #[stable]
     AWAY(Option<String>),
     /// REHASH
-    #[stable]
     REHASH,
     /// DIE
-    #[stable]
     DIE,
     /// RESTART
-    #[stable]
     RESTART,
     /// SUMMON user [target :[channel]]
-    #[stable]
     SUMMON(String, Option<String>, Option<String>),
     /// USERS :[target]
-    #[stable]
     USERS(Option<String>),
     /// WALLOPS :Text to be sent
-    #[stable]
     WALLOPS(String),
     /// USERHOST space-separated nicklist
-    #[stable]
     USERHOST(Vec<String>),
     /// ISON space-separated nicklist
-    #[stable]
     ISON(Vec<String>),
 
     // Non-RFC commands from InspIRCd
     /// SAJOIN nickname channel
-    #[stable]
     SAJOIN(String, String),
     /// SAMODE target modes [modeparams]
-    #[stable]
     SAMODE(String, String, Option<String>),
     /// SANICK old nickname new nickname
-    #[stable]
     SANICK(String, String),
     /// SAPART nickname :comment
-    #[stable]
     SAPART(String, String),
     /// SAQUIT nickname :comment
-    #[stable]
     SAQUIT(String, String),
     /// NICKSERV message
-    #[stable]
     NICKSERV(String),
     /// CHANSERV message
-    #[stable]
     CHANSERV(String),
     /// OPERSERV message
-    #[stable]
     OPERSERV(String),
     /// BOTSERV message
-    #[stable]
     BOTSERV(String),
     /// HOSTSERV message
-    #[stable]
     HOSTSERV(String),
     /// MEMOSERV message
-    #[stable]
     MEMOSERV(String),
 
     // Capabilities extension to IRCv3
     /// CAP [*] COMMAND [*] :[param]
-    #[unstable = "Feature recently changed to hopefully be specification-compliant."]
     CAP(Option<String>, CapSubCommand, Option<String>, Option<String>),
 }
 
@@ -360,10 +301,8 @@ impl ToMessage for Command {
     }
 }
 
-#[stable]
 impl Command {
     /// Converts a Message into a Command.
-    #[stable]
     pub fn from_message(m: &Message) -> Result<Command> {
         Ok(if let "PASS" = &m.command[..] {
             match m.suffix {
@@ -1081,43 +1020,32 @@ impl Command {
     }
 
     /// Converts a potential Message result into a potential Command result.
-    #[unstable = "This feature is still relatively new."]
     pub fn from_message_io(m: Result<Message>) -> Result<Command> {
         m.and_then(|msg| Command::from_message(&msg))
     }
 }
 
 /// A list of all of the subcommands for the capabilities extension.
-#[stable]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CapSubCommand {
     /// Requests a list of the server's capabilities.
-    #[stable]
     LS,
     /// Requests a list of the server's capabilities.
-    #[stable]
     LIST,
     /// Requests specific capabilities blindly.
-    #[stable]
     REQ,
     /// Acknowledges capabilities.
-    #[stable]
     ACK,
     /// Does not acknowledge certain capabilities.
-    #[stable]
     NAK,
     /// Requests that the server clears the capabilities of this client.
-    #[stable]
     CLEAR,
     /// Ends the capability negotiation before registration.
-    #[stable]
     END
 }
 
-#[stable]
 impl CapSubCommand {
     /// Gets the string that corresponds to this subcommand.
-    #[stable]
     pub fn to_str(&self) -> &str {
         match self {
             &CapSubCommand::LS    => "LS",
