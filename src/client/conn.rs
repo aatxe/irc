@@ -133,7 +133,8 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
     #[cfg(not(feature = "encode"))]
     pub fn send<M: Into<Message>>(&self, to_msg: M) -> Result<()> {
         let mut writer = self.writer.lock().unwrap();
-        try!(writer.write_all(&to_msg.into::<Message>().into_string().as_bytes()));
+        let msg: Message = to_msg.into();
+        try!(writer.write_all(&msg.into_string().as_bytes()));
         writer.flush()
     }
 

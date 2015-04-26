@@ -311,10 +311,9 @@ mod test {
     use std::default::Default;
     use std::io::{Cursor, sink};
     use client::conn::Connection;
-    use client::data::{Config, User};
+    use client::data::{Config, Message, User};
     use client::data::command::Command::PRIVMSG;
     use client::data::kinds::IrcRead;
-    use client::data::message::ToMessage;
     use client::test::buf_empty;
 
     pub fn test_config() -> Config {
@@ -357,7 +356,8 @@ mod test {
         ));
         let mut messages = String::new();
         for command in server.iter_cmd() {
-            messages.push_str(&command.unwrap().to_message().into_string());
+            let msg: Message = command.unwrap().into();
+            messages.push_str(&msg.into_string());
         }
         assert_eq!(&messages[..], exp);
     }

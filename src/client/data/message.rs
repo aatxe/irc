@@ -103,7 +103,7 @@ impl<'a> From<&'a str> for Message {
 
 #[cfg(test)]
 mod test {
-    use super::{Message, ToMessage};
+    use super::Message;
 
     #[test]
     fn new() {
@@ -171,14 +171,16 @@ mod test {
             args: vec![format!("test")],
             suffix: Some(format!("Testing!")),
         };
-        assert_eq!("PRIVMSG test :Testing!\r\n".to_message(), message);
+        let msg: Message = "PRIVMSG test :Testing!\r\n".into();
+        assert_eq!(msg, message);
         let message = Message {
             prefix: Some(format!("test!test@test")),
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
             suffix: Some(format!("Still testing!")),
         };
-        assert_eq!(":test!test@test PRIVMSG test :Still testing!\r\n".to_message(), message);
+        let msg: Message = ":test!test@test PRIVMSG test :Still testing!\r\n".into();
+        assert_eq!(msg, message);
     }
 
     #[test]
@@ -189,14 +191,15 @@ mod test {
             prefix: Some(format!("test!test@test")),
             command: format!("COMMAND"),
             args: vec![format!("ARG:test")],
-            suffix: Some(format!("Still testing!")),
+            suffix: Some(format!("Testing!")),
         };
-        assert_eq!(":test!test@test COMMAND ARG:test :Still testing!\r\n".to_message(), message);
+        let msg: Message = ":test!test@test COMMAND ARG:test :Testing!\r\n".into();
+        assert_eq!(msg, message);
     }
 
     #[test]
     #[should_panic]
     fn to_message_invalid_format() {
-        ":invalid :message".to_message();
+        let _: Message = ":invalid :message".into();
     }
 }
