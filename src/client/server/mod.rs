@@ -8,7 +8,7 @@ use std::io::{BufReader, BufWriter, Error, ErrorKind, Result};
 use std::sync::{Mutex, RwLock};
 use std::iter::Map;
 use client::conn::{Connection, NetStream};
-use client::data::{Command, Config, Message, Response, User};
+use client::data::{Command, Config, Message, Response, ToMessage, User};
 use client::data::Command::{JOIN, NICK, NICKSERV, PONG, MODE};
 use client::data::kinds::{IrcRead, IrcWrite};
 #[cfg(feature = "ctcp")] use time::now;
@@ -20,7 +20,7 @@ pub trait Server<'a, T, U> {
     /// Gets the configuration being used with this Server.
     fn config(&self) -> &Config;
     /// Sends a Command to this Server.
-    fn send(&self, command: Command) -> Result<()>;
+    fn send<M: ToMessage>(&self, message: M) -> Result<()>;
     /// Gets an Iterator over Messages received by this Server.
     fn iter(&'a self) -> ServerIterator<'a, T, U>;
     /// Gets an Iterator over Commands received by this Server.
@@ -76,13 +76,13 @@ impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for IrcServer<T, U> {
     }
 
     #[cfg(feature = "encode")]
-    fn send(&self, cmd: Command) -> Result<()> {
-        self.conn.send(cmd, self.config.encoding())
+    fn send<M: ToMessage>(&self, msg: M) -> Result<()> {
+        self.conn.send(msg, self.config.encoding())
     }
 
     #[cfg(not(feature = "encode"))]
-    fn send(&self, cmd: Command) -> Result<()> {
-        self.conn.send(cmd)
+    fn send<M: ToMessage>(&self, msg: M) -> Result<()> {
+        self.conn.send(msg)
     }
 
     fn iter(&'a self) -> ServerIterator<'a, T, U> {
