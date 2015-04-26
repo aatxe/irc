@@ -28,6 +28,14 @@ impl Message {
         }
     }
 
+    /// Creates a new Message from already owned data.
+    pub fn from_owned(prefix: Option<String>, command: String, args: Option<Vec<String>>,
+                      suffix: Option<String>) -> Message {
+        Message {
+            prefix: prefix, command: command, args: args.unwrap_or(Vec::new()), suffix: suffix
+        }
+    }
+
     /// Gets the nickname of the message source, if it exists. 
     pub fn get_source_nickname(&self) -> Option<&str> {
         self.prefix.as_ref().and_then(|s| s.find('!').map(|i| &s[..i]))

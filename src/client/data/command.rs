@@ -153,152 +153,176 @@ impl ToMessage for Command {
     /// Converts a Command into a Message.
     fn to_message(self) -> Message {
         match self {
-            Command::PASS(ref p) => Message::new(None, "PASS", None, Some(&p)),
-            Command::NICK(ref n) => Message::new(None, "NICK", None, Some(&n)),
-            Command::USER(ref u, ref m, ref r) =>
-                Message::new(None, "USER", Some(vec![&u, &m, "*"]), Some(&r)),
-            Command::OPER(ref u, ref p) =>
-                Message::new(None, "OPER", Some(vec![&u]), Some(&p)),
-            Command::MODE(ref t, ref m, Some(ref p)) =>
-                Message::new(None, "MODE", Some(vec![&t, &m,&p]), None),
-            Command::MODE(ref t, ref m, None) =>
-                Message::new(None, "MODE", Some(vec![&t, &m]), None), 
-            Command::SERVICE(ref n, ref r, ref d, ref t, ref re, ref i) =>
-                Message::new(None, "SERVICE", Some(vec![&n, &r, &d, &t, &re]), Some(i)),
-            Command::QUIT(Some(ref m)) => Message::new(None, "QUIT", None, Some(&m)),
-            Command::QUIT(None) => Message::new(None, "QUIT", None, None),
-            Command::SQUIT(ref s, ref c) => Message::new(None, "SQUIT", Some(vec![&s]), Some(&c)),
-            Command::JOIN(ref c, Some(ref k)) =>
-                Message::new(None, "JOIN", Some(vec![&c, &k]), None),
-            Command::JOIN(ref c, None) => Message::new(None, "JOIN", Some(vec![&c]), None),
-            Command::PART(ref c, Some(ref m)) =>
-                Message::new(None, "PART", Some(vec![&c]), Some(&m)),
-            Command::PART(ref c, None) => Message::new(None, "PART", Some(vec![&c]), None),
-            Command::TOPIC(ref c, Some(ref t)) =>
-                Message::new(None, "TOPIC", Some(vec![&c]), Some(&t)),
-            Command::TOPIC(ref c, None) => Message::new(None, "TOPIC", Some(vec![&c]), None),
-            Command::NAMES(Some(ref c), Some(ref t)) =>
-                Message::new(None, "NAMES", Some(vec![&c]), Some(&t)),
-            Command::NAMES(Some(ref c), None) => Message::new(None, "NAMES", Some(vec![&c]), None),
-            Command::NAMES(None, _) => Message::new(None, "NAMES", None, None),
-            Command::LIST(Some(ref c), Some(ref t)) =>
-                Message::new(None, "LIST", Some(vec![&c]), Some(t)),
-            Command::LIST(Some(ref c), None) => Message::new(None, "LIST", Some(vec![&c]), None),
-            Command::LIST(None, _) => Message::new(None, "LIST", None, None),
-            Command::INVITE(ref n, ref c) =>
-                Message::new(None, "INVITE", Some(vec![&n, &c]), None),
-            Command::KICK(ref c, ref n, Some(ref r)) =>
-                Message::new(None, "KICK", Some(vec![&c, &n]), Some(r)),
-            Command::KICK(ref c, ref n, None) =>
-                Message::new(None, "KICK", Some(vec![&c, &n]), None),
-            Command::PRIVMSG(ref t, ref m) =>
-                Message::new(None, "PRIVMSG", Some(vec![&t]), Some(&m)),
-            Command::NOTICE(ref t, ref m) =>
-                Message::new(None, "NOTICE", Some(vec![&t]), Some(&m)),
-            Command::MOTD(Some(ref t)) => Message::new(None, "MOTD", None, Some(&t)),
-            Command::MOTD(None) => Message::new(None, "MOTD", None, None),
-            Command::LUSERS(Some(ref m), Some(ref t)) =>
-                Message::new(None, "LUSERS", Some(vec![&m]), Some(t)),
-            Command::LUSERS(Some(ref m), None) =>
-                Message::new(None, "LUSERS", Some(vec![&m]), None),
-            Command::LUSERS(None, _) => Message::new(None, "LUSERS", None, None),
-            Command::VERSION(Some(ref t)) => Message::new(None, "VERSION", None, Some(&t)),
-            Command::VERSION(None) => Message::new(None, "VERSION", None, None),
-            Command::STATS(Some(ref q), Some(ref t)) =>
-                Message::new(None, "STATS", Some(vec![&q]), Some(t)),
-            Command::STATS(Some(ref q), None) => Message::new(None, "STATS", Some(vec![&q]), None),
-            Command::STATS(None, _) => Message::new(None, "STATS", None, None),
-            Command::LINKS(Some(ref r), Some(ref s)) =>
-                Message::new(None, "LINKS", Some(vec![&r]), Some(&s)),
-            Command::LINKS(None, Some(ref s)) => Message::new(None, "LINKS", None, Some(&s)),
-            Command::LINKS(_, None) => Message::new(None, "LINKS", None, None),
-            Command::TIME(Some(ref t)) => Message::new(None, "TIME", None, Some(&t)),
-            Command::TIME(None) => Message::new(None, "TIME", None, None),
-            Command::CONNECT(ref t, ref p, Some(ref r)) =>
-                Message::new(None, "CONNECT", Some(vec![&t, &p]), Some(&r)),
-            Command::CONNECT(ref t, ref p, None) => 
-                Message::new(None, "CONNECT", Some(vec![&t, &p]), None),
-            Command::TRACE(Some(ref t)) => Message::new(None, "TRACE", None, Some(&t)),
-            Command::TRACE(None) => Message::new(None, "TRACE", None, None),
-            Command::ADMIN(Some(ref t)) => Message::new(None, "ADMIN", None, Some(&t)),
-            Command::ADMIN(None) => Message::new(None, "ADMIN", None, None),
-            Command::INFO(Some(ref t)) => Message::new(None, "INFO", None, Some(&t)),
-            Command::INFO(None) => Message::new(None, "INFO", None, None),
-            Command::SERVLIST(Some(ref m), Some(ref t)) =>
-                Message::new(None, "SERVLIST", Some(vec![&m]), Some(&t)),
-            Command::SERVLIST(Some(ref m), None) =>
-                Message::new(None, "SERVLIST", Some(vec![&m]), None),
-            Command::SERVLIST(None, _) => Message::new(None, "SERVLIST", None, None),
-            Command::SQUERY(ref s, ref t) =>
-                Message::new(None, "SQUERY", Some(vec![&s, &t]), None),
-            Command::WHO(Some(ref s), Some(true)) =>
-                Message::new(None, "WHO", Some(vec![&s, "o"]), None),
-            Command::WHO(Some(ref s), _) => Message::new(None, "WHO", Some(vec![&s]), None),
-            Command::WHO(None, _) => Message::new(None, "WHO", None, None),
-            Command::WHOIS(Some(ref t), ref m) =>
-                Message::new(None, "WHOIS", Some(vec![&t, &m]), None),
-            Command::WHOIS(None, ref m) => Message::new(None, "WHOIS", Some(vec![&m]), None),
-            Command::WHOWAS(ref n, Some(ref c), Some(ref t)) =>
-                Message::new(None, "WHOWAS", Some(vec![&n, &c]), Some(t)),
-            Command::WHOWAS(ref n, Some(ref c), None) =>
-                Message::new(None, "WHOWAS", Some(vec![&n, &c]), None),
-            Command::WHOWAS(ref n, None, _) => Message::new(None, "WHOWAS", Some(vec![&n]), None),
-            Command::KILL(ref n, ref c) => Message::new(None, "KILL", Some(vec![&n]), Some(&c)),
-            Command::PING(ref s, Some(ref t)) =>
-                Message::new(None, "PING", Some(vec![&s]), Some(&t)),
-            Command::PING(ref s, None) => Message::new(None, "PING", None, Some(&s)),
-            Command::PONG(ref s, Some(ref t)) =>
-                Message::new(None, "PONG", Some(vec![&s]), Some(&t)),
-            Command::PONG(ref s, None) => Message::new(None, "PONG", None, Some(&s)),
-            Command::ERROR(ref m) => Message::new(None, "ERROR", None, Some(&m)),
-            Command::AWAY(Some(ref m)) => Message::new(None, "AWAY", None, Some(&m)),
-            Command::AWAY(None) => Message::new(None, "AWAY", None, None),
-            Command::REHASH => Message::new(None, "REHASH", None, None),
-            Command::DIE => Message::new(None, "DIE", None, None),
-            Command::RESTART => Message::new(None, "RESTART", None, None),
-            Command::SUMMON(ref u, Some(ref t), Some(ref c)) =>
-                Message::new(None, "SUMMON", Some(vec![&u, &t]), Some(&c)),
-            Command::SUMMON(ref u, Some(ref t), None) =>
-                Message::new(None, "SUMMON", Some(vec![&u, &t]), None),
-            Command::SUMMON(ref u, None, _) => Message::new(None, "SUMMON", Some(vec![&u]), None),
-            Command::USERS(Some(ref t)) => Message::new(None, "USERS", None, Some(&t)),
-            Command::USERS(None) => Message::new(None, "USERS", None, None),
-            Command::WALLOPS(ref t) => Message::new(None, "WALLOPS", None, Some(&t)),
-            Command::USERHOST(ref u) =>
-                Message::new(None, "USERHOST", Some(u.iter().map(|s| &s[..]).collect()), None),
-            Command::ISON(ref u) =>
-                Message::new(None, "ISON", Some(u.iter().map(|s| &s[..]).collect()), None),
+            Command::PASS(p) => Message::from_owned(None, string("PASS"), None, Some(p)),
+            Command::NICK(n) => Message::from_owned(None, string("NICK"), None, Some(n)),
+            Command::USER(u, m, r) =>
+                Message::from_owned(None, string("USER"), Some(vec![u, m, string("*")]), Some(r)),
+            Command::OPER(u, p) =>
+                Message::from_owned(None, string("OPER"), Some(vec![u]), Some(p)),
+            Command::MODE(t, m, Some(p)) =>
+                Message::from_owned(None, string("MODE"), Some(vec![t, m, p]), None),
+            Command::MODE(t, m, None) =>
+                Message::from_owned(None, string("MODE"), Some(vec![t, m]), None),
+            Command::SERVICE(n, r, d, t, re, i) =>
+                Message::from_owned(None, string("SERVICE"), Some(vec![n, r, d, t, re]), Some(i)),
+            Command::QUIT(Some(m)) => Message::from_owned(None, string("QUIT"), None, Some(m)),
+            Command::QUIT(None) => Message::from_owned(None, string("QUIT"), None, None),
+            Command::SQUIT(s, c) =>
+                Message::from_owned(None, string("SQUIT"), Some(vec![s]), Some(c)),
+            Command::JOIN(c, Some(k)) =>
+                Message::from_owned(None, string("JOIN"), Some(vec![c, k]), None),
+            Command::JOIN(c, None) =>
+                Message::from_owned(None, string("JOIN"), Some(vec![c]), None),
+            Command::PART(c, Some(m)) =>
+                Message::from_owned(None, string("PART"), Some(vec![c]), Some(m)),
+            Command::PART(c, None) =>
+                Message::from_owned(None, string("PART"), Some(vec![c]), None),
+            Command::TOPIC(c, Some(t)) =>
+                Message::from_owned(None, string("TOPIC"), Some(vec![c]), Some(t)),
+            Command::TOPIC(c, None) =>
+                Message::from_owned(None, string("TOPIC"), Some(vec![c]), None),
+            Command::NAMES(Some(c), Some(t)) =>
+                Message::from_owned(None, string("NAMES"), Some(vec![c]), Some(t)),
+            Command::NAMES(Some(c), None) =>
+                Message::from_owned(None, string("NAMES"), Some(vec![c]), None),
+            Command::NAMES(None, _) => Message::from_owned(None, string("NAMES"), None, None),
+            Command::LIST(Some(c), Some(t)) =>
+                Message::from_owned(None, string("LIST"), Some(vec![c]), Some(t)),
+            Command::LIST(Some(c), None) =>
+                Message::from_owned(None, string("LIST"), Some(vec![c]), None),
+            Command::LIST(None, _) => Message::from_owned(None, string("LIST"), None, None),
+            Command::INVITE(n, c) =>
+                Message::from_owned(None, string("INVITE"), Some(vec![n, c]), None),
+            Command::KICK(c, n, Some(r)) =>
+                Message::from_owned(None, string("KICK"), Some(vec![c, n]), Some(r)),
+            Command::KICK(c, n, None) =>
+                Message::from_owned(None, string("KICK"), Some(vec![c, n]), None),
+            Command::PRIVMSG(t, m) =>
+                Message::from_owned(None, string("PRIVMSG"), Some(vec![t]), Some(m)),
+            Command::NOTICE(t, m) =>
+                Message::from_owned(None, string("NOTICE"), Some(vec![t]), Some(m)),
+            Command::MOTD(Some(t)) => Message::from_owned(None, string("MOTD"), None, Some(t)),
+            Command::MOTD(None) => Message::from_owned(None, string("MOTD"), None, None),
+            Command::LUSERS(Some(m), Some(t)) =>
+                Message::from_owned(None, string("LUSERS"), Some(vec![m]), Some(t)),
+            Command::LUSERS(Some(m), None) =>
+                Message::from_owned(None, string("LUSERS"), Some(vec![m]), None),
+            Command::LUSERS(None, _) => Message::from_owned(None, string("LUSERS"), None, None),
+            Command::VERSION(Some(t)) =>
+                Message::from_owned(None, string("VERSION"), None, Some(t)),
+            Command::VERSION(None) => Message::from_owned(None, string("VERSION"), None, None),
+            Command::STATS(Some(q), Some(t)) =>
+                Message::from_owned(None, string("STATS"), Some(vec![q]), Some(t)),
+            Command::STATS(Some(q), None) =>
+                Message::from_owned(None, string("STATS"), Some(vec![q]), None),
+            Command::STATS(None, _) => Message::from_owned(None, string("STATS"), None, None),
+            Command::LINKS(Some(r), Some(s)) =>
+                Message::from_owned(None, string("LINKS"), Some(vec![r]), Some(s)),
+            Command::LINKS(None, Some(s)) =>
+                Message::from_owned(None, string("LINKS"), None, Some(s)),
+            Command::LINKS(_, None) => Message::from_owned(None, string("LINKS"), None, None),
+            Command::TIME(Some(t)) => Message::from_owned(None, string("TIME"), None, Some(t)),
+            Command::TIME(None) => Message::from_owned(None, string("TIME"), None, None),
+            Command::CONNECT(t, p, Some(r)) =>
+                Message::from_owned(None, string("CONNECT"), Some(vec![t, p]), Some(r)),
+            Command::CONNECT(t, p, None) =>
+                Message::from_owned(None, string("CONNECT"), Some(vec![t, p]), None),
+            Command::TRACE(Some(t)) => Message::from_owned(None, string("TRACE"), None, Some(t)),
+            Command::TRACE(None) => Message::from_owned(None, string("TRACE"), None, None),
+            Command::ADMIN(Some(t)) => Message::from_owned(None, string("ADMIN"), None, Some(t)),
+            Command::ADMIN(None) => Message::from_owned(None, string("ADMIN"), None, None),
+            Command::INFO(Some(t)) => Message::from_owned(None, string("INFO"), None, Some(t)),
+            Command::INFO(None) => Message::from_owned(None, string("INFO"), None, None),
+            Command::SERVLIST(Some(m), Some(t)) =>
+                Message::from_owned(None, string("SERVLIST"), Some(vec![m]), Some(t)),
+            Command::SERVLIST(Some(m), None) =>
+                Message::from_owned(None, string("SERVLIST"), Some(vec![m]), None),
+            Command::SERVLIST(None, _) =>
+                Message::from_owned(None, string("SERVLIST"), None, None),
+            Command::SQUERY(s, t) =>
+                Message::from_owned(None, string("SQUERY"), Some(vec![s, t]), None),
+            Command::WHO(Some(s), Some(true)) =>
+                Message::from_owned(None, string("WHO"), Some(vec![s, string("o")]), None),
+            Command::WHO(Some(s), _) =>
+                Message::from_owned(None, string("WHO"), Some(vec![s]), None),
+            Command::WHO(None, _) => Message::from_owned(None, string("WHO"), None, None),
+            Command::WHOIS(Some(t), m) =>
+                Message::from_owned(None, string("WHOIS"), Some(vec![t, m]), None),
+            Command::WHOIS(None, m) =>
+                Message::from_owned(None, string("WHOIS"), Some(vec![m]), None),
+            Command::WHOWAS(n, Some(c), Some(t)) =>
+                Message::from_owned(None, string("WHOWAS"), Some(vec![n, c]), Some(t)),
+            Command::WHOWAS(n, Some(c), None) =>
+                Message::from_owned(None, string("WHOWAS"), Some(vec![n, c]), None),
+            Command::WHOWAS(n, None, _) =>
+                Message::from_owned(None, string("WHOWAS"), Some(vec![n]), None),
+            Command::KILL(n, c) =>
+                Message::from_owned(None, string("KILL"), Some(vec![n]), Some(c)),
+            Command::PING(s, Some(t)) =>
+                Message::from_owned(None, string("PING"), Some(vec![s]), Some(t)),
+            Command::PING(s, None) => Message::from_owned(None, string("PING"), None, Some(s)),
+            Command::PONG(s, Some(t)) =>
+                Message::from_owned(None, string("PONG"), Some(vec![s]), Some(t)),
+            Command::PONG(s, None) => Message::from_owned(None, string("PONG"), None, Some(s)),
+            Command::ERROR(m) => Message::from_owned(None, string("ERROR"), None, Some(m)),
+            Command::AWAY(Some(m)) => Message::from_owned(None, string("AWAY"), None, Some(m)),
+            Command::AWAY(None) => Message::from_owned(None, string("AWAY"), None, None),
+            Command::REHASH => Message::from_owned(None, string("REHASH"), None, None),
+            Command::DIE => Message::from_owned(None, string("DIE"), None, None),
+            Command::RESTART => Message::from_owned(None, string("RESTART"), None, None),
+            Command::SUMMON(u, Some(t), Some(c)) =>
+                Message::from_owned(None, string("SUMMON"), Some(vec![u, t]), Some(c)),
+            Command::SUMMON(u, Some(t), None) =>
+                Message::from_owned(None, string("SUMMON"), Some(vec![u, t]), None),
+            Command::SUMMON(u, None, _) =>
+                Message::from_owned(None, string("SUMMON"), Some(vec![u]), None),
+            Command::USERS(Some(t)) => Message::from_owned(None, string("USERS"), None, Some(t)),
+            Command::USERS(None) => Message::from_owned(None, string("USERS"), None, None),
+            Command::WALLOPS(t) => Message::from_owned(None, string("WALLOPS"), None, Some(t)),
+            Command::USERHOST(u) => Message::from_owned(None, string("USERHOST"), Some(u), None),
+            Command::ISON(u) => Message::from_owned(None, string("ISON"), Some(u), None),
 
-            Command::SAJOIN(ref n, ref c) =>
-                Message::new(None, "SAJOIN", Some(vec![&n, &c]), None),
-            Command::SAMODE(ref t, ref m, Some(ref p)) =>
-                Message::new(None, "SAMODE", Some(vec![&t, &m, &p]), None),
-            Command::SAMODE(ref t, ref m, None) =>
-                Message::new(None, "SAMODE", Some(vec![t, m]), None),
-            Command::SANICK(ref o, ref n) =>
-                Message::new(None, "SANICK", Some(vec![&o, &n]), None),
-            Command::SAPART(ref c, ref r) =>
-                Message::new(None, "SAPART", Some(vec![&c]), Some(&r)),
-            Command::SAQUIT(ref c, ref r) =>
-                Message::new(None, "SAQUIT", Some(vec![&c]), Some(&r)),
+            Command::SAJOIN(n, c) =>
+                Message::from_owned(None, string("SAJOIN"), Some(vec![n, c]), None),
+            Command::SAMODE(t, m, Some(p)) =>
+                Message::from_owned(None, string("SAMODE"), Some(vec![t, m, p]), None),
+            Command::SAMODE(t, m, None) =>
+                Message::from_owned(None, string("SAMODE"), Some(vec![t, m]), None),
+            Command::SANICK(o, n) =>
+                Message::from_owned(None, string("SANICK"), Some(vec![o, n]), None),
+            Command::SAPART(c, r) =>
+                Message::from_owned(None, string("SAPART"), Some(vec![c]), Some(r)),
+            Command::SAQUIT(c, r) =>
+                Message::from_owned(None, string("SAQUIT"), Some(vec![c]), Some(r)),
 
-            Command::NICKSERV(ref m) => Message::new(None, "NICKSERV", Some(vec![&m]), None),
-            Command::CHANSERV(ref m) => Message::new(None, "CHANSERV", Some(vec![&m]), None),
-            Command::OPERSERV(ref m) => Message::new(None, "OPERSERV", Some(vec![&m]), None),
-            Command::BOTSERV(ref m) => Message::new(None, "BOTSERV", Some(vec![&m]), None),
-            Command::HOSTSERV(ref m) => Message::new(None, "HOSTSERV", Some(vec![&m]), None),
-            Command::MEMOSERV(ref m) => Message::new(None, "MEMOSERV", Some(vec![&m]), None),
+            Command::NICKSERV(m) =>
+                Message::from_owned(None, string("NICKSERV"), Some(vec![m]), None),
+            Command::CHANSERV(m) =>
+                Message::from_owned(None, string("CHANSERV"), Some(vec![m]), None),
+            Command::OPERSERV(m) =>
+                Message::from_owned(None, string("OPERSERV"), Some(vec![m]), None),
+            Command::BOTSERV(m) =>
+                Message::from_owned(None, string("BOTSERV"), Some(vec![m]), None),
+            Command::HOSTSERV(m) =>
+                Message::from_owned(None, string("HOSTSERV"), Some(vec![m]), None),
+            Command::MEMOSERV(m) =>
+                Message::from_owned(None, string("MEMOSERV"), Some(vec![m]), None),
 
-            Command::CAP(None, ref s, None, ref p) => 
-                Message::new(None, "CAP", Some(vec![s.str()]), p.as_ref().map(|m| &m[..])),
-            Command::CAP(Some(ref k), ref s, None, ref  p) => 
-                Message::new(None, "CAP", Some(vec![&k, s.str()]), p.as_ref().map(|m| &m[..])),
-            Command::CAP(None, ref s, Some(ref c), ref p) =>
-                Message::new(None, "CAP", Some(vec![s.str(), &c]), p.as_ref().map(|m| &m[..])),
-            Command::CAP(Some(ref k), ref s, Some(ref c), ref p) => 
-                Message::new(None, "CAP", Some(vec![&k, s.str(), &c]), p.as_ref().map(|m| &m[..])),
+            Command::CAP(None, s, None, p) =>
+                Message::from_owned(None, string("CAP"), Some(vec![s.string()]), p),
+            Command::CAP(Some(k), s, None,  p) =>
+                Message::from_owned(None, string("CAP"), Some(vec![k, s.string()]), p),
+            Command::CAP(None, s, Some(c), p) =>
+                Message::from_owned(None, string("CAP"), Some(vec![s.string(), c]), p),
+            Command::CAP(Some(k), s, Some(c), p) =>
+                Message::from_owned(None, string("CAP"), Some(vec![k, s.string(), c]), p),
         }
     }
+}
+
+/// Converts a static str to an owned String.
+fn string(s: &'static str) -> String {
+    s.to_owned()
 }
 
 impl Command {
@@ -1059,8 +1083,8 @@ impl CapSubCommand {
     }
 
     // This makes some earlier lines shorter.
-    fn str(&self) -> &str {
-        self.to_str()
+    fn string(&self) -> String {
+        self.to_str().to_owned()
     }
 }
 
