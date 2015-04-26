@@ -151,8 +151,8 @@ pub enum Command {
 
 impl ToMessage for Command {
     /// Converts a Command into a Message.
-    fn to_message(&self) -> Message {
-        match *self {
+    fn to_message(self) -> Message {
+        match self {
             Command::PASS(ref p) => Message::new(None, "PASS", None, Some(&p)),
             Command::NICK(ref n) => Message::new(None, "NICK", None, Some(&n)),
             Command::USER(ref u, ref m, ref r) =>

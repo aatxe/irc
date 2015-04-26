@@ -56,8 +56,8 @@ impl Message {
 }
 
 impl ToMessage for Message {
-    fn to_message(&self) -> Message {
-        self.clone()
+    fn to_message(self) -> Message {
+        self
     }
 }
 
@@ -96,11 +96,11 @@ impl FromStr for Message {
 /// A trait representing the ability to be converted into a Message.
 pub trait ToMessage {
     /// Converts this to a Message.
-    fn to_message(&self) -> Message;
+    fn to_message(self) -> Message;
 }
 
 impl<'a> ToMessage for &'a str {
-    fn to_message(&self) -> Message {
+    fn to_message(self) -> Message {
         self.parse().unwrap()
     }
 }
