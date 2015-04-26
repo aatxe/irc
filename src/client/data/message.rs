@@ -63,12 +63,6 @@ impl Message {
     }
 }
 
-impl ToMessage for Message {
-    fn to_message(self) -> Message {
-        self
-    }
-}
-
 impl FromStr for Message {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Message, &'static str> {
@@ -101,15 +95,9 @@ impl FromStr for Message {
     }
 }
 
-/// A trait representing the ability to be converted into a Message.
-pub trait ToMessage {
-    /// Converts this to a Message.
-    fn to_message(self) -> Message;
-}
-
-impl<'a> ToMessage for &'a str {
-    fn to_message(self) -> Message {
-        self.parse().unwrap()
+impl<'a> From<&'a str> for Message {
+    fn from(s: &'a str) -> Message {
+        s.parse().unwrap()
     }
 }
 

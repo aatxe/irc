@@ -8,7 +8,7 @@ pub mod prelude {
     //! A client-side IRC prelude, re-exporting all the necessary basics.
     pub use client::server::{IrcServer, Server};
     pub use client::server::utils::ServerExt;
-    pub use client::data::{Command, Config, Message, Response, ToMessage};
+    pub use client::data::{Command, Config, Message, Response};
     pub use client::data::kinds::{IrcRead, IrcWrite};
 }
 

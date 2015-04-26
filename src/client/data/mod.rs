@@ -2,7 +2,7 @@
 
 pub use client::data::command::Command;
 pub use client::data::config::Config;
-pub use client::data::message::{Message, ToMessage};
+pub use client::data::message::Message;
 pub use client::data::response::Response;
 pub use client::data::user::{AccessLevel, User};
 

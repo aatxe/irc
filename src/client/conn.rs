@@ -9,8 +9,8 @@ use std::net::TcpStream;
 use std::sync::{Mutex, MutexGuard};
 #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
 #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
+use client::data::Message;
 use client::data::kinds::{IrcRead, IrcWrite};
-use client::data::message::ToMessage;
 #[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslMethod, SslStream};
 #[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
 
@@ -110,14 +110,14 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
 
     /// Sends a Message over this connection.
     #[cfg(feature = "encode")]
-    pub fn send<M: ToMessage>(&self, to_msg: M, encoding: &str) -> Result<()> {
+    pub fn send<M: Into<Message>>(&self, to_msg: M, encoding: &str) -> Result<()> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
             None => return Err(Error::new(
                 ErrorKind::InvalidInput, &format!("Failed to find encoder. ({})", encoding)[..]
             ))
         };
-        let msg = to_msg.to_message();
+        let msg: Message = to_msg.into();
         let data = match encoding.encode(&msg.into_string(), EncoderTrap::Replace) {
             Ok(data) => data,
             Err(data) => return Err(Error::new(ErrorKind::InvalidInput, 
@@ -131,9 +131,9 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
 
     /// Sends a message over this connection. 
     #[cfg(not(feature = "encode"))]
-    pub fn send<M: ToMessage>(&self, to_msg: M) -> Result<()> {
+    pub fn send<M: Into<Message>>(&self, to_msg: M) -> Result<()> {
         let mut writer = self.writer.lock().unwrap();
-        try!(writer.write_all(&to_msg.to_message().into_string().as_bytes()));
+        try!(writer.write_all(&to_msg.into::<Message>().into_string().as_bytes()));
         writer.flush()
     }
 

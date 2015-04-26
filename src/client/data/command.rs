@@ -2,7 +2,7 @@
 use std::io::{Error, ErrorKind, Result};
 use std::result::Result as StdResult;
 use std::str::FromStr;
-use client::data::message::{Message, ToMessage};
+use client::data::Message;
 
 /// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This
 /// also includes commands from the
@@ -149,9 +149,9 @@ pub enum Command {
     CAP(Option<String>, CapSubCommand, Option<String>, Option<String>),
 }
 
-impl ToMessage for Command {
+impl Into<Message> for Command {
     /// Converts a Command into a Message.
-    fn to_message(self) -> Message {
+    fn into(self) -> Message {
         match self {
             Command::PASS(p) => Message::from_owned(None, string("PASS"), None, Some(p)),
             Command::NICK(n) => Message::from_owned(None, string("NICK"), None, Some(n)),
