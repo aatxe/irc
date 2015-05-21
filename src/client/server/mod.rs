@@ -26,7 +26,8 @@ pub trait Server<'a, T, U> {
     /// Gets an Iterator over Commands received by this Server.
     fn iter_cmd(&'a self) -> ServerCmdIterator<'a, T, U>;
     /// Gets a list of Users in the specified channel. This will be none if the channel is not
-    /// being tracked, or if tracking is not supported altogether.
+    /// being tracked, or if tracking is not supported altogether. For best results, be sure to
+    /// request `multi-prefix` support from the server.
     fn list_users(&self, channel: &str) -> Option<Vec<User>>;
 }
 
