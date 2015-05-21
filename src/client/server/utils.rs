@@ -18,9 +18,8 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Sends a CAP END, NICK and USER to identify.
     fn identify(&self) -> Result<()> {
-        // We'll issue a CAP REQ for multi-prefix support to improve access level tracking.
-        try!(self.send(CAP(None, REQ, None, Some("multi-prefix".to_owned()))));
-        try!(self.send(CAP(None, END, None, None))); // Then, send a CAP END to end the negotiation.
+        // Send a CAP END to signify that we're IRCv3-compliant (and to end negotiations!).
+        try!(self.send(CAP(None, END, None, None)));
         if self.config().password() != "" {
             try!(self.send(PASS(self.config().password().to_owned())));
         }
