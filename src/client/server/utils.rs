@@ -11,7 +11,12 @@ use client::server::Server;
 
 /// Extensions for Server capabilities that make it easier to work directly with the protocol.
 pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
-    /// Sends a NICK and USER to identify.
+    /// Sends an IRCv3 capabilities request for the specified extensions.
+    fn send_cap_req(&self, extensions: &str) -> Result<()> {
+        self.send(CAP(None, REQ, None, Some(extensions.to_owned())))
+    }
+
+    /// Sends a CAP END, NICK and USER to identify.
     fn identify(&self) -> Result<()> {
         // We'll issue a CAP REQ for multi-prefix support to improve access level tracking.
         try!(self.send(CAP(None, REQ, None, Some("multi-prefix".to_owned()))));
