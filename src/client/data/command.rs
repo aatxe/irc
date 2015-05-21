@@ -1062,8 +1062,6 @@ pub enum CapSubCommand {
     ACK,
     /// Does not acknowledge certain capabilities.
     NAK,
-    /// Requests that the server clears the capabilities of this client.
-    CLEAR,
     /// Ends the capability negotiation before registration.
     END
 }
@@ -1077,7 +1075,6 @@ impl CapSubCommand {
             &CapSubCommand::REQ   => "REQ",
             &CapSubCommand::ACK   => "ACK",
             &CapSubCommand::NAK   => "NAK",
-            &CapSubCommand::CLEAR => "CLEAR",
             &CapSubCommand::END   => "END",
         }
     }
@@ -1097,7 +1094,6 @@ impl FromStr for CapSubCommand {
             "REQ"   => Ok(CapSubCommand::REQ),
             "ACK"   => Ok(CapSubCommand::ACK),
             "NAK"   => Ok(CapSubCommand::NAK),
-            "CLEAR" => Ok(CapSubCommand::CLEAR),
             "END"   => Ok(CapSubCommand::END),
             _       => Err("Failed to parse CAP subcommand."),
         }
