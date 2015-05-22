@@ -144,9 +144,11 @@ pub enum Command {
     /// MEMOSERV message
     MEMOSERV(String),
 
-    // Capabilities extension to IRCv3
+    // IRCv3 support
     /// CAP [*] COMMAND [*] :[param]
     CAP(Option<String>, CapSubCommand, Option<String>, Option<String>),
+    /// ACCOUNT [account name]
+    ACCOUNT(String),
 }
 
 impl Into<Message> for Command {
@@ -316,6 +318,8 @@ impl Into<Message> for Command {
                 Message::from_owned(None, string("CAP"), Some(vec![s.string(), c]), p),
             Command::CAP(Some(k), s, Some(c), p) =>
                 Message::from_owned(None, string("CAP"), Some(vec![k, s.string(), c]), p),
+            Command::ACCOUNT(a) =>
+                Message::from_owned(None, string("ACCOUNT"), Some(vec![a]), None),
         }
     }
 }
@@ -1037,6 +1041,19 @@ impl Command {
                 }
             } else {
                 return Err(invalid_input())
+            }
+        } else if let "ACCOUNT" = &m.command[..] {
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    Command::ACCOUNT(suffix.clone())
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 1 {
+                    Command::ACCOUNT(m.args[0].clone())
+                } else {
+                    return Err(invalid_input())
+                }
             }
         } else {
             return Err(invalid_input())
