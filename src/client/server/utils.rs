@@ -1,5 +1,4 @@
 //! Utilities and shortcuts for working with IRC servers.
-
 use std::io::Result;
 use std::borrow::ToOwned;
 use client::data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
@@ -200,8 +199,8 @@ mod test {
         let server = IrcServer::from_connection(test_config(), 
                      Connection::new(buf_empty(), Vec::new()));
         server.identify().unwrap();
-        assert_eq!(&get_server_value(server)[..],
-        "CAP REQ :multi-prefix\r\nCAP END\r\nNICK :test\r\nUSER test 0 * :test\r\n");
+        assert_eq!(&get_server_value(server)[..], "CAP END\r\nNICK :test\r\n\
+                                                   USER test 0 * :test\r\n");
     }
 
     #[test]
@@ -212,8 +211,8 @@ mod test {
             .. Default::default()
         }, Connection::new(buf_empty(), Vec::new()));
         server.identify().unwrap();
-        assert_eq!(&get_server_value(server)[..], "CAP REQ :multi-prefix\r\nCAP END\r\n\
-        PASS :password\r\nNICK :test\r\nUSER test 0 * :test\r\n");
+        assert_eq!(&get_server_value(server)[..], "CAP END\r\nPASS :password\r\nNICK :test\r\n\
+                                                   USER test 0 * :test\r\n");
     }
 
     #[test]
