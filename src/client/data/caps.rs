@@ -10,6 +10,8 @@ pub enum Capability {
     AccountNotify,
     /// [away-notify](http://ircv3.net/specs/extensions/away-notify-3.1.html)
     AwayNotify,
+    /// [extended-join](http://ircv3.net/specs/extensions/extended-join-3.1.html)
+    ExtendedJoin,
 }
 
 impl AsRef<str> for Capability {
@@ -18,6 +20,7 @@ impl AsRef<str> for Capability {
             Capability::MultiPrefix => "multi-prefix",
             Capability::AccountNotify => "account-notify",
             Capability::AwayNotify => "away-notify",
+            Capability::ExtendedJoin => "extended-join",
         }
     }
 }
@@ -31,5 +34,6 @@ mod test {
         assert_eq!(MultiPrefix.as_ref(), "multi-prefix");
         assert_eq!(AccountNotify.as_ref(), "account-notify");
         assert_eq!(AwayNotify.as_ref(), "away-notify");
+        assert_eq!(ExtendedJoin.as_ref(), "extended-join");
     }
 }

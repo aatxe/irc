@@ -40,7 +40,7 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
 
     /// Joins the specified channel or chanlist.
     fn send_join(&self, chanlist: &str) -> Result<()> {
-        self.send(JOIN(chanlist.to_owned(), None))
+        self.send(JOIN(chanlist.to_owned(), None, None))
     }
 
     /// Attempts to oper up using the specified username and password.

@@ -150,7 +150,7 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
                                    self.config.umodes().to_owned(), None)).unwrap();
                 }
                 for chan in self.config.channels().into_iter() {
-                    self.send(JOIN(chan.to_owned(), None)).unwrap();
+                    self.send(JOIN(chan.to_owned(), None, None)).unwrap();
                 }
             } else if resp == Response::ERR_NICKNAMEINUSE ||
                       resp == Response::ERR_ERRONEOUSNICKNAME {

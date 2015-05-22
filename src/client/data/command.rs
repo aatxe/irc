@@ -31,7 +31,7 @@ pub enum Command {
 
     // 3.2 Channel operations
     /// JOIN chanlist [chankeys]
-    JOIN(String, Option<String>),
+    JOIN(String, Option<String>, Option<String>),
     /// PART chanlist :[comment]
     PART(String, Option<String>),
     // MODE is already defined.
@@ -152,7 +152,9 @@ pub enum Command {
     /// ACCOUNT [account name]
     ACCOUNT(String),
     // AWAY is already defined as a send-only message.
-    //AWAY(Option<String>),
+    // AWAY(Option<String>),
+    // JOIN is already defined.
+    // JOIN(String, Option<String>, Option<String>),
 }
 
 impl Into<Message> for Command {
@@ -175,10 +177,10 @@ impl Into<Message> for Command {
             Command::QUIT(None) => Message::from_owned(None, string("QUIT"), None, None),
             Command::SQUIT(s, c) =>
                 Message::from_owned(None, string("SQUIT"), Some(vec![s]), Some(c)),
-            Command::JOIN(c, Some(k)) =>
-                Message::from_owned(None, string("JOIN"), Some(vec![c, k]), None),
-            Command::JOIN(c, None) =>
-                Message::from_owned(None, string("JOIN"), Some(vec![c]), None),
+            Command::JOIN(c, Some(k), n) =>
+                Message::from_owned(None, string("JOIN"), Some(vec![c, k]), n),
+            Command::JOIN(c, None, n) =>
+                Message::from_owned(None, string("JOIN"), Some(vec![c]), n),
             Command::PART(c, Some(m)) =>
                 Message::from_owned(None, string("PART"), Some(vec![c]), Some(m)),
             Command::PART(c, None) =>
@@ -427,16 +429,21 @@ impl Command {
         } else if let "JOIN" = &m.command[..] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 0 {
-                    Command::JOIN(suffix.clone(), None)
+                    Command::JOIN(suffix.clone(), None, None)
                 } else if m.args.len() == 1 {
-                    Command::JOIN(m.args[0].clone(), Some(suffix.clone()))
+                    Command::JOIN(m.args[0].clone(), Some(suffix.clone()), None)
+                } else if m.args.len() == 2 {
+                    Command::JOIN(m.args[0].clone(), Some(m.args[1].clone()), Some(suffix.clone()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if m.args.len() == 1 {
-                    Command::JOIN(m.args[0].clone(), None)
+                    Command::JOIN(m.args[0].clone(), None, None)
                 } else if m.args.len() == 2 {
-                    Command::JOIN(m.args[0].clone(), Some(m.args[1].clone()))
+                    Command::JOIN(m.args[0].clone(), Some(m.args[1].clone()), None)
+                } else if m.args.len() == 3 {
+                    Command::JOIN(m.args[0].clone(), Some(m.args[1].clone()), 
+                                  Some(m.args[2].clone()))
                 } else {
                     return Err(invalid_input())
                 }
