@@ -1,5 +1,6 @@
 //! Data related to IRC functionality.
 
+pub use client::data::caps::Capability;
 pub use client::data::command::Command;
 pub use client::data::config::Config;
 pub use client::data::message::Message;
@@ -18,6 +19,7 @@ pub mod kinds {
     impl<T> IrcRead for T where T: BufRead + Sized + Send + 'static {}
 }
 
+pub mod caps;
 pub mod command;
 pub mod config;
 pub mod message;

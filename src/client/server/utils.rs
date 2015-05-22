@@ -1,6 +1,7 @@
 //! Utilities and shortcuts for working with IRC servers.
 use std::io::Result;
 use std::borrow::ToOwned;
+use client::data::Capability;
 use client::data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
 use client::data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
 use client::data::command::CapSubCommand::{END, REQ};
@@ -11,8 +12,12 @@ use client::server::Server;
 /// Extensions for Server capabilities that make it easier to work directly with the protocol.
 pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
     /// Sends an IRCv3 capabilities request for the specified extensions.
-    fn send_cap_req(&self, extensions: &str) -> Result<()> {
-        self.send(CAP(None, REQ, None, Some(extensions.to_owned())))
+    fn send_cap_req(&self, extensions: &[Capability]) -> Result<()> {
+        let append = |mut s: String, c| { s.push_str(c); s.push(' '); s };
+        let mut exts = extensions.iter().map(|c| c.as_ref()).fold(String::new(), append);
+        let len = exts.len() - 1;
+        exts.truncate(len);
+        self.send(CAP(None, REQ, None, Some(exts)))
     }
 
     /// Sends a CAP END, NICK and USER to identify.
