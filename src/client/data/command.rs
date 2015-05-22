@@ -147,8 +147,12 @@ pub enum Command {
     // IRCv3 support
     /// CAP [*] COMMAND [*] :[param]
     CAP(Option<String>, CapSubCommand, Option<String>, Option<String>),
+
+    // IRCv3.1 extensions
     /// ACCOUNT [account name]
     ACCOUNT(String),
+    // AWAY is already defined as a send-only message.
+    //AWAY(Option<String>),
 }
 
 impl Into<Message> for Command {
@@ -267,8 +271,7 @@ impl Into<Message> for Command {
                 Message::from_owned(None, string("PONG"), Some(vec![s]), Some(t)),
             Command::PONG(s, None) => Message::from_owned(None, string("PONG"), None, Some(s)),
             Command::ERROR(m) => Message::from_owned(None, string("ERROR"), None, Some(m)),
-            Command::AWAY(Some(m)) => Message::from_owned(None, string("AWAY"), None, Some(m)),
-            Command::AWAY(None) => Message::from_owned(None, string("AWAY"), None, None),
+            Command::AWAY(m) => Message::from_owned(None, string("AWAY"), None, m),
             Command::REHASH => Message::from_owned(None, string("REHASH"), None, None),
             Command::DIE => Message::from_owned(None, string("DIE"), None, None),
             Command::RESTART => Message::from_owned(None, string("RESTART"), None, None),
@@ -318,6 +321,7 @@ impl Into<Message> for Command {
                 Message::from_owned(None, string("CAP"), Some(vec![s.string(), c]), p),
             Command::CAP(Some(k), s, Some(c), p) =>
                 Message::from_owned(None, string("CAP"), Some(vec![k, s.string(), c]), p),
+
             Command::ACCOUNT(a) =>
                 Message::from_owned(None, string("ACCOUNT"), Some(vec![a]), None),
         }

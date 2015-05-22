@@ -8,6 +8,8 @@ pub enum Capability {
     MultiPrefix,
     /// [account-notify](http://ircv3.net/specs/extensions/account-notify-3.1.html)
     AccountNotify,
+    /// [away-notify](http://ircv3.net/specs/extensions/away-notify-3.1.html)
+    AwayNotify,
 }
 
 impl AsRef<str> for Capability {
@@ -15,6 +17,7 @@ impl AsRef<str> for Capability {
         match *self {
             Capability::MultiPrefix => "multi-prefix",
             Capability::AccountNotify => "account-notify",
+            Capability::AwayNotify => "away-notify",
         }
     }
 }
@@ -27,5 +30,6 @@ mod test {
     fn to_str() {
         assert_eq!(MultiPrefix.as_ref(), "multi-prefix");
         assert_eq!(AccountNotify.as_ref(), "account-notify");
+        assert_eq!(AwayNotify.as_ref(), "away-notify");
     }
 }
