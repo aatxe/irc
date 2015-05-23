@@ -1,6 +1,6 @@
 //! Data related to IRC functionality.
 
-pub use client::data::caps::Capability;
+pub use client::data::caps::{Capability, NegotiationVersion};
 pub use client::data::command::Command;
 pub use client::data::config::Config;
 pub use client::data::message::Message;

@@ -1,16 +1,24 @@
 //! Utilities and shortcuts for working with IRC servers.
 use std::io::Result;
 use std::borrow::ToOwned;
-use client::data::Capability;
+use client::data::{Capability, NegotiationVersion};
 use client::data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
 use client::data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
-use client::data::command::CapSubCommand::{END, REQ};
+use client::data::command::CapSubCommand::{END, LS, REQ};
 use client::data::kinds::{IrcRead, IrcWrite};
 #[cfg(feature = "ctcp")] use time::get_time;
 use client::server::Server;
 
 /// Extensions for Server capabilities that make it easier to work directly with the protocol.
 pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
+    /// Sends a request for a list of server capabilities for a specific IRCv3 version.
+    fn send_cap_ls(&self, version: NegotiationVersion) -> Result<()> {
+        self.send(CAP(None, LS, match version {
+            NegotiationVersion::V301 => None,
+            NegotiationVersion::V302 => Some("302".to_owned()),
+        }, None))
+    }
+
     /// Sends an IRCv3 capabilities request for the specified extensions.
     fn send_cap_req(&self, extensions: &[Capability]) -> Result<()> {
         let append = |mut s: String, c| { s.push_str(c); s.push(' '); s };

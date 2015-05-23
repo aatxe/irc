@@ -14,6 +14,14 @@ pub enum Capability {
     ExtendedJoin,
 }
 
+/// List of IRCv3 capability negotiation versions.
+pub enum NegotiationVersion {
+    /// [IRCv3.1](http://ircv3.net/specs/core/capability-negotiation-3.1.html)
+    V301,
+    /// [IRCv3.2](http://ircv3.net/specs/core/capability-negotiation-3.2.html)
+    V302,
+}
+
 impl AsRef<str> for Capability {
     fn as_ref(&self) -> &str {
         match *self {
