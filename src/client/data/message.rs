@@ -5,6 +5,8 @@ use std::str::FromStr;
 /// IRC Message data.
 #[derive(Clone, PartialEq, Debug)]
 pub struct Message {
+    /// Message tags as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
+    pub tags: Option<Vec<Tag>>,
     /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
     pub prefix: Option<String>,
     /// The IRC command as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
@@ -20,7 +22,14 @@ impl Message {
     /// Creates a new Message.
     pub fn new(prefix: Option<&str>, command: &str, args: Option<Vec<&str>>, suffix: Option<&str>)
         -> Message {
+        Message::with_tags(None, prefix, command, args, suffix)
+    }
+
+    /// Creates a new Message optionally including IRCv3.2 message tags.
+    pub fn with_tags(tags: Option<Vec<Tag>>, prefix: Option<&str>, command: &str,
+                     args: Option<Vec<&str>>, suffix: Option<&str>) -> Message {
         Message {
+            tags: tags,
             prefix: prefix.map(|s| s.to_owned()),
             command: command.to_owned(),
             args: args.map_or(Vec::new(), |v| v.iter().map(|&s| s.to_owned()).collect()),
@@ -32,7 +41,7 @@ impl Message {
     pub fn from_owned(prefix: Option<String>, command: String, args: Option<Vec<String>>,
                       suffix: Option<String>) -> Message {
         Message {
-            prefix: prefix, command: command, args: args.unwrap_or(Vec::new()), suffix: suffix
+            tags: None, prefix: prefix, command: command, args: args.unwrap_or(Vec::new()), suffix: suffix
         }
     }
 
@@ -68,6 +77,17 @@ impl FromStr for Message {
     fn from_str(s: &str) -> Result<Message, &'static str> {
         let mut state = s.clone();
         if s.len() == 0 { return Err("Cannot parse an empty string as a message.") }
+        let tags = if state.starts_with("@") {
+            let tags = state.find(' ').map(|i| &state[1..i]);
+            state = state.find(' ').map_or("", |i| &state[i+1..]);
+            tags.map(|ts| ts.split(";").filter(|s| s.len() != 0).map(|s: &str| {
+                let mut iter = s.splitn(2, "=");
+                let (fst, snd) = (iter.next(), iter.next());
+                Tag(fst.unwrap_or("").to_owned(), snd.map(|s| s.to_owned()))
+            }).collect::<Vec<_>>())
+        } else {
+            None
+        };
         let prefix = if state.starts_with(":") {
             let prefix = state.find(' ').map(|i| &state[1..i]);
             state = state.find(' ').map_or("", |i| &state[i+1..]);
@@ -91,7 +111,9 @@ impl FromStr for Message {
         };
         if suffix.is_none() { state = &state[..state.len() - 2] }
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| s.len() != 0).collect();
-        Ok(Message::new(prefix, command, if args.len() > 0 { Some(args) } else { None }, suffix))
+        Ok(Message::with_tags(
+            tags, prefix, command, if args.len() > 0 { Some(args) } else { None }, suffix
+        ))
     }
 }
 
@@ -101,13 +123,18 @@ impl<'a> From<&'a str> for Message {
     }
 }
 
+/// A message tag as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
+#[derive(Clone, PartialEq, Debug)]
+pub struct Tag(String, Option<String>);
+
 #[cfg(test)]
 mod test {
-    use super::Message;
+    use super::{Message, Tag};
 
     #[test]
     fn new() {
         let message = Message {
+            tags: None,
             prefix: None,
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
@@ -130,6 +157,7 @@ mod test {
     #[test]
     fn into_string() {
         let message = Message {
+            tags: None,
             prefix: None,
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
@@ -137,6 +165,7 @@ mod test {
         };
         assert_eq!(&message.into_string()[..], "PRIVMSG test :Testing!\r\n");
         let message = Message {
+            tags: None,
             prefix: Some(format!("test!test@test")),
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
@@ -148,6 +177,7 @@ mod test {
     #[test]
     fn from_string() {
         let message = Message {
+            tags: None,
             prefix: None,
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
@@ -155,17 +185,30 @@ mod test {
         };
         assert_eq!("PRIVMSG test :Testing!\r\n".parse(), Ok(message));
         let message = Message {
+            tags: None,
             prefix: Some(format!("test!test@test")),
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
             suffix: Some(format!("Still testing!")),
         };
         assert_eq!(":test!test@test PRIVMSG test :Still testing!\r\n".parse(), Ok(message));
+        let message = Message {
+            tags: Some(vec![Tag(format!("aaa"), Some(format!("bbb"))),
+                            Tag(format!("ccc"), None),
+                            Tag(format!("example.com/ddd"), Some(format!("eee")))]),
+            prefix: Some(format!("test!test@test")),
+            command: format!("PRIVMSG"),
+            args: vec![format!("test")],
+            suffix: Some(format!("Testing with tags!")),
+        };
+        assert_eq!("@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
+                    tags!\r\n".parse(), Ok(message))
     }
 
     #[test]
     fn to_message() {
         let message = Message {
+            tags: None,
             prefix: None,
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
@@ -174,6 +217,7 @@ mod test {
         let msg: Message = "PRIVMSG test :Testing!\r\n".into();
         assert_eq!(msg, message);
         let message = Message {
+            tags: None,
             prefix: Some(format!("test!test@test")),
             command: format!("PRIVMSG"),
             args: vec![format!("test")],
@@ -188,6 +232,7 @@ mod test {
         // Apparently, UnrealIRCd (and perhaps some others) send some messages that include
         // colons within individual parameters. So, let's make sure it parses correctly.
         let message = Message {
+            tags: None,
             prefix: Some(format!("test!test@test")),
             command: format!("COMMAND"),
             args: vec![format!("ARG:test")],
