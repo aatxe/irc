@@ -12,6 +12,8 @@ pub enum Capability {
     AwayNotify,
     /// [extended-join](http://ircv3.net/specs/extensions/extended-join-3.1.html)
     ExtendedJoin,
+    /// [monitor](http://ircv3.net/specs/core/monitor-3.2.html)
+    Monitor,
 }
 
 /// List of IRCv3 capability negotiation versions.
@@ -29,6 +31,7 @@ impl AsRef<str> for Capability {
             Capability::AccountNotify => "account-notify",
             Capability::AwayNotify => "away-notify",
             Capability::ExtendedJoin => "extended-join",
+            Capability::Monitor => "monitor",
         }
     }
 }
@@ -43,5 +46,7 @@ mod test {
         assert_eq!(AccountNotify.as_ref(), "account-notify");
         assert_eq!(AwayNotify.as_ref(), "away-notify");
         assert_eq!(ExtendedJoin.as_ref(), "extended-join");
+        assert_eq!(Monitor.as_ref(), "monitor");
+
     }
 }
