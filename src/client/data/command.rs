@@ -155,6 +155,10 @@ pub enum Command {
     // AWAY(Option<String>),
     // JOIN is already defined.
     // JOIN(String, Option<String>, Option<String>),
+
+    // IRCv3.2 extensions
+    /// MONITOR command [nicklist]
+    MONITOR(String, Option<String>)
 }
 
 impl Into<Message> for Command {
@@ -326,6 +330,11 @@ impl Into<Message> for Command {
 
             Command::ACCOUNT(a) =>
                 Message::from_owned(None, string("ACCOUNT"), Some(vec![a]), None),
+
+            Command::MONITOR(c, Some(t)) =>
+                Message::from_owned(None, string("MONITOR"), Some(vec![c, t]), None),
+            Command::MONITOR(c, None) =>
+                Message::from_owned(None, string("MONITOR"), Some(vec![c]), None),
         }
     }
 }
@@ -1065,6 +1074,12 @@ impl Command {
                 } else {
                     return Err(invalid_input())
                 }
+            }
+        } else if let "MONITOR" = &m.command[..] {
+            if m.args.len() == 1 {
+                Command::MONITOR(m.args[0].clone(), m.suffix.clone())
+            } else {
+                return Err(invalid_input())
             }
         } else {
             return Err(invalid_input())
