@@ -158,7 +158,9 @@ pub enum Command {
 
     // IRCv3.2 extensions
     /// MONITOR command [nicklist]
-    MONITOR(String, Option<String>)
+    MONITOR(String, Option<String>),
+    /// CHGHOST user host
+    CHGHOST(String, String),
 }
 
 impl Into<Message> for Command {
@@ -335,6 +337,8 @@ impl Into<Message> for Command {
                 Message::from_owned(None, string("MONITOR"), Some(vec![c, t]), None),
             Command::MONITOR(c, None) =>
                 Message::from_owned(None, string("MONITOR"), Some(vec![c]), None),
+            Command::CHGHOST(u, h) =>
+                Message::from_owned(None, string("CHGHOST"), Some(vec![u, h]), None),
         }
     }
 }
@@ -1080,6 +1084,19 @@ impl Command {
                 Command::MONITOR(m.args[0].clone(), m.suffix.clone())
             } else {
                 return Err(invalid_input())
+            }
+        } else if let "CHGHOST" = &m.command[..] {
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 1 {
+                    Command::CHGHOST(m.args[0].clone(), suffix.clone())
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 2 {
+                    Command::CHGHOST(m.args[0].clone(), m.args[1].clone())
+                } else {
+                    return Err(invalid_input())
+                }
             }
         } else {
             return Err(invalid_input())

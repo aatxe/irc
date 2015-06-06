@@ -18,6 +18,8 @@ pub enum Capability {
     AccountTag,
     /// [cap-notify](http://ircv3.net/specs/extensions/cap-notify-3.2.html)
     CapNotify,
+    /// [chghost](http://ircv3.net/specs/extensions/chghost-3.2.html)
+    ChgHost,
 }
 
 /// List of IRCv3 capability negotiation versions.
@@ -38,6 +40,7 @@ impl AsRef<str> for Capability {
             Capability::Monitor => "monitor",
             Capability::AccountTag => "account-tag",
             Capability::CapNotify => "cap-notify",
+            Capability::ChgHost => "chghost",
         }
     }
 }
@@ -55,5 +58,6 @@ mod test {
         assert_eq!(Monitor.as_ref(), "monitor");
         assert_eq!(AccountTag.as_ref(), "account-tag");
         assert_eq!(CapNotify.as_ref(), "cap-notify");
+        assert_eq!(ChgHost.as_ref(), "chghost");
     }
 }
