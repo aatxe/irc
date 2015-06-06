@@ -8,19 +8,30 @@ use std::str::FromStr;
 #[derive(Clone, Debug)]
 pub struct User {
     /// The user's nickname.
-    /// This is the only detail used in determining the equality of two users.
-    name: String,
+    nickname: String,
+    /// The user's username.
+    username: Option<String>,
+    /// The user's hostname.
+    hostname: Option<String>,
     /// The user's highest access level.
     highest_access_level: AccessLevel,
+    /// All of the user's current access levels.
     access_levels: Vec<AccessLevel>,
 }
 
 impl User {
     /// Creates a new User.
-    pub fn new(name: &str) -> User {
-        let ranks: Vec<_> = AccessLevelIterator::new(name).collect();
+    pub fn new(string: &str) -> User {
+        let ranks: Vec<_> = AccessLevelIterator::new(string).collect();
+        let mut state = &string[ranks.len()..];
+        let nickname = state.find('!').map_or(state, |i| &state[..i]).to_owned();
+        state = state.find('!').map_or("", |i| &state[i+1..]);
+        let username = state.find('@').map(|i| state[..i].to_owned());
+        let hostname = state.find('@').map(|i| state[i+1..].to_owned());
         User {
-            name: name[ranks.len()..].to_owned(),
+            nickname: nickname,
+            username: username,
+            hostname: hostname,
             access_levels: { 
                 let mut ranks = ranks.clone();
                 ranks.push(AccessLevel::Member);
@@ -39,8 +50,20 @@ impl User {
     }
 
     /// Gets the nickname of the user.
-    pub fn get_name(&self) -> &str {
-        &self.name
+    pub fn get_nickname(&self) -> &str {
+        &self.nickname
+    }
+
+    /// Gets the username of the user, if it's known.
+    /// This requires the IRCv3.2 extension `userhost-in-name`.
+    pub fn get_username(&self) -> Option<&str> {
+        self.username.as_ref().map(|s| &s[..])
+    }
+
+    /// Gets the hostname of the user, if it's known.
+    /// This requires the IRCv3.2 extension `userhost-in-name`.
+    pub fn get_hostname(&self) -> Option<&str> {
+        self.hostname.as_ref().map(|s| &s[..])
     }
 
     /// Gets the user's highest access level.
@@ -99,7 +122,8 @@ impl User {
 
 impl PartialEq for User {
     fn eq(&self, other: &User) -> bool {
-        self.name == other.name
+        self.nickname == other.nickname && self.username == other.username &&
+        self.hostname == other.hostname
     }
 }
 
@@ -215,7 +239,9 @@ mod test {
     fn create_user() {
         let user = User::new("~owner");
         let exp = User {
-            name: format!("owner"),
+            nickname: format!("owner"),
+            username: None,
+            hostname: None,
             highest_access_level: Owner,
             access_levels: vec![Owner, Member],
         };
@@ -228,7 +254,9 @@ mod test {
     fn create_user_complex() {
         let user = User::new("~&+user");
         let exp = User {
-            name: format!("user"),
+            nickname: format!("user"),
+            username: None,
+            hostname: None,
             highest_access_level: Owner,
             access_levels: vec![Owner, Admin, Voice, Member]
         };
@@ -239,9 +267,9 @@ mod test {
     }
 
     #[test]
-    fn get_name() {
+    fn get_nickname() {
         let user = User::new("~owner");
-        assert_eq!(user.get_name(), "owner");
+        assert_eq!(user.get_nickname(), "owner");
     }
 
     #[test]
