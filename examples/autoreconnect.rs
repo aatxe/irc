@@ -24,7 +24,7 @@ fn main() {
                 match msg {
                     Ok(msg) => { 
                         print!("{}", msg.into_string());
-                        match Command::from_message(&msg) {
+                        match (&msg).into() {
                             Ok(Command::PRIVMSG(_, msg)) => if msg.contains("bye") { 
                                 server.send_quit("").unwrap() 
                             },

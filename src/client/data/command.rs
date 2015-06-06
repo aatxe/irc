@@ -348,9 +348,9 @@ fn string(s: &'static str) -> String {
     s.to_owned()
 }
 
-impl Command {
+impl<'a> From<&'a Message> for Result<Command> {
     /// Converts a Message into a Command.
-    pub fn from_message(m: &Message) -> Result<Command> {
+    fn from(m: &'a Message) -> Result<Command> {
         Ok(if let "PASS" = &m.command[..] {
             match m.suffix {
                 Some(ref suffix) => {
@@ -1102,10 +1102,12 @@ impl Command {
             return Err(invalid_input())
         })
     }
+}
 
+impl Command {
     /// Converts a potential Message result into a potential Command result.
     pub fn from_message_io(m: Result<Message>) -> Result<Command> {
-        m.and_then(|msg| Command::from_message(&msg))
+        m.and_then(|msg| (&msg).into())
     }
 }
 
