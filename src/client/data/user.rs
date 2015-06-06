@@ -273,6 +273,22 @@ mod test {
     }
 
     #[test]
+    fn get_username() {
+        let user = User::new("user!username@hostname");
+        assert_eq!(user.get_username(), Some("username"));
+        let user = User::new("user");
+        assert_eq!(user.get_username(), None);
+    }
+
+    #[test]
+    fn get_hostname() {
+        let user = User::new("user!username@hostname");
+        assert_eq!(user.get_hostname(), Some("hostname"));
+        let user = User::new("user");
+        assert_eq!(user.get_hostname(), None);
+    }
+
+    #[test]
     fn access_level() {
         let user = User::new("~owner");
         assert_eq!(user.highest_access_level(), Owner);
