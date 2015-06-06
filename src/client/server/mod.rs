@@ -5,6 +5,7 @@ use std::borrow::ToOwned;
 use std::collections::HashMap;
 use std::error::Error as StdError;
 use std::io::{BufReader, BufWriter, Error, ErrorKind, Result};
+use std::path::Path;
 use std::sync::{Mutex, RwLock};
 use std::iter::Map;
 use client::conn::{Connection, NetStream};
@@ -49,8 +50,8 @@ pub type NetIrcServer = IrcServer<BufReader<NetStream>, BufWriter<NetStream>>;
 impl IrcServer<BufReader<NetStream>, BufWriter<NetStream>> {
     /// Creates a new IRC Server connection from the configuration at the specified path,
     /// connecting immediately.
-    pub fn new(config: &str) -> Result<NetIrcServer> {
-        IrcServer::from_config(try!(Config::load_utf8(config)))
+    pub fn new<P: AsRef<Path>>(config: P) -> Result<NetIrcServer> {
+        IrcServer::from_config(try!(Config::load(config)))
     }
 
     /// Creates a new IRC server connection from the specified configuration, connecting

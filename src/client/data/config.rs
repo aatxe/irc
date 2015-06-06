@@ -46,18 +46,13 @@ pub struct Config {
 
 impl Config {
     /// Loads a JSON configuration from the desired path.
-    pub fn load(path: &Path) -> Result<Config> {
+    pub fn load<P: AsRef<Path>>(path: P) -> Result<Config> {
         let mut file = try!(File::open(path));
         let mut data = String::new();
         try!(file.read_to_string(&mut data));
         decode(&data[..]).map_err(|_| 
             Error::new(ErrorKind::InvalidInput, "Failed to decode configuration file.")
         )
-    }
-
-    /// Loads a JSON configuration using the string as a UTF-8 path.
-    pub fn load_utf8(path: &str) -> Result<Config> {
-        Config::load(Path::new(path))
     }
 
     /// Determines whether or not the nickname provided is the owner of the bot.
@@ -186,7 +181,7 @@ mod test {
     }
 
     #[test]
-    fn load_utf8() {
+    fn load_from_str() {
         let cfg = Config {
             owners: Some(vec![format!("test")]),
             nickname: Some(format!("test")),
@@ -204,7 +199,7 @@ mod test {
             user_info: None,
             options: Some(HashMap::new()),
         };
-        assert_eq!(Config::load_utf8("client_config.json").unwrap(), cfg);
+        assert_eq!(Config::load("client_config.json").unwrap(), cfg);
     }
 
 
