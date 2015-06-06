@@ -24,6 +24,8 @@ pub enum Capability {
     EchoMessage,
     /// [invite-notify](http://ircv3.net/specs/extensions/invite-notify-3.2.html)
     InviteNotify,
+    /// [server-time](http://ircv3.net/specs/extensions/server-time-3.2.html)
+    ServerTime,
 }
 
 /// List of IRCv3 capability negotiation versions.
@@ -47,6 +49,7 @@ impl AsRef<str> for Capability {
             Capability::ChgHost => "chghost",
             Capability::EchoMessage => "echo-message",
             Capability::InviteNotify => "invite-notify",
+            Capability::ServerTime => "server-time",
         }
     }
 }
@@ -67,5 +70,6 @@ mod test {
         assert_eq!(ChgHost.as_ref(), "chghost");
         assert_eq!(EchoMessage.as_ref(), "echo-message");
         assert_eq!(InviteNotify.as_ref(), "invite-notify");
+        assert_eq!(ServerTime.as_ref(), "server-time");
     }
 }
