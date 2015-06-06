@@ -1106,7 +1106,11 @@ pub enum CapSubCommand {
     /// Does not acknowledge certain capabilities.
     NAK,
     /// Ends the capability negotiation before registration.
-    END
+    END,
+    /// Signals that new capabilities are now being offered.
+    NEW,
+    /// Signasl that the specified capabilities are cancelled and no longer available.
+    DEL,
 }
 
 impl CapSubCommand {
@@ -1119,6 +1123,8 @@ impl CapSubCommand {
             &CapSubCommand::ACK   => "ACK",
             &CapSubCommand::NAK   => "NAK",
             &CapSubCommand::END   => "END",
+            &CapSubCommand::NEW   => "NEW",
+            &CapSubCommand::DEL   => "DEL",
         }
     }
 
@@ -1138,6 +1144,8 @@ impl FromStr for CapSubCommand {
             "ACK"   => Ok(CapSubCommand::ACK),
             "NAK"   => Ok(CapSubCommand::NAK),
             "END"   => Ok(CapSubCommand::END),
+            "NEW"   => Ok(CapSubCommand::NEW),
+            "DEL"   => Ok(CapSubCommand::DEL),
             _       => Err("Failed to parse CAP subcommand."),
         }
     }

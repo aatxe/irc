@@ -16,6 +16,8 @@ pub enum Capability {
     Monitor,
     /// [account-tag](http://ircv3.net/specs/extensions/account-tag-3.2.html)
     AccountTag,
+    /// [cap-notify](http://ircv3.net/specs/extensions/cap-notify-3.2.html)
+    CapNotify,
 }
 
 /// List of IRCv3 capability negotiation versions.
@@ -35,6 +37,7 @@ impl AsRef<str> for Capability {
             Capability::ExtendedJoin => "extended-join",
             Capability::Monitor => "monitor",
             Capability::AccountTag => "account-tag",
+            Capability::CapNotify => "cap-notify",
         }
     }
 }
@@ -51,5 +54,6 @@ mod test {
         assert_eq!(ExtendedJoin.as_ref(), "extended-join");
         assert_eq!(Monitor.as_ref(), "monitor");
         assert_eq!(AccountTag.as_ref(), "account-tag");
+        assert_eq!(CapNotify.as_ref(), "cap-notify");
     }
 }
