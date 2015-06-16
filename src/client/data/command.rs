@@ -348,6 +348,12 @@ fn string(s: &'static str) -> String {
     s.to_owned()
 }
 
+impl From<Message> for Result<Command> {
+    fn from(m: Message) -> Result<Command> {
+        (&m).into()
+    }
+}
+
 impl<'a> From<&'a Message> for Result<Command> {
     /// Converts a Message into a Command.
     fn from(m: &'a Message) -> Result<Command> {
