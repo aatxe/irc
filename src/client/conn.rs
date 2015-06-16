@@ -330,7 +330,7 @@ mod test {
             vec.extend("PRIVMSG test :".as_bytes());
             vec.extend(data.iter());
             vec.extend("\r\n".as_bytes());
-            vec.into_iter().map(|b| *b).collect::<Vec<_>>()
+            vec.into_iter().collect::<Vec<_>>()
         }), sink());
         assert_eq!(&conn.recv("l9").unwrap()[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
