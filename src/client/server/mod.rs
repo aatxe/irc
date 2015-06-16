@@ -21,7 +21,7 @@ pub trait Server<'a, T, U> {
     /// Gets the configuration being used with this Server.
     fn config(&self) -> &Config;
     /// Sends a Command to this Server.
-    fn send<M: Into<Message>>(&self, message: M) -> Result<()>;
+    fn send<M: Into<Message>>(&self, message: M) -> Result<()> where Self: Sized;
     /// Gets an Iterator over Messages received by this Server.
     fn iter(&'a self) -> ServerIterator<'a, T, U>;
     /// Gets an Iterator over Commands received by this Server.
@@ -83,7 +83,7 @@ impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for IrcServer<T, U> {
     }
 
     #[cfg(not(feature = "encode"))]
-    fn send<M: Into<Message>>(&self, msg: M) -> Result<()> {
+    fn send<M: Into<Message>>(&self, msg: M) -> Result<()> where Self: Sized {
         self.conn.send(msg)
     }
 
