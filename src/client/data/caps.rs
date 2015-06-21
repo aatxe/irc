@@ -28,6 +28,8 @@ pub enum Capability {
     ServerTime,
     /// [userhost-in-names](http://ircv3.net/specs/extensions/userhost-in-names-3.2.html)
     UserhostInNames,
+    /// Custom IRCv3 capability extensions
+    Custom(&'static str),
 }
 
 /// List of IRCv3 capability negotiation versions.
@@ -53,6 +55,7 @@ impl AsRef<str> for Capability {
             Capability::InviteNotify => "invite-notify",
             Capability::ServerTime => "server-time",
             Capability::UserhostInNames => "userhost-in-names",
+            Capability::Custom(s) => s,
         }
     }
 }
@@ -75,5 +78,6 @@ mod test {
         assert_eq!(InviteNotify.as_ref(), "invite-notify");
         assert_eq!(ServerTime.as_ref(), "server-time");
         assert_eq!(UserhostInNames.as_ref(), "userhost-in-names");
+        assert_eq!(Custom("example").as_ref(), "example");
     }
 }
