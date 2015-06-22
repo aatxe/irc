@@ -45,7 +45,7 @@ impl Message {
         }
     }
 
-    /// Gets the nickname of the message source, if it exists. 
+    /// Gets the nickname of the message source, if it exists.
     pub fn get_source_nickname(&self) -> Option<&str> {
         self.prefix.as_ref().and_then(|s| s.find('!').map(|i| &s[..i]))
     }

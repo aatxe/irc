@@ -15,7 +15,7 @@ fn main() {
     let server = Arc::new(IrcServer::from_config(config).unwrap());
     server.identify().unwrap();
     let server = server.clone();
-    let _ = spawn(move || { 
+    let _ = spawn(move || {
         for msg in server.iter() {
             print!("{}", msg.unwrap().into_string());
         }

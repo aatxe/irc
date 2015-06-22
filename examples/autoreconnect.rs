@@ -13,20 +13,20 @@ fn main() {
         .. Default::default()
     };
     let server = Arc::new(IrcServer::from_config(config).unwrap());
-    // FIXME: if set_keepalive is stabilized, this can be readded. 
+    // FIXME: if set_keepalive is stabilized, this can be readded.
     // server.conn().set_keepalive(Some(5)).unwrap();
     let server = server.clone();
-    let _ = spawn(move || { 
+    let _ = spawn(move || {
         server.identify().unwrap();
         loop {
             let mut quit = false;
             for msg in server.iter() {
                 match msg {
-                    Ok(msg) => { 
+                    Ok(msg) => {
                         print!("{}", msg.into_string());
                         match (&msg).into() {
-                            Ok(Command::PRIVMSG(_, msg)) => if msg.contains("bye") { 
-                                server.send_quit("").unwrap() 
+                            Ok(Command::PRIVMSG(_, msg)) => if msg.contains("bye") {
+                                server.send_quit("").unwrap()
                             },
                             Ok(Command::ERROR(ref msg)) if msg.contains("Quit") => quit = true,
                             _ => (),
@@ -39,5 +39,5 @@ fn main() {
             server.reconnect().unwrap();
             server.identify().unwrap();
         }
-    }).join(); 
+    }).join();
 }

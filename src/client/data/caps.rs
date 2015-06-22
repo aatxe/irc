@@ -1,7 +1,7 @@
 //! Enumeration of all supported IRCv3 capability extensions.
 
 /// List of all supported IRCv3 capability extensions from the
-/// [IRCv3 specifications](http://ircv3.net/irc/). 
+/// [IRCv3 specifications](http://ircv3.net/irc/).
 #[derive(Debug, PartialEq)]
 pub enum Capability {
     /// [multi-prefix](http://ircv3.net/specs/extensions/multi-prefix-3.1.html)

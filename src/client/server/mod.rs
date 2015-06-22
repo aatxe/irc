@@ -125,7 +125,7 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
             if resp == Response::RPL_NAMREPLY {
                 if cfg!(not(feature = "nochanlists")) {
                     if let Some(users) = msg.suffix.clone() {
-                        if msg.args.len() == 3 { 
+                        if msg.args.len() == 3 {
                             // TODO: replace with slice pattern matching when/if stable
                             let ref chan = msg.args[2];
                             for user in users.split(" ") {
@@ -133,7 +133,7 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
                                     Some(vec) => { vec.push(User::new(user)); false },
                                     None => true,
                                 } {
-                                    self.chanlists.lock().unwrap().insert(chan.clone(), 
+                                    self.chanlists.lock().unwrap().insert(chan.clone(),
                                                                           vec!(User::new(user)));
                                 }
                             }
@@ -168,7 +168,7 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
         }
         if &msg.command[..] == "PING" {
             self.send(PONG(msg.suffix.as_ref().unwrap().to_owned(), None)).unwrap();
-        } else if cfg!(not(feature = "nochanlists")) && 
+        } else if cfg!(not(feature = "nochanlists")) &&
                   (&msg.command[..] == "JOIN" || &msg.command[..] == "PART") {
             let chan = match msg.suffix {
                 Some(ref suffix) => &suffix[..],
@@ -234,7 +234,7 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
                             self.send_ctcp_internal(resp, "SOURCE");
                         },
                         "PING" => self.send_ctcp_internal(resp, &format!("PING {}", tokens[1])),
-                        "TIME" => self.send_ctcp_internal(resp, &format!("TIME :{}", 
+                        "TIME" => self.send_ctcp_internal(resp, &format!("TIME :{}",
                                                                 now().rfc822z())),
                         "USERINFO" => self.send_ctcp_internal(resp, &format!("USERINFO :{}",
                                                                     self.config.user_info())),
@@ -293,7 +293,7 @@ impl<'a, T: IrcRead, U: IrcWrite> Iterator for ServerIterator<'a, T, U> {
                     self.server.handle_message(&msg);
                     Ok(msg)
                 },
-                Err(_) => Err(Error::new(ErrorKind::InvalidInput, 
+                Err(_) => Err(Error::new(ErrorKind::InvalidInput,
                     &format!("Failed to parse message. (Message: {})", msg)[..]
                 ))
             }

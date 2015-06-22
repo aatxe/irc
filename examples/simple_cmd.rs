@@ -11,7 +11,7 @@ fn main() {
         channels: Some(vec![format!("#vana")]),
         .. Default::default()
     };
-    let server = IrcServer::from_config(config).unwrap();    
+    let server = IrcServer::from_config(config).unwrap();
     server.identify().unwrap();
     for command in server.iter_cmd() {
         // Use of unwrap() on the results of iter_cmd() is discouraged since response codes will be

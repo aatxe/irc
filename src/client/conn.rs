@@ -79,7 +79,7 @@ impl Connection<BufReader<NetStream>, BufWriter<NetStream>> {
         Ok(())
     }
 
-    
+
     /*
     FIXME: removed until set_keepalive is stabilized.
     /// Sets the keepalive for the network stream.
@@ -120,7 +120,7 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
         let msg: Message = to_msg.into();
         let data = match encoding.encode(&msg.into_string(), EncoderTrap::Replace) {
             Ok(data) => data,
-            Err(data) => return Err(Error::new(ErrorKind::InvalidInput, 
+            Err(data) => return Err(Error::new(ErrorKind::InvalidInput,
                 &format!("Failed to encode {} as {}.", data, encoding.name())[..]
             ))
         };
@@ -129,7 +129,7 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
         writer.flush()
     }
 
-    /// Sends a message over this connection. 
+    /// Sends a message over this connection.
     #[cfg(not(feature = "encode"))]
     pub fn send<M: Into<Message>>(&self, to_msg: M) -> Result<()> {
         let mut writer = self.writer.lock().unwrap();
@@ -152,7 +152,7 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
             match encoding.decode(&buf, DecoderTrap::Replace) {
                 _ if buf.is_empty() => Err(Error::new(ErrorKind::Other, "EOF")),
                 Ok(data) => Ok(data),
-                Err(data) => return Err(Error::new(ErrorKind::InvalidInput, 
+                Err(data) => return Err(Error::new(ErrorKind::InvalidInput,
                     &format!("Failed to decode {} as {}.", data, encoding.name())[..]
                 ))
             }
@@ -187,7 +187,7 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
 fn ssl_to_io<T>(res: StdResult<T, SslError>) -> Result<T> {
     match res {
         Ok(x) => Ok(x),
-        Err(e) => Err(Error::new(ErrorKind::Other, 
+        Err(e) => Err(Error::new(ErrorKind::Other,
             &format!("An SSL error occurred. ({})", e.description())[..]
         )),
     }
@@ -250,7 +250,7 @@ mod test {
         let data = String::from_utf8(conn.writer().to_vec()).unwrap();
         assert_eq!(&data[..], "PRIVMSG test :Testing!\r\n");
     }
-    
+
     #[test]
     #[cfg(not(feature = "encode"))]
     fn send_str() {

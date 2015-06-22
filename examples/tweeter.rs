@@ -11,13 +11,13 @@ fn main() {
         server: Some(format!("irc.fyrechat.net")),
         channels: Some(vec![format!("#vana")]),
         .. Default::default()
-    }; 
+    };
     let server = Arc::new(IrcServer::from_config(config).unwrap());
     server.identify().unwrap();
     let server2 = server.clone();
     // Let's set up a loop that just prints the messages.
-    spawn(move || { 
-        server2.iter().map(|m| print!("{}", m.unwrap().into_string())).count(); 
+    spawn(move || {
+        server2.iter().map(|m| print!("{}", m.unwrap().into_string())).count();
     });
     loop {
         server.send_privmsg("#vana", "TWEET TWEET").unwrap();

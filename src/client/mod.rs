@@ -15,7 +15,7 @@ pub mod prelude {
 #[cfg(test)]
 pub mod test {
     use std::io::{BufReader, Empty, empty};
-    
+
     pub fn buf_empty() -> BufReader<Empty> {
         BufReader::new(empty())
     }

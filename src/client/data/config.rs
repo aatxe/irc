@@ -50,7 +50,7 @@ impl Config {
         let mut file = try!(File::open(path));
         let mut data = String::new();
         try!(file.read_to_string(&mut data));
-        decode(&data[..]).map_err(|_| 
+        decode(&data[..]).map_err(|_|
             Error::new(ErrorKind::InvalidInput, "Failed to decode configuration file.")
         )
     }
@@ -128,7 +128,7 @@ impl Config {
     /// Gets the channels to join upon connection.
     /// This defaults to an empty vector if it's not specified.
     pub fn channels(&self) -> Vec<&str> {
-        self.channels.as_ref().map(|v| v.iter().map(|s| &s[..]).collect()).unwrap_or(vec![])    
+        self.channels.as_ref().map(|v| v.iter().map(|s| &s[..]).collect()).unwrap_or(vec![])
     }
 
     /// Gets the user modes to set on connect specified in the configuration.

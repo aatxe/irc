@@ -130,7 +130,7 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
         self.send(INVITE(nick.to_owned(), chan.to_owned()))
     }
 
-    /// Quits the server entirely with a message. 
+    /// Quits the server entirely with a message.
     /// This defaults to `Powered by Rust.` if none is specified.
     fn send_quit(&self, msg: &str) -> Result<()> where Self: Sized {
         self.send(QUIT(Some(if msg.len() == 0 {
@@ -212,7 +212,7 @@ mod test {
 
     #[test]
     fn identify() {
-        let server = IrcServer::from_connection(test_config(), 
+        let server = IrcServer::from_connection(test_config(),
                      Connection::new(buf_empty(), Vec::new()));
         server.identify().unwrap();
         assert_eq!(&get_server_value(server)[..], "CAP END\r\nNICK :test\r\n\

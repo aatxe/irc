@@ -32,7 +32,7 @@ impl User {
             nickname: nickname,
             username: username,
             hostname: hostname,
-            access_levels: { 
+            access_levels: {
                 let mut ranks = ranks.clone();
                 ranks.push(AccessLevel::Member);
                 ranks
@@ -96,7 +96,7 @@ impl User {
     /// Adds an access level to the list, and updates the highest level if necessary.
     fn add_access_level(&mut self, level: AccessLevel) {
         if level > self.highest_access_level() {
-            self.highest_access_level = level   
+            self.highest_access_level = level
         }
         self.access_levels.push(level.clone())
     }
@@ -178,7 +178,7 @@ impl PartialOrd for AccessLevel {
                 }
             },
             &AccessLevel::Member => Some(Less),
-        }    
+        }
     }
 }
 

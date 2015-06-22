@@ -461,7 +461,7 @@ impl<'a> From<&'a Message> for Result<Command> {
                 } else if m.args.len() == 2 {
                     Command::JOIN(m.args[0].clone(), Some(m.args[1].clone()), None)
                 } else if m.args.len() == 3 {
-                    Command::JOIN(m.args[0].clone(), Some(m.args[1].clone()), 
+                    Command::JOIN(m.args[0].clone(), Some(m.args[1].clone()),
                                   Some(m.args[2].clone()))
                 } else {
                     return Err(invalid_input())
@@ -750,7 +750,7 @@ impl<'a> From<&'a Message> for Result<Command> {
                 } else if m.args.len() == 1 {
                     Command::WHOWAS(m.args[0].clone(), None, Some(suffix.clone()))
                 } else if m.args.len() == 2 {
-                    Command::WHOWAS(m.args[0].clone(), Some(m.args[1].clone()), 
+                    Command::WHOWAS(m.args[0].clone(), Some(m.args[1].clone()),
                                     Some(suffix.clone()))
                 } else {
                     return Err(invalid_input())
@@ -760,7 +760,7 @@ impl<'a> From<&'a Message> for Result<Command> {
                 } else if m.args.len() == 2 {
                     Command::WHOWAS(m.args[0].clone(), None, Some(m.args[1].clone()))
                 } else if m.args.len() == 3 {
-                    Command::WHOWAS(m.args[0].clone(), Some(m.args[1].clone()), 
+                    Command::WHOWAS(m.args[0].clone(), Some(m.args[1].clone()),
                                     Some(m.args[2].clone()))
                 } else {
                     return Err(invalid_input())
@@ -854,7 +854,7 @@ impl<'a> From<&'a Message> for Result<Command> {
                 } else if m.args.len() == 1 {
                     Command::SUMMON(m.args[0].clone(), Some(suffix.clone()), None)
                 } else if m.args.len() == 2 {
-                    Command::SUMMON(m.args[0].clone(), Some(m.args[1].clone()), 
+                    Command::SUMMON(m.args[0].clone(), Some(m.args[1].clone()),
                                     Some(suffix.clone()))
                 } else {
                     return Err(invalid_input())
@@ -864,7 +864,7 @@ impl<'a> From<&'a Message> for Result<Command> {
                 } else if m.args.len() == 2 {
                     Command::SUMMON(m.args[0].clone(), Some(m.args[1].clone()), None)
                 } else if m.args.len() == 3 {
-                    Command::SUMMON(m.args[0].clone(), Some(m.args[1].clone()), 
+                    Command::SUMMON(m.args[0].clone(), Some(m.args[1].clone()),
                                     Some(m.args[2].clone()))
                 } else {
                     return Err(invalid_input())
@@ -1044,7 +1044,7 @@ impl<'a> From<&'a Message> for Result<Command> {
             } else if m.args.len() == 2 {
                 if let Ok(cmd) = m.args[0].parse() {
                     match m.suffix {
-                        Some(ref suffix) => Command::CAP(None, cmd, Some(m.args[1].clone()), 
+                        Some(ref suffix) => Command::CAP(None, cmd, Some(m.args[1].clone()),
                                                          Some(suffix.clone())),
                         None => Command::CAP(None, cmd, Some(m.args[1].clone()), None),
                     }
@@ -1060,7 +1060,7 @@ impl<'a> From<&'a Message> for Result<Command> {
             } else if m.args.len() == 3 {
                 if let Ok(cmd) = m.args[1].parse() {
                     match m.suffix {
-                        Some(ref suffix) => Command::CAP(Some(m.args[0].clone()), cmd, 
+                        Some(ref suffix) => Command::CAP(Some(m.args[0].clone()), cmd,
                                                          Some(m.args[2].clone()),
                                                          Some(suffix.clone())),
                         None => Command::CAP(Some(m.args[0].clone()), cmd, Some(m.args[2].clone()),

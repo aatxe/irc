@@ -74,7 +74,7 @@ pub enum Response {
     RPL_ENDOFEXCEPTLIST = 349,
     /// 351 <version>.<debuglevel> <server> :<comments>
     RPL_VERSION         = 351,
-    /// 352 <channel> <user> <host> <server> <nick> ( "H" / "G" > ["*"] [ ( "@" / "+" ) ] 
+    /// 352 <channel> <user> <host> <server> <nick> ( "H" / "G" > ["*"] [ ( "@" / "+" ) ]
     /// :<hopcount> <real name>
     RPL_WHOREPLY        = 352,
     /// 315 <name> :End of WHO list
@@ -95,7 +95,7 @@ pub enum Response {
     RPL_INFO            = 371,
     /// 374 :End of INFO list
     RPL_ENDOFINFO       = 374,
-    /// 375 :- <server> Message of the day - 
+    /// 375 :- <server> Message of the day -
     RPL_MOTDSTART       = 375,
     /// 372 :- <text>
     RPL_MOTD            = 372,
@@ -190,7 +190,7 @@ pub enum Response {
     /// 733 <nick> :End of MONITOR list
     RPL_ENDOFMONLIST    = 733,
 
-    
+
     // Error replies
     /// 401 <nickname> :No such nick/channel
     ERR_NOSUCHNICK          = 401,
@@ -304,11 +304,11 @@ pub enum Response {
 
 impl Response {
     /// Gets a response from a message.
-    pub fn from_message(m: &Message) -> Option<Response> { 
+    pub fn from_message(m: &Message) -> Option<Response> {
         m.command.parse().ok()
     }
 
-    /// Determines whether or not this response is an error response. 
+    /// Determines whether or not this response is an error response.
     pub fn is_error(&self) -> bool {
         *self as u16 >= 400
     }
@@ -320,12 +320,12 @@ impl FromStr for Response {
         if let Ok(rc) = s.parse::<u16>() {
             // This wall of text was brought to you by the removal of FromPrimitive.
             if (rc > 0 && rc < 5) || (rc > 200 && rc < 213) || rc == 219 || rc == 221 || rc == 234
-               || rc == 235 || rc == 242 || rc == 243 || (rc > 250 && rc < 260) || 
-               (rc > 260 && rc < 264) || (rc > 300 && rc < 307) || 
-               (rc > 310 && rc < 326 && rc != 320) || rc == 331 || rc == 332 || rc == 341 || 
-               rc == 342 || (rc > 345 && rc < 354 && rc != 350) || 
-               (rc > 363 && rc < 377 && rc != 370) || (rc > 380 && rc < 384) || 
-               (rc > 390 && rc < 396) || (rc > 400 && rc < 415 && rc != 410) || 
+               || rc == 235 || rc == 242 || rc == 243 || (rc > 250 && rc < 260) ||
+               (rc > 260 && rc < 264) || (rc > 300 && rc < 307) ||
+               (rc > 310 && rc < 326 && rc != 320) || rc == 331 || rc == 332 || rc == 341 ||
+               rc == 342 || (rc > 345 && rc < 354 && rc != 350) ||
+               (rc > 363 && rc < 377 && rc != 370) || (rc > 380 && rc < 384) ||
+               (rc > 390 && rc < 396) || (rc > 400 && rc < 415 && rc != 410) ||
                (rc > 420 && rc < 425) || (rc > 430 && rc < 434) || rc == 436 || rc == 437 ||
                (rc > 440 && rc < 447) || rc == 451 || (rc > 460 && rc < 468) ||
                (rc > 470 && rc < 479) || (rc > 480 && rc < 486) || rc == 491 || rc == 501 ||
@@ -336,7 +336,7 @@ impl FromStr for Response {
             }
         } else {
             Err("Failed to parse response code.")
-        }   
+        }
     }
 }
 
