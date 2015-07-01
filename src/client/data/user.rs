@@ -192,28 +192,28 @@ impl FromStr for AccessLevel {
             Some('%') => Ok(AccessLevel::HalfOp),
             Some('+') => Ok(AccessLevel::Voice),
             None => Err("No access level in an empty string."),
-             _  =>Err("Failed to parse access level."),
+             _  => Err("Failed to parse access level."),
         }
     }
 }
 
 /// An iterator used to parse access levels from strings.
-struct AccessLevelIterator<'a> {
-    value: &'a str,
+struct AccessLevelIterator {
+    value: String,
 }
 
-impl<'a> AccessLevelIterator<'a> {
-    pub fn new(value: &'a str) -> AccessLevelIterator<'a> {
-        AccessLevelIterator { value: value }
+impl AccessLevelIterator {
+    pub fn new(value: &str) -> AccessLevelIterator {
+        AccessLevelIterator { value: value.to_owned() }
     }
 }
 
-impl<'a> Iterator for AccessLevelIterator<'a> {
+impl Iterator for AccessLevelIterator {
     type Item = AccessLevel;
     fn next(&mut self) -> Option<AccessLevel> {
         let ret = self.value.parse();
         if self.value.len() > 0 {
-            self.value = &self.value[1..];
+            self.value = self.value.chars().skip(1).collect()
         }
         ret.ok()
     }
