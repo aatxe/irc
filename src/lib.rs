@@ -1,6 +1,5 @@
 //! A simple, thread-safe IRC library.
-#![crate_name = "irc"]
-#![crate_type = "lib"]
+
 #![warn(missing_docs)]
 
 #[cfg(feature = "ctcp")] extern crate time;
