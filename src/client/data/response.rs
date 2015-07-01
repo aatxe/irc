@@ -189,7 +189,12 @@ pub enum Response {
     RPL_MONLIST         = 732,
     /// 733 <nick> :End of MONITOR list
     RPL_ENDOFMONLIST    = 733,
-
+    /// 760 <target> <key> <visibility> :<value>
+    RPL_WHOISKEYVALUE   = 760,
+    /// 761 <target> <key> <visibility> :[<value>]
+    RPL_KEYVALUE        = 761,
+    /// 762 :end of metadata
+    RPL_METADATAEND     = 762,
 
     // Error replies
     /// 401 <nickname> :No such nick/channel
@@ -300,6 +305,19 @@ pub enum Response {
     ERR_USERSDONTMATCH      = 502,
     /// 734 <nick> <limit> <targets> :Monitor list is full.
     ERR_MONLISTFULL         = 734,
+    /// 764 <target> :metadata limit reached
+    ERR_METADATALIMIT       = 764,
+    /// 765 <target> :invalid metadata target
+    ERR_TARGETINVALID       = 765,
+    /// 766 <key> :no matching key
+    ERR_NOMATCHINGKEY       = 766,
+    /// 767 <key> :invalid metadata key
+    ERR_KEYINVALID          = 767,
+    /// 768 <target> <key> :key not set
+    ERR_KEYNOTSET           = 768,
+    /// 769 <target> <key> :permission denied
+    ERR_KEYNOPERMISSION     = 779,
+
 }
 
 impl Response {
@@ -329,7 +347,7 @@ impl FromStr for Response {
                (rc > 420 && rc < 425) || (rc > 430 && rc < 434) || rc == 436 || rc == 437 ||
                (rc > 440 && rc < 447) || rc == 451 || (rc > 460 && rc < 468) ||
                (rc > 470 && rc < 479) || (rc > 480 && rc < 486) || rc == 491 || rc == 501 ||
-               rc == 502 || (rc > 729 && rc < 735) {
+               rc == 502 || (rc > 729 && rc < 735) || (rc > 759 && rc < 770 && rc != 763) {
                 Ok(unsafe { transmute(rc) })
             } else {
                 Err("Failed to parse due to unknown response code.")

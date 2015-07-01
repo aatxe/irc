@@ -157,6 +157,8 @@ pub enum Command {
     // JOIN(String, Option<String>, Option<String>),
 
     // IRCv3.2 extensions
+    /// METADATA target COMMAND [params] :[param]
+    METADATA(String, MetadataSubCommand, Option<Vec<String>>, Option<String>),
     /// MONITOR command [nicklist]
     MONITOR(String, Option<String>),
     /// CHGHOST user host
@@ -333,6 +335,11 @@ impl Into<Message> for Command {
             Command::ACCOUNT(a) =>
                 Message::from_owned(None, string("ACCOUNT"), Some(vec![a]), None),
 
+            Command::METADATA(t, c, None, p) =>
+                Message::from_owned(None, string("METADATA"), Some(vec![t, c.string()]), p),
+            Command::METADATA(t, c, Some(a), p) =>
+                Message::from_owned(None, string("METADATA"),
+                                    Some(vec![t, c.string()].into_iter().chain(a).collect()), p),
             Command::MONITOR(c, Some(t)) =>
                 Message::from_owned(None, string("MONITOR"), Some(vec![c, t]), None),
             Command::MONITOR(c, None) =>
@@ -1085,6 +1092,24 @@ impl<'a> From<&'a Message> for Result<Command> {
                     return Err(invalid_input())
                 }
             }
+        } else if let "METADATA" = &m.command[..] {
+            if m.args.len() == 2 {
+                match m.suffix {
+                    Some(_) => return Err(invalid_input()),
+                    None => match m.args[1].parse() {
+                        Ok(c) => Command::METADATA(m.args[0].clone(), c, None, None),
+                        Err(_) => return Err(invalid_input()),
+                    },
+                }
+            } else if m.args.len() > 2 {
+                match m.args[1].parse() {
+                    Ok(c) => Command::METADATA(m.args[0].clone(), c, Some(m.args[1..].to_owned()),
+                                                 m.suffix.clone()),
+                    Err(_) => return Err(invalid_input()),
+                }
+            } else {
+                return Err(invalid_input())
+            }
         } else if let "MONITOR" = &m.command[..] {
             if m.args.len() == 1 {
                 Command::MONITOR(m.args[0].clone(), m.suffix.clone())
@@ -1175,6 +1200,51 @@ impl FromStr for CapSubCommand {
         }
     }
 }
+
+/// A list of all the subcommands for the
+/// [metadata extension](http://ircv3.net/specs/core/metadata-3.2.html).
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum MetadataSubCommand {
+    /// Looks up the value for some keys.
+    GET,
+    /// Lists all of the metadata keys and values.
+    LIST,
+    /// Sets the value for some key.
+    SET,
+    /// Removes all metadata.
+    CLEAR,
+}
+
+impl MetadataSubCommand {
+    /// Gets the string that corresponds to this subcommand.
+    pub fn to_str(&self) -> &str {
+        match self {
+            &MetadataSubCommand::GET   => "GET",
+            &MetadataSubCommand::LIST  => "LIST",
+            &MetadataSubCommand::SET   => "SET",
+            &MetadataSubCommand::CLEAR => "CLEAR",
+        }
+    }
+
+    // This makes some earlier lines shorter.
+    fn string(&self) -> String {
+        self.to_str().to_owned()
+    }
+}
+
+impl FromStr for MetadataSubCommand {
+    type Err = &'static str;
+    fn from_str(s: &str) -> StdResult<MetadataSubCommand, &'static str> {
+        match s {
+            "GET"   => Ok(MetadataSubCommand::GET),
+            "LIST"  => Ok(MetadataSubCommand::LIST),
+            "SET"   => Ok(MetadataSubCommand::SET),
+            "CLEAR" => Ok(MetadataSubCommand::CLEAR),
+            _       => Err("Failed to parse METADATA subcommand."),
+        }
+    }
+}
+
 
 /// Produces an invalid_input IoError.
 fn invalid_input() -> Error {
