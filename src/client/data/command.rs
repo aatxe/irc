@@ -17,6 +17,8 @@ pub enum Command {
     NICK(String),
     /// USER user mode * :realname
     USER(String, String, String),
+    /// ACTION :action
+    ACTION(String),
     /// OPER name :password
     OPER(String, String),
     /// MODE nickname modes
@@ -171,6 +173,7 @@ impl Into<Message> for Command {
             Command::NICK(n) => Message::from_owned(None, string("NICK"), None, Some(n)),
             Command::USER(u, m, r) =>
                 Message::from_owned(None, string("USER"), Some(vec![u, m, string("*")]), Some(r)),
+            Command::ACTION(w) => Message::from_owned(None, string("ACTION"), None, Some(w)),
             Command::OPER(u, p) =>
                 Message::from_owned(None, string("OPER"), Some(vec![u]), Some(p)),
             Command::MODE(t, m, Some(p)) =>
@@ -388,6 +391,17 @@ impl<'a> From<&'a Message> for Result<Command> {
                 None => {
                     if m.args.len() != 3 { return Err(invalid_input()) }
                     Command::USER(m.args[0].clone(), m.args[1].clone(), m.args[2].clone())
+                }
+            }
+        } else if let "ACTION" = &m.command[..] {
+            match m.suffix {
+                Some(ref suffix) => {
+                    if m.args.len() != 0 { return Err(invalid_input()) }
+                    Command::ACTION(suffix.clone())
+                },
+                None => {
+                    if m.args.len() != 1 { return Err(invalid_input()) }
+                    Command::ACTION(m.args[0].clone())
                 }
             }
         } else if let "OPER" = &m.command[..] {
