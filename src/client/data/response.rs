@@ -1,14 +1,32 @@
 //! Enumeration of all the possible server responses.
 #![allow(non_camel_case_types)]
-use std::mem::transmute;
 use std::str::FromStr;
 use client::data::message::Message;
 
-/// List of all server responses as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812).
-/// All commands are documented with their expected form from the RFC.
-#[derive(Clone, Copy, Debug, PartialEq)]
-#[repr(u16)]
-pub enum Response {
+macro_rules! make_response {
+    ($(#[$attr:meta] $variant:ident = $value:expr),+) => {
+        /// List of all server responses as defined in
+        /// [RFC 2812](http://tools.ietf.org/html/rfc2812).
+        /// All commands are documented with their expected form from the RFC.
+        #[derive(Clone, Copy, Debug, PartialEq)]
+        #[repr(u16)]
+        pub enum Response {
+            $(#[$attr] $variant = $value),+
+        }
+
+        impl Response {
+            /// Generates a Response from a u16.
+            fn from_u16(val: u16) -> Option<Response> {
+                match val {
+                    $($value => Some(Response::$variant),)+
+                    _ => None
+                }
+            }
+        }
+    }
+}
+
+make_response! {
     // Expected replies
     /// 001 Welcome to the Internet Relay Network <nick>!<user>@<host>
     RPL_WELCOME         = 001,
@@ -74,8 +92,8 @@ pub enum Response {
     RPL_ENDOFEXCEPTLIST = 349,
     /// 351 <version>.<debuglevel> <server> :<comments>
     RPL_VERSION         = 351,
-    /// 352 <channel> <user> <host> <server> <nick> ( "H" / "G" > ["*"] [ ( "@" / "+" ) ]
-    /// :<hopcount> <real name>
+    /** 352 <channel> <user> <host> <server> <nick> ( "H" / "G" > ["*"] [ ( "@" / "+" ) ]
+        :<hopcount> <real name> **/
     RPL_WHOREPLY        = 352,
     /// 315 <name> :End of WHO list
     RPL_ENDOFWHO        = 315,
@@ -117,8 +135,8 @@ pub enum Response {
     RPL_ENDOFUSERS      = 394,
     /// 395 :Nobody logged in
     RPL_NOUSERS         = 395,
-    /// 200 Link <version & debug level> <destination> <next server> V<protocol version>
-    /// <link uptime in seconds> <backstream sendq> <upstream sendq>
+    /** 200 Link <version & debug level> <destination> <next server> V<protocol version>
+        <link uptime in seconds> <backstream sendq> <upstream sendq> **/
     RPL_TRACELINK       = 200,
     /// 201 Try. <class> <server>
     RPL_TRACECONNECTING = 201,
@@ -144,8 +162,8 @@ pub enum Response {
     RPL_TRACELOG        = 261,
     /// 262 <server name> <version & debug level> :End of TRACE
     RPL_TRACEEND        = 262,
-    /// 211 <linkname> <sendq> <sent messages> <sent Kbytes> <received messages> <received Kbytes>
-    /// <time open>
+    /** 211 <linkname> <sendq> <sent messages> <sent Kbytes> <received messages> <received Kbytes>
+        <time open> **/
     RPL_STATSLINKINFO   = 211,
     /// 212 <command> <count> <byte count> <remote count>
     RPL_STATSCOMMANDS   = 212,
@@ -316,7 +334,7 @@ pub enum Response {
     /// 768 <target> <key> :key not set
     ERR_KEYNOTSET           = 768,
     /// 769 <target> <key> :permission denied
-    ERR_KEYNOPERMISSION     = 779,
+    ERR_KEYNOPERMISSION     = 779
 
 }
 
@@ -335,22 +353,10 @@ impl Response {
 impl FromStr for Response {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Response, &'static str> {
-        if let Ok(rc) = s.parse::<u16>() {
-            // This wall of text was brought to you by the removal of FromPrimitive.
-            if (rc > 0 && rc < 5) || (rc > 200 && rc < 213) || rc == 219 || rc == 221 || rc == 234
-               || rc == 235 || rc == 242 || rc == 243 || (rc > 250 && rc < 260) ||
-               (rc > 260 && rc < 264) || (rc > 300 && rc < 307) ||
-               (rc > 310 && rc < 326 && rc != 320) || rc == 331 || rc == 332 || rc == 341 ||
-               rc == 342 || (rc > 345 && rc < 354 && rc != 350) ||
-               (rc > 363 && rc < 377 && rc != 370) || (rc > 380 && rc < 384) ||
-               (rc > 390 && rc < 396) || (rc > 400 && rc < 415 && rc != 410) ||
-               (rc > 420 && rc < 425) || (rc > 430 && rc < 434) || rc == 436 || rc == 437 ||
-               (rc > 440 && rc < 447) || rc == 451 || (rc > 460 && rc < 468) ||
-               (rc > 470 && rc < 479) || (rc > 480 && rc < 486) || rc == 491 || rc == 501 ||
-               rc == 502 || (rc > 729 && rc < 735) || (rc > 759 && rc < 770 && rc != 763) {
-                Ok(unsafe { transmute(rc) })
-            } else {
-                Err("Failed to parse due to unknown response code.")
+        if let Ok(rc) = s.parse() {
+            match Response::from_u16(rc) {
+                Some(r) => Ok(r),
+                None => Err("Failed to parse due to unknown response code.")
             }
         } else {
             Err("Failed to parse response code.")
