@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>client</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../conn/index.html' title='Thread-safe connections on IrcStreams.'>conn</a><a class='mod current' href='../data/index.html' title='Data related to IRC functionality.'>data</a><a class='mod ' href='../prelude/index.html' title='A client-side IRC prelude, re-exporting all the necessary basics.'>prelude</a><a class='mod ' href='../server/index.html' title='Interface for working with IRC Servers.'>server</a></div>
+        <p class='location'><a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>client</a></p><script>window.sidebarCurrent = {name: 'data', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,53 +41,76 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>client</a>::<wbr><a class='mod' href=''>data</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-1053' href='../../../src/irc/client/data/mod.rs.html#1-29'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>client</a>::<wbr><a class='mod' href=''>data</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1026' class='srclink' href='../../../src/irc/client/data/mod.rs.html#1-27' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Data related to IRC functionality.</p>
 </div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
-<table><tr><td><code>pub use client::data::command::<a class='enum' href='../../../irc/client/data/command/enum.Command.html' title='irc::client::data::command::Command'>Command</a>;</code></td></tr><tr><td><code>pub use client::data::config::<a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a>;</code></td></tr><tr><td><code>pub use client::data::message::{<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>, <a class='trait' href='../../../irc/client/data/message/trait.ToMessage.html' title='irc::client::data::message::ToMessage'>ToMessage</a>};</code></td></tr><tr><td><code>pub use client::data::response::<a class='enum' href='../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a>;</code></td></tr><tr><td><code>pub use client::data::user::{<a class='enum' href='../../../irc/client/data/user/enum.AccessLevel.html' title='irc::client::data::user::AccessLevel'>AccessLevel</a>, <a class='struct' href='../../../irc/client/data/user/struct.User.html' title='irc::client::data::user::User'>User</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr><td><code>pub use client::data::caps::{<a class='enum' href='../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a>, <a class='enum' href='../../../irc/client/data/caps/enum.NegotiationVersion.html' title='irc::client::data::caps::NegotiationVersion'>NegotiationVersion</a>};</code></td></tr><tr><td><code>pub use client::data::command::<a class='enum' href='../../../irc/client/data/command/enum.Command.html' title='irc::client::data::command::Command'>Command</a>;</code></td></tr><tr><td><code>pub use client::data::config::<a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a>;</code></td></tr><tr><td><code>pub use client::data::message::<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>;</code></td></tr><tr><td><code>pub use client::data::response::<a class='enum' href='../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a>;</code></td></tr><tr><td><code>pub use client::data::user::{<a class='enum' href='../../../irc/client/data/user/enum.AccessLevel.html' title='irc::client::data::user::AccessLevel'>AccessLevel</a>, <a class='struct' href='../../../irc/client/data/user/struct.User.html' title='irc::client::data::user::User'>User</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='command/index.html'
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='caps/index.html'
+                               title='irc::client::data::caps'>caps</a></td>
+                        <td class='docblock short'>
+                             <p>Enumeration of all supported IRCv3 capability extensions.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='command/index.html'
                                title='irc::client::data::command'>command</a></td>
-                        <td class='docblock short'><p>Enumeration of all available client commands.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Enumeration of all available client commands.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='config/index.html'
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='config/index.html'
                                title='irc::client::data::config'>config</a></td>
-                        <td class='docblock short'><p>JSON configuration files using libserialize.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>JSON configuration files using libserialize.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='kinds/index.html'
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='kinds/index.html'
                                title='irc::client::data::kinds'>kinds</a></td>
-                        <td class='docblock short'><p>Trait definitions of appropriate Writers and Buffers for use with this library.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Trait definitions of appropriate Writers and Buffers for use with this library.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='message/index.html'
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='message/index.html'
                                title='irc::client::data::message'>message</a></td>
-                        <td class='docblock short'><p>Messages to and from the server.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Messages to and from the server.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='response/index.html'
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='response/index.html'
                                title='irc::client::data::response'>response</a></td>
-                        <td class='docblock short'><p>Enumeration of all the possible server responses.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Enumeration of all the possible server responses.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='user/index.html'
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='user/index.html'
                                title='irc::client::data::user'>user</a></td>
-                        <td class='docblock short'><p>Data for tracking user information.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Data for tracking user information.</p>
+
+                        </td>
                     </tr>
                 </table></section>
     <section id='search' class="content hidden"></section>
@@ -121,6 +144,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

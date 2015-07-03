@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.24/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/nightly/cargo/registry/src/github.com-0a35038f75765ae4/encoding-0.2.32/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -281,6 +281,41 @@
 <span id="239">239</span>
 <span id="240">240</span>
 <span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
 </pre><pre class='rust '>
 <span class='comment'>// This is a part of rust-encoding.</span>
 <span class='comment'>// Copyright (c) 2013-2015, Kang Seonghoon.</span>
@@ -288,13 +323,35 @@
 
 <span class='doccomment'>/*!
 
-# Encoding 0.2.24
+# Encoding 0.2.32
 
 Character encoding support for Rust. (also known as `rust-encoding`)
 It is based on [WHATWG Encoding Standard](http://encoding.spec.whatwg.org/),
 and also provides an advanced interface for error detection and recovery.
 
-## Simple Usage
+## Usage
+
+Put this in your `Cargo.toml`:
+
+```toml
+[dependencies]
+encoding = &quot;0.2&quot;
+```
+
+Or in the case you are using Rust 1.0 beta, pin the exact version:
+
+```toml
+[dependencies]
+encoding = &quot;=0.2.32&quot;
+```
+
+Then put this in your crate root:
+
+```rust
+extern crate encoding;
+```
+
+## Overview
 
 To encode a string:
 
@@ -344,6 +401,22 @@ assert_eq!(ISO_8859_6.decode(&amp;[65,99,109,101,169], DecoderTrap::Ignore),
            Ok(&quot;Acme&quot;.to_string()));
 ~~~~
 
+To encode or decode the input into the already allocated buffer:
+
+~~~~ {.rust}
+use encoding::{Encoding, EncoderTrap, DecoderTrap};
+use encoding::all::{ISO_8859_2, ISO_8859_6};
+
+let mut bytes = Vec::new();
+let mut chars = String::new();
+
+assert!(ISO_8859_2.encode_to(&quot;Acme\u{a9}&quot;, EncoderTrap::Ignore, &amp;mut bytes).is_ok());
+assert!(ISO_8859_6.decode_to(&amp;[65,99,109,101,169], DecoderTrap::Replace, &amp;mut chars).is_ok());
+
+assert_eq!(bytes, [65,99,109,101]);
+assert_eq!(chars, &quot;Acme\u{fffd}&quot;);
+~~~~
+
 A practical example of custom encoder traps:
 
 ~~~~ {.rust}
@@ -386,7 +459,7 @@ assert_eq!(WINDOWS_949.decode(broken, DecoderTrap::Replace),
            Ok(&quot;\u{c6b0}\u{c640}\u{fffd}\u{c559}&quot;.to_string()));
 ~~~~
 
-## Detailed Usage
+## Types and Stuffs
 
 There are three main entry points to Encoding.
 
@@ -440,9 +513,12 @@ Encoding covers all encodings specified by WHATWG Encoding Standard and some mor
     * EUC-JP and Windows code page 932 (`shift_jis`,
       since it&#39;s the most widespread extension to Shift_JIS)
     * ISO-2022-JP with asymmetric JIS X 0212 support
+      (Note: this is not yet up to date to the current standard)
+    * GBK
     * GB 18030
-    * HZ
     * Big5-2003 with HKSCS-2008 extensions
+* Encodings that were originally specified by WHATWG Encoding Standard:
+    * HZ
 * ISO 8859-1 (distinct from Windows code page 1252)
 
 Parenthesized names refer to the encoding&#39;s primary name assigned by WHATWG Encoding Standard.
@@ -456,14 +532,13 @@ Whenever in doubt, look at the source code and specifications for detailed expla
 
 */</span>
 
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>core</span>, <span class='ident'>collections</span>)]</span> <span class='comment'>// lib stability features as per RFC #507</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>test</span>, <span class='ident'>feature</span>(<span class='ident'>env</span>, <span class='ident'>old_io</span>, <span class='ident'>old_path</span>, <span class='ident'>test</span>))]</span> <span class='comment'>// ditto</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>test</span>, <span class='ident'>feature</span>(<span class='ident'>test</span>))]</span> <span class='comment'>// lib stability features as per RFC #507</span>
 
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;encoding-index-singlebyte&quot;</span> <span class='kw'>as</span> <span class='ident'>index_singlebyte</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;encoding-index-korean&quot;</span> <span class='kw'>as</span> <span class='ident'>index_korean</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;encoding-index-japanese&quot;</span> <span class='kw'>as</span> <span class='ident'>index_japanese</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;encoding-index-simpchinese&quot;</span> <span class='kw'>as</span> <span class='ident'>index_simpchinese</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='string'>&quot;encoding-index-tradchinese&quot;</span> <span class='kw'>as</span> <span class='ident'>index_tradchinese</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>encoding_index_singlebyte</span> <span class='kw'>as</span> <span class='ident'>index_singlebyte</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>encoding_index_korean</span> <span class='kw'>as</span> <span class='ident'>index_korean</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>encoding_index_japanese</span> <span class='kw'>as</span> <span class='ident'>index_japanese</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>encoding_index_simpchinese</span> <span class='kw'>as</span> <span class='ident'>index_simpchinese</span>;
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>encoding_index_tradchinese</span> <span class='kw'>as</span> <span class='ident'>index_tradchinese</span>;
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>test</span>;
 
@@ -472,17 +547,12 @@ Whenever in doubt, look at the source code and specifications for detailed expla
                       <span class='ident'>EncoderTrapFunc</span>, <span class='ident'>DecoderTrapFunc</span>, <span class='ident'>DecoderTrap</span>,
                       <span class='ident'>EncoderTrap</span>, <span class='ident'>decode</span>}; <span class='comment'>// reexport</span>
 
-<span class='comment'>// XXX gah rust-lang/rust#15702</span>
-<span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;use encoding::RawEncoder instead&quot;</span>]</span> <span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>types</span>::<span class='ident'>RawEncoder</span> <span class='kw'>as</span> <span class='ident'>Encoder</span>;
-<span class='attribute'>#[<span class='ident'>deprecated</span> <span class='op'>=</span> <span class='string'>&quot;use encoding::RawDecoder instead&quot;</span>]</span> <span class='kw'>pub</span> <span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>types</span>::<span class='ident'>RawDecoder</span> <span class='kw'>as</span> <span class='ident'>Decoder</span>;
-
 <span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>mod</span> <span class='ident'>util</span>;
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span> <span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>mod</span> <span class='ident'>testutils</span>;
 
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>types</span>;
 
 <span class='doccomment'>/// Codec implementations.</span>
-<span class='attribute'>#[<span class='ident'>unstable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>codec</span> {
     <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>error</span>;
     <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>ascii</span>;
@@ -556,6 +626,10 @@ Whenever in doubt, look at the source code and specifications for detailed expla
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

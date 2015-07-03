@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../../../index.html'>irc</a>::<wbr><a href='../../index.html'>client</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>command</a></p><div class='block enum'><h2>Enums</h2><a class='enum current' href='enum.CapSubCommand.html' title='A list of all of the subcommands for the capabilities extension.'>CapSubCommand</a><a class='enum ' href='enum.Command.html' title='List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This also includes commands from the [capabilities extension](https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01). Additionally, this includes some common additional commands from popular IRCds.'>Command</a></div>
+        <p class='location'><a href='../../../index.html'>irc</a>::<wbr><a href='../../index.html'>client</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>command</a></p><script>window.sidebarCurrent = {name: 'CapSubCommand', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,34 +41,40 @@
     </nav>
 
     <section id='main' class="content enum">
-<h1 class='fqn'><span class='in-band'>Enum <a href='../../../index.html'>irc</a>::<wbr><a href='../../index.html'>client</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>command</a>::<wbr><a class='enum' href=''>CapSubCommand</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-12719' href='../../../../src/irc/client/data/command.rs.html#1093-1115'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Enum <a href='../../../index.html'>irc</a>::<wbr><a href='../../index.html'>client</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>command</a>::<wbr><a class='enum' href=''>CapSubCommand</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-12736' class='srclink' href='../../../../src/irc/client/data/command.rs.html#1147-1164' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum CapSubCommand {
     LS,
     LIST,
     REQ,
     ACK,
     NAK,
-    CLEAR,
     END,
+    NEW,
+    DEL,
 }</pre><div class='docblock'><p>A list of all of the subcommands for the capabilities extension.</p>
 </div><h2 class='variants'>Variants</h2>
-<table><tr><td id='variant.LS'><a class='stability Unmarked' title='No stability level'></a><code>LS</code></td><td><div class='docblock'><p>Requests a list of the server&#39;s capabilities.</p>
-</div></td></tr><tr><td id='variant.LIST'><a class='stability Unmarked' title='No stability level'></a><code>LIST</code></td><td><div class='docblock'><p>Requests a list of the server&#39;s capabilities.</p>
-</div></td></tr><tr><td id='variant.REQ'><a class='stability Unmarked' title='No stability level'></a><code>REQ</code></td><td><div class='docblock'><p>Requests specific capabilities blindly.</p>
-</div></td></tr><tr><td id='variant.ACK'><a class='stability Unmarked' title='No stability level'></a><code>ACK</code></td><td><div class='docblock'><p>Acknowledges capabilities.</p>
-</div></td></tr><tr><td id='variant.NAK'><a class='stability Unmarked' title='No stability level'></a><code>NAK</code></td><td><div class='docblock'><p>Does not acknowledge certain capabilities.</p>
-</div></td></tr><tr><td id='variant.CLEAR'><a class='stability Unmarked' title='No stability level'></a><code>CLEAR</code></td><td><div class='docblock'><p>Requests that the server clears the capabilities of this client.</p>
-</div></td></tr><tr><td id='variant.END'><a class='stability Unmarked' title='No stability level'></a><code>END</code></td><td><div class='docblock'><p>Ends the capability negotiation before registration.</p>
-</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h3><div class='impl-items'><h4 id='method.to_str' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.to_str' class='fnname'>to_str</a>(&amp;self) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<table><tr><td id='variant.LS'><code>LS</code></td><td><div class='docblock'><p>Requests a list of the server&#39;s capabilities.</p>
+</div></td></tr><tr><td id='variant.LIST'><code>LIST</code></td><td><div class='docblock'><p>Requests a list of the server&#39;s capabilities.</p>
+</div></td></tr><tr><td id='variant.REQ'><code>REQ</code></td><td><div class='docblock'><p>Requests specific capabilities blindly.</p>
+</div></td></tr><tr><td id='variant.ACK'><code>ACK</code></td><td><div class='docblock'><p>Acknowledges capabilities.</p>
+</div></td></tr><tr><td id='variant.NAK'><code>NAK</code></td><td><div class='docblock'><p>Does not acknowledge certain capabilities.</p>
+</div></td></tr><tr><td id='variant.END'><code>END</code></td><td><div class='docblock'><p>Ends the capability negotiation before registration.</p>
+</div></td></tr><tr><td id='variant.NEW'><code>NEW</code></td><td><div class='docblock'><p>Signals that new capabilities are now being offered.</p>
+</div></td></tr><tr><td id='variant.DEL'><code>DEL</code></td><td><div class='docblock'><p>Signasl that the specified capabilities are cancelled and no longer available.</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h3><div class='impl-items'><h4 id='method.to_str' class='method'><code>fn <a href='#method.to_str' class='fnname'>to_str</a>(&amp;self) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
 <div class='docblock'><p>Gets the string that corresponds to this subcommand.</p>
-</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/str/trait.FromStr.html' title='core::str::FromStr'>FromStr</a> for <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h3><div class='impl-items'><h4 id='assoc_type.Err' class='type'><a class='stability Unmarked' title='No stability level'></a><code>type Err = &amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
-<h4 id='method.from_str' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.from_str' class='fnname'>from_str</a>(s: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>StdResult</a>&lt;<a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a>, &amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h4>
-</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.ne' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
-</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
-</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h3><div class='impl-items'></div></section>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/str/trait.FromStr.html' title='core::str::FromStr'>FromStr</a> for <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h3><div class='impl-items'><h4 id='assoc_type.Err' class='type'><code>type Err = &amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<h4 id='method.from_str' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/str/trait.FromStr.html#method.from_str' class='fnname'>from_str</a>(s: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>StdResult</a>&lt;<a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a>, &amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -100,6 +106,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

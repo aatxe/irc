@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.24/src/label.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/nightly/cargo/registry/src/github.com-0a35038f75765ae4/encoding-0.2.32/src/label.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>label.rs.html -- source</title>
@@ -388,6 +388,14 @@
 <span id="346">346</span>
 <span id="347">347</span>
 <span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
 </pre><pre class='rust '>
 <span class='comment'>// This is a part of rust-encoding.</span>
 <span class='comment'>// Copyright (c) 2013-2015, Kang Seonghoon.</span>
@@ -400,7 +408,6 @@
 
 <span class='doccomment'>/// Returns an encoding from given label, defined in the WHATWG Encoding standard, if any.</span>
 <span class='doccomment'>/// Implements &quot;get an encoding&quot; algorithm: http://encoding.spec.whatwg.org/#concept-encoding-get</span>
-<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>encoding_from_whatwg_label</span>(<span class='ident'>label</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>EncodingRef</span><span class='op'>&gt;</span> {
     <span class='kw'>let</span> <span class='ident'>label</span> <span class='op'>=</span> <span class='ident'>label</span>.<span class='ident'>trim_matches</span>(<span class='kw-2'>&amp;</span>[<span class='string'>&#39; &#39;</span>, <span class='string'>&#39;\n&#39;</span>, <span class='string'>&#39;\r&#39;</span>, <span class='string'>&#39;\t&#39;</span>, <span class='string'>&#39;\x0C&#39;</span>][..]);
     <span class='kw'>let</span> <span class='ident'>label</span>: <span class='ident'>String</span> <span class='op'>=</span>
@@ -608,16 +615,15 @@
         <span class='string'>&quot;chinese&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;csgb2312&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;csiso58gb231280&quot;</span> <span class='op'>|</span>
-        <span class='string'>&quot;gb18030&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;gb2312&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;gb_2312&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;gb_2312-80&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;gbk&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;iso-ir-58&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;x-gbk&quot;</span> <span class='op'>=&gt;</span>
+            <span class='prelude-val'>Some</span>(<span class='ident'>all</span>::<span class='ident'>GBK</span> <span class='kw'>as</span> <span class='ident'>EncodingRef</span>),
+        <span class='string'>&quot;gb18030&quot;</span> <span class='op'>=&gt;</span>
             <span class='prelude-val'>Some</span>(<span class='ident'>all</span>::<span class='ident'>GB18030</span> <span class='kw'>as</span> <span class='ident'>EncodingRef</span>),
-        <span class='string'>&quot;hz-gb-2312&quot;</span> <span class='op'>=&gt;</span>
-            <span class='prelude-val'>Some</span>(<span class='ident'>all</span>::<span class='ident'>HZ</span> <span class='kw'>as</span> <span class='ident'>EncodingRef</span>),
         <span class='string'>&quot;big5&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;big5-hkscs&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;cn-big5&quot;</span> <span class='op'>|</span>
@@ -651,6 +657,7 @@
         <span class='string'>&quot;windows-949&quot;</span> <span class='op'>=&gt;</span>
             <span class='prelude-val'>Some</span>(<span class='ident'>all</span>::<span class='ident'>WINDOWS_949</span> <span class='kw'>as</span> <span class='ident'>EncodingRef</span>),
         <span class='string'>&quot;csiso2022kr&quot;</span> <span class='op'>|</span>
+        <span class='string'>&quot;hz-gb-2312&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;iso-2022-kr&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;iso-2022-cn&quot;</span> <span class='op'>|</span>
         <span class='string'>&quot;iso-2022-cn-ext&quot;</span> <span class='op'>=&gt;</span>
@@ -669,7 +676,6 @@
 <span class='doccomment'>/// Returns an encoding from Windows code page number.</span>
 <span class='doccomment'>/// http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756%28v=vs.85%29.aspx</span>
 <span class='doccomment'>/// Sometimes it can return a *superset* of the requested encoding, e.g. for several CJK encodings.</span>
-<span class='attribute'>#[<span class='ident'>unstable</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>encoding_from_windows_code_page</span>(<span class='ident'>cp</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>EncodingRef</span><span class='op'>&gt;</span> {
     <span class='kw'>match</span> <span class='ident'>cp</span> {
         <span class='number'>65001</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>all</span>::<span class='ident'>UTF_8</span> <span class='kw'>as</span> <span class='ident'>EncodingRef</span>),
@@ -715,6 +721,7 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
     <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>test</span>;
+    <span class='kw'>use</span> <span class='ident'>all</span>;
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>encoding_from_whatwg_label</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -727,6 +734,15 @@
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>encoding_from_whatwg_label</span>(<span class='string'>&quot;greek&quot;</span>).<span class='ident'>is_some</span>());
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>encoding_from_whatwg_label</span>(<span class='string'>&quot;gree\u{212A}&quot;</span>).<span class='ident'>is_none</span>(),
                 <span class='string'>&quot;Case-insensitive matching should be ASCII only. Kelvin sign does not match k.&quot;</span>);
+
+        <span class='comment'>// checks if the `whatwg_name` method returns the label that resolves back to that encoding</span>
+        <span class='kw'>for</span> <span class='ident'>encoding</span> <span class='kw'>in</span> <span class='ident'>all</span>::<span class='ident'>encodings</span>() {
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>whatwg_name</span>) <span class='op'>=</span> <span class='ident'>encoding</span>.<span class='ident'>whatwg_name</span>() {
+                <span class='kw'>if</span> <span class='ident'>whatwg_name</span> <span class='op'>==</span> <span class='string'>&quot;replacement&quot;</span> { <span class='kw'>continue</span>; }
+                <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>encoding_from_whatwg_label</span>(<span class='ident'>whatwg_name</span>).<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> <span class='ident'>e</span>.<span class='ident'>whatwg_name</span>()),
+                           <span class='prelude-val'>Some</span>(<span class='ident'>whatwg_name</span>));
+            }
+        }
     }
 
     <span class='attribute'>#[<span class='ident'>bench</span>]</span>
@@ -770,6 +786,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.24/src/codec/utf_16.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/nightly/cargo/registry/src/github.com-0a35038f75765ae4/encoding-0.2.32/src/codec/utf_16.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>utf_16.rs.html -- source</title>
@@ -640,7 +640,7 @@
 
 <span class='doccomment'>//! UTF-16.</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>IntoCow</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>convert</span>::<span class='ident'>Into</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>marker</span>::<span class='ident'>PhantomData</span>;
 <span class='kw'>use</span> <span class='ident'>util</span>::<span class='ident'>as_char</span>;
 <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
@@ -667,7 +667,7 @@
 
 <span class='kw'>impl</span> <span class='ident'>Endian</span> <span class='kw'>for</span> <span class='ident'>Little</span> {
     <span class='kw'>fn</span> <span class='ident'>name</span>() <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> { <span class='string'>&quot;utf-16le&quot;</span> }
-    <span class='kw'>fn</span> <span class='ident'>whatwg_name</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> { <span class='prelude-val'>Some</span>(<span class='string'>&quot;utf-16&quot;</span>) } <span class='comment'>// WHATWG compatibility</span>
+    <span class='kw'>fn</span> <span class='ident'>whatwg_name</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> { <span class='prelude-val'>Some</span>(<span class='string'>&quot;utf-16le&quot;</span>) }
     <span class='kw'>fn</span> <span class='ident'>write_two_bytes</span>(<span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ByteWriter</span>, <span class='ident'>msb</span>: <span class='ident'>u8</span>, <span class='ident'>lsb</span>: <span class='ident'>u8</span>) {
         <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='ident'>lsb</span>);
         <span class='ident'>output</span>.<span class='ident'>write_byte</span>(<span class='ident'>msb</span>);
@@ -829,7 +829,7 @@
                     }
                     _ <span class='op'>=&gt;</span> {
                         <span class='kw'>return</span> (<span class='ident'>processed</span>, <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> {
-                            <span class='ident'>upto</span>: <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>isize</span> <span class='op'>-</span> <span class='number'>2</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into_cow</span>()
+                            <span class='ident'>upto</span>: <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>isize</span> <span class='op'>-</span> <span class='number'>2</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into</span>()
                         }));
                     }
                 }
@@ -841,7 +841,7 @@
                     }
                     <span class='number'>0xdc00</span>...<span class='number'>0xdfff</span> <span class='op'>=&gt;</span> {
                         <span class='kw'>return</span> (<span class='ident'>processed</span>, <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> {
-                            <span class='ident'>upto</span>: <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>isize</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into_cow</span>()
+                            <span class='ident'>upto</span>: <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>isize</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into</span>()
                         }));
                     }
                     _ <span class='op'>=&gt;</span> {
@@ -871,7 +871,7 @@
                     <span class='self'>self</span>.<span class='ident'>leadbyte</span> <span class='op'>=</span> <span class='number'>0xffff</span>;
                     <span class='self'>self</span>.<span class='ident'>leadsurrogate</span> <span class='op'>=</span> <span class='number'>0xffff</span>;
                     <span class='kw'>return</span> (<span class='ident'>processed</span>, <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> {
-                        <span class='ident'>upto</span>: <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>isize</span> <span class='op'>-</span> <span class='number'>2</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into_cow</span>()
+                        <span class='ident'>upto</span>: <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>isize</span> <span class='op'>-</span> <span class='number'>2</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into</span>()
                     }));
                 }
             }
@@ -903,14 +903,14 @@
                         }
                         _ <span class='op'>=&gt;</span> {
                             <span class='kw'>return</span> (<span class='ident'>processed</span>, <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> {
-                                <span class='ident'>upto</span>: <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>isize</span> <span class='op'>-</span> <span class='number'>1</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into_cow</span>()
+                                <span class='ident'>upto</span>: <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>isize</span> <span class='op'>-</span> <span class='number'>1</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into</span>()
                             }));
                         }
                     }
                 }
                 <span class='number'>0xdc00</span>...<span class='number'>0xdfff</span> <span class='op'>=&gt;</span> {
                     <span class='kw'>return</span> (<span class='ident'>processed</span>, <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> {
-                        <span class='ident'>upto</span>: <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>isize</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into_cow</span>()
+                        <span class='ident'>upto</span>: <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>isize</span> <span class='op'>+</span> <span class='number'>1</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into</span>()
                     }));
                 }
                 _ <span class='op'>=&gt;</span> {
@@ -929,7 +929,7 @@
         <span class='self'>self</span>.<span class='ident'>leadbyte</span> <span class='op'>=</span> <span class='number'>0xffff</span>;
         <span class='self'>self</span>.<span class='ident'>leadsurrogate</span> <span class='op'>=</span> <span class='number'>0xffff</span>;
         <span class='kw'>if</span> <span class='ident'>leadbyte</span> <span class='op'>!=</span> <span class='number'>0xffff</span> <span class='op'>||</span> <span class='ident'>leadsurrogate</span> <span class='op'>!=</span> <span class='number'>0xffff</span> {
-            <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> { <span class='ident'>upto</span>: <span class='number'>0</span>, <span class='ident'>cause</span>: <span class='string'>&quot;incomplete sequence&quot;</span>.<span class='ident'>into_cow</span>() })
+            <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> { <span class='ident'>upto</span>: <span class='number'>0</span>, <span class='ident'>cause</span>: <span class='string'>&quot;incomplete sequence&quot;</span>.<span class='ident'>into</span>() })
         } <span class='kw'>else</span> {
             <span class='prelude-val'>None</span>
         }
@@ -1260,6 +1260,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

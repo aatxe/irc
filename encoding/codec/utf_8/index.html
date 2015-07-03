@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../ascii/index.html' title='7-bit ASCII encoding.'>ascii</a><a class='mod ' href='../error/index.html' title='A placeholder encoding that returns encoder/decoder error for every case.'>error</a><a class='mod ' href='../japanese/index.html' title='Legacy Japanese encodings based on JIS X 0208 and JIS X 0212.'>japanese</a><a class='mod ' href='../korean/index.html' title='Legacy Korean encodings based on KS X 1001.'>korean</a><a class='mod ' href='../simpchinese/index.html' title='Legacy simplified Chinese encodings based on GB 2312 and GB 18030.'>simpchinese</a><a class='mod ' href='../singlebyte/index.html' title='Common codec implementation for single-byte encodings.'>singlebyte</a><a class='mod ' href='../tradchinese/index.html' title='Legacy traditional Chinese encodings.'>tradchinese</a><a class='mod ' href='../utf_16/index.html' title='UTF-16.'>utf_16</a><a class='mod current' href='../utf_8/index.html' title='UTF-8, the universal encoding.'>utf_8</a><a class='mod ' href='../whatwg/index.html' title='Asymmetric or special encoding constructions required by the WHATWG Encoding standard.'>whatwg</a></div>
+        <p class='location'><a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a></p><script>window.sidebarCurrent = {name: 'utf_8', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,41 +41,51 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a>::<wbr><a class='mod' href=''>utf_8</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-2579' href='../../../src/encoding/codec/utf_8.rs.html#25-828'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a>::<wbr><a class='mod' href=''>utf_8</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-2743' class='srclink' href='../../../src/encoding/codec/utf_8.rs.html#25-828' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>UTF-8, the universal encoding.</p>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.UTF8Decoder.html'
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.UTF8Decoder.html'
                                title='encoding::codec::utf_8::UTF8Decoder'>UTF8Decoder</a></td>
-                        <td class='docblock short'><p>A decoder for UTF-8.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>A decoder for UTF-8.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.UTF8Encoder.html'
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.UTF8Encoder.html'
                                title='encoding::codec::utf_8::UTF8Encoder'>UTF8Encoder</a></td>
-                        <td class='docblock short'><p>An encoder for UTF-8.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>An encoder for UTF-8.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.UTF8Encoding.html'
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.UTF8Encoding.html'
                                title='encoding::codec::utf_8::UTF8Encoding'>UTF8Encoding</a></td>
-                        <td class='docblock short'><p>UTF-8 (UCS Transformation Format, 8-bit).</p>
-</td>
+                        <td class='docblock short'>
+                             <p>UTF-8 (UCS Transformation Format, 8-bit).</p>
+
+                        </td>
                     </tr>
                 </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.from_utf8.html'
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.from_utf8.html'
                                title='encoding::codec::utf_8::from_utf8'>from_utf8</a></td>
-                        <td class='docblock short'><p>Almost equivalent to <code>std::str::from_utf8</code>.
+                        <td class='docblock short'>
+                             <p>Almost equivalent to <code>std::str::from_utf8</code>.
 This function is provided for the fair benchmark against the stdlib&#39;s UTF-8 conversion
 functions, as rust-encoding always allocates a new string.</p>
-</td>
+
+                        </td>
                     </tr>
                 </table></section>
     <section id='search' class="content hidden"></section>
@@ -109,6 +119,10 @@ functions, as rust-encoding always allocates a new string.</p>
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

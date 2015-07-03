@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='index.html'>encoding_index_tests</a></p><div class='block macro'><h2>Macros</h2><a class='macro ' href='macro.multi_byte_range_tests!.html' title='Makes a common test suite for multi-byte range indices.'>multi_byte_range_tests!</a><a class='macro ' href='macro.multi_byte_tests!.html' title='Makes a common test suite for multi-byte indices.'>multi_byte_tests!</a><a class='macro current' href='macro.single_byte_tests!.html' title='Makes a common test suite for single-byte indices.'>single_byte_tests!</a></div>
+        <p class='location'><a href='index.html'>encoding_index_tests</a></p><script>window.sidebarCurrent = {name: 'single_byte_tests!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,9 +41,11 @@
     </nav>
 
     <section id='main' class="content macro">
-<h1 class='fqn'><span class='in-band'><a href='index.html'>encoding_index_tests</a>::<wbr><a class='macro' href=''>single_byte_tests!</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-4' href='../src/encoding_index_tests/index_tests.rs.html#9-47'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'><a href='index.html'>encoding_index_tests</a>::<wbr><a class='macro' href=''>single_byte_tests!</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-4' class='srclink' href='../src/encoding_index_tests/index_tests.rs.html#9-47' title='goto source code'>[src]</a></span></h1>
 <pre class='rust macro'>
 <span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>single_byte_tests</span> {
     (
@@ -52,11 +54,11 @@
         <span class='kw'>mod</span> <span class='ident'>tests</span> {
             <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>test</span>;
             <span class='kw'>use</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>parentmod</span>::{<span class='ident'>forward</span>, <span class='ident'>backward</span>};
-            <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>range_inclusive</span>;
 
             <span class='attribute'>#[<span class='ident'>test</span>]</span>
             <span class='kw'>fn</span> <span class='ident'>test_correct_table</span>() {
-                <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0x80u8</span>, <span class='number'>0xff</span>) {
+                <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0x80</span>..<span class='number'>0x100</span> {
+                    <span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>u8</span>;
                     <span class='kw'>let</span> <span class='ident'>j</span> <span class='op'>=</span> <span class='ident'>forward</span>(<span class='ident'>i</span>);
                     <span class='kw'>if</span> <span class='ident'>j</span> <span class='op'>!=</span> <span class='number'>0xffff</span> { <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>backward</span>(<span class='ident'>j</span> <span class='kw'>as</span> <span class='ident'>u32</span>), <span class='ident'>i</span>); }
                 }
@@ -65,8 +67,8 @@
             <span class='attribute'>#[<span class='ident'>bench</span>]</span>
             <span class='kw'>fn</span> <span class='ident'>bench_forward_sequential_128</span>(<span class='ident'>bencher</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>test</span>::<span class='ident'>Bencher</span>) {
                 <span class='ident'>bencher</span>.<span class='ident'>iter</span>(<span class='op'>||</span> {
-                    <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0x80u8</span>, <span class='number'>0xff</span>) {
-                        <span class='ident'>test</span>::<span class='ident'>black_box</span>(<span class='ident'>forward</span>(<span class='ident'>i</span>));
+                    <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0x80</span>..<span class='number'>0x100</span> {
+                        <span class='ident'>test</span>::<span class='ident'>black_box</span>(<span class='ident'>forward</span>(<span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>u8</span>));
                     }
                 })
             }
@@ -118,6 +120,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

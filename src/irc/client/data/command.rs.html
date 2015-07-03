@@ -1198,374 +1198,467 @@
 <span id="1156">1156</span>
 <span id="1157">1157</span>
 <span id="1158">1158</span>
+<span id="1159">1159</span>
+<span id="1160">1160</span>
+<span id="1161">1161</span>
+<span id="1162">1162</span>
+<span id="1163">1163</span>
+<span id="1164">1164</span>
+<span id="1165">1165</span>
+<span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
+<span id="1170">1170</span>
+<span id="1171">1171</span>
+<span id="1172">1172</span>
+<span id="1173">1173</span>
+<span id="1174">1174</span>
+<span id="1175">1175</span>
+<span id="1176">1176</span>
+<span id="1177">1177</span>
+<span id="1178">1178</span>
+<span id="1179">1179</span>
+<span id="1180">1180</span>
+<span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
+<span id="1184">1184</span>
+<span id="1185">1185</span>
+<span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
+<span id="1189">1189</span>
+<span id="1190">1190</span>
+<span id="1191">1191</span>
+<span id="1192">1192</span>
+<span id="1193">1193</span>
+<span id="1194">1194</span>
+<span id="1195">1195</span>
+<span id="1196">1196</span>
+<span id="1197">1197</span>
+<span id="1198">1198</span>
+<span id="1199">1199</span>
+<span id="1200">1200</span>
+<span id="1201">1201</span>
+<span id="1202">1202</span>
+<span id="1203">1203</span>
+<span id="1204">1204</span>
+<span id="1205">1205</span>
+<span id="1206">1206</span>
+<span id="1207">1207</span>
+<span id="1208">1208</span>
+<span id="1209">1209</span>
+<span id="1210">1210</span>
+<span id="1211">1211</span>
+<span id="1212">1212</span>
+<span id="1213">1213</span>
+<span id="1214">1214</span>
+<span id="1215">1215</span>
+<span id="1216">1216</span>
+<span id="1217">1217</span>
+<span id="1218">1218</span>
+<span id="1219">1219</span>
+<span id="1220">1220</span>
+<span id="1221">1221</span>
+<span id="1222">1222</span>
+<span id="1223">1223</span>
+<span id="1224">1224</span>
+<span id="1225">1225</span>
+<span id="1226">1226</span>
+<span id="1227">1227</span>
+<span id="1228">1228</span>
+<span id="1229">1229</span>
+<span id="1230">1230</span>
+<span id="1231">1231</span>
+<span id="1232">1232</span>
+<span id="1233">1233</span>
+<span id="1234">1234</span>
+<span id="1235">1235</span>
+<span id="1236">1236</span>
+<span id="1237">1237</span>
+<span id="1238">1238</span>
+<span id="1239">1239</span>
+<span id="1240">1240</span>
+<span id="1241">1241</span>
+<span id="1242">1242</span>
+<span id="1243">1243</span>
+<span id="1244">1244</span>
+<span id="1245">1245</span>
+<span id="1246">1246</span>
+<span id="1247">1247</span>
+<span id="1248">1248</span>
+<span id="1249">1249</span>
+<span id="1250">1250</span>
+<span id="1251">1251</span>
+<span id="1252">1252</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Enumeration of all available client commands.</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>Error</span>, <span class='ident'>ErrorKind</span>, <span class='prelude-ty'>Result</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>result</span>::<span class='prelude-ty'>Result</span> <span class='kw'>as</span> <span class='ident'>StdResult</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>::<span class='ident'>FromStr</span>;
-<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>message</span>::{<span class='ident'>Message</span>, <span class='ident'>ToMessage</span>};
+<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Message</span>;
 
 <span class='doccomment'>/// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This</span>
 <span class='doccomment'>/// also includes commands from the</span>
 <span class='doccomment'>/// [capabilities extension](https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01).</span>
 <span class='doccomment'>/// Additionally, this includes some common additional commands from popular IRCds.</span>
-<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Command</span> {
     <span class='comment'>// 3.1 Connection Registration</span>
     <span class='doccomment'>/// PASS :password</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>PASS</span>(<span class='ident'>String</span>),
     <span class='doccomment'>/// NICK :nickname</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>NICK</span>(<span class='ident'>String</span>),
     <span class='doccomment'>/// USER user mode * :realname</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>USER</span>(<span class='ident'>String</span>, <span class='ident'>String</span>, <span class='ident'>String</span>),
     <span class='doccomment'>/// OPER name :password</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>OPER</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
     <span class='doccomment'>/// MODE nickname modes</span>
     <span class='doccomment'>/// MODE channel modes [modeparams]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>MODE</span>(<span class='ident'>String</span>, <span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// SERVICE nickname reserved distribution type reserved :info</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>SERVICE</span>(<span class='ident'>String</span>, <span class='ident'>String</span>, <span class='ident'>String</span>, <span class='ident'>String</span>, <span class='ident'>String</span>, <span class='ident'>String</span>),
     <span class='doccomment'>/// QUIT :comment</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>QUIT</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// SQUIT server :comment</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>SQUIT</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
 
     <span class='comment'>// 3.2 Channel operations</span>
     <span class='doccomment'>/// JOIN chanlist [chankeys]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='ident'>JOIN</span>(<span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
+    <span class='ident'>JOIN</span>(<span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// PART chanlist :[comment]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>PART</span>(<span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='comment'>// MODE is already defined.</span>
     <span class='comment'>// MODE(String, String, Option&lt;String&gt;),</span>
     <span class='doccomment'>/// TOPIC channel :[topic]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>TOPIC</span>(<span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// NAMES [chanlist :[target]]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>NAMES</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// LIST [chanlist :[target]]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>LIST</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// INVITE nickname channel</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>INVITE</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
     <span class='doccomment'>/// KICK chanlist userlist :[comment]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>KICK</span>(<span class='ident'>String</span>, <span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
 
     <span class='comment'>// 3.3 Sending messages</span>
     <span class='doccomment'>/// PRIVMSG msgtarget :message</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>PRIVMSG</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
     <span class='doccomment'>/// NOTICE msgtarget :message</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>NOTICE</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
 
     <span class='comment'>// 3.4 Server queries and commands</span>
     <span class='doccomment'>/// MOTD :[target]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>MOTD</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// LUSERS [mask :[target]]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>LUSERS</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// VERSION :[target]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>VERSION</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// STATS [query :[target]]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>STATS</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// LINKS [[remote server] server :mask]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>LINKS</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// TIME :[target]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>TIME</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// CONNECT target server port :[remote server]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>CONNECT</span>(<span class='ident'>String</span>, <span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// TRACE :[target]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>TRACE</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// ADMIN :[target]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>ADMIN</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// INFO :[target]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>INFO</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
 
     <span class='comment'>// 3.5 Service Query and Commands</span>
     <span class='doccomment'>/// SERVLIST [mask :[type]]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>SERVLIST</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// SQUERY servicename text</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>SQUERY</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
 
     <span class='comment'>// 3.6 User based queries</span>
     <span class='doccomment'>/// WHO [mask [&quot;o&quot;]]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>WHO</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// WHOIS [target] masklist</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>WHOIS</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>String</span>),
     <span class='doccomment'>/// WHOWAS nicklist [count :[target]]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>WHOWAS</span>(<span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
 
     <span class='comment'>// 3.7 Miscellaneous messages</span>
     <span class='doccomment'>/// KILL nickname :comment</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>KILL</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
     <span class='doccomment'>/// PING server1 :[server2]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>PING</span>(<span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// PONG server :[server2]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>PONG</span>(<span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// ERROR :message</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>ERROR</span>(<span class='ident'>String</span>),
 
 
     <span class='comment'>// 4 Optional Features</span>
     <span class='doccomment'>/// AWAY :[message]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>AWAY</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// REHASH</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>REHASH</span>,
     <span class='doccomment'>/// DIE</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>DIE</span>,
     <span class='doccomment'>/// RESTART</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>RESTART</span>,
     <span class='doccomment'>/// SUMMON user [target :[channel]]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>SUMMON</span>(<span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// USERS :[target]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>USERS</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// WALLOPS :Text to be sent</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>WALLOPS</span>(<span class='ident'>String</span>),
     <span class='doccomment'>/// USERHOST space-separated nicklist</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>USERHOST</span>(<span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// ISON space-separated nicklist</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>ISON</span>(<span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
 
     <span class='comment'>// Non-RFC commands from InspIRCd</span>
     <span class='doccomment'>/// SAJOIN nickname channel</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>SAJOIN</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
     <span class='doccomment'>/// SAMODE target modes [modeparams]</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>SAMODE</span>(<span class='ident'>String</span>, <span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
     <span class='doccomment'>/// SANICK old nickname new nickname</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>SANICK</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
     <span class='doccomment'>/// SAPART nickname :comment</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>SAPART</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
     <span class='doccomment'>/// SAQUIT nickname :comment</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>SAQUIT</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
     <span class='doccomment'>/// NICKSERV message</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>NICKSERV</span>(<span class='ident'>String</span>),
     <span class='doccomment'>/// CHANSERV message</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>CHANSERV</span>(<span class='ident'>String</span>),
     <span class='doccomment'>/// OPERSERV message</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>OPERSERV</span>(<span class='ident'>String</span>),
     <span class='doccomment'>/// BOTSERV message</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>BOTSERV</span>(<span class='ident'>String</span>),
     <span class='doccomment'>/// HOSTSERV message</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>HOSTSERV</span>(<span class='ident'>String</span>),
     <span class='doccomment'>/// MEMOSERV message</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>MEMOSERV</span>(<span class='ident'>String</span>),
 
-    <span class='comment'>// Capabilities extension to IRCv3</span>
-    <span class='comment'>//// CAP [*] COMMAND [*] :[param]</span>
-    <span class='comment'>//#[unstable = &quot;Feature recently changed to hopefully be specification-compliant.&quot;]</span>
-    <span class='comment'>//CAP(Option&lt;String&gt;, CapSubCommand, Option&lt;String&gt;, Option&lt;String&gt;),</span>
+    <span class='comment'>// IRCv3 support</span>
+    <span class='doccomment'>/// CAP [*] COMMAND [*] :[param]</span>
+    <span class='ident'>CAP</span>(<span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>CapSubCommand</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
+
+    <span class='comment'>// IRCv3.1 extensions</span>
+    <span class='doccomment'>/// ACCOUNT [account name]</span>
+    <span class='ident'>ACCOUNT</span>(<span class='ident'>String</span>),
+    <span class='comment'>// AWAY is already defined as a send-only message.</span>
+    <span class='comment'>// AWAY(Option&lt;String&gt;),</span>
+    <span class='comment'>// JOIN is already defined.</span>
+    <span class='comment'>// JOIN(String, Option&lt;String&gt;, Option&lt;String&gt;),</span>
+
+    <span class='comment'>// IRCv3.2 extensions</span>
+    <span class='doccomment'>/// METADATA target COMMAND [params] :[param]</span>
+    <span class='ident'>METADATA</span>(<span class='ident'>String</span>, <span class='ident'>MetadataSubCommand</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
+    <span class='doccomment'>/// MONITOR command [nicklist]</span>
+    <span class='ident'>MONITOR</span>(<span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>),
+    <span class='doccomment'>/// CHGHOST user host</span>
+    <span class='ident'>CHGHOST</span>(<span class='ident'>String</span>, <span class='ident'>String</span>),
 }
 
-<span class='kw'>impl</span> <span class='ident'>ToMessage</span> <span class='kw'>for</span> <span class='ident'>Command</span> {
+<span class='kw'>impl</span> <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Command</span> {
     <span class='doccomment'>/// Converts a Command into a Message.</span>
-    <span class='kw'>fn</span> <span class='ident'>to_message</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Message</span> {
-        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
-            <span class='ident'>Command</span>::<span class='ident'>PASS</span>(<span class='kw-2'>ref</span> <span class='ident'>p</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;PASS&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>p</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>NICK</span>(<span class='kw-2'>ref</span> <span class='ident'>n</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;NICK&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>n</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>USER</span>(<span class='kw-2'>ref</span> <span class='ident'>u</span>, <span class='kw-2'>ref</span> <span class='ident'>m</span>, <span class='kw-2'>ref</span> <span class='ident'>r</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;USER&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>u</span>, <span class='kw-2'>&amp;</span><span class='ident'>m</span>, <span class='string'>&quot;*&quot;</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>r</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>OPER</span>(<span class='kw-2'>ref</span> <span class='ident'>u</span>, <span class='kw-2'>ref</span> <span class='ident'>p</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;OPER&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>u</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>p</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>MODE</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>, <span class='kw-2'>ref</span> <span class='ident'>m</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>p</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;MODE&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>t</span>, <span class='kw-2'>&amp;</span><span class='ident'>m</span>,<span class='kw-2'>&amp;</span><span class='ident'>p</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>MODE</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>, <span class='kw-2'>ref</span> <span class='ident'>m</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;MODE&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>t</span>, <span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>None</span>), 
-            <span class='ident'>Command</span>::<span class='ident'>SERVICE</span>(<span class='kw-2'>ref</span> <span class='ident'>n</span>, <span class='kw-2'>ref</span> <span class='ident'>r</span>, <span class='kw-2'>ref</span> <span class='ident'>d</span>, <span class='kw-2'>ref</span> <span class='ident'>t</span>, <span class='kw-2'>ref</span> <span class='ident'>re</span>, <span class='kw-2'>ref</span> <span class='ident'>i</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SERVICE&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>n</span>, <span class='kw-2'>&amp;</span><span class='ident'>r</span>, <span class='kw-2'>&amp;</span><span class='ident'>d</span>, <span class='kw-2'>&amp;</span><span class='ident'>t</span>, <span class='kw-2'>&amp;</span><span class='ident'>re</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>i</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>QUIT</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;QUIT&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>m</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>QUIT</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;QUIT&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>SQUIT</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>, <span class='kw-2'>ref</span> <span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SQUIT&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>s</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>c</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>k</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;JOIN&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>, <span class='kw-2'>&amp;</span><span class='ident'>k</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;JOIN&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>PART</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;PART&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>m</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>PART</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;PART&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>TOPIC</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;TOPIC&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>TOPIC</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;TOPIC&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>NAMES</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;NAMES&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>NAMES</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;NAMES&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>NAMES</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;NAMES&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>LIST</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;LIST&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>LIST</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;LIST&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>LIST</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;LIST&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>INVITE</span>(<span class='kw-2'>ref</span> <span class='ident'>n</span>, <span class='kw-2'>ref</span> <span class='ident'>c</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;INVITE&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>n</span>, <span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>KICK</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>, <span class='kw-2'>ref</span> <span class='ident'>n</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>r</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;KICK&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>, <span class='kw-2'>&amp;</span><span class='ident'>n</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>r</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>KICK</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>, <span class='kw-2'>ref</span> <span class='ident'>n</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;KICK&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>, <span class='kw-2'>&amp;</span><span class='ident'>n</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>PRIVMSG</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>, <span class='kw-2'>ref</span> <span class='ident'>m</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;PRIVMSG&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>t</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>m</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>NOTICE</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>, <span class='kw-2'>ref</span> <span class='ident'>m</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;NOTICE&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>t</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>m</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>MOTD</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;MOTD&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>MOTD</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;MOTD&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>LUSERS</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;LUSERS&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>LUSERS</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;LUSERS&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>LUSERS</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;LUSERS&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>VERSION</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;VERSION&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>VERSION</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;VERSION&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>STATS</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>q</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;STATS&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>q</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>STATS</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>q</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;STATS&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>q</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>STATS</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;STATS&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>LINKS</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>r</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;LINKS&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>r</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>s</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>LINKS</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;LINKS&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>s</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>LINKS</span>(_, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;LINKS&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>TIME</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;TIME&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>TIME</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;TIME&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>CONNECT</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>, <span class='kw-2'>ref</span> <span class='ident'>p</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>r</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;CONNECT&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>t</span>, <span class='kw-2'>&amp;</span><span class='ident'>p</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>r</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>CONNECT</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>, <span class='kw-2'>ref</span> <span class='ident'>p</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> 
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;CONNECT&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>t</span>, <span class='kw-2'>&amp;</span><span class='ident'>p</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>TRACE</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;TRACE&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>TRACE</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;TRACE&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>ADMIN</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;ADMIN&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>ADMIN</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;ADMIN&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>INFO</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;INFO&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>INFO</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;INFO&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>SERVLIST</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SERVLIST&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>SERVLIST</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SERVLIST&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>SERVLIST</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SERVLIST&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>SQUERY</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>, <span class='kw-2'>ref</span> <span class='ident'>t</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SQUERY&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>s</span>, <span class='kw-2'>&amp;</span><span class='ident'>t</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>WHO</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>), <span class='prelude-val'>Some</span>(<span class='boolval'>true</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;WHO&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>s</span>, <span class='string'>&quot;o&quot;</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>WHO</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>), _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;WHO&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>s</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>WHO</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;WHO&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>WHOIS</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>), <span class='kw-2'>ref</span> <span class='ident'>m</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;WHOIS&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>t</span>, <span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>WHOIS</span>(<span class='prelude-val'>None</span>, <span class='kw-2'>ref</span> <span class='ident'>m</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;WHOIS&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='kw-2'>ref</span> <span class='ident'>n</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;WHOWAS&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>n</span>, <span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='kw-2'>ref</span> <span class='ident'>n</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;WHOWAS&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>n</span>, <span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='kw-2'>ref</span> <span class='ident'>n</span>, <span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;WHOWAS&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>n</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>KILL</span>(<span class='kw-2'>ref</span> <span class='ident'>n</span>, <span class='kw-2'>ref</span> <span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;KILL&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>n</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>c</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>PING</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;PING&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>s</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>PING</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;PING&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>s</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>PONG</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;PONG&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>s</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>PONG</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;PONG&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>s</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>ERROR</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;ERROR&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>m</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>AWAY</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;AWAY&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>m</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>AWAY</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;AWAY&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>REHASH</span> <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;REHASH&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>DIE</span> <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;DIE&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>RESTART</span> <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;RESTART&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='kw-2'>ref</span> <span class='ident'>u</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>), <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SUMMON&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>u</span>, <span class='kw-2'>&amp;</span><span class='ident'>t</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>c</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='kw-2'>ref</span> <span class='ident'>u</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SUMMON&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>u</span>, <span class='kw-2'>&amp;</span><span class='ident'>t</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='kw-2'>ref</span> <span class='ident'>u</span>, <span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SUMMON&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>u</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>USERS</span>(<span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;USERS&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>USERS</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;USERS&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>WALLOPS</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;WALLOPS&quot;</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>USERHOST</span>(<span class='kw-2'>ref</span> <span class='ident'>u</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;USERHOST&quot;</span>, <span class='prelude-val'>Some</span>(<span class='ident'>u</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>s</span>[..]).<span class='ident'>collect</span>()), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>ISON</span>(<span class='kw-2'>ref</span> <span class='ident'>u</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;ISON&quot;</span>, <span class='prelude-val'>Some</span>(<span class='ident'>u</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>s</span>[..]).<span class='ident'>collect</span>()), <span class='prelude-val'>None</span>),
+    <span class='kw'>fn</span> <span class='ident'>into</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Message</span> {
+        <span class='kw'>match</span> <span class='self'>self</span> {
+            <span class='ident'>Command</span>::<span class='ident'>PASS</span>(<span class='ident'>p</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;PASS&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>p</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>NICK</span>(<span class='ident'>n</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;NICK&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>n</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>USER</span>(<span class='ident'>u</span>, <span class='ident'>m</span>, <span class='ident'>r</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;USER&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>u</span>, <span class='ident'>m</span>, <span class='ident'>string</span>(<span class='string'>&quot;*&quot;</span>)]), <span class='prelude-val'>Some</span>(<span class='ident'>r</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>OPER</span>(<span class='ident'>u</span>, <span class='ident'>p</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;OPER&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>u</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>p</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>MODE</span>(<span class='ident'>t</span>, <span class='ident'>m</span>, <span class='prelude-val'>Some</span>(<span class='ident'>p</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;MODE&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>, <span class='ident'>m</span>, <span class='ident'>p</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>MODE</span>(<span class='ident'>t</span>, <span class='ident'>m</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;MODE&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>, <span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>SERVICE</span>(<span class='ident'>n</span>, <span class='ident'>r</span>, <span class='ident'>d</span>, <span class='ident'>t</span>, <span class='ident'>re</span>, <span class='ident'>i</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SERVICE&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>n</span>, <span class='ident'>r</span>, <span class='ident'>d</span>, <span class='ident'>t</span>, <span class='ident'>re</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>i</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>QUIT</span>(<span class='prelude-val'>Some</span>(<span class='ident'>m</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;QUIT&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>m</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>QUIT</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;QUIT&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>SQUIT</span>(<span class='ident'>s</span>, <span class='ident'>c</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SQUIT&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>s</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>c</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>c</span>, <span class='prelude-val'>Some</span>(<span class='ident'>k</span>), <span class='ident'>n</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;JOIN&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>, <span class='ident'>k</span>]), <span class='ident'>n</span>),
+            <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>c</span>, <span class='prelude-val'>None</span>, <span class='ident'>n</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;JOIN&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='ident'>n</span>),
+            <span class='ident'>Command</span>::<span class='ident'>PART</span>(<span class='ident'>c</span>, <span class='prelude-val'>Some</span>(<span class='ident'>m</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;PART&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>PART</span>(<span class='ident'>c</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;PART&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>TOPIC</span>(<span class='ident'>c</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;TOPIC&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>TOPIC</span>(<span class='ident'>c</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;TOPIC&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>NAMES</span>(<span class='prelude-val'>Some</span>(<span class='ident'>c</span>), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;NAMES&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>NAMES</span>(<span class='prelude-val'>Some</span>(<span class='ident'>c</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;NAMES&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>NAMES</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;NAMES&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>LIST</span>(<span class='prelude-val'>Some</span>(<span class='ident'>c</span>), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;LIST&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>LIST</span>(<span class='prelude-val'>Some</span>(<span class='ident'>c</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;LIST&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>LIST</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;LIST&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>INVITE</span>(<span class='ident'>n</span>, <span class='ident'>c</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;INVITE&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>n</span>, <span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>KICK</span>(<span class='ident'>c</span>, <span class='ident'>n</span>, <span class='prelude-val'>Some</span>(<span class='ident'>r</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;KICK&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>, <span class='ident'>n</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>r</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>KICK</span>(<span class='ident'>c</span>, <span class='ident'>n</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;KICK&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>, <span class='ident'>n</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>PRIVMSG</span>(<span class='ident'>t</span>, <span class='ident'>m</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;PRIVMSG&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>NOTICE</span>(<span class='ident'>t</span>, <span class='ident'>m</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;NOTICE&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>MOTD</span>(<span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;MOTD&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>MOTD</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;MOTD&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>LUSERS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>m</span>), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;LUSERS&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>m</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>LUSERS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>m</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;LUSERS&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>LUSERS</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;LUSERS&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>VERSION</span>(<span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;VERSION&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>VERSION</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;VERSION&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>STATS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>q</span>), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;STATS&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>q</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>STATS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>q</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;STATS&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>q</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>STATS</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;STATS&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>LINKS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>r</span>), <span class='prelude-val'>Some</span>(<span class='ident'>s</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;LINKS&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>r</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>s</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>LINKS</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>s</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;LINKS&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>s</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>LINKS</span>(_, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;LINKS&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>TIME</span>(<span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;TIME&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>TIME</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;TIME&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>CONNECT</span>(<span class='ident'>t</span>, <span class='ident'>p</span>, <span class='prelude-val'>Some</span>(<span class='ident'>r</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;CONNECT&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>, <span class='ident'>p</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>r</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>CONNECT</span>(<span class='ident'>t</span>, <span class='ident'>p</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;CONNECT&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>, <span class='ident'>p</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>TRACE</span>(<span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;TRACE&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>TRACE</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;TRACE&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>ADMIN</span>(<span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;ADMIN&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>ADMIN</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;ADMIN&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>INFO</span>(<span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;INFO&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>INFO</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;INFO&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>SERVLIST</span>(<span class='prelude-val'>Some</span>(<span class='ident'>m</span>), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SERVLIST&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>m</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>SERVLIST</span>(<span class='prelude-val'>Some</span>(<span class='ident'>m</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SERVLIST&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>SERVLIST</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SERVLIST&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>SQUERY</span>(<span class='ident'>s</span>, <span class='ident'>t</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SQUERY&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>s</span>, <span class='ident'>t</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>WHO</span>(<span class='prelude-val'>Some</span>(<span class='ident'>s</span>), <span class='prelude-val'>Some</span>(<span class='boolval'>true</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;WHO&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>s</span>, <span class='ident'>string</span>(<span class='string'>&quot;o&quot;</span>)]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>WHO</span>(<span class='prelude-val'>Some</span>(<span class='ident'>s</span>), _) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;WHO&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>s</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>WHO</span>(<span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;WHO&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>WHOIS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>t</span>), <span class='ident'>m</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;WHOIS&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>, <span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>WHOIS</span>(<span class='prelude-val'>None</span>, <span class='ident'>m</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;WHOIS&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='ident'>n</span>, <span class='prelude-val'>Some</span>(<span class='ident'>c</span>), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;WHOWAS&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>n</span>, <span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='ident'>n</span>, <span class='prelude-val'>Some</span>(<span class='ident'>c</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;WHOWAS&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>n</span>, <span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='ident'>n</span>, <span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;WHOWAS&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>n</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>KILL</span>(<span class='ident'>n</span>, <span class='ident'>c</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;KILL&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>n</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>c</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>PING</span>(<span class='ident'>s</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;PING&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>s</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>PING</span>(<span class='ident'>s</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;PING&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>s</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>PONG</span>(<span class='ident'>s</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;PONG&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>s</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>PONG</span>(<span class='ident'>s</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;PONG&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>s</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>ERROR</span>(<span class='ident'>m</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;ERROR&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>m</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>AWAY</span>(<span class='ident'>m</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;AWAY&quot;</span>), <span class='prelude-val'>None</span>, <span class='ident'>m</span>),
+            <span class='ident'>Command</span>::<span class='ident'>REHASH</span> <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;REHASH&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>DIE</span> <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;DIE&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>RESTART</span> <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;RESTART&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='ident'>u</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>), <span class='prelude-val'>Some</span>(<span class='ident'>c</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SUMMON&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>u</span>, <span class='ident'>t</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>c</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='ident'>u</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>), <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SUMMON&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>u</span>, <span class='ident'>t</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='ident'>u</span>, <span class='prelude-val'>None</span>, _) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SUMMON&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>u</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>USERS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;USERS&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>USERS</span>(<span class='prelude-val'>None</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;USERS&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>WALLOPS</span>(<span class='ident'>t</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;WALLOPS&quot;</span>), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>USERHOST</span>(<span class='ident'>u</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;USERHOST&quot;</span>), <span class='prelude-val'>Some</span>(<span class='ident'>u</span>), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>ISON</span>(<span class='ident'>u</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;ISON&quot;</span>), <span class='prelude-val'>Some</span>(<span class='ident'>u</span>), <span class='prelude-val'>None</span>),
 
-            <span class='ident'>Command</span>::<span class='ident'>SAJOIN</span>(<span class='kw-2'>ref</span> <span class='ident'>n</span>, <span class='kw-2'>ref</span> <span class='ident'>c</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SAJOIN&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>n</span>, <span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>SAMODE</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>, <span class='kw-2'>ref</span> <span class='ident'>m</span>, <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>p</span>)) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SAMODE&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>t</span>, <span class='kw-2'>&amp;</span><span class='ident'>m</span>, <span class='kw-2'>&amp;</span><span class='ident'>p</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>SAMODE</span>(<span class='kw-2'>ref</span> <span class='ident'>t</span>, <span class='kw-2'>ref</span> <span class='ident'>m</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SAMODE&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>, <span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>SANICK</span>(<span class='kw-2'>ref</span> <span class='ident'>o</span>, <span class='kw-2'>ref</span> <span class='ident'>n</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SANICK&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>o</span>, <span class='kw-2'>&amp;</span><span class='ident'>n</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>SAPART</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>, <span class='kw-2'>ref</span> <span class='ident'>r</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SAPART&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>r</span>)),
-            <span class='ident'>Command</span>::<span class='ident'>SAQUIT</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>, <span class='kw-2'>ref</span> <span class='ident'>r</span>) <span class='op'>=&gt;</span>
-                <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;SAQUIT&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>r</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>SAJOIN</span>(<span class='ident'>n</span>, <span class='ident'>c</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SAJOIN&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>n</span>, <span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>SAMODE</span>(<span class='ident'>t</span>, <span class='ident'>m</span>, <span class='prelude-val'>Some</span>(<span class='ident'>p</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SAMODE&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>, <span class='ident'>m</span>, <span class='ident'>p</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>SAMODE</span>(<span class='ident'>t</span>, <span class='ident'>m</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SAMODE&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>, <span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>SANICK</span>(<span class='ident'>o</span>, <span class='ident'>n</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SANICK&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>o</span>, <span class='ident'>n</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>SAPART</span>(<span class='ident'>c</span>, <span class='ident'>r</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SAPART&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>r</span>)),
+            <span class='ident'>Command</span>::<span class='ident'>SAQUIT</span>(<span class='ident'>c</span>, <span class='ident'>r</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;SAQUIT&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='prelude-val'>Some</span>(<span class='ident'>r</span>)),
 
-            <span class='ident'>Command</span>::<span class='ident'>NICKSERV</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;NICKSERV&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>CHANSERV</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;CHANSERV&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>OPERSERV</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;OPERSERV&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>BOTSERV</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;BOTSERV&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>HOSTSERV</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;HOSTSERV&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
-            <span class='ident'>Command</span>::<span class='ident'>MEMOSERV</span>(<span class='kw-2'>ref</span> <span class='ident'>m</span>) <span class='op'>=&gt;</span> <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;MEMOSERV&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='kw-2'>&amp;</span><span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>NICKSERV</span>(<span class='ident'>m</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;NICKSERV&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>CHANSERV</span>(<span class='ident'>m</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;CHANSERV&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>OPERSERV</span>(<span class='ident'>m</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;OPERSERV&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>BOTSERV</span>(<span class='ident'>m</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;BOTSERV&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>HOSTSERV</span>(<span class='ident'>m</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;HOSTSERV&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>MEMOSERV</span>(<span class='ident'>m</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;MEMOSERV&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>m</span>]), <span class='prelude-val'>None</span>),
 
-            <span class='comment'>/*Command::CAP(None, ref s, None, ref p) =&gt; 
-                Message::new(None, &quot;CAP&quot;, Some(vec![s.str()]), p.as_ref().map(|m| &amp;m[..])),
-            Command::CAP(Some(ref k), ref s, None, ref  p) =&gt; 
-                Message::new(None, &quot;CAP&quot;, Some(vec![&amp;k, s.str()]), p.as_ref().map(|m| &amp;m[..])),
-            Command::CAP(None, ref s, Some(ref c), ref p) =&gt;
-                Message::new(None, &quot;CAP&quot;, Some(vec![s.str(), &amp;c]), p.as_ref().map(|m| &amp;m[..])),
-            Command::CAP(Some(ref k), ref s, Some(ref c), ref p) =&gt; 
-                Message::new(None, &quot;CAP&quot;, Some(vec![&amp;k, s.str(), &amp;c]), p.as_ref().map(|m| &amp;m[..])),*/</span>
+            <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>None</span>, <span class='ident'>s</span>, <span class='prelude-val'>None</span>, <span class='ident'>p</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;CAP&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>s</span>.<span class='ident'>string</span>()]), <span class='ident'>p</span>),
+            <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>Some</span>(<span class='ident'>k</span>), <span class='ident'>s</span>, <span class='prelude-val'>None</span>,  <span class='ident'>p</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;CAP&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>k</span>, <span class='ident'>s</span>.<span class='ident'>string</span>()]), <span class='ident'>p</span>),
+            <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>None</span>, <span class='ident'>s</span>, <span class='prelude-val'>Some</span>(<span class='ident'>c</span>), <span class='ident'>p</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;CAP&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>s</span>.<span class='ident'>string</span>(), <span class='ident'>c</span>]), <span class='ident'>p</span>),
+            <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>Some</span>(<span class='ident'>k</span>), <span class='ident'>s</span>, <span class='prelude-val'>Some</span>(<span class='ident'>c</span>), <span class='ident'>p</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;CAP&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>k</span>, <span class='ident'>s</span>.<span class='ident'>string</span>(), <span class='ident'>c</span>]), <span class='ident'>p</span>),
+
+            <span class='ident'>Command</span>::<span class='ident'>ACCOUNT</span>(<span class='ident'>a</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;ACCOUNT&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>a</span>]), <span class='prelude-val'>None</span>),
+
+            <span class='ident'>Command</span>::<span class='ident'>METADATA</span>(<span class='ident'>t</span>, <span class='ident'>c</span>, <span class='prelude-val'>None</span>, <span class='ident'>p</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;METADATA&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>, <span class='ident'>c</span>.<span class='ident'>string</span>()]), <span class='ident'>p</span>),
+            <span class='ident'>Command</span>::<span class='ident'>METADATA</span>(<span class='ident'>t</span>, <span class='ident'>c</span>, <span class='prelude-val'>Some</span>(<span class='ident'>a</span>), <span class='ident'>p</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;METADATA&quot;</span>),
+                                    <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>t</span>, <span class='ident'>c</span>.<span class='ident'>string</span>()].<span class='ident'>into_iter</span>().<span class='ident'>chain</span>(<span class='ident'>a</span>).<span class='ident'>collect</span>()), <span class='ident'>p</span>),
+            <span class='ident'>Command</span>::<span class='ident'>MONITOR</span>(<span class='ident'>c</span>, <span class='prelude-val'>Some</span>(<span class='ident'>t</span>)) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;MONITOR&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>, <span class='ident'>t</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>MONITOR</span>(<span class='ident'>c</span>, <span class='prelude-val'>None</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;MONITOR&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>c</span>]), <span class='prelude-val'>None</span>),
+            <span class='ident'>Command</span>::<span class='ident'>CHGHOST</span>(<span class='ident'>u</span>, <span class='ident'>h</span>) <span class='op'>=&gt;</span>
+                <span class='ident'>Message</span>::<span class='ident'>from_owned</span>(<span class='prelude-val'>None</span>, <span class='ident'>string</span>(<span class='string'>&quot;CHGHOST&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>u</span>, <span class='ident'>h</span>]), <span class='prelude-val'>None</span>),
         }
     }
 }
 
-<span class='attribute'>#[<span class='ident'>stable</span>]</span>
-<span class='kw'>impl</span> <span class='ident'>Command</span> {
+<span class='doccomment'>/// Converts a static str to an owned String.</span>
+<span class='kw'>fn</span> <span class='ident'>string</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
+    <span class='ident'>s</span>.<span class='ident'>to_owned</span>()
+}
+
+<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Command</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>m</span>: <span class='ident'>Message</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Command</span><span class='op'>&gt;</span> {
+        (<span class='kw-2'>&amp;</span><span class='ident'>m</span>).<span class='ident'>into</span>()
+    }
+}
+
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Message</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Command</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Converts a Message into a Command.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_message</span>(<span class='ident'>m</span>: <span class='kw-2'>&amp;</span><span class='ident'>Message</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Command</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>m</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>Message</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Command</span><span class='op'>&gt;</span> {
         <span class='prelude-val'>Ok</span>(<span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;PASS&quot;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>m</span>.<span class='ident'>command</span>[..] {
             <span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>suffix</span>) <span class='op'>=&gt;</span> {
@@ -1657,16 +1750,21 @@
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;JOIN&quot;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>m</span>.<span class='ident'>command</span>[..] {
             <span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
-                    <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>(), <span class='prelude-val'>None</span>)
+                    <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>(), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
-                    <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>()))
+                    <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>()), <span class='prelude-val'>None</span>)
+                } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>2</span> {
+                    <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 },
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
-                    <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>None</span>)
+                    <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>2</span> {
-                    <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()))
+                    <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()), <span class='prelude-val'>None</span>)
+                } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>3</span> {
+                    <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()),
+                                  <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>2</span>].<span class='ident'>clone</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 }
@@ -1954,7 +2052,7 @@
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>()))
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>2</span> {
-                    <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()), 
+                    <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()),
                                     <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
@@ -1964,7 +2062,7 @@
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>2</span> {
                     <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()))
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>3</span> {
-                    <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()), 
+                    <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()),
                                     <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>2</span>].<span class='ident'>clone</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
@@ -2058,7 +2156,7 @@
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>()), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>2</span> {
-                    <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()), 
+                    <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()),
                                     <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
@@ -2068,7 +2166,7 @@
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>2</span> {
                     <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>3</span> {
-                    <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()), 
+                    <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()),
                                     <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>2</span>].<span class='ident'>clone</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
@@ -2235,90 +2333,133 @@
                     <span class='ident'>Command</span>::<span class='ident'>MEMOSERV</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>())
                 }
             }
-        <span class='comment'>/*} else if let &quot;CAP&quot; = &amp;m.command[..] {
-            if m.args.len() == 1 {
-                if let Ok(cmd) = m.args[0].parse() {
-                    match m.suffix {
-                        Some(ref suffix) =&gt; Command::CAP(None, cmd, None, Some(suffix.clone())),
-                        None =&gt; Command::CAP(None, cmd, None, None),
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;CAP&quot;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>m</span>.<span class='ident'>command</span>[..] {
+            <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
+                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>cmd</span>) <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>parse</span>() {
+                    <span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>suffix</span> {
+                        <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>None</span>, <span class='ident'>cmd</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>())),
+                        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>None</span>, <span class='ident'>cmd</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
                     }
-                } else {
-                    return Err(invalid_input())
+                } <span class='kw'>else</span> {
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 }
-            } else if m.args.len() == 2 {
-                if let Ok(cmd) = m.args[0].parse() {
-                    match m.suffix {
-                        Some(ref suffix) =&gt; Command::CAP(None, cmd, Some(m.args[1].clone()), 
-                                                         Some(suffix.clone())),
-                        None =&gt; Command::CAP(None, cmd, Some(m.args[1].clone()), None),
+            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>2</span> {
+                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>cmd</span>) <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>parse</span>() {
+                    <span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>suffix</span> {
+                        <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>None</span>, <span class='ident'>cmd</span>, <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()),
+                                                         <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>())),
+                        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>None</span>, <span class='ident'>cmd</span>, <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>()), <span class='prelude-val'>None</span>),
                     }
-                } else if let Ok(cmd) = m.args[1].parse() {
-                    match m.suffix {
-                        Some(ref suffix) =&gt; Command::CAP(Some(m.args[0].clone()), cmd, None,
-                                                         Some(suffix.clone())),
-                        None =&gt; Command::CAP(Some(m.args[0].clone()), cmd, None, None),
+                } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>cmd</span>) <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>parse</span>() {
+                    <span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>suffix</span> {
+                        <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>()), <span class='ident'>cmd</span>, <span class='prelude-val'>None</span>,
+                                                         <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>())),
+                        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>()), <span class='ident'>cmd</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
                     }
-                } else {
-                    return Err(invalid_input())
+                } <span class='kw'>else</span> {
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 }
-            } else if m.args.len() == 3 {
-                if let Ok(cmd) = m.args[1].parse() {
-                    match m.suffix {
-                        Some(ref suffix) =&gt; Command::CAP(Some(m.args[0].clone()), cmd, 
-                                                         Some(m.args[2].clone()),
-                                                         Some(suffix.clone())),
-                        None =&gt; Command::CAP(Some(m.args[0].clone()), cmd, Some(m.args[2].clone()),
-                                             None),
+            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>3</span> {
+                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>cmd</span>) <span class='op'>=</span> <span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>parse</span>() {
+                    <span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>suffix</span> {
+                        <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>()), <span class='ident'>cmd</span>,
+                                                         <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>2</span>].<span class='ident'>clone</span>()),
+                                                         <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>())),
+                        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>CAP</span>(<span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>()), <span class='ident'>cmd</span>, <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>2</span>].<span class='ident'>clone</span>()),
+                                             <span class='prelude-val'>None</span>),
                     }
-                } else {
-                    return Err(invalid_input())
+                } <span class='kw'>else</span> {
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 }
-            } else {
-                return Err(invalid_input())
-            }*/</span>
+            } <span class='kw'>else</span> {
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
+            }
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;ACCOUNT&quot;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>m</span>.<span class='ident'>command</span>[..] {
+            <span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>suffix</span> {
+                <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                    <span class='ident'>Command</span>::<span class='ident'>ACCOUNT</span>(<span class='ident'>suffix</span>.<span class='ident'>clone</span>())
+                } <span class='kw'>else</span> {
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
+                },
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
+                    <span class='ident'>Command</span>::<span class='ident'>ACCOUNT</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>())
+                } <span class='kw'>else</span> {
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
+                }
+            }
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;METADATA&quot;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>m</span>.<span class='ident'>command</span>[..] {
+            <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>2</span> {
+                <span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>suffix</span> {
+                    <span class='prelude-val'>Some</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()),
+                    <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>parse</span>() {
+                        <span class='prelude-val'>Ok</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>METADATA</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='ident'>c</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>),
+                        <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()),
+                    },
+                }
+            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>2</span> {
+                <span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>parse</span>() {
+                    <span class='prelude-val'>Ok</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>METADATA</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='ident'>c</span>, <span class='prelude-val'>Some</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>..].<span class='ident'>to_owned</span>()),
+                                                 <span class='ident'>m</span>.<span class='ident'>suffix</span>.<span class='ident'>clone</span>()),
+                    <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()),
+                }
+            } <span class='kw'>else</span> {
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
+            }
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;MONITOR&quot;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>m</span>.<span class='ident'>command</span>[..] {
+            <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
+                <span class='ident'>Command</span>::<span class='ident'>MONITOR</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='ident'>m</span>.<span class='ident'>suffix</span>.<span class='ident'>clone</span>())
+            } <span class='kw'>else</span> {
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
+            }
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;CHGHOST&quot;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>m</span>.<span class='ident'>command</span>[..] {
+            <span class='kw'>match</span> <span class='ident'>m</span>.<span class='ident'>suffix</span> {
+                <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
+                    <span class='ident'>Command</span>::<span class='ident'>CHGHOST</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='ident'>suffix</span>.<span class='ident'>clone</span>())
+                } <span class='kw'>else</span> {
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
+                },
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>m</span>.<span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>2</span> {
+                    <span class='ident'>Command</span>::<span class='ident'>CHGHOST</span>(<span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>clone</span>(), <span class='ident'>m</span>.<span class='ident'>args</span>[<span class='number'>1</span>].<span class='ident'>clone</span>())
+                } <span class='kw'>else</span> {
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
+                }
+            }
         } <span class='kw'>else</span> {
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
         })
     }
+}
 
+<span class='kw'>impl</span> <span class='ident'>Command</span> {
     <span class='doccomment'>/// Converts a potential Message result into a potential Command result.</span>
-    <span class='attribute'>#[<span class='ident'>unstable</span> <span class='op'>=</span> <span class='string'>&quot;This feature is still relatively new.&quot;</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_message_io</span>(<span class='ident'>m</span>: <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Command</span><span class='op'>&gt;</span> {
-        <span class='ident'>m</span>.<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>msg</span><span class='op'>|</span> <span class='ident'>Command</span>::<span class='ident'>from_message</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>))
+        <span class='ident'>m</span>.<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>msg</span><span class='op'>|</span> (<span class='kw-2'>&amp;</span><span class='ident'>msg</span>).<span class='ident'>into</span>())
     }
 }
 
 <span class='doccomment'>/// A list of all of the subcommands for the capabilities extension.</span>
-<span class='attribute'>#[<span class='ident'>stable</span>]</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Copy</span>, <span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>, <span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>CapSubCommand</span> {
     <span class='doccomment'>/// Requests a list of the server&#39;s capabilities.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>LS</span>,
     <span class='doccomment'>/// Requests a list of the server&#39;s capabilities.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>LIST</span>,
     <span class='doccomment'>/// Requests specific capabilities blindly.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>REQ</span>,
     <span class='doccomment'>/// Acknowledges capabilities.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>ACK</span>,
     <span class='doccomment'>/// Does not acknowledge certain capabilities.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='ident'>NAK</span>,
-    <span class='doccomment'>/// Requests that the server clears the capabilities of this client.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='ident'>CLEAR</span>,
     <span class='doccomment'>/// Ends the capability negotiation before registration.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
-    <span class='ident'>END</span>
+    <span class='ident'>END</span>,
+    <span class='doccomment'>/// Signals that new capabilities are now being offered.</span>
+    <span class='ident'>NEW</span>,
+    <span class='doccomment'>/// Signasl that the specified capabilities are cancelled and no longer available.</span>
+    <span class='ident'>DEL</span>,
 }
 
-<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>impl</span> <span class='ident'>CapSubCommand</span> {
     <span class='doccomment'>/// Gets the string that corresponds to this subcommand.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>to_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> {
         <span class='kw'>match</span> <span class='self'>self</span> {
             <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>LS</span>    <span class='op'>=&gt;</span> <span class='string'>&quot;LS&quot;</span>,
@@ -2326,14 +2467,15 @@
             <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>REQ</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;REQ&quot;</span>,
             <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>ACK</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;ACK&quot;</span>,
             <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>NAK</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;NAK&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>CLEAR</span> <span class='op'>=&gt;</span> <span class='string'>&quot;CLEAR&quot;</span>,
             <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>END</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;END&quot;</span>,
+            <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>NEW</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;NEW&quot;</span>,
+            <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>DEL</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;DEL&quot;</span>,
         }
     }
 
     <span class='comment'>// This makes some earlier lines shorter.</span>
-    <span class='kw'>fn</span> <span class='ident'>str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> {
-        <span class='self'>self</span>.<span class='ident'>to_str</span>()
+    <span class='kw'>fn</span> <span class='ident'>string</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
+        <span class='self'>self</span>.<span class='ident'>to_str</span>().<span class='ident'>to_owned</span>()
     }
 }
 
@@ -2346,16 +2488,62 @@
             <span class='string'>&quot;REQ&quot;</span>   <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>CapSubCommand</span>::<span class='ident'>REQ</span>),
             <span class='string'>&quot;ACK&quot;</span>   <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>CapSubCommand</span>::<span class='ident'>ACK</span>),
             <span class='string'>&quot;NAK&quot;</span>   <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>CapSubCommand</span>::<span class='ident'>NAK</span>),
-            <span class='string'>&quot;CLEAR&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>CapSubCommand</span>::<span class='ident'>CLEAR</span>),
             <span class='string'>&quot;END&quot;</span>   <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>CapSubCommand</span>::<span class='ident'>END</span>),
+            <span class='string'>&quot;NEW&quot;</span>   <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>CapSubCommand</span>::<span class='ident'>NEW</span>),
+            <span class='string'>&quot;DEL&quot;</span>   <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>CapSubCommand</span>::<span class='ident'>DEL</span>),
             _       <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Failed to parse CAP subcommand.&quot;</span>),
         }
     }
 }
 
+<span class='doccomment'>/// A list of all the subcommands for the</span>
+<span class='doccomment'>/// [metadata extension](http://ircv3.net/specs/core/metadata-3.2.html).</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>, <span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>MetadataSubCommand</span> {
+    <span class='doccomment'>/// Looks up the value for some keys.</span>
+    <span class='ident'>GET</span>,
+    <span class='doccomment'>/// Lists all of the metadata keys and values.</span>
+    <span class='ident'>LIST</span>,
+    <span class='doccomment'>/// Sets the value for some key.</span>
+    <span class='ident'>SET</span>,
+    <span class='doccomment'>/// Removes all metadata.</span>
+    <span class='ident'>CLEAR</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>MetadataSubCommand</span> {
+    <span class='doccomment'>/// Gets the string that corresponds to this subcommand.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>to_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> {
+        <span class='kw'>match</span> <span class='self'>self</span> {
+            <span class='kw-2'>&amp;</span><span class='ident'>MetadataSubCommand</span>::<span class='ident'>GET</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;GET&quot;</span>,
+            <span class='kw-2'>&amp;</span><span class='ident'>MetadataSubCommand</span>::<span class='ident'>LIST</span>  <span class='op'>=&gt;</span> <span class='string'>&quot;LIST&quot;</span>,
+            <span class='kw-2'>&amp;</span><span class='ident'>MetadataSubCommand</span>::<span class='ident'>SET</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;SET&quot;</span>,
+            <span class='kw-2'>&amp;</span><span class='ident'>MetadataSubCommand</span>::<span class='ident'>CLEAR</span> <span class='op'>=&gt;</span> <span class='string'>&quot;CLEAR&quot;</span>,
+        }
+    }
+
+    <span class='comment'>// This makes some earlier lines shorter.</span>
+    <span class='kw'>fn</span> <span class='ident'>string</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
+        <span class='self'>self</span>.<span class='ident'>to_str</span>().<span class='ident'>to_owned</span>()
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>FromStr</span> <span class='kw'>for</span> <span class='ident'>MetadataSubCommand</span> {
+    <span class='kw'>type</span> <span class='prelude-val'>Err</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>;
+    <span class='kw'>fn</span> <span class='ident'>from_str</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>StdResult</span><span class='op'>&lt;</span><span class='ident'>MetadataSubCommand</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
+        <span class='kw'>match</span> <span class='ident'>s</span> {
+            <span class='string'>&quot;GET&quot;</span>   <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>MetadataSubCommand</span>::<span class='ident'>GET</span>),
+            <span class='string'>&quot;LIST&quot;</span>  <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>MetadataSubCommand</span>::<span class='ident'>LIST</span>),
+            <span class='string'>&quot;SET&quot;</span>   <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>MetadataSubCommand</span>::<span class='ident'>SET</span>),
+            <span class='string'>&quot;CLEAR&quot;</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>MetadataSubCommand</span>::<span class='ident'>CLEAR</span>),
+            _       <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Failed to parse METADATA subcommand.&quot;</span>),
+        }
+    }
+}
+
+
 <span class='doccomment'>/// Produces an invalid_input IoError.</span>
 <span class='kw'>fn</span> <span class='ident'>invalid_input</span>() <span class='op'>-&gt;</span> <span class='ident'>Error</span> {
-    <span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidInput</span>, <span class='string'>&quot;Failed to parse malformed message as command.&quot;</span>, <span class='prelude-val'>None</span>)
+    <span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidInput</span>, <span class='string'>&quot;Failed to parse malformed message as command.&quot;</span>)
 }
 </pre>
 </section>
@@ -2390,6 +2578,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

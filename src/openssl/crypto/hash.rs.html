@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/Documents/Programming/Rust/rust-openssl/openssl/src/crypto/hash.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/nightly/cargo/registry/src/github.com-0a35038f75765ae4/openssl-0.6.2/src/crypto/hash.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>hash.rs.html -- source</title>
@@ -387,7 +387,7 @@
 <span class='kw'>use</span> <span class='ident'>ffi</span>;
 
 <span class='doccomment'>/// Message digest (hash) type.</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Copy</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Copy</span>, <span class='ident'>Clone</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>Type</span> {
     <span class='ident'>MD5</span>,
     <span class='ident'>SHA1</span>,
@@ -432,7 +432,7 @@
     }
 }
 
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Copy</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Copy</span>, <span class='ident'>Clone</span>)]</span>
 <span class='kw'>enum</span> <span class='ident'>State</span> {
     <span class='ident'>Reset</span>,
     <span class='ident'>Updated</span>,
@@ -750,6 +750,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

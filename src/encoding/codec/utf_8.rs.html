@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.24/src/codec/utf_8.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/nightly/cargo/registry/src/github.com-0a35038f75765ae4/encoding-0.2.32/src/codec/utf_8.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>utf_8.rs.html -- source</title>
@@ -896,7 +896,7 @@
 <span class='doccomment'>//! UTF-8, the universal encoding.</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::{<span class='ident'>str</span>, <span class='ident'>mem</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>IntoCow</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>convert</span>::<span class='ident'>Into</span>;
 <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
 
 <span class='doccomment'>/**
@@ -1044,7 +1044,7 @@
                 <span class='self'>self</span>.<span class='ident'>queuelen</span> <span class='op'>=</span> <span class='number'>0</span>;
                 <span class='ident'>write_bytes</span>(<span class='ident'>output</span>, <span class='kw-2'>&amp;</span><span class='ident'>input</span>[<span class='number'>0</span>..<span class='ident'>processed</span>]);
                 <span class='kw'>return</span> (<span class='ident'>processed</span>, <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> {
-                    <span class='ident'>upto</span>: <span class='ident'>upto</span> <span class='kw'>as</span> <span class='ident'>isize</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into_cow</span>()
+                    <span class='ident'>upto</span>: <span class='ident'>upto</span> <span class='kw'>as</span> <span class='ident'>isize</span>, <span class='ident'>cause</span>: <span class='string'>&quot;invalid sequence&quot;</span>.<span class='ident'>into</span>()
                 }));
             }
         }
@@ -1057,7 +1057,7 @@
         <span class='ident'>write_bytes</span>(<span class='ident'>output</span>, <span class='kw-2'>&amp;</span><span class='ident'>input</span>[<span class='number'>0</span>..<span class='ident'>processed</span>]);
         <span class='kw'>if</span> <span class='ident'>processed</span> <span class='op'>&lt;</span> <span class='ident'>input</span>.<span class='ident'>len</span>() {
             <span class='kw'>let</span> <span class='ident'>morequeuelen</span> <span class='op'>=</span> <span class='ident'>input</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='ident'>processed</span>;
-            <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0</span>, <span class='ident'>morequeuelen</span>) {
+            <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>morequeuelen</span> {
                 <span class='self'>self</span>.<span class='ident'>queue</span>[<span class='self'>self</span>.<span class='ident'>queuelen</span> <span class='op'>+</span> <span class='ident'>i</span>] <span class='op'>=</span> <span class='ident'>input</span>[<span class='ident'>processed</span> <span class='op'>+</span> <span class='ident'>i</span>];
             }
             <span class='self'>self</span>.<span class='ident'>queuelen</span> <span class='op'>+=</span> <span class='ident'>morequeuelen</span>;
@@ -1071,7 +1071,7 @@
         <span class='self'>self</span>.<span class='ident'>state</span> <span class='op'>=</span> <span class='ident'>INITIAL_STATE</span>;
         <span class='self'>self</span>.<span class='ident'>queuelen</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>if</span> <span class='ident'>state</span> <span class='op'>!=</span> <span class='ident'>ACCEPT_STATE</span> {
-            <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> { <span class='ident'>upto</span>: <span class='number'>0</span>, <span class='ident'>cause</span>: <span class='string'>&quot;incomplete sequence&quot;</span>.<span class='ident'>into_cow</span>() })
+            <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> { <span class='ident'>upto</span>: <span class='number'>0</span>, <span class='ident'>cause</span>: <span class='string'>&quot;incomplete sequence&quot;</span>.<span class='ident'>into</span>() })
         } <span class='kw'>else</span> {
             <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>queuelen</span> <span class='op'>==</span> <span class='number'>0</span>);
             <span class='prelude-val'>None</span>
@@ -1216,7 +1216,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_invalid_continuation</span>() {
-        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0x80u8</span>, <span class='number'>0xc0</span>) {
+        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='number'>0x80</span>..<span class='number'>0xc0</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>UTF8Encoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>c</span>], [], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1274,7 +1274,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_invalid_start_immediate_test_finish</span>() {
-        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0xf5u16</span>, <span class='number'>0x100</span>) {
+        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='number'>0xf5</span>..<span class='number'>0x100</span> {
             <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>u8</span>;
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>UTF8Encoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>c</span>], [], <span class='string'>&quot;&quot;</span>);
@@ -1284,7 +1284,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_invalid_start_followed_by_space</span>() {
-        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0xf5u16</span>, <span class='number'>0x100</span>) {
+        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='number'>0xf5</span>..<span class='number'>0x100</span> {
             <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='ident'>c</span> <span class='kw'>as</span> <span class='ident'>u8</span>;
 
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>UTF8Encoding</span>.<span class='ident'>raw_decoder</span>();
@@ -1300,7 +1300,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_invalid_lone_start_immediate_test_finish</span>() {
-        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0xc2u8</span>, <span class='number'>0xf5</span>) {
+        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='number'>0xc2</span>..<span class='number'>0xf5</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>UTF8Encoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>c</span>], <span class='string'>&quot;&quot;</span>); <span class='comment'>// wait for cont. bytes</span>
             <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1309,7 +1309,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_invalid_lone_start_followed_by_space</span>() {
-        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0xc2u8</span>, <span class='number'>0xf5</span>) {
+        <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='number'>0xc2</span>..<span class='number'>0xf5</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>UTF8Encoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>c</span>], [<span class='number'>0x20</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1323,7 +1323,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_invalid_incomplete_three_byte_seq_followed_by_space</span>() {
-        <span class='kw'>for</span> <span class='ident'>b</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0xe0u8</span>, <span class='number'>0xf5</span>) {
+        <span class='kw'>for</span> <span class='ident'>b</span> <span class='kw'>in</span> <span class='number'>0xe0</span>..<span class='number'>0xf5</span> {
             <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>b</span> <span class='op'>==</span> <span class='number'>0xe0</span> <span class='op'>||</span> <span class='ident'>b</span> <span class='op'>==</span> <span class='number'>0xf0</span> {<span class='number'>0xa0</span>} <span class='kw'>else</span> {<span class='number'>0x80</span>};
 
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>UTF8Encoding</span>.<span class='ident'>raw_decoder</span>();
@@ -1350,7 +1350,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_invalid_incomplete_four_byte_seq_followed_by_space</span>() {
-        <span class='kw'>for</span> <span class='ident'>a</span> <span class='kw'>in</span> <span class='ident'>range</span>(<span class='number'>0xf0u8</span>, <span class='number'>0xf5</span>) {
+        <span class='kw'>for</span> <span class='ident'>a</span> <span class='kw'>in</span> <span class='number'>0xf0</span>..<span class='number'>0xf5</span> {
             <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>a</span> <span class='op'>==</span> <span class='number'>0xf0</span> {<span class='number'>0xa0</span>} <span class='kw'>else</span> {<span class='number'>0x80</span>};
             <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='number'>0x80</span>;
 
@@ -1730,6 +1730,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

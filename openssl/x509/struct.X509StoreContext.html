@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>openssl</a>::<wbr><a href='index.html'>x509</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.X509.html' title='A public key certificate'>X509</a><a class='struct ' href='struct.X509Generator.html' title='Generator of private key/certificate pairs'>X509Generator</a><a class='struct ' href='struct.X509Name.html' title=''>X509Name</a><a class='struct current' href='struct.X509StoreContext.html' title=''>X509StoreContext</a></div><div class='block enum'><h2>Enums</h2><a class='enum ' href='enum.ExtKeyUsage.html' title=''>ExtKeyUsage</a><a class='enum ' href='enum.KeyUsage.html' title=''>KeyUsage</a><a class='enum ' href='enum.X509FileType.html' title=''>X509FileType</a><a class='enum ' href='enum.X509ValidationError.html' title=''>X509ValidationError</a></div>
+        <p class='location'><a href='../index.html'>openssl</a>::<wbr><a href='index.html'>x509</a></p><script>window.sidebarCurrent = {name: 'X509StoreContext', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,14 +41,16 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>openssl</a>::<wbr><a href='index.html'>x509</a>::<wbr><a class='struct' href=''>X509StoreContext</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-12370' href='../../src/openssl/x509/mod.rs.html#33-35'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>openssl</a>::<wbr><a href='index.html'>x509</a>::<wbr><a class='struct' href=''>X509StoreContext</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-13624' class='srclink' href='../../src/openssl/x509/mod.rs.html#32-34' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct X509StoreContext {
     // some fields omitted
-}</pre><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='struct' href='../../openssl/x509/struct.X509StoreContext.html' title='openssl::x509::X509StoreContext'>X509StoreContext</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.new' class='fnname'>new</a>(ctx: *mut <a class='type' href='../../openssl-sys/type.X509_STORE_CTX.html' title='openssl-sys::X509_STORE_CTX'>X509_STORE_CTX</a>) -&gt; <a class='struct' href='../../openssl/x509/struct.X509StoreContext.html' title='openssl::x509::X509StoreContext'>X509StoreContext</a></code></h4>
-<h4 id='method.get_error' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.get_error' class='fnname'>get_error</a>(&amp;self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../../openssl/x509/enum.X509ValidationError.html' title='openssl::x509::X509ValidationError'>X509ValidationError</a>&gt;</code></h4>
-<h4 id='method.get_current_cert' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.get_current_cert' class='fnname'>get_current_cert</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../openssl/x509/struct.X509.html' title='openssl::x509::X509'>X509</a>&lt;'a&gt;&gt;</code></h4>
+}</pre><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../openssl/x509/struct.X509StoreContext.html' title='openssl::x509::X509StoreContext'>X509StoreContext</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(ctx: <a href='http://doc.rust-lang.org/nightly/std/primitive.pointer.html'>*mut <a class='type' href='../../openssl_sys/type.X509_STORE_CTX.html' title='openssl_sys::X509_STORE_CTX'>X509_STORE_CTX</a></a>) -&gt; <a class='struct' href='../../openssl/x509/struct.X509StoreContext.html' title='openssl::x509::X509StoreContext'>X509StoreContext</a></code></h4>
+<h4 id='method.get_error' class='method'><code>fn <a href='#method.get_error' class='fnname'>get_error</a>(&amp;self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../../openssl/x509/enum.X509ValidationError.html' title='openssl::x509::X509ValidationError'>X509ValidationError</a>&gt;</code></h4>
+<h4 id='method.get_current_cert' class='method'><code>fn <a href='#method.get_current_cert' class='fnname'>get_current_cert</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../openssl/x509/struct.X509.html' title='openssl::x509::X509'>X509</a>&lt;'a&gt;&gt;</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 
@@ -81,6 +83,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

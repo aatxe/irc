@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>encoding</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../all/index.html' title='A list of all supported encodings. Useful for encodings fixed in the compile time.'>all</a><a class='mod ' href='../codec/index.html' title='Codec implementations.'>codec</a><a class='mod ' href='../label/index.html' title='An interface for retrieving an encoding (or a set of encodings) from a string/numeric label.'>label</a><a class='mod current' href='../types/index.html' title='Interface to the character encoding.'>types</a></div>
+        <p class='location'><a href='../index.html'>encoding</a></p><script>window.sidebarCurrent = {name: 'types', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,9 +41,11 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>encoding</a>::<wbr><a class='mod' href=''>types</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-380' href='../../src/encoding/types.rs.html#5-556'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>encoding</a>::<wbr><a class='mod' href=''>types</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-388' class='srclink' href='../../src/encoding/types.rs.html#5-513' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Interface to the character encoding.</p>
 
 <h1 id="raw-incremental-interface" class='section-header'><a
@@ -94,96 +96,120 @@ then it can just discard the first sequence and can emit the fixed string on an 
 It still has to feed the input bytes starting at the second offset again.</p>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.CodecError.html'
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.CodecError.html'
                                title='encoding::types::CodecError'>CodecError</a></td>
-                        <td class='docblock short'><p>Error information from either encoder or decoder.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Error information from either encoder or decoder.</p>
+
+                        </td>
                     </tr>
                 </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='enum' href='enum.DecoderTrap.html'
+                    <tr class=' module-item'>
+                        <td><a class='enum' href='enum.DecoderTrap.html'
                                title='encoding::types::DecoderTrap'>DecoderTrap</a></td>
-                        <td class='docblock short'><p>Trap, which handles decoder errors.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Trap, which handles decoder errors.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='enum' href='enum.EncoderTrap.html'
+                    <tr class=' module-item'>
+                        <td><a class='enum' href='enum.EncoderTrap.html'
                                title='encoding::types::EncoderTrap'>EncoderTrap</a></td>
-                        <td class='docblock short'></td>
+                        <td class='docblock short'>
+                             
+                        </td>
                     </tr>
                 </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
 <table>
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='trait' href='trait.ByteWriter.html'
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.ByteWriter.html'
                                title='encoding::types::ByteWriter'>ByteWriter</a></td>
-                        <td class='docblock short'><p>Byte writer used by encoders. In most cases this will be an owned vector of <code>u8</code>.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Byte writer used by encoders. In most cases this will be an owned vector of <code>u8</code>.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='trait' href='trait.Encoding.html'
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.Encoding.html'
                                title='encoding::types::Encoding'>Encoding</a></td>
-                        <td class='docblock short'><p>Character encoding.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Character encoding.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='trait' href='trait.RawDecoder.html'
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.RawDecoder.html'
                                title='encoding::types::RawDecoder'>RawDecoder</a></td>
-                        <td class='docblock short'><p>Decoder converting a byte sequence into a Unicode string.
+                        <td class='docblock short'>
+                             <p>Decoder converting a byte sequence into a Unicode string.
 This is a lower level interface, and normally <code>Encoding::decode</code> should be used instead.</p>
-</td>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='trait' href='trait.RawEncoder.html'
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.RawEncoder.html'
                                title='encoding::types::RawEncoder'>RawEncoder</a></td>
-                        <td class='docblock short'><p>Encoder converting a Unicode string into a byte sequence.
+                        <td class='docblock short'>
+                             <p>Encoder converting a Unicode string into a byte sequence.
 This is a lower level interface, and normally <code>Encoding::encode</code> should be used instead.</p>
-</td>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='trait' href='trait.StringWriter.html'
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.StringWriter.html'
                                title='encoding::types::StringWriter'>StringWriter</a></td>
-                        <td class='docblock short'><p>String writer used by decoders. In most cases this will be an owned string.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>String writer used by decoders. In most cases this will be an owned string.</p>
+
+                        </td>
                     </tr>
                 </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.decode.html'
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.decode.html'
                                title='encoding::types::decode'>decode</a></td>
-                        <td class='docblock short'><p>Determine the encoding by looking for a Byte Order Mark (BOM)
+                        <td class='docblock short'>
+                             <p>Determine the encoding by looking for a Byte Order Mark (BOM)
 and decoded a single string in memory.
 Return the result and the used encoding.</p>
-</td>
+
+                        </td>
                     </tr>
                 </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
 <table>
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='type' href='type.DecoderTrapFunc.html'
+                    <tr class=' module-item'>
+                        <td><a class='type' href='type.DecoderTrapFunc.html'
                                title='encoding::types::DecoderTrapFunc'>DecoderTrapFunc</a></td>
-                        <td class='docblock short'><p>A type of the bare function in <code>DecoderTrap</code> values.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>A type of the bare function in <code>DecoderTrap</code> values.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='type' href='type.EncoderTrapFunc.html'
+                    <tr class=' module-item'>
+                        <td><a class='type' href='type.EncoderTrapFunc.html'
                                title='encoding::types::EncoderTrapFunc'>EncoderTrapFunc</a></td>
-                        <td class='docblock short'><p>A type of the bare function in <code>EncoderTrap</code> values.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>A type of the bare function in <code>EncoderTrap</code> values.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='type' href='type.EncodingRef.html'
+                    <tr class=' module-item'>
+                        <td><a class='type' href='type.EncodingRef.html'
                                title='encoding::types::EncodingRef'>EncodingRef</a></td>
-                        <td class='docblock short'><p>A trait object using dynamic dispatch which is a sendable reference to the encoding,
+                        <td class='docblock short'>
+                             <p>A trait object using dynamic dispatch which is a sendable reference to the encoding,
 for code where the encoding is not known at compile-time.</p>
-</td>
+
+                        </td>
                     </tr>
                 </table></section>
     <section id='search' class="content hidden"></section>
@@ -217,6 +243,10 @@ for code where the encoding is not known at compile-time.</p>
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

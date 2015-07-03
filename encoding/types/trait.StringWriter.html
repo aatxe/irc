@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.CodecError.html' title='Error information from either encoder or decoder.'>CodecError</a></div><div class='block enum'><h2>Enums</h2><a class='enum ' href='enum.DecoderTrap.html' title='Trap, which handles decoder errors.'>DecoderTrap</a><a class='enum ' href='enum.EncoderTrap.html' title=''>EncoderTrap</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.ByteWriter.html' title='Byte writer used by encoders. In most cases this will be an owned vector of `u8`.'>ByteWriter</a><a class='trait ' href='trait.Encoding.html' title='Character encoding.'>Encoding</a><a class='trait ' href='trait.RawDecoder.html' title='Decoder converting a byte sequence into a Unicode string. This is a lower level interface, and normally `Encoding::decode` should be used instead.'>RawDecoder</a><a class='trait ' href='trait.RawEncoder.html' title='Encoder converting a Unicode string into a byte sequence. This is a lower level interface, and normally `Encoding::encode` should be used instead.'>RawEncoder</a><a class='trait current' href='trait.StringWriter.html' title='String writer used by decoders. In most cases this will be an owned string.'>StringWriter</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.decode.html' title='Determine the encoding by looking for a Byte Order Mark (BOM) and decoded a single string in memory. Return the result and the used encoding.'>decode</a></div>
+        <p class='location'><a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a></p><script>window.sidebarCurrent = {name: 'StringWriter', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,9 +41,11 @@
     </nav>
 
     <section id='main' class="content trait">
-<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='trait' href=''>StringWriter</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-468' href='../../src/encoding/types.rs.html#104-118'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='trait' href=''>StringWriter</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-476' class='srclink' href='../../src/encoding/types.rs.html#101-115' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait StringWriter {
     fn <a href='#tymethod.write_char' class='fnname'>write_char</a>(&amp;mut self, c: <a href='http://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>);
     fn <a href='#tymethod.write_str' class='fnname'>write_str</a>(&amp;mut self, s: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>);
@@ -53,12 +55,12 @@
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.write_char' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#tymethod.write_char' class='fnname'>write_char</a>(&amp;mut self, c: <a href='http://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>)</code></h3><div class='docblock'><p>Writes a single character.</p>
-</div><h3 id='tymethod.write_str' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#tymethod.write_str' class='fnname'>write_str</a>(&amp;mut self, s: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h3><div class='docblock'><p>Writes a string.</p>
+        <h3 id='tymethod.write_char' class='method stab '><code>fn <a href='#tymethod.write_char' class='fnname'>write_char</a>(&amp;mut self, c: <a href='http://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>)</code></h3><div class='docblock'><p>Writes a single character.</p>
+</div><h3 id='tymethod.write_str' class='method stab '><code>fn <a href='#tymethod.write_str' class='fnname'>write_str</a>(&amp;mut self, s: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h3><div class='docblock'><p>Writes a string.</p>
 </div></div>
             <h2 id='provided-methods'>Provided Methods</h2>
             <div class='methods'>
-        <h3 id='method.writer_hint' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.writer_hint' class='fnname'>writer_hint</a>(&amp;mut self, _expectedlen: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h3><div class='docblock'><p>Hints an expected lower bound on the length (in bytes) of the output
+        <h3 id='method.writer_hint' class='method stab '><code>fn <a href='#method.writer_hint' class='fnname'>writer_hint</a>(&amp;mut self, _expectedlen: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h3><div class='docblock'><p>Hints an expected lower bound on the length (in bytes) of the output
 until the next call to <code>writer_hint</code>,
 so that the writer can reserve the memory for writing.
 <code>RawDecoder</code>s are recommended but not required to call this method
@@ -67,7 +69,7 @@ By default this method does nothing.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='trait' href='../../encoding/types/trait.StringWriter.html' title='encoding::types::StringWriter'>StringWriter</a> for <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></li>
+    <li><code>impl <a class='trait' href='../../encoding/types/trait.StringWriter.html' title='encoding::types::StringWriter'>StringWriter</a> for <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></li>
 </ul><script type="text/javascript" async
                               src="../../implementors/encoding/types/trait.StringWriter.js">
                       </script></section>
@@ -102,6 +104,10 @@ By default this method does nothing.</p>
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

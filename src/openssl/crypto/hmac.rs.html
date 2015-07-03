@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/Documents/Programming/Rust/rust-openssl/openssl/src/crypto/hmac.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/nightly/cargo/registry/src/github.com-0a35038f75765ae4/openssl-0.6.2/src/crypto/hmac.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>hmac.rs.html -- source</title>
@@ -543,7 +543,7 @@
 <span class='kw'>use</span> <span class='ident'>crypto</span>::<span class='ident'>hash</span>::<span class='ident'>Type</span>;
 <span class='kw'>use</span> <span class='ident'>ffi</span>;
 
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Copy</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Copy</span>, <span class='ident'>Clone</span>)]</span>
 <span class='kw'>enum</span> <span class='ident'>State</span> {
     <span class='ident'>Reset</span>,
     <span class='ident'>Updated</span>,
@@ -565,7 +565,7 @@
 <span class='doccomment'>/// let data = b&quot;what do ya want for nothing?&quot;;</span>
 <span class='doccomment'>/// let spec = b&quot;\x75\x0c\x78\x3e\x6a\xb0\xb5\x03\xea\xa8\x6e\x31\x0a\x5d\xb7\x38&quot;;</span>
 <span class='doccomment'>/// let res = hmac(Type::MD5, key, data);</span>
-<span class='doccomment'>/// assert_eq!(spec, res);</span>
+<span class='doccomment'>/// assert_eq!(res, spec);</span>
 <span class='doccomment'>/// ```</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Use the `Write` trait to supply the input in chunks.</span>
@@ -575,13 +575,13 @@
 <span class='doccomment'>/// use openssl::crypto::hash::Type;</span>
 <span class='doccomment'>/// use openssl::crypto::hmac::HMAC;</span>
 <span class='doccomment'>/// let key = b&quot;Jefe&quot;;</span>
-<span class='doccomment'>/// let data = [b&quot;what do ya &quot;, b&quot;want for nothing?&quot;];</span>
+<span class='doccomment'>/// let data: &amp;[&amp;[u8]] = &amp;[b&quot;what do ya &quot;, b&quot;want for nothing?&quot;];</span>
 <span class='doccomment'>/// let spec = b&quot;\x75\x0c\x78\x3e\x6a\xb0\xb5\x03\xea\xa8\x6e\x31\x0a\x5d\xb7\x38&quot;;</span>
 <span class='doccomment'>/// let mut h = HMAC::new(Type::MD5, &amp;*key);</span>
 <span class='doccomment'>/// h.write_all(data[0]);</span>
 <span class='doccomment'>/// h.write_all(data[1]);</span>
 <span class='doccomment'>/// let res = h.finish();</span>
-<span class='doccomment'>/// assert_eq!(spec, res);</span>
+<span class='doccomment'>/// assert_eq!(res, spec);</span>
 <span class='doccomment'>/// ```</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>HMAC</span> {
     <span class='ident'>ctx</span>: <span class='ident'>ffi</span>::<span class='ident'>HMAC_CTX</span>,
@@ -1030,6 +1030,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

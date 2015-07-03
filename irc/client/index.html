@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>irc</a></p><div class='block mod'><h2>Modules</h2><a class='mod current' href='../client/index.html' title='A simple, thread-safe IRC client library.'>client</a><a class='mod ' href='../server/index.html' title='A simple, thread-safe IRC server library.'>server</a></div>
+        <p class='location'><a href='../index.html'>irc</a></p><script>window.sidebarCurrent = {name: 'client', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,38 +41,48 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>irc</a>::<wbr><a class='mod' href=''>client</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-8' href='../../src/irc/client/mod.rs.html#1-25'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>irc</a>::<wbr><a class='mod' href=''>client</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-8' class='srclink' href='../../src/irc/client/mod.rs.html#1-22' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>A simple, thread-safe IRC client library.</p>
 </div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='conn/index.html'
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='conn/index.html'
                                title='irc::client::conn'>conn</a></td>
-                        <td class='docblock short'><p>Thread-safe connections on IrcStreams.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Thread-safe connections on IrcStreams.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='data/index.html'
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='data/index.html'
                                title='irc::client::data'>data</a></td>
-                        <td class='docblock short'><p>Data related to IRC functionality.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Data related to IRC functionality.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='prelude/index.html'
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='prelude/index.html'
                                title='irc::client::prelude'>prelude</a></td>
-                        <td class='docblock short'><p>A client-side IRC prelude, re-exporting all the necessary basics.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>A client-side IRC prelude, re-exporting all the necessary basics.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='mod' href='server/index.html'
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='server/index.html'
                                title='irc::client::server'>server</a></td>
-                        <td class='docblock short'><p>Interface for working with IRC Servers.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>Interface for working with IRC Servers.</p>
+
+                        </td>
                     </tr>
                 </table></section>
     <section id='search' class="content hidden"></section>
@@ -106,6 +116,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

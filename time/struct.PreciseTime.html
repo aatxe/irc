@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         <a href='../time/index.html'><img src='http://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png' alt='' width='100'></a>
-        <p class='location'><a href='index.html'>time</a></p><div class='block struct'><h2>Structs</h2><a class='struct current' href='struct.PreciseTime.html' title='An opaque structure representing a moment in time.'>PreciseTime</a><a class='struct ' href='struct.SteadyTime.html' title='A structure representing a moment in time.'>SteadyTime</a><a class='struct ' href='struct.Timespec.html' title='A record specifying a time value in seconds and nanoseconds.'>Timespec</a><a class='struct ' href='struct.Tm.html' title='Holds a calendar date and time broken down into its components (year, month, day, and so on), also called a broken-down time value.'>Tm</a><a class='struct ' href='struct.TmFmt.html' title='A wrapper around a `Tm` and format string that implements Display.'>TmFmt</a></div><div class='block enum'><h2>Enums</h2><a class='enum ' href='enum.ParseError.html' title=''>ParseError</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.at.html' title='Returns the specified time in the local timezone'>at</a><a class='fn ' href='fn.at_utc.html' title='Returns the specified time in UTC'>at_utc</a><a class='fn ' href='fn.empty_tm.html' title=''>empty_tm</a><a class='fn ' href='fn.get_time.html' title='Returns the current time as a `timespec` containing the seconds and nanoseconds since 1970-01-01T00:00:00Z.'>get_time</a><a class='fn ' href='fn.now.html' title='Returns the current time in the local timezone'>now</a><a class='fn ' href='fn.now_utc.html' title='Returns the current time in UTC'>now_utc</a><a class='fn ' href='fn.precise_time_ns.html' title='Returns the current value of a high-resolution performance counter in nanoseconds since an unspecified epoch.'>precise_time_ns</a><a class='fn ' href='fn.precise_time_s.html' title='Returns the current value of a high-resolution performance counter in seconds since an unspecified epoch.'>precise_time_s</a><a class='fn ' href='fn.strftime.html' title='Formats the time according to the format string.'>strftime</a><a class='fn ' href='fn.strptime.html' title='Parses the time from the string according to the format string.'>strptime</a><a class='fn ' href='fn.tzset.html' title=''>tzset</a></div>
+        <p class='location'><a href='index.html'>time</a></p><script>window.sidebarCurrent = {name: 'PreciseTime', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,9 +41,11 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>time</a>::<wbr><a class='struct' href=''>PreciseTime</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-1100' href='../src/time/lib.rs.html#303'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>time</a>::<wbr><a class='struct' href=''>PreciseTime</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-8677' class='srclink' href='../src/time/lib.rs.html#324' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct PreciseTime(_);</pre><div class='docblock'><p>An opaque structure representing a moment in time.</p>
 
 <p>The only operation that can be performed on a <code>PreciseTime</code> is the
@@ -52,9 +54,8 @@ calculation of the <code>Duration</code> of time that lies between them.</p>
 <h1 id="examples" class='section-header'><a
                            href="#examples">Examples</a></h1>
 <p>Repeatedly call a function for 1 second:</p>
-<pre id='rust-example-rendered' class='rust '>
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>time</span>::<span class='ident'>Duration</span>;
-<span class='kw'>use</span> <span class='ident'>time</span>::<span class='ident'>PreciseTime</span>;
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>time</span>::{<span class='ident'>Duration</span>, <span class='ident'>PreciseTime</span>};
 
 <span class='kw'>let</span> <span class='ident'>start</span> <span class='op'>=</span> <span class='ident'>PreciseTime</span>::<span class='ident'>now</span>();
 
@@ -62,9 +63,9 @@ calculation of the <code>Duration</code> of time that lies between them.</p>
     <span class='ident'>do_some_work</span>();
 }
 </pre>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a></code></h3><div class='impl-items'><h4 id='method.now' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.now' class='fnname'>now</a>() -&gt; <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a></code></h4>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a></code></h3><div class='impl-items'><h4 id='method.now' class='method'><code>fn <a href='#method.now' class='fnname'>now</a>() -&gt; <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a></code></h4>
 <div class='docblock'><p>Returns a <code>PreciseTime</code> representing the current moment in time.</p>
-</div><h4 id='method.to' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.to' class='fnname'>to</a>(&amp;self, later: <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a></code></h4>
+</div><h4 id='method.to' class='method'><code>fn <a href='#method.to' class='fnname'>to</a>(&amp;self, later: <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a>) -&gt; <a class='struct' href='../time/struct.Duration.html' title='time::Duration'>Duration</a></code></h4>
 <div class='docblock'><p>Returns a <code>Duration</code> representing the span of time from the value of
 <code>self</code> to the value of <code>later</code>.</p>
 
@@ -75,9 +76,9 @@ is unspecified.</p>
 
 <p>If <code>later</code> represents a time more than 293 years after <code>self</code>, the
 result of this method is unspecified.</p>
-</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a></code></h4>
-<h4 id='method.clone_from' class='tymethod'><a class='stability Unstable' title='Unstable: this function is rarely used'></a><code>fn <a href='#tymethod.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
-</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a></code></h3><div class='impl-items'></div></section>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a></code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='struct' href='../time/struct.PreciseTime.html' title='time::PreciseTime'>PreciseTime</a></code></h3><div class='impl-items'></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -109,6 +110,10 @@ result of this method is unspecified.</p>
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

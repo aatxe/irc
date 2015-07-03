@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a></p><div class='block struct'><h2>Structs</h2><a class='struct ' href='struct.CodecError.html' title='Error information from either encoder or decoder.'>CodecError</a></div><div class='block enum'><h2>Enums</h2><a class='enum ' href='enum.DecoderTrap.html' title='Trap, which handles decoder errors.'>DecoderTrap</a><a class='enum current' href='enum.EncoderTrap.html' title=''>EncoderTrap</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.ByteWriter.html' title='Byte writer used by encoders. In most cases this will be an owned vector of `u8`.'>ByteWriter</a><a class='trait ' href='trait.Encoding.html' title='Character encoding.'>Encoding</a><a class='trait ' href='trait.RawDecoder.html' title='Decoder converting a byte sequence into a Unicode string. This is a lower level interface, and normally `Encoding::decode` should be used instead.'>RawDecoder</a><a class='trait ' href='trait.RawEncoder.html' title='Encoder converting a Unicode string into a byte sequence. This is a lower level interface, and normally `Encoding::encode` should be used instead.'>RawEncoder</a><a class='trait ' href='trait.StringWriter.html' title='String writer used by decoders. In most cases this will be an owned string.'>StringWriter</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.decode.html' title='Determine the encoding by looking for a Byte Order Mark (BOM) and decoded a single string in memory. Return the result and the used encoding.'>decode</a></div>
+        <p class='location'><a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a></p><script>window.sidebarCurrent = {name: 'EncoderTrap', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,9 +41,11 @@
     </nav>
 
     <section id='main' class="content enum">
-<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='enum' href=''>EncoderTrap</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-1096' href='../../src/encoding/types.rs.html#398-416'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='enum' href=''>EncoderTrap</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1192' class='srclink' href='../../src/encoding/types.rs.html#344-362' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum EncoderTrap {
     Strict,
     Replace,
@@ -51,19 +53,24 @@
     NcrEscape,
     Call(<a class='type' href='../../encoding/types/type.EncoderTrapFunc.html' title='encoding::types::EncoderTrapFunc'>EncoderTrapFunc</a>),
 }</pre><h2 class='variants'>Variants</h2>
-<table><tr><td id='variant.Strict'><a class='stability Unmarked' title='No stability level'></a><code>Strict</code></td><td><div class='docblock'><p>Immediately fails on errors.
+<table><tr><td id='variant.Strict'><code>Strict</code></td><td><div class='docblock'><p>Immediately fails on errors.
 Corresponds to WHATWG &quot;fatal&quot; error algorithm.</p>
-</div></td></tr><tr><td id='variant.Replace'><a class='stability Unmarked' title='No stability level'></a><code>Replace</code></td><td><div class='docblock'><p>Replaces an error with <code>?</code> in given encoding.
+</div></td></tr><tr><td id='variant.Replace'><code>Replace</code></td><td><div class='docblock'><p>Replaces an error with <code>?</code> in given encoding.
 Note that this fails when <code>?</code> cannot be represented in given encoding.
 Corresponds to WHATWG &quot;URL&quot; error algorithms.</p>
-</div></td></tr><tr><td id='variant.Ignore'><a class='stability Unmarked' title='No stability level'></a><code>Ignore</code></td><td><div class='docblock'><p>Silently ignores an error, effectively replacing it with an empty sequence.</p>
-</div></td></tr><tr><td id='variant.NcrEscape'><a class='stability Unmarked' title='No stability level'></a><code>NcrEscape</code></td><td><div class='docblock'><p>Replaces an error with XML numeric character references (e.g. <code>&amp;#1234;</code>).
+</div></td></tr><tr><td id='variant.Ignore'><code>Ignore</code></td><td><div class='docblock'><p>Silently ignores an error, effectively replacing it with an empty sequence.</p>
+</div></td></tr><tr><td id='variant.NcrEscape'><code>NcrEscape</code></td><td><div class='docblock'><p>Replaces an error with XML numeric character references (e.g. <code>&amp;#1234;</code>).
 The encoder trap fails when NCRs cannot be represented in given encoding.
 Corresponds to WHATWG &quot;<form>&quot; error algorithms.</p>
-</div></td></tr><tr><td id='variant.Call'><a class='stability Unmarked' title='No stability level'></a><code>Call</code></td><td><div class='docblock'><p>Calls given function to handle encoder errors.
+</div></td></tr><tr><td id='variant.Call'><code>Call</code></td><td><div class='docblock'><p>Calls given function to handle encoder errors.
 The function is given the current encoder, input and output writer,
 and should return true only when it is fine to keep going.</p>
-</div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></h3><div class='impl-items'></div></section>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></h3><div class='impl-items'><h4 id='method.trap' class='method'><code>fn <a href='#method.trap' class='fnname'>trap</a>(&amp;self, encoder: &amp;mut <a class='trait' href='../../encoding/types/trait.RawEncoder.html' title='encoding::types::RawEncoder'>RawEncoder</a>, input: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, output: &amp;mut <a class='trait' href='../../encoding/types/trait.ByteWriter.html' title='encoding::types::ByteWriter'>ByteWriter</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Handles an encoder error. May write to the output writer.
+Returns true only when it is fine to keep going.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></h3><div class='impl-items'></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -95,6 +102,10 @@ and should return true only when it is fine to keep going.</p>
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../ascii/index.html' title='7-bit ASCII encoding.'>ascii</a><a class='mod ' href='../error/index.html' title='A placeholder encoding that returns encoder/decoder error for every case.'>error</a><a class='mod ' href='../japanese/index.html' title='Legacy Japanese encodings based on JIS X 0208 and JIS X 0212.'>japanese</a><a class='mod ' href='../korean/index.html' title='Legacy Korean encodings based on KS X 1001.'>korean</a><a class='mod current' href='../simpchinese/index.html' title='Legacy simplified Chinese encodings based on GB 2312 and GB 18030.'>simpchinese</a><a class='mod ' href='../singlebyte/index.html' title='Common codec implementation for single-byte encodings.'>singlebyte</a><a class='mod ' href='../tradchinese/index.html' title='Legacy traditional Chinese encodings.'>tradchinese</a><a class='mod ' href='../utf_16/index.html' title='UTF-16.'>utf_16</a><a class='mod ' href='../utf_8/index.html' title='UTF-8, the universal encoding.'>utf_8</a><a class='mod ' href='../whatwg/index.html' title='Asymmetric or special encoding constructions required by the WHATWG Encoding standard.'>whatwg</a></div>
+        <p class='location'><a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a></p><script>window.sidebarCurrent = {name: 'simpchinese', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,52 +41,104 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a>::<wbr><a class='mod' href=''>simpchinese</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-11066' href='../../../src/encoding/codec/simpchinese.rs.html#5-617'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a>::<wbr><a class='mod' href=''>simpchinese</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-11591' class='srclink' href='../../../src/encoding/codec/simpchinese.rs.html#5-778' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Legacy simplified Chinese encodings based on GB 2312 and GB 18030.</p>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.GB18030Decoder.html'
-                               title='encoding::codec::simpchinese::GB18030Decoder'>GB18030Decoder</a></td>
-                        <td class='docblock short'><p>A decoder for GB 18030.</p>
-</td>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.GB18030.html'
+                               title='encoding::codec::simpchinese::GB18030'>GB18030</a></td>
+                        <td class='docblock short'>
+                             <p>An implementation type for GB18030.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.GB18030Encoder.html'
-                               title='encoding::codec::simpchinese::GB18030Encoder'>GB18030Encoder</a></td>
-                        <td class='docblock short'><p>An encoder for GB 18030.</p>
-</td>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.GBEncoder.html'
+                               title='encoding::codec::simpchinese::GBEncoder'>GBEncoder</a></td>
+                        <td class='docblock short'>
+                             <p>An encoder for GBK and GB18030.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.GB18030Encoding.html'
-                               title='encoding::codec::simpchinese::GB18030Encoding'>GB18030Encoding</a></td>
-                        <td class='docblock short'><p>GB 18030-2005.</p>
-</td>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.GBEncoding.html'
+                               title='encoding::codec::simpchinese::GBEncoding'>GBEncoding</a></td>
+                        <td class='docblock short'>
+                             <p>GBK and GB 18030-2005.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.HZDecoder.html'
-                               title='encoding::codec::simpchinese::HZDecoder'>HZDecoder</a></td>
-                        <td class='docblock short'><p>A decoder for HZ.</p>
-</td>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.GBK.html'
+                               title='encoding::codec::simpchinese::GBK'>GBK</a></td>
+                        <td class='docblock short'>
+                             <p>An implementation type for GBK.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.HZEncoder.html'
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.HZEncoder.html'
                                title='encoding::codec::simpchinese::HZEncoder'>HZEncoder</a></td>
-                        <td class='docblock short'><p>An encoder for HZ.</p>
-</td>
+                        <td class='docblock short'>
+                             <p>An encoder for HZ.</p>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.HZEncoding.html'
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.HZEncoding.html'
                                title='encoding::codec::simpchinese::HZEncoding'>HZEncoding</a></td>
-                        <td class='docblock short'><p>HZ. (RFC 1843)</p>
-</td>
+                        <td class='docblock short'>
+                             <p>HZ. (RFC 1843)</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.GB18030_ENCODING.html'
+                               title='encoding::codec::simpchinese::GB18030_ENCODING'>GB18030_ENCODING</a></td>
+                        <td class='docblock short'>
+                             <p>An instance for GB18030.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='constant' href='constant.GBK_ENCODING.html'
+                               title='encoding::codec::simpchinese::GBK_ENCODING'>GBK_ENCODING</a></td>
+                        <td class='docblock short'>
+                             <p>An instance for GBK.</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='type' href='type.GB18030Encoding.html'
+                               title='encoding::codec::simpchinese::GB18030Encoding'>GB18030Encoding</a></td>
+                        <td class='docblock short'>
+                             <p>A type for GB18030.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='type' href='type.GBKEncoding.html'
+                               title='encoding::codec::simpchinese::GBKEncoding'>GBKEncoding</a></td>
+                        <td class='docblock short'>
+                             <p>A type for GBK.</p>
+
+                        </td>
                     </tr>
                 </table></section>
     <section id='search' class="content hidden"></section>
@@ -120,6 +172,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

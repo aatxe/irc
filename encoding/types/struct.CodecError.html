@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a></p><div class='block struct'><h2>Structs</h2><a class='struct current' href='struct.CodecError.html' title='Error information from either encoder or decoder.'>CodecError</a></div><div class='block enum'><h2>Enums</h2><a class='enum ' href='enum.DecoderTrap.html' title='Trap, which handles decoder errors.'>DecoderTrap</a><a class='enum ' href='enum.EncoderTrap.html' title=''>EncoderTrap</a></div><div class='block trait'><h2>Traits</h2><a class='trait ' href='trait.ByteWriter.html' title='Byte writer used by encoders. In most cases this will be an owned vector of `u8`.'>ByteWriter</a><a class='trait ' href='trait.Encoding.html' title='Character encoding.'>Encoding</a><a class='trait ' href='trait.RawDecoder.html' title='Decoder converting a byte sequence into a Unicode string. This is a lower level interface, and normally `Encoding::decode` should be used instead.'>RawDecoder</a><a class='trait ' href='trait.RawEncoder.html' title='Encoder converting a Unicode string into a byte sequence. This is a lower level interface, and normally `Encoding::encode` should be used instead.'>RawEncoder</a><a class='trait ' href='trait.StringWriter.html' title='String writer used by decoders. In most cases this will be an owned string.'>StringWriter</a></div><div class='block fn'><h2>Functions</h2><a class='fn ' href='fn.decode.html' title='Determine the encoding by looking for a Byte Order Mark (BOM) and decoded a single string in memory. Return the result and the used encoding.'>decode</a></div>
+        <p class='location'><a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a></p><script>window.sidebarCurrent = {name: 'CodecError', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,21 +41,25 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='struct' href=''>CodecError</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-383' href='../../src/encoding/types.rs.html#58-68'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='struct' href=''>CodecError</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-391' class='srclink' href='../../src/encoding/types.rs.html#57-67' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct CodecError {
     pub upto: <a href='http://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a>,
     pub cause: <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;,
 }</pre><div class='docblock'><p>Error information from either encoder or decoder.</p>
 </div><h2 class='fields'>Fields</h2>
-<table><tr><td id='structfield.upto'><a class='stability Unmarked' title='No stability level'></a><code>upto</code></td><td><div class='docblock'><p>The byte position of the first remaining byte, with respect to the <em>current</em> input.
+<table><tr class='stab '>
+                                  <td id='structfield.upto'><code>upto</code></td><td><div class='docblock'><p>The byte position of the first remaining byte, with respect to the <em>current</em> input.
 For the <code>finish</code> call, this should be no more than zero (since there is no input).
 It can be negative if the remaining byte is in the prior inputs,
 as long as the remaining byte is not yet processed.
 The caller should feed the bytes starting from this point again
 in order to continue encoding or decoding after an error.</p>
-</div></td></tr><tr><td id='structfield.cause'><a class='stability Unmarked' title='No stability level'></a><code>cause</code></td><td><div class='docblock'><p>A human-readable cause of the error.</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.cause'><code>cause</code></td><td><div class='docblock'><p>A human-readable cause of the error.</p>
 </div></td></tr></table></section>
     <section id='search' class="content hidden"></section>
 
@@ -88,6 +92,10 @@ in order to continue encoding or decoding after an error.</p>
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

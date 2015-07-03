@@ -244,38 +244,85 @@
 <span id="202">202</span>
 <span id="203">203</span>
 <span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Messages to and from the server.</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>stable</span>]</span>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>ToOwned</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>str</span>::<span class='ident'>FromStr</span>;
 
 <span class='doccomment'>/// IRC Message data.</span>
-<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Debug</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Message</span> {
+    <span class='doccomment'>/// Message tags as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).</span>
+    <span class='kw'>pub</span> <span class='ident'>tags</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Tag</span><span class='op'>&gt;&gt;</span>,
     <span class='doccomment'>/// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// The IRC command as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='ident'>command</span>: <span class='ident'>String</span>,
     <span class='doccomment'>/// The command arguments.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='ident'>args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// The message suffix as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).</span>
     <span class='doccomment'>/// This is the only part of the message that is allowed to contain spaces.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='ident'>suffix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
 }
 
-<span class='attribute'>#[<span class='ident'>stable</span>]</span>
 <span class='kw'>impl</span> <span class='ident'>Message</span> {
     <span class='doccomment'>/// Creates a new Message.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>, <span class='ident'>command</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>args</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>, <span class='ident'>suffix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>)
         <span class='op'>-&gt;</span> <span class='ident'>Message</span> {
+        <span class='ident'>Message</span>::<span class='ident'>with_tags</span>(<span class='prelude-val'>None</span>, <span class='ident'>prefix</span>, <span class='ident'>command</span>, <span class='ident'>args</span>, <span class='ident'>suffix</span>)
+    }
+
+    <span class='doccomment'>/// Creates a new Message optionally including IRCv3.2 message tags.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>with_tags</span>(<span class='ident'>tags</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Tag</span><span class='op'>&gt;&gt;</span>, <span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>, <span class='ident'>command</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>,
+                     <span class='ident'>args</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;&gt;</span>, <span class='ident'>suffix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Message</span> {
         <span class='ident'>Message</span> {
+            <span class='ident'>tags</span>: <span class='ident'>tags</span>,
             <span class='ident'>prefix</span>: <span class='ident'>prefix</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>to_owned</span>()),
             <span class='ident'>command</span>: <span class='ident'>command</span>.<span class='ident'>to_owned</span>(),
             <span class='ident'>args</span>: <span class='ident'>args</span>.<span class='ident'>map_or</span>(<span class='ident'>Vec</span>::<span class='ident'>new</span>(), <span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> <span class='ident'>v</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>to_owned</span>()).<span class='ident'>collect</span>()),
@@ -283,14 +330,20 @@
         }
     }
 
-    <span class='doccomment'>/// Gets the nickname of the message source, if it exists. </span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
+    <span class='doccomment'>/// Creates a new Message from already owned data.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_owned</span>(<span class='ident'>prefix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>command</span>: <span class='ident'>String</span>, <span class='ident'>args</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span>,
+                      <span class='ident'>suffix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Message</span> {
+        <span class='ident'>Message</span> {
+            <span class='ident'>tags</span>: <span class='prelude-val'>None</span>, <span class='ident'>prefix</span>: <span class='ident'>prefix</span>, <span class='ident'>command</span>: <span class='ident'>command</span>, <span class='ident'>args</span>: <span class='ident'>args</span>.<span class='ident'>unwrap_or</span>(<span class='ident'>Vec</span>::<span class='ident'>new</span>()), <span class='ident'>suffix</span>: <span class='ident'>suffix</span>
+        }
+    }
+
+    <span class='doccomment'>/// Gets the nickname of the message source, if it exists.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_source_nickname</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>prefix</span>.<span class='ident'>as_ref</span>().<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>find</span>(<span class='string'>&#39;!&#39;</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>s</span>[..<span class='ident'>i</span>]))
     }
 
     <span class='doccomment'>/// Converts a Message into a String according to the IRC protocol.</span>
-    <span class='attribute'>#[<span class='ident'>stable</span>]</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>into_string</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
         <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>prefix</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>prefix</span> {
@@ -312,17 +365,22 @@
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>ToMessage</span> <span class='kw'>for</span> <span class='ident'>Message</span> {
-    <span class='kw'>fn</span> <span class='ident'>to_message</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Message</span> {
-        <span class='self'>self</span>.<span class='ident'>clone</span>()
-    }
-}
-
 <span class='kw'>impl</span> <span class='ident'>FromStr</span> <span class='kw'>for</span> <span class='ident'>Message</span> {
     <span class='kw'>type</span> <span class='prelude-val'>Err</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>;
     <span class='kw'>fn</span> <span class='ident'>from_str</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Message</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>state</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>clone</span>();
         <span class='kw'>if</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Cannot parse an empty string as a message.&quot;</span>) }
+        <span class='kw'>let</span> <span class='ident'>tags</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>state</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;@&quot;</span>) {
+            <span class='kw'>let</span> <span class='ident'>tags</span> <span class='op'>=</span> <span class='ident'>state</span>.<span class='ident'>find</span>(<span class='string'>&#39; &#39;</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>state</span>[<span class='number'>1</span>..<span class='ident'>i</span>]);
+            <span class='ident'>state</span> <span class='op'>=</span> <span class='ident'>state</span>.<span class='ident'>find</span>(<span class='string'>&#39; &#39;</span>).<span class='ident'>map_or</span>(<span class='string'>&quot;&quot;</span>, <span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>state</span>[<span class='ident'>i</span><span class='op'>+</span><span class='number'>1</span>..]);
+            <span class='ident'>tags</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>ts</span><span class='op'>|</span> <span class='ident'>ts</span>.<span class='ident'>split</span>(<span class='string'>&quot;;&quot;</span>).<span class='ident'>filter</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>|</span> {
+                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>iter</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>splitn</span>(<span class='number'>2</span>, <span class='string'>&quot;=&quot;</span>);
+                <span class='kw'>let</span> (<span class='ident'>fst</span>, <span class='ident'>snd</span>) <span class='op'>=</span> (<span class='ident'>iter</span>.<span class='ident'>next</span>(), <span class='ident'>iter</span>.<span class='ident'>next</span>());
+                <span class='ident'>Tag</span>(<span class='ident'>fst</span>.<span class='ident'>unwrap_or</span>(<span class='string'>&quot;&quot;</span>).<span class='ident'>to_owned</span>(), <span class='ident'>snd</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>to_owned</span>()))
+            }).<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>())
+        } <span class='kw'>else</span> {
+            <span class='prelude-val'>None</span>
+        };
         <span class='kw'>let</span> <span class='ident'>prefix</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>state</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;:&quot;</span>) {
             <span class='kw'>let</span> <span class='ident'>prefix</span> <span class='op'>=</span> <span class='ident'>state</span>.<span class='ident'>find</span>(<span class='string'>&#39; &#39;</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>state</span>[<span class='number'>1</span>..<span class='ident'>i</span>]);
             <span class='ident'>state</span> <span class='op'>=</span> <span class='ident'>state</span>.<span class='ident'>find</span>(<span class='string'>&#39; &#39;</span>).<span class='ident'>map_or</span>(<span class='string'>&quot;&quot;</span>, <span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>state</span>[<span class='ident'>i</span><span class='op'>+</span><span class='number'>1</span>..]);
@@ -330,9 +388,9 @@
         } <span class='kw'>else</span> {
             <span class='prelude-val'>None</span>
         };
-        <span class='kw'>let</span> <span class='ident'>suffix</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>state</span>.<span class='ident'>contains</span>(<span class='string'>&quot;:&quot;</span>) {
-            <span class='kw'>let</span> <span class='ident'>suffix</span> <span class='op'>=</span> <span class='ident'>state</span>.<span class='ident'>find</span>(<span class='string'>&#39;:&#39;</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>state</span>[<span class='ident'>i</span><span class='op'>+</span><span class='number'>1</span>..<span class='ident'>state</span>.<span class='ident'>len</span>()<span class='op'>-</span><span class='number'>2</span>]);
-            <span class='ident'>state</span> <span class='op'>=</span> <span class='ident'>state</span>.<span class='ident'>find</span>(<span class='string'>&#39;:&#39;</span>).<span class='ident'>map_or</span>(<span class='string'>&quot;&quot;</span>, <span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>state</span>[..<span class='ident'>i</span>]);
+        <span class='kw'>let</span> <span class='ident'>suffix</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>state</span>.<span class='ident'>contains</span>(<span class='string'>&quot; :&quot;</span>) {
+            <span class='kw'>let</span> <span class='ident'>suffix</span> <span class='op'>=</span> <span class='ident'>state</span>.<span class='ident'>find</span>(<span class='string'>&quot; :&quot;</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>state</span>[<span class='ident'>i</span><span class='op'>+</span><span class='number'>2</span>..<span class='ident'>state</span>.<span class='ident'>len</span>()<span class='op'>-</span><span class='number'>2</span>]);
+            <span class='ident'>state</span> <span class='op'>=</span> <span class='ident'>state</span>.<span class='ident'>find</span>(<span class='string'>&quot; :&quot;</span>).<span class='ident'>map_or</span>(<span class='string'>&quot;&quot;</span>, <span class='op'>|</span><span class='ident'>i</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>state</span>[..<span class='ident'>i</span><span class='op'>+</span><span class='number'>1</span>]);
             <span class='ident'>suffix</span>
         } <span class='kw'>else</span> {
             <span class='prelude-val'>None</span>
@@ -346,30 +404,30 @@
         };
         <span class='kw'>if</span> <span class='ident'>suffix</span>.<span class='ident'>is_none</span>() { <span class='ident'>state</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>state</span>[..<span class='ident'>state</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='number'>2</span>] }
         <span class='kw'>let</span> <span class='ident'>args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>state</span>.<span class='ident'>splitn</span>(<span class='number'>14</span>, <span class='string'>&#39; &#39;</span>).<span class='ident'>filter</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span>).<span class='ident'>collect</span>();
-        <span class='prelude-val'>Ok</span>(<span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='ident'>prefix</span>, <span class='ident'>command</span>, <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='prelude-val'>Some</span>(<span class='ident'>args</span>) } <span class='kw'>else</span> { <span class='prelude-val'>None</span> }, <span class='ident'>suffix</span>))
+        <span class='prelude-val'>Ok</span>(<span class='ident'>Message</span>::<span class='ident'>with_tags</span>(
+            <span class='ident'>tags</span>, <span class='ident'>prefix</span>, <span class='ident'>command</span>, <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='prelude-val'>Some</span>(<span class='ident'>args</span>) } <span class='kw'>else</span> { <span class='prelude-val'>None</span> }, <span class='ident'>suffix</span>
+        ))
     }
 }
 
-<span class='doccomment'>/// A trait representing the ability to be converted into a Message.</span>
-<span class='attribute'>#[<span class='ident'>stable</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>ToMessage</span> {
-    <span class='doccomment'>/// Converts this to a Message.</span>
-    <span class='kw'>fn</span> <span class='ident'>to_message</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Message</span>;
-}
-
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>ToMessage</span> <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span> {
-    <span class='kw'>fn</span> <span class='ident'>to_message</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Message</span> {
-        <span class='self'>self</span>.<span class='ident'>parse</span>().<span class='ident'>unwrap</span>()
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Message</span> {
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Message</span> {
+        <span class='ident'>s</span>.<span class='ident'>parse</span>().<span class='ident'>unwrap</span>()
     }
 }
+
+<span class='doccomment'>/// A message tag as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Debug</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Tag</span>(<span class='ident'>String</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>);
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
-    <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Message</span>, <span class='ident'>ToMessage</span>};
+    <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Message</span>, <span class='ident'>Tag</span>};
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>new</span>() {
         <span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>Message</span> {
+            <span class='ident'>tags</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>prefix</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>command</span>: <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;PRIVMSG&quot;</span>),
             <span class='ident'>args</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)],
@@ -392,6 +450,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>into_string</span>() {
         <span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>Message</span> {
+            <span class='ident'>tags</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>prefix</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>command</span>: <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;PRIVMSG&quot;</span>),
             <span class='ident'>args</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)],
@@ -399,6 +458,7 @@
         };
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>message</span>.<span class='ident'>into_string</span>()[..], <span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>);
         <span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>Message</span> {
+            <span class='ident'>tags</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>prefix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test!test@test&quot;</span>)),
             <span class='ident'>command</span>: <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;PRIVMSG&quot;</span>),
             <span class='ident'>args</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)],
@@ -410,6 +470,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>from_string</span>() {
         <span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>Message</span> {
+            <span class='ident'>tags</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>prefix</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>command</span>: <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;PRIVMSG&quot;</span>),
             <span class='ident'>args</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)],
@@ -417,36 +478,67 @@
         };
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>.<span class='ident'>parse</span>(), <span class='prelude-val'>Ok</span>(<span class='ident'>message</span>));
         <span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>Message</span> {
+            <span class='ident'>tags</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>prefix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test!test@test&quot;</span>)),
             <span class='ident'>command</span>: <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;PRIVMSG&quot;</span>),
             <span class='ident'>args</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)],
             <span class='ident'>suffix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Still testing!&quot;</span>)),
         };
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;:test!test@test PRIVMSG test :Still testing!\r\n&quot;</span>.<span class='ident'>parse</span>(), <span class='prelude-val'>Ok</span>(<span class='ident'>message</span>));
+        <span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>Message</span> {
+            <span class='ident'>tags</span>: <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>Tag</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;aaa&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;bbb&quot;</span>))),
+                            <span class='ident'>Tag</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;ccc&quot;</span>), <span class='prelude-val'>None</span>),
+                            <span class='ident'>Tag</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;example.com/ddd&quot;</span>), <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;eee&quot;</span>)))]),
+            <span class='ident'>prefix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test!test@test&quot;</span>)),
+            <span class='ident'>command</span>: <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;PRIVMSG&quot;</span>),
+            <span class='ident'>args</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)],
+            <span class='ident'>suffix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Testing with tags!&quot;</span>)),
+        };
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
+                    tags!\r\n&quot;</span>.<span class='ident'>parse</span>(), <span class='prelude-val'>Ok</span>(<span class='ident'>message</span>))
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>to_message</span>() {
         <span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>Message</span> {
+            <span class='ident'>tags</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>prefix</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>command</span>: <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;PRIVMSG&quot;</span>),
             <span class='ident'>args</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)],
             <span class='ident'>suffix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Testing!&quot;</span>)),
         };
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>.<span class='ident'>to_message</span>(), <span class='ident'>message</span>);
+        <span class='kw'>let</span> <span class='ident'>msg</span>: <span class='ident'>Message</span> <span class='op'>=</span> <span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>.<span class='ident'>into</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>msg</span>, <span class='ident'>message</span>);
         <span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>Message</span> {
+            <span class='ident'>tags</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>prefix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test!test@test&quot;</span>)),
             <span class='ident'>command</span>: <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;PRIVMSG&quot;</span>),
             <span class='ident'>args</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test&quot;</span>)],
             <span class='ident'>suffix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Still testing!&quot;</span>)),
         };
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='string'>&quot;:test!test@test PRIVMSG test :Still testing!\r\n&quot;</span>.<span class='ident'>to_message</span>(), <span class='ident'>message</span>);
+        <span class='kw'>let</span> <span class='ident'>msg</span>: <span class='ident'>Message</span> <span class='op'>=</span> <span class='string'>&quot;:test!test@test PRIVMSG test :Still testing!\r\n&quot;</span>.<span class='ident'>into</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>msg</span>, <span class='ident'>message</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='attribute'>#[<span class='ident'>should_fail</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>to_message_with_colon_in_arg</span>() {
+        <span class='comment'>// Apparently, UnrealIRCd (and perhaps some others) send some messages that include</span>
+        <span class='comment'>// colons within individual parameters. So, let&#39;s make sure it parses correctly.</span>
+        <span class='kw'>let</span> <span class='ident'>message</span> <span class='op'>=</span> <span class='ident'>Message</span> {
+            <span class='ident'>tags</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>prefix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;test!test@test&quot;</span>)),
+            <span class='ident'>command</span>: <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;COMMAND&quot;</span>),
+            <span class='ident'>args</span>: <span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;ARG:test&quot;</span>)],
+            <span class='ident'>suffix</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Testing!&quot;</span>)),
+        };
+        <span class='kw'>let</span> <span class='ident'>msg</span>: <span class='ident'>Message</span> <span class='op'>=</span> <span class='string'>&quot;:test!test@test COMMAND ARG:test :Testing!\r\n&quot;</span>.<span class='ident'>into</span>();
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>msg</span>, <span class='ident'>message</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>test</span>]</span>
+    <span class='attribute'>#[<span class='ident'>should_panic</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>to_message_invalid_format</span>() {
-        <span class='string'>&quot;:invalid :message&quot;</span>.<span class='ident'>to_message</span>();
+        <span class='kw'>let</span> _: <span class='ident'>Message</span> <span class='op'>=</span> <span class='string'>&quot;:invalid :message&quot;</span>.<span class='ident'>into</span>();
     }
 }
 </pre>
@@ -482,6 +574,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

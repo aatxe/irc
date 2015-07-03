@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.24/src/codec/japanese.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/nightly/cargo/registry/src/github.com-0a35038f75765ae4/encoding-0.2.32/src/codec/japanese.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>japanese.rs.html -- source</title>
@@ -1309,6 +1309,80 @@
 <span id="1267">1267</span>
 <span id="1268">1268</span>
 <span id="1269">1269</span>
+<span id="1270">1270</span>
+<span id="1271">1271</span>
+<span id="1272">1272</span>
+<span id="1273">1273</span>
+<span id="1274">1274</span>
+<span id="1275">1275</span>
+<span id="1276">1276</span>
+<span id="1277">1277</span>
+<span id="1278">1278</span>
+<span id="1279">1279</span>
+<span id="1280">1280</span>
+<span id="1281">1281</span>
+<span id="1282">1282</span>
+<span id="1283">1283</span>
+<span id="1284">1284</span>
+<span id="1285">1285</span>
+<span id="1286">1286</span>
+<span id="1287">1287</span>
+<span id="1288">1288</span>
+<span id="1289">1289</span>
+<span id="1290">1290</span>
+<span id="1291">1291</span>
+<span id="1292">1292</span>
+<span id="1293">1293</span>
+<span id="1294">1294</span>
+<span id="1295">1295</span>
+<span id="1296">1296</span>
+<span id="1297">1297</span>
+<span id="1298">1298</span>
+<span id="1299">1299</span>
+<span id="1300">1300</span>
+<span id="1301">1301</span>
+<span id="1302">1302</span>
+<span id="1303">1303</span>
+<span id="1304">1304</span>
+<span id="1305">1305</span>
+<span id="1306">1306</span>
+<span id="1307">1307</span>
+<span id="1308">1308</span>
+<span id="1309">1309</span>
+<span id="1310">1310</span>
+<span id="1311">1311</span>
+<span id="1312">1312</span>
+<span id="1313">1313</span>
+<span id="1314">1314</span>
+<span id="1315">1315</span>
+<span id="1316">1316</span>
+<span id="1317">1317</span>
+<span id="1318">1318</span>
+<span id="1319">1319</span>
+<span id="1320">1320</span>
+<span id="1321">1321</span>
+<span id="1322">1322</span>
+<span id="1323">1323</span>
+<span id="1324">1324</span>
+<span id="1325">1325</span>
+<span id="1326">1326</span>
+<span id="1327">1327</span>
+<span id="1328">1328</span>
+<span id="1329">1329</span>
+<span id="1330">1330</span>
+<span id="1331">1331</span>
+<span id="1332">1332</span>
+<span id="1333">1333</span>
+<span id="1334">1334</span>
+<span id="1335">1335</span>
+<span id="1336">1336</span>
+<span id="1337">1337</span>
+<span id="1338">1338</span>
+<span id="1339">1339</span>
+<span id="1340">1340</span>
+<span id="1341">1341</span>
+<span id="1342">1342</span>
+<span id="1343">1343</span>
 </pre><pre class='rust '>
 <span class='comment'>// This is a part of rust-encoding.</span>
 <span class='comment'>// Copyright (c) 2013-2015, Kang Seonghoon.</span>
@@ -1316,7 +1390,8 @@
 
 <span class='doccomment'>//! Legacy Japanese encodings based on JIS X 0208 and JIS X 0212.</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>IntoCow</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>convert</span>::<span class='ident'>Into</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>default</span>::<span class='ident'>Default</span>;
 <span class='kw'>use</span> <span class='ident'>util</span>::<span class='ident'>StrCharIndex</span>;
 <span class='kw'>use</span> <span class='ident'>index_japanese</span> <span class='kw'>as</span> <span class='ident'>index</span>;
 <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
@@ -1375,7 +1450,7 @@
                     <span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='ident'>index</span>::<span class='ident'>jis0208</span>::<span class='ident'>backward</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
                     <span class='kw'>if</span> <span class='ident'>ptr</span> <span class='op'>==</span> <span class='number'>0xffff</span> {
                         <span class='kw'>return</span> (<span class='ident'>i</span>, <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> {
-                            <span class='ident'>upto</span>: <span class='ident'>j</span> <span class='kw'>as</span> <span class='ident'>isize</span>, <span class='ident'>cause</span>: <span class='string'>&quot;unrepresentable character&quot;</span>.<span class='ident'>into_cow</span>()
+                            <span class='ident'>upto</span>: <span class='ident'>j</span> <span class='kw'>as</span> <span class='ident'>isize</span>, <span class='ident'>cause</span>: <span class='string'>&quot;unrepresentable character&quot;</span>.<span class='ident'>into</span>()
                         }));
                     } <span class='kw'>else</span> {
                         <span class='kw'>let</span> <span class='ident'>lead</span> <span class='op'>=</span> <span class='ident'>ptr</span> <span class='op'>/</span> <span class='number'>94</span> <span class='op'>+</span> <span class='number'>0xa1</span>;
@@ -1394,11 +1469,36 @@
     }
 }
 
-<span class='macro'>ascii_compatible_stateful_decoder</span><span class='macro'>!</span> {
-    <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>&quot;A decoder for EUC-JP with JIS X 0212 in G3.&quot;</span>]</span>
-    <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
-    <span class='kw'>struct</span> <span class='ident'>EUCJP0212Decoder</span>;
+<span class='doccomment'>/// A decoder for EUC-JP with JIS X 0212 in G3.</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
+<span class='kw'>struct</span> <span class='ident'>EUCJP0212Decoder</span> {
+    <span class='ident'>st</span>: <span class='ident'>eucjp</span>::<span class='ident'>State</span>,
+}
 
+<span class='kw'>impl</span> <span class='ident'>EUCJP0212Decoder</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawDecoder</span><span class='op'>&gt;</span> {
+        <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>EUCJP0212Decoder</span> { <span class='ident'>st</span>: <span class='ident'>Default</span>::<span class='ident'>default</span>() })
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>RawDecoder</span> <span class='kw'>for</span> <span class='ident'>EUCJP0212Decoder</span> {
+    <span class='kw'>fn</span> <span class='ident'>from_self</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawDecoder</span><span class='op'>&gt;</span> { <span class='ident'>EUCJP0212Decoder</span>::<span class='ident'>new</span>() }
+    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>true</span> }
+
+    <span class='kw'>fn</span> <span class='ident'>raw_feed</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StringWriter</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span>) {
+        <span class='kw'>let</span> (<span class='ident'>st</span>, <span class='ident'>processed</span>, <span class='ident'>err</span>) <span class='op'>=</span> <span class='ident'>eucjp</span>::<span class='ident'>raw_feed</span>(<span class='self'>self</span>.<span class='ident'>st</span>, <span class='ident'>input</span>, <span class='ident'>output</span>, <span class='kw-2'>&amp;</span>());
+        <span class='self'>self</span>.<span class='ident'>st</span> <span class='op'>=</span> <span class='ident'>st</span>;
+        (<span class='ident'>processed</span>, <span class='ident'>err</span>)
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>raw_finish</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StringWriter</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> (<span class='ident'>st</span>, <span class='ident'>err</span>) <span class='op'>=</span> <span class='ident'>eucjp</span>::<span class='ident'>raw_finish</span>(<span class='self'>self</span>.<span class='ident'>st</span>, <span class='ident'>output</span>, <span class='kw-2'>&amp;</span>());
+        <span class='self'>self</span>.<span class='ident'>st</span> <span class='op'>=</span> <span class='ident'>st</span>;
+        <span class='ident'>err</span>
+    }
+}
+
+<span class='macro'>stateful_decoder</span><span class='macro'>!</span> {
     <span class='ident'>module</span> <span class='ident'>eucjp</span>;
 
     <span class='ident'>internal</span> <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>map_two_0208_bytes</span>(<span class='ident'>lead</span>: <span class='ident'>u8</span>, <span class='ident'>trail</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>u32</span> {
@@ -1477,7 +1577,6 @@
 <span class='kw'>mod</span> <span class='ident'>eucjp_tests</span> {
     <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>test</span>;
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>EUCJPEncoding</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>range_inclusive</span>;
     <span class='kw'>use</span> <span class='ident'>testutils</span>;
     <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
 
@@ -1554,13 +1653,13 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_lone_lead_immediate_test_finish</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0x8eu8</span>, <span class='number'>0x8f</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0x8e</span>..<span class='number'>0x90</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>); <span class='comment'>// wait for a trail</span>
             <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
         }
 
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0xa1u8</span>, <span class='number'>0xfe</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0xa1</span>..<span class='number'>0xff</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>); <span class='comment'>// wait for a trail</span>
             <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1568,10 +1667,10 @@
 
         <span class='comment'>// immediate failures</span>
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0x80u8</span>, <span class='number'>0x8d</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0x80</span>..<span class='number'>0x8e</span> {
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [], <span class='string'>&quot;&quot;</span>);
         }
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0x90u8</span>, <span class='number'>0xa0</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0x90</span>..<span class='number'>0xa1</span> {
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [], <span class='string'>&quot;&quot;</span>);
         }
         <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0xff</span>], [], <span class='string'>&quot;&quot;</span>);
@@ -1580,7 +1679,8 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_lone_lead_followed_by_space</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0x80u8</span>, <span class='number'>0xff</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0x80</span>..<span class='number'>0x100</span> {
+            <span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>u8</span>;
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [<span class='number'>0x20</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1589,7 +1689,8 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_lead_followed_by_invalid_trail</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0x80u8</span>, <span class='number'>0xff</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0x80</span>..<span class='number'>0x100</span> {
+            <span class='kw'>let</span> <span class='ident'>i</span> <span class='op'>=</span> <span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>u8</span>;
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [<span class='number'>0x80</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [<span class='number'>0xff</span>], <span class='string'>&quot;&quot;</span>);
@@ -1599,7 +1700,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_lone_lead_for_0212_immediate_test_finish</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0xa1u8</span>, <span class='number'>0xfe</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0xa1</span>..<span class='number'>0xff</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8f</span>, <span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>); <span class='comment'>// wait for a trail</span>
             <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1608,7 +1709,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_lone_lead_for_0212_immediate_test_finish_partial</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0xa1u8</span>, <span class='number'>0xfe</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0xa1</span>..<span class='number'>0xff</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8f</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>); <span class='comment'>// wait for a trail</span>
@@ -1618,13 +1719,13 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_trail_for_0201</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0u8</span>, <span class='number'>0xa0</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='number'>0xa1</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8e</span>], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
         }
 
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0xe0u8</span>, <span class='number'>0xfe</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0xe0</span>..<span class='number'>0xff</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8e</span>, <span class='ident'>i</span>], [], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1633,14 +1734,14 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_trail_for_0201_partial</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0u8</span>, <span class='number'>0xa0</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='number'>0xa1</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8e</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
         }
 
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0xe0u8</span>, <span class='number'>0xfe</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0xe0</span>..<span class='number'>0xff</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8e</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [], <span class='string'>&quot;&quot;</span>);
@@ -1650,7 +1751,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_middle_for_0212</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0u8</span>, <span class='number'>0xa0</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='number'>0xa1</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8f</span>], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1659,7 +1760,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_middle_for_0212_partial</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0u8</span>, <span class='number'>0xa0</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='number'>0xa1</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8f</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>);
@@ -1669,7 +1770,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_trail_for_0212</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0u8</span>, <span class='number'>0xa0</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='number'>0xa1</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8f</span>, <span class='number'>0xa1</span>], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1678,7 +1779,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_trail_for_0212_partial</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0u8</span>, <span class='number'>0xa0</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='number'>0xa1</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>EUCJPEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0x8f</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='number'>0xa1</span>], <span class='string'>&quot;&quot;</span>);
@@ -1769,7 +1870,7 @@
                     <span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='ident'>index</span>::<span class='ident'>jis0208</span>::<span class='ident'>backward_remapped</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
                     <span class='kw'>if</span> <span class='ident'>ptr</span> <span class='op'>==</span> <span class='number'>0xffff</span> {
                         <span class='kw'>return</span> (<span class='ident'>i</span>, <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> {
-                            <span class='ident'>upto</span>: <span class='ident'>j</span> <span class='kw'>as</span> <span class='ident'>isize</span>, <span class='ident'>cause</span>: <span class='string'>&quot;unrepresentable character&quot;</span>.<span class='ident'>into_cow</span>(),
+                            <span class='ident'>upto</span>: <span class='ident'>j</span> <span class='kw'>as</span> <span class='ident'>isize</span>, <span class='ident'>cause</span>: <span class='string'>&quot;unrepresentable character&quot;</span>.<span class='ident'>into</span>(),
                         }));
                     } <span class='kw'>else</span> {
                         <span class='kw'>let</span> <span class='ident'>lead</span> <span class='op'>=</span> <span class='ident'>ptr</span> <span class='op'>/</span> <span class='number'>188</span>;
@@ -1790,11 +1891,36 @@
     }
 }
 
-<span class='macro'>ascii_compatible_stateful_decoder</span><span class='macro'>!</span> {
-    <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>&quot;A decoder for Shift_JIS with IBM/NEC extensions.&quot;</span>]</span>
-    <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
-    <span class='kw'>struct</span> <span class='ident'>Windows31JDecoder</span>;
+<span class='doccomment'>/// A decoder for Shift_JIS with IBM/NEC extensions.</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
+<span class='kw'>struct</span> <span class='ident'>Windows31JDecoder</span> {
+    <span class='ident'>st</span>: <span class='ident'>windows31j</span>::<span class='ident'>State</span>,
+}
 
+<span class='kw'>impl</span> <span class='ident'>Windows31JDecoder</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawDecoder</span><span class='op'>&gt;</span> {
+        <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>Windows31JDecoder</span> { <span class='ident'>st</span>: <span class='ident'>Default</span>::<span class='ident'>default</span>() })
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>RawDecoder</span> <span class='kw'>for</span> <span class='ident'>Windows31JDecoder</span> {
+    <span class='kw'>fn</span> <span class='ident'>from_self</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawDecoder</span><span class='op'>&gt;</span> { <span class='ident'>Windows31JDecoder</span>::<span class='ident'>new</span>() }
+    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>true</span> }
+
+    <span class='kw'>fn</span> <span class='ident'>raw_feed</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StringWriter</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span>) {
+        <span class='kw'>let</span> (<span class='ident'>st</span>, <span class='ident'>processed</span>, <span class='ident'>err</span>) <span class='op'>=</span> <span class='ident'>windows31j</span>::<span class='ident'>raw_feed</span>(<span class='self'>self</span>.<span class='ident'>st</span>, <span class='ident'>input</span>, <span class='ident'>output</span>, <span class='kw-2'>&amp;</span>());
+        <span class='self'>self</span>.<span class='ident'>st</span> <span class='op'>=</span> <span class='ident'>st</span>;
+        (<span class='ident'>processed</span>, <span class='ident'>err</span>)
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>raw_finish</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StringWriter</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> (<span class='ident'>st</span>, <span class='ident'>err</span>) <span class='op'>=</span> <span class='ident'>windows31j</span>::<span class='ident'>raw_finish</span>(<span class='self'>self</span>.<span class='ident'>st</span>, <span class='ident'>output</span>, <span class='kw-2'>&amp;</span>());
+        <span class='self'>self</span>.<span class='ident'>st</span> <span class='op'>=</span> <span class='ident'>st</span>;
+        <span class='ident'>err</span>
+    }
+}
+
+<span class='macro'>stateful_decoder</span><span class='macro'>!</span> {
     <span class='ident'>module</span> <span class='ident'>windows31j</span>;
 
     <span class='ident'>internal</span> <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>map_two_0208_bytes</span>(<span class='ident'>lead</span>: <span class='ident'>u8</span>, <span class='ident'>trail</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>u32</span> {
@@ -1838,7 +1964,6 @@
 <span class='kw'>mod</span> <span class='ident'>windows31j_tests</span> {
     <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>test</span>;
     <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>Windows31JEncoding</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>iter</span>::<span class='ident'>range_inclusive</span>;
     <span class='kw'>use</span> <span class='ident'>testutils</span>;
     <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
 
@@ -1911,13 +2036,13 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_lone_lead_immediate_test_finish</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0x81u8</span>, <span class='number'>0x9f</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0x81</span>..<span class='number'>0xa0</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>); <span class='comment'>// wait for a trail</span>
             <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
         }
 
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0xe0u8</span>, <span class='number'>0xfc</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0xe0</span>..<span class='number'>0xfd</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>); <span class='comment'>// wait for a trail</span>
             <span class='macro'>assert_finish_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1934,13 +2059,13 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_lone_lead_followed_by_space</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0x81u8</span>, <span class='number'>0x9f</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0x81</span>..<span class='number'>0xa0</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [<span class='number'>0x20</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
         }
 
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0xe0u8</span>, <span class='number'>0xfc</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0xe0</span>..<span class='number'>0xfd</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [<span class='number'>0x20</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
@@ -1949,7 +2074,7 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_lead_followed_by_invalid_trail</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0x81u8</span>, <span class='number'>0x9f</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0x81</span>..<span class='number'>0xa0</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [<span class='number'>0x3f</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [<span class='number'>0x7f</span>], <span class='string'>&quot;&quot;</span>);
@@ -1959,7 +2084,7 @@
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
         }
 
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0xe0u8</span>, <span class='number'>0xfc</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0xe0</span>..<span class='number'>0xfd</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [<span class='number'>0x3f</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], [<span class='number'>0x7f</span>], <span class='string'>&quot;&quot;</span>);
@@ -1972,14 +2097,14 @@
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_decoder_invalid_lead_followed_by_invalid_trail_partial</span>() {
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0x81u8</span>, <span class='number'>0x9f</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0x81</span>..<span class='number'>0xa0</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [], [<span class='number'>0xff</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_finish_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, <span class='string'>&quot;&quot;</span>);
         }
 
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='ident'>range_inclusive</span>(<span class='number'>0xe0u8</span>, <span class='number'>0xfc</span>) {
+        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0xe0</span>..<span class='number'>0xfd</span> {
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>d</span> <span class='op'>=</span> <span class='ident'>Windows31JEncoding</span>.<span class='ident'>raw_decoder</span>();
             <span class='macro'>assert_feed_ok</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [<span class='ident'>i</span>], <span class='string'>&quot;&quot;</span>);
             <span class='macro'>assert_feed_err</span><span class='macro'>!</span>(<span class='ident'>d</span>, [], [], [<span class='number'>0xff</span>], <span class='string'>&quot;&quot;</span>);
@@ -2088,7 +2213,7 @@
                     <span class='kw'>if</span> <span class='ident'>ptr</span> <span class='op'>==</span> <span class='number'>0xffff</span> {
                         <span class='self'>self</span>.<span class='ident'>st</span> <span class='op'>=</span> <span class='ident'>st</span>; <span class='comment'>// do NOT reset the state!</span>
                         <span class='kw'>return</span> (<span class='ident'>i</span>, <span class='prelude-val'>Some</span>(<span class='ident'>CodecError</span> {
-                            <span class='ident'>upto</span>: <span class='ident'>j</span> <span class='kw'>as</span> <span class='ident'>isize</span>, <span class='ident'>cause</span>: <span class='string'>&quot;unrepresentable character&quot;</span>.<span class='ident'>into_cow</span>()
+                            <span class='ident'>upto</span>: <span class='ident'>j</span> <span class='kw'>as</span> <span class='ident'>isize</span>, <span class='ident'>cause</span>: <span class='string'>&quot;unrepresentable character&quot;</span>.<span class='ident'>into</span>()
                         }));
                     } <span class='kw'>else</span> {
                         <span class='macro'>ensure_Lead</span><span class='macro'>!</span>();
@@ -2110,14 +2235,37 @@
     }
 }
 
+<span class='doccomment'>/// A decoder for ISO-2022-JP with JIS X 0212 support.</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
+<span class='kw'>struct</span> <span class='ident'>ISO2022JPDecoder</span> {
+    <span class='ident'>st</span>: <span class='ident'>iso2022jp</span>::<span class='ident'>State</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>ISO2022JPDecoder</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawDecoder</span><span class='op'>&gt;</span> {
+        <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>ISO2022JPDecoder</span> { <span class='ident'>st</span>: <span class='ident'>Default</span>::<span class='ident'>default</span>() })
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>RawDecoder</span> <span class='kw'>for</span> <span class='ident'>ISO2022JPDecoder</span> {
+    <span class='kw'>fn</span> <span class='ident'>from_self</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawDecoder</span><span class='op'>&gt;</span> { <span class='ident'>ISO2022JPDecoder</span>::<span class='ident'>new</span>() }
+    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>false</span> }
+
+    <span class='kw'>fn</span> <span class='ident'>raw_feed</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StringWriter</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span>) {
+        <span class='kw'>let</span> (<span class='ident'>st</span>, <span class='ident'>processed</span>, <span class='ident'>err</span>) <span class='op'>=</span> <span class='ident'>iso2022jp</span>::<span class='ident'>raw_feed</span>(<span class='self'>self</span>.<span class='ident'>st</span>, <span class='ident'>input</span>, <span class='ident'>output</span>, <span class='kw-2'>&amp;</span>());
+        <span class='self'>self</span>.<span class='ident'>st</span> <span class='op'>=</span> <span class='ident'>st</span>;
+        (<span class='ident'>processed</span>, <span class='ident'>err</span>)
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>raw_finish</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StringWriter</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> (<span class='ident'>st</span>, <span class='ident'>err</span>) <span class='op'>=</span> <span class='ident'>iso2022jp</span>::<span class='ident'>raw_finish</span>(<span class='self'>self</span>.<span class='ident'>st</span>, <span class='ident'>output</span>, <span class='kw-2'>&amp;</span>());
+        <span class='self'>self</span>.<span class='ident'>st</span> <span class='op'>=</span> <span class='ident'>st</span>;
+        <span class='ident'>err</span>
+    }
+}
+
 <span class='macro'>stateful_decoder</span><span class='macro'>!</span> {
-    <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>&quot;A decoder for ISO-2022-JP with JIS X 0212 support.&quot;</span>]</span>
-    <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>)]</span>
-    <span class='kw'>struct</span> <span class='ident'>ISO2022JPDecoder</span>;
-
     <span class='ident'>module</span> <span class='ident'>iso2022jp</span>;
-
-    <span class='ident'>ascii_compatible</span> <span class='boolval'>false</span>;
 
     <span class='ident'>internal</span> <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>map_two_0208_bytes</span>(<span class='ident'>lead</span>: <span class='ident'>u8</span>, <span class='ident'>trail</span>: <span class='ident'>u8</span>) <span class='op'>-&gt;</span> <span class='ident'>u32</span> {
         <span class='kw'>use</span> <span class='ident'>index_japanese</span> <span class='kw'>as</span> <span class='ident'>index</span>;
@@ -2612,6 +2760,10 @@
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>

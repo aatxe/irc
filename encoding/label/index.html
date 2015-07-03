@@ -26,7 +26,7 @@
 
     <section class="sidebar">
         
-        <p class='location'><a href='../index.html'>encoding</a></p><div class='block mod'><h2>Modules</h2><a class='mod ' href='../all/index.html' title='A list of all supported encodings. Useful for encodings fixed in the compile time.'>all</a><a class='mod ' href='../codec/index.html' title='Codec implementations.'>codec</a><a class='mod current' href='../label/index.html' title='An interface for retrieving an encoding (or a set of encodings) from a string/numeric label.'>label</a><a class='mod ' href='../types/index.html' title='Interface to the character encoding.'>types</a></div>
+        <p class='location'><a href='../index.html'>encoding</a></p><script>window.sidebarCurrent = {name: 'label', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
     </section>
 
     <nav class="sub">
@@ -41,27 +41,33 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>encoding</a>::<wbr><a class='mod' href=''>label</a><wbr></span><span class='out-of-band'><span id='render-detail'>
-            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-15793' href='../../src/encoding/label.rs.html#5-347'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>encoding</a>::<wbr><a class='mod' href=''>label</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-16877' class='srclink' href='../../src/encoding/label.rs.html#5-355' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>An interface for retrieving an encoding (or a set of encodings) from a string/numeric label.</p>
 </div><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.encoding_from_whatwg_label.html'
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.encoding_from_whatwg_label.html'
                                title='encoding::label::encoding_from_whatwg_label'>encoding_from_whatwg_label</a></td>
-                        <td class='docblock short'><p>Returns an encoding from given label, defined in the WHATWG Encoding standard, if any.
+                        <td class='docblock short'>
+                             <p>Returns an encoding from given label, defined in the WHATWG Encoding standard, if any.
 Implements &quot;get an encoding&quot; algorithm: <a href="http://encoding.spec.whatwg.org/#concept-encoding-get">http://encoding.spec.whatwg.org/#concept-encoding-get</a></p>
-</td>
+
+                        </td>
                     </tr>
                 
-                    <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.encoding_from_windows_code_page.html'
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.encoding_from_windows_code_page.html'
                                title='encoding::label::encoding_from_windows_code_page'>encoding_from_windows_code_page</a></td>
-                        <td class='docblock short'><p>Returns an encoding from Windows code page number.
+                        <td class='docblock short'>
+                             <p>Returns an encoding from Windows code page number.
 <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756%28v=vs.85%29.aspx">http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756%28v=vs.85%29.aspx</a>
 Sometimes it can return a <em>superset</em> of the requested encoding, e.g. for several CJK encodings.</p>
-</td>
+
+                        </td>
                     </tr>
                 </table></section>
     <section id='search' class="content hidden"></section>
@@ -95,6 +101,10 @@ Sometimes it can return a <em>superset</em> of the requested encoding, e.g. for 
                 <code>struct</code>, <code>enum</code>,
                 <code>trait</code>, <code>typedef</code> (or
                 <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
             </p>
         </div>
     </div>
