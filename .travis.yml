@@ -3,6 +3,7 @@ env:
     - secure: aGzqk53//ZQmZ/7Eb8XtlUG3bmwmR5p+RCSqUEz0xUazsYAO0/NRYgEkebXpggvjQCaJFsWWNxfSq5+3bVa43boIChKzshkrqIvF6sO5RxMslNQbb4rabo4GadJYMMFmoG/3h1EwFk3pEsAorNC/M6VVuH9XLKD5dWgvefMqclc=
 language: rust
 rust: nightly
+sudo: false
 script:
   - chmod +x mktestconfig.sh
   - ./mktestconfig.sh
