@@ -30,6 +30,8 @@ pub enum Capability {
     UserhostInNames,
     /// [metadata](http://ircv3.net/specs/core/metadata-3.2.html)
     Metadata,
+    /// [metadata-notify](http://ircv3.net/specs/core/metadata-3.2.html)
+    MetadataNotify,
     /// Custom IRCv3 capability extensions
     Custom(&'static str),
 }
@@ -58,6 +60,7 @@ impl AsRef<str> for Capability {
             Capability::ServerTime => "server-time",
             Capability::UserhostInNames => "userhost-in-names",
             Capability::Metadata => "metadata",
+            Capability::MetadataNotify => "metadata-notify",
             Capability::Custom(s) => s,
         }
     }
@@ -82,6 +85,7 @@ mod test {
         assert_eq!(ServerTime.as_ref(), "server-time");
         assert_eq!(UserhostInNames.as_ref(), "userhost-in-names");
         assert_eq!(Metadata.as_ref(), "metadata");
+        assert_eq!(MetadataNotify.as_ref(), "metadata-notify");
         assert_eq!(Custom("example").as_ref(), "example");
     }
 }

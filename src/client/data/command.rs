@@ -158,7 +158,7 @@ pub enum Command {
 
     // IRCv3.2 extensions
     /// METADATA target COMMAND [params] :[param]
-    METADATA(String, MetadataSubCommand, Option<Vec<String>>, Option<String>),
+    METADATA(String, Option<MetadataSubCommand>, Option<Vec<String>>, Option<String>),
     /// MONITOR command [nicklist]
     MONITOR(String, Option<String>),
     /// CHGHOST user host
@@ -335,11 +335,16 @@ impl Into<Message> for Command {
             Command::ACCOUNT(a) =>
                 Message::from_owned(None, string("ACCOUNT"), Some(vec![a]), None),
 
-            Command::METADATA(t, c, None, p) =>
+            Command::METADATA(t, Some(c), None, p) =>
                 Message::from_owned(None, string("METADATA"), Some(vec![t, c.string()]), p),
-            Command::METADATA(t, c, Some(a), p) =>
+            Command::METADATA(t, Some(c), Some(a), p) =>
                 Message::from_owned(None, string("METADATA"),
                                     Some(vec![t, c.string()].into_iter().chain(a).collect()), p),
+            Command::METADATA(t, None, None, p) =>
+                Message::from_owned(None, string("METADATA"), Some(vec![t]), p),
+            Command::METADATA(t, None, Some(a), p) =>
+                Message::from_owned(None, string("METADATA"),
+                                    Some(vec![t].into_iter().chain(a).collect()), p),
             Command::MONITOR(c, Some(t)) =>
                 Message::from_owned(None, string("MONITOR"), Some(vec![c, t]), None),
             Command::MONITOR(c, None) =>
@@ -1097,15 +1102,19 @@ impl<'a> From<&'a Message> for Result<Command> {
                 match m.suffix {
                     Some(_) => return Err(invalid_input()),
                     None => match m.args[1].parse() {
-                        Ok(c) => Command::METADATA(m.args[0].clone(), c, None, None),
+                        Ok(c) => Command::METADATA(m.args[0].clone(), Some(c), None, None),
                         Err(_) => return Err(invalid_input()),
                     },
                 }
             } else if m.args.len() > 2 {
                 match m.args[1].parse() {
-                    Ok(c) => Command::METADATA(m.args[0].clone(), c, Some(m.args[1..].to_owned()),
-                                                 m.suffix.clone()),
-                    Err(_) => return Err(invalid_input()),
+                    Ok(c) => Command::METADATA(m.args[0].clone(), Some(c),
+                                               Some(m.args[1..].to_owned()), m.suffix.clone()),
+                    Err(_) => if m.args.len() == 3 && m.suffix.is_some() {
+                        Command::METADATA(m.args[0].clone(), None, Some(m.args[1..].to_owned()), m.suffix.clone())
+                    } else {
+                        return Err(invalid_input())
+                    },
                 }
             } else {
                 return Err(invalid_input())
