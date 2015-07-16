@@ -2,7 +2,7 @@
 use std::io::Result;
 use std::borrow::ToOwned;
 use client::data::{Capability, NegotiationVersion};
-use client::data::Command::{CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
+use client::data::Command::{AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
 use client::data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
 use client::data::command::CapSubCommand::{END, LS, REQ};
 use client::data::kinds::{IrcRead, IrcWrite};
@@ -39,6 +39,27 @@ pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
         try!(self.send(USER(self.config().username().to_owned(), "0".to_owned(),
                             self.config().real_name().to_owned())));
         Ok(())
+    }
+
+    /// Sends a SASL AUTHENTICATE message with the specified data.
+    fn send_sasl(&self, data: &str) -> Result<()> where Self: Sized {
+        self.send(AUTHENTICATE(data.to_owned()))
+    }
+
+    /// Sends a SASL AUTHENTICATE request to use the PLAIN mechanism.
+    fn send_sasl_plain(&self) -> Result<()> where Self: Sized {
+        self.send_sasl("PLAIN")
+    }
+
+
+    /// Sends a SASL AUTHENTICATE request to use the EXTERNAL mechanism.
+    fn send_sasl_external(&self) -> Result<()> where Self: Sized {
+        self.send_sasl("EXTERNAL")
+    }
+
+    /// Sends a SASL AUTHENTICATE request to abort authentication.
+    fn send_sasl_abort(&self) -> Result<()> where Self: Sized {
+        self.send_sasl("*")
     }
 
     /// Sends a PONG with the specified message.
