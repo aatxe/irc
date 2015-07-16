@@ -149,6 +149,8 @@ pub enum Command {
     CAP(Option<String>, CapSubCommand, Option<String>, Option<String>),
 
     // IRCv3.1 extensions
+    /// AUTHENTICATE data
+    AUTHENTICATE(String),
     /// ACCOUNT [account name]
     ACCOUNT(String),
     // AWAY is already defined as a send-only message.
@@ -334,6 +336,8 @@ impl Into<Message> for Command {
             Command::CAP(Some(k), s, Some(c), p) =>
                 Message::from_owned(None, string("CAP"), Some(vec![k, s.string(), c]), p),
 
+            Command::AUTHENTICATE(d) =>
+                Message::from_owned(None, string("AUTHENTICATE"), Some(vec![d]), None),
             Command::ACCOUNT(a) =>
                 Message::from_owned(None, string("ACCOUNT"), Some(vec![a]), None),
 
@@ -1097,6 +1101,19 @@ impl<'a> From<&'a Message> for Result<Command> {
                 }
             } else {
                 return Err(invalid_input())
+            }
+        } else if let "AUTHENTICATE" = &m.command[..] {
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    Command::AUTHENTICATE(suffix.clone())
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 1 {
+                    Command::AUTHENTICATE(m.args[0].clone())
+                } else {
+                    return Err(invalid_input())
+                }
             }
         } else if let "ACCOUNT" = &m.command[..] {
             match m.suffix {

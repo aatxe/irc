@@ -213,6 +213,14 @@ make_response! {
     RPL_KEYVALUE        = 761,
     /// 762 :end of metadata
     RPL_METADATAEND     = 762,
+    /// 900 <nick> <nick>!<ident>@<host> <account> :You are now logged in as <user>
+    RPL_LOGGEDIN        = 900,
+    /// 901 <nick> <nick>!<ident>@<host> :You are now logged out
+    RPL_LOGGEDOUT       = 901,
+    /// 903 <nick> :SASL authentication successful
+    RPL_SASLSUCCESS     = 903,
+    /// 908 <nick> <mechanisms> :are available SASL mechanisms
+    RPL_SASLMECHS       = 908,
 
     // Error replies
     /// 401 <nickname> :No such nick/channel
@@ -334,8 +342,17 @@ make_response! {
     /// 768 <target> <key> :key not set
     ERR_KEYNOTSET           = 768,
     /// 769 <target> <key> :permission denied
-    ERR_KEYNOPERMISSION     = 779
-
+    ERR_KEYNOPERMISSION     = 779,
+    /// 902 <nick> :You must use a nick assigned to you.
+    ERR_NICKLOCKED          = 902,
+    /// 904 <nick> :SASL authentication failed
+    ERR_SASLFAIL            = 904,
+    /// 905 <nick> :SASL message too long
+    ERR_SASLTOOLONG         = 905,
+    /// 906 <nick> :SASL authentication aborted
+    ERR_SASLABORT           = 906,
+    /// 907 <nick> :You have already authenticated using SASL
+    ERR_SASLALREADY         = 907
 }
 
 impl Response {
