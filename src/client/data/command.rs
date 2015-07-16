@@ -161,6 +161,8 @@ pub enum Command {
     METADATA(String, Option<MetadataSubCommand>, Option<Vec<String>>, Option<String>),
     /// MONITOR command [nicklist]
     MONITOR(String, Option<String>),
+    /// BATCH (+/-)reference-tag [type [params]]
+    BATCH(String, Option<BatchSubCommand>, Option<Vec<String>>),
     /// CHGHOST user host
     CHGHOST(String, String),
 }
@@ -349,6 +351,18 @@ impl Into<Message> for Command {
                 Message::from_owned(None, string("MONITOR"), Some(vec![c, t]), None),
             Command::MONITOR(c, None) =>
                 Message::from_owned(None, string("MONITOR"), Some(vec![c]), None),
+            Command::BATCH(t, Some(c), Some(a)) =>
+                Message::from_owned(None, string("BATCH"), Some(vec![t, c.string()].into_iter()
+                                                                                   .chain(a)
+                                                                                   .collect()),
+                                    None),
+            Command::BATCH(t, Some(c), None) =>
+                Message::from_owned(None, string("BATCH"), Some(vec![t, c.string()]), None),
+            Command::BATCH(t, None, Some(a)) =>
+                Message::from_owned(None, string("BATCH"),
+                                    Some(vec![t].into_iter().chain(a).collect()), None),
+            Command::BATCH(t, None, None) =>
+                Message::from_owned(None, string("BATCH"), Some(vec![t]), None),
             Command::CHGHOST(u, h) =>
                 Message::from_owned(None, string("CHGHOST"), Some(vec![u, h]), None),
         }
@@ -1125,6 +1139,37 @@ impl<'a> From<&'a Message> for Result<Command> {
             } else {
                 return Err(invalid_input())
             }
+        } else if let "BATCH" = &m.command[..] {
+            match m.suffix {
+                Some(ref suffix) => if m.args.len() == 0 {
+                    Command::BATCH(suffix.clone(), None, None)
+                } else if m.args.len() == 1 {
+                    Command::BATCH(m.args[0].clone(), Some(
+                        suffix.parse().unwrap_or(return Err(invalid_input()))
+                    ), None)
+                } else if m.args.len() > 1 {
+                    Command::BATCH(m.args[0].clone(), Some(
+                        m.args[1].parse().unwrap_or(return Err(invalid_input()))
+                    ), Some(
+                        vec![suffix.clone()].into_iter().chain(m.args[2..].to_owned()).collect()
+                    ))
+                } else {
+                    return Err(invalid_input())
+                },
+                None => if m.args.len() == 1 {
+                    Command::BATCH(m.args[0].clone(), None, None)
+                } else if m.args.len() == 2 {
+                    Command::BATCH(m.args[0].clone(), Some(
+                        m.args[1].parse().unwrap_or(return Err(invalid_input()))
+                    ), None)
+                } else if m.args.len() > 2 {
+                    Command::BATCH(m.args[0].clone(), Some(
+                        m.args[1].parse().unwrap_or(return Err(invalid_input()))
+                    ), Some(m.args[2..].to_owned()))
+                } else {
+                    return Err(invalid_input())
+                }
+            }
         } else if let "CHGHOST" = &m.command[..] {
             match m.suffix {
                 Some(ref suffix) => if m.args.len() == 1 {
@@ -1254,6 +1299,43 @@ impl FromStr for MetadataSubCommand {
     }
 }
 
+/// [batch extension](http://ircv3.net/specs/extensions/batch-3.2.html).
+#[derive(Clone, Debug, PartialEq)]
+pub enum BatchSubCommand {
+    /// [NETSPLIT](http://ircv3.net/specs/extensions/batch/netsplit.html)
+    NETSPLIT,
+    /// [NETJOIN](http://ircv3.net/specs/extensions/batch/netsplit.html)
+    NETJOIN,
+    /// Vendor-specific BATCH subcommands.
+    CUSTOM(String),
+}
+
+impl BatchSubCommand {
+    /// Gets the string that corresponds to this subcommand.
+    pub fn to_str(&self) -> &str {
+        match self {
+            &BatchSubCommand::NETSPLIT      => "NETSPLIT",
+            &BatchSubCommand::NETJOIN       => "NETJOIN",
+            &BatchSubCommand::CUSTOM(ref s) => &s,
+        }
+    }
+
+    // This makes some earlier lines shorter.
+    fn string(&self) -> String {
+        self.to_str().to_owned()
+    }
+}
+
+impl FromStr for BatchSubCommand {
+    type Err = &'static str;
+    fn from_str(s: &str) -> StdResult<BatchSubCommand, &'static str> {
+        match s {
+            "NETSPLIT" => Ok(BatchSubCommand::NETSPLIT),
+            "NETJOIN"  => Ok(BatchSubCommand::NETJOIN),
+            _          => Ok(BatchSubCommand::CUSTOM(s.to_owned())),
+        }
+    }
+}
 
 /// Produces an invalid_input IoError.
 fn invalid_input() -> Error {
