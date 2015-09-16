@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::{Error, ErrorKind, Result};
 use std::path::Path;
-use rustc_serialize::json::decode;
+use rustc_serialize::json::{decode, encode};
 
 /// Configuration data.
 #[derive(Clone, RustcDecodable, RustcEncodable, Default, PartialEq, Debug)]
@@ -53,6 +53,14 @@ impl Config {
         decode(&data[..]).map_err(|_|
             Error::new(ErrorKind::InvalidInput, "Failed to decode configuration file.")
         )
+    }
+
+    /// Saves a JSON configuration to the desired path.
+    pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        let mut file = try!(File::create(path));
+        file.write_all(try!(encode(self).map_err(|_|
+            Error::new(ErrorKind::InvalidInput, "Failed to encode configuration file.")
+        )).as_bytes())
     }
 
     /// Determines whether or not the nickname provided is the owner of the bot.
