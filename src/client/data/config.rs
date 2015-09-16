@@ -8,7 +8,7 @@ use std::path::Path;
 use rustc_serialize::json::decode;
 
 /// Configuration data.
-#[derive(Clone, RustcDecodable, Default, PartialEq, Debug)]
+#[derive(Clone, RustcDecodable, RustcEncodable, Default, PartialEq, Debug)]
 pub struct Config {
     /// A list of the owners of the bot by nickname.
     pub owners: Option<Vec<String>>,
