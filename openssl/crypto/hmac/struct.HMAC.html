@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -45,7 +45,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-5056' class='srclink' href='../../../src/openssl/crypto/hmac.rs.html#65-69' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-5086' class='srclink' href='../../../src/openssl/crypto/hmac.rs.html#65-69' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct HMAC {
     // some fields omitted
 }</pre><div class='docblock'><p>Provides HMAC computation.</p>
@@ -60,8 +60,7 @@
 <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='string'>b&quot;what do ya want for nothing?&quot;</span>;
 <span class='kw'>let</span> <span class='ident'>spec</span> <span class='op'>=</span> <span class='string'>b&quot;\x75\x0c\x78\x3e\x6a\xb0\xb5\x03\xea\xa8\x6e\x31\x0a\x5d\xb7\x38&quot;</span>;
 <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>hmac</span>(<span class='ident'>Type</span>::<span class='ident'>MD5</span>, <span class='ident'>key</span>, <span class='ident'>data</span>);
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>res</span>, <span class='ident'>spec</span>);
-</pre>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>res</span>, <span class='ident'>spec</span>);</pre>
 
 <p>Use the <code>Write</code> trait to supply the input in chunks.</p>
 <pre class='rust rust-example-rendered'>
@@ -75,8 +74,7 @@
 <span class='ident'>h</span>.<span class='ident'>write_all</span>(<span class='ident'>data</span>[<span class='number'>0</span>]);
 <span class='ident'>h</span>.<span class='ident'>write_all</span>(<span class='ident'>data</span>[<span class='number'>1</span>]);
 <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>h</span>.<span class='ident'>finish</span>();
-<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>res</span>, <span class='ident'>spec</span>);
-</pre>
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>res</span>, <span class='ident'>spec</span>);</pre>
 </div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../openssl/crypto/hmac/struct.HMAC.html' title='openssl::crypto::hmac::HMAC'>HMAC</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(ty: <a class='enum' href='../../../openssl/crypto/hash/enum.Type.html' title='openssl::crypto::hash::Type'>Type</a>, key: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='struct' href='../../../openssl/crypto/hmac/struct.HMAC.html' title='openssl::crypto::hmac::HMAC'>HMAC</a></code></h4>
 <div class='docblock'><p>Creates a new <code>HMAC</code> with the specified hash type using the <code>key</code>.</p>
 </div><h4 id='method.finish' class='method'><code>fn <a href='#method.finish' class='fnname'>finish</a>(&amp;mut self) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;</code></h4>
@@ -97,37 +95,44 @@ the last <code>finish</code> and resets the hasher.</p>
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

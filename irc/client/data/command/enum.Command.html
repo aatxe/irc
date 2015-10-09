@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -45,7 +45,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1590' class='srclink' href='../../../../src/irc/client/data/command.rs.html#12-166' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1656' class='srclink' href='../../../../src/irc/client/data/command.rs.html#12-170' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum Command {
     PASS(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>),
     NICK(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>),
@@ -104,9 +104,11 @@
     HOSTSERV(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>),
     MEMOSERV(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>),
     CAP(<a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;, <a class='enum' href='../../../../irc/client/data/command/enum.CapSubCommand.html' title='irc::client::data::command::CapSubCommand'>CapSubCommand</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;, <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;),
+    AUTHENTICATE(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>),
     ACCOUNT(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>),
-    METADATA(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='../../../../irc/client/data/command/enum.MetadataSubCommand.html' title='irc::client::data::command::MetadataSubCommand'>MetadataSubCommand</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;, <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;),
+    METADATA(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../../../../irc/client/data/command/enum.MetadataSubCommand.html' title='irc::client::data::command::MetadataSubCommand'>MetadataSubCommand</a>&gt;, <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;, <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;),
     MONITOR(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;),
+    BATCH(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../../../../irc/client/data/command/enum.BatchSubCommand.html' title='irc::client::data::command::BatchSubCommand'>BatchSubCommand</a>&gt;, <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;),
     CHGHOST(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>),
 }</pre><div class='docblock'><p>List of all client commands as defined in <a href="http://tools.ietf.org/html/rfc2812">RFC 2812</a>. This
 also includes commands from the
@@ -171,9 +173,11 @@ MODE channel modes [modeparams]</p>
 </div></td></tr><tr><td id='variant.HOSTSERV'><code>HOSTSERV</code></td><td><div class='docblock'><p>HOSTSERV message</p>
 </div></td></tr><tr><td id='variant.MEMOSERV'><code>MEMOSERV</code></td><td><div class='docblock'><p>MEMOSERV message</p>
 </div></td></tr><tr><td id='variant.CAP'><code>CAP</code></td><td><div class='docblock'><p>CAP [*] COMMAND [*] :[param]</p>
+</div></td></tr><tr><td id='variant.AUTHENTICATE'><code>AUTHENTICATE</code></td><td><div class='docblock'><p>AUTHENTICATE data</p>
 </div></td></tr><tr><td id='variant.ACCOUNT'><code>ACCOUNT</code></td><td><div class='docblock'><p>ACCOUNT [account name]</p>
 </div></td></tr><tr><td id='variant.METADATA'><code>METADATA</code></td><td><div class='docblock'><p>METADATA target COMMAND [params] :[param]</p>
 </div></td></tr><tr><td id='variant.MONITOR'><code>MONITOR</code></td><td><div class='docblock'><p>MONITOR command [nicklist]</p>
+</div></td></tr><tr><td id='variant.BATCH'><code>BATCH</code></td><td><div class='docblock'><p>BATCH (+/-)reference-tag [type [params]]</p>
 </div></td></tr><tr><td id='variant.CHGHOST'><code>CHGHOST</code></td><td><div class='docblock'><p>CHGHOST user host</p>
 </div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='enum' href='../../../../irc/client/data/command/enum.Command.html' title='irc::client::data::command::Command'>Command</a></code></h3><div class='impl-items'><h4 id='method.from_message_io' class='method'><code>fn <a href='#method.from_message_io' class='fnname'>from_message_io</a>(m: <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='../../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>&gt;) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='enum' href='../../../../irc/client/data/command/enum.Command.html' title='irc::client::data::command::Command'>Command</a>&gt;</code></h4>
 <div class='docblock'><p>Converts a potential Message result into a potential Command result.</p>
@@ -187,37 +191,44 @@ MODE channel modes [modeparams]</p>
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

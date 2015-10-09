@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -45,11 +45,15 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-22062' class='srclink' href='../../../../src/irc/client/server/utils.rs.html#13-199' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-23855' class='srclink' href='../../../../src/irc/client/server/utils.rs.html#13-220' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait ServerExt&lt;'a, T, U&gt;: <a class='trait' href='../../../../irc/client/server/trait.Server.html' title='irc::client::server::Server'>Server</a>&lt;'a, T, U&gt; {
     fn <a href='#method.send_cap_ls' class='fnname'>send_cap_ls</a>(&amp;self, version: <a class='enum' href='../../../../irc/client/data/caps/enum.NegotiationVersion.html' title='irc::client::data::caps::NegotiationVersion'>NegotiationVersion</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span> { ... }
     fn <a href='#method.send_cap_req' class='fnname'>send_cap_req</a>(&amp;self, extensions: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span> { ... }
     fn <a href='#method.identify' class='fnname'>identify</a>(&amp;self) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span> { ... }
+    fn <a href='#method.send_sasl' class='fnname'>send_sasl</a>(&amp;self, data: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span> { ... }
+    fn <a href='#method.send_sasl_plain' class='fnname'>send_sasl_plain</a>(&amp;self) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span> { ... }
+    fn <a href='#method.send_sasl_external' class='fnname'>send_sasl_external</a>(&amp;self) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span> { ... }
+    fn <a href='#method.send_sasl_abort' class='fnname'>send_sasl_abort</a>(&amp;self) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span> { ... }
     fn <a href='#method.send_pong' class='fnname'>send_pong</a>(&amp;self, msg: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span> { ... }
     fn <a href='#method.send_join' class='fnname'>send_join</a>(&amp;self, chanlist: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span> { ... }
     fn <a href='#method.send_oper' class='fnname'>send_oper</a>(&amp;self, username: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, password: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span> { ... }
@@ -78,6 +82,10 @@
         <h3 id='method.send_cap_ls' class='method stab '><code>fn <a href='#method.send_cap_ls' class='fnname'>send_cap_ls</a>(&amp;self, version: <a class='enum' href='../../../../irc/client/data/caps/enum.NegotiationVersion.html' title='irc::client::data::caps::NegotiationVersion'>NegotiationVersion</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Sends a request for a list of server capabilities for a specific IRCv3 version.</p>
 </div><h3 id='method.send_cap_req' class='method stab '><code>fn <a href='#method.send_cap_req' class='fnname'>send_cap_req</a>(&amp;self, extensions: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Sends an IRCv3 capabilities request for the specified extensions.</p>
 </div><h3 id='method.identify' class='method stab '><code>fn <a href='#method.identify' class='fnname'>identify</a>(&amp;self) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Sends a CAP END, NICK and USER to identify.</p>
+</div><h3 id='method.send_sasl' class='method stab '><code>fn <a href='#method.send_sasl' class='fnname'>send_sasl</a>(&amp;self, data: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Sends a SASL AUTHENTICATE message with the specified data.</p>
+</div><h3 id='method.send_sasl_plain' class='method stab '><code>fn <a href='#method.send_sasl_plain' class='fnname'>send_sasl_plain</a>(&amp;self) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Sends a SASL AUTHENTICATE request to use the PLAIN mechanism.</p>
+</div><h3 id='method.send_sasl_external' class='method stab '><code>fn <a href='#method.send_sasl_external' class='fnname'>send_sasl_external</a>(&amp;self) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Sends a SASL AUTHENTICATE request to use the EXTERNAL mechanism.</p>
+</div><h3 id='method.send_sasl_abort' class='method stab '><code>fn <a href='#method.send_sasl_abort' class='fnname'>send_sasl_abort</a>(&amp;self) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Sends a SASL AUTHENTICATE request to abort authentication.</p>
 </div><h3 id='method.send_pong' class='method stab '><code>fn <a href='#method.send_pong' class='fnname'>send_pong</a>(&amp;self, msg: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Sends a PONG with the specified message.</p>
 </div><h3 id='method.send_join' class='method stab '><code>fn <a href='#method.send_join' class='fnname'>send_join</a>(&amp;self, chanlist: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Joins the specified channel or chanlist.</p>
 </div><h3 id='method.send_oper' class='method stab '><code>fn <a href='#method.send_oper' class='fnname'>send_oper</a>(&amp;self, username: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, password: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Attempts to oper up using the specified username and password.</p>
@@ -123,37 +131,44 @@ This requires the CTCP feature to be enabled.</p>
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

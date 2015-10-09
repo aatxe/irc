@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -426,6 +426,23 @@
 <span id="384">384</span>
 <span id="385">385</span>
 <span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Enumeration of all the possible server responses.</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>non_camel_case_types</span>)]</span>
@@ -642,6 +659,14 @@
     <span class='ident'>RPL_KEYVALUE</span>        <span class='op'>=</span> <span class='number'>761</span>,
     <span class='doccomment'>/// 762 :end of metadata</span>
     <span class='ident'>RPL_METADATAEND</span>     <span class='op'>=</span> <span class='number'>762</span>,
+    <span class='doccomment'>/// 900 &lt;nick&gt; &lt;nick&gt;!&lt;ident&gt;@&lt;host&gt; &lt;account&gt; :You are now logged in as &lt;user&gt;</span>
+    <span class='ident'>RPL_LOGGEDIN</span>        <span class='op'>=</span> <span class='number'>900</span>,
+    <span class='doccomment'>/// 901 &lt;nick&gt; &lt;nick&gt;!&lt;ident&gt;@&lt;host&gt; :You are now logged out</span>
+    <span class='ident'>RPL_LOGGEDOUT</span>       <span class='op'>=</span> <span class='number'>901</span>,
+    <span class='doccomment'>/// 903 &lt;nick&gt; :SASL authentication successful</span>
+    <span class='ident'>RPL_SASLSUCCESS</span>     <span class='op'>=</span> <span class='number'>903</span>,
+    <span class='doccomment'>/// 908 &lt;nick&gt; &lt;mechanisms&gt; :are available SASL mechanisms</span>
+    <span class='ident'>RPL_SASLMECHS</span>       <span class='op'>=</span> <span class='number'>908</span>,
 
     <span class='comment'>// Error replies</span>
     <span class='doccomment'>/// 401 &lt;nickname&gt; :No such nick/channel</span>
@@ -763,8 +788,17 @@
     <span class='doccomment'>/// 768 &lt;target&gt; &lt;key&gt; :key not set</span>
     <span class='ident'>ERR_KEYNOTSET</span>           <span class='op'>=</span> <span class='number'>768</span>,
     <span class='doccomment'>/// 769 &lt;target&gt; &lt;key&gt; :permission denied</span>
-    <span class='ident'>ERR_KEYNOPERMISSION</span>     <span class='op'>=</span> <span class='number'>779</span>
-
+    <span class='ident'>ERR_KEYNOPERMISSION</span>     <span class='op'>=</span> <span class='number'>779</span>,
+    <span class='doccomment'>/// 902 &lt;nick&gt; :You must use a nick assigned to you.</span>
+    <span class='ident'>ERR_NICKLOCKED</span>          <span class='op'>=</span> <span class='number'>902</span>,
+    <span class='doccomment'>/// 904 &lt;nick&gt; :SASL authentication failed</span>
+    <span class='ident'>ERR_SASLFAIL</span>            <span class='op'>=</span> <span class='number'>904</span>,
+    <span class='doccomment'>/// 905 &lt;nick&gt; :SASL message too long</span>
+    <span class='ident'>ERR_SASLTOOLONG</span>         <span class='op'>=</span> <span class='number'>905</span>,
+    <span class='doccomment'>/// 906 &lt;nick&gt; :SASL authentication aborted</span>
+    <span class='ident'>ERR_SASLABORT</span>           <span class='op'>=</span> <span class='number'>906</span>,
+    <span class='doccomment'>/// 907 &lt;nick&gt; :You have already authenticated using SASL</span>
+    <span class='ident'>ERR_SASLALREADY</span>         <span class='op'>=</span> <span class='number'>907</span>
 }
 
 <span class='kw'>impl</span> <span class='ident'>Response</span> {
@@ -820,37 +854,44 @@
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

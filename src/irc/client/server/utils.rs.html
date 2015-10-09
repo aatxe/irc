@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -476,12 +476,33 @@
 <span id="434">434</span>
 <span id="435">435</span>
 <span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Utilities and shortcuts for working with IRC servers.</span>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>ToOwned</span>;
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::{<span class='ident'>Capability</span>, <span class='ident'>NegotiationVersion</span>};
-<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>CAP</span>, <span class='ident'>INVITE</span>, <span class='ident'>JOIN</span>, <span class='ident'>KICK</span>, <span class='ident'>KILL</span>, <span class='ident'>MODE</span>, <span class='ident'>NICK</span>, <span class='ident'>NOTICE</span>};
+<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>AUTHENTICATE</span>, <span class='ident'>CAP</span>, <span class='ident'>INVITE</span>, <span class='ident'>JOIN</span>, <span class='ident'>KICK</span>, <span class='ident'>KILL</span>, <span class='ident'>MODE</span>, <span class='ident'>NICK</span>, <span class='ident'>NOTICE</span>};
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>OPER</span>, <span class='ident'>PASS</span>, <span class='ident'>PONG</span>, <span class='ident'>PRIVMSG</span>, <span class='ident'>QUIT</span>, <span class='ident'>SAMODE</span>, <span class='ident'>SANICK</span>, <span class='ident'>TOPIC</span>, <span class='ident'>USER</span>};
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>command</span>::<span class='ident'>CapSubCommand</span>::{<span class='ident'>END</span>, <span class='ident'>LS</span>, <span class='ident'>REQ</span>};
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>kinds</span>::{<span class='ident'>IrcRead</span>, <span class='ident'>IrcWrite</span>};
@@ -518,6 +539,27 @@
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>USER</span>(<span class='self'>self</span>.<span class='ident'>config</span>().<span class='ident'>username</span>().<span class='ident'>to_owned</span>(), <span class='string'>&quot;0&quot;</span>.<span class='ident'>to_owned</span>(),
                             <span class='self'>self</span>.<span class='ident'>config</span>().<span class='ident'>real_name</span>().<span class='ident'>to_owned</span>())));
         <span class='prelude-val'>Ok</span>(())
+    }
+
+    <span class='doccomment'>/// Sends a SASL AUTHENTICATE message with the specified data.</span>
+    <span class='kw'>fn</span> <span class='ident'>send_sasl</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>data</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> <span class='kw'>where</span> <span class='kw'>Self</span>: <span class='ident'>Sized</span> {
+        <span class='self'>self</span>.<span class='ident'>send</span>(<span class='ident'>AUTHENTICATE</span>(<span class='ident'>data</span>.<span class='ident'>to_owned</span>()))
+    }
+
+    <span class='doccomment'>/// Sends a SASL AUTHENTICATE request to use the PLAIN mechanism.</span>
+    <span class='kw'>fn</span> <span class='ident'>send_sasl_plain</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> <span class='kw'>where</span> <span class='kw'>Self</span>: <span class='ident'>Sized</span> {
+        <span class='self'>self</span>.<span class='ident'>send_sasl</span>(<span class='string'>&quot;PLAIN&quot;</span>)
+    }
+
+
+    <span class='doccomment'>/// Sends a SASL AUTHENTICATE request to use the EXTERNAL mechanism.</span>
+    <span class='kw'>fn</span> <span class='ident'>send_sasl_external</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> <span class='kw'>where</span> <span class='kw'>Self</span>: <span class='ident'>Sized</span> {
+        <span class='self'>self</span>.<span class='ident'>send_sasl</span>(<span class='string'>&quot;EXTERNAL&quot;</span>)
+    }
+
+    <span class='doccomment'>/// Sends a SASL AUTHENTICATE request to abort authentication.</span>
+    <span class='kw'>fn</span> <span class='ident'>send_sasl_abort</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> <span class='kw'>where</span> <span class='kw'>Self</span>: <span class='ident'>Sized</span> {
+        <span class='self'>self</span>.<span class='ident'>send_sasl</span>(<span class='string'>&quot;*&quot;</span>)
     }
 
     <span class='doccomment'>/// Sends a PONG with the specified message.</span>
@@ -920,37 +962,44 @@
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 

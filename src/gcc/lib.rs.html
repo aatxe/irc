@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/nightly/cargo/registry/src/github.com-0a35038f75765ae4/gcc-0.3.8/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-0a35038f75765ae4/gcc-0.3.14/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -34,7 +34,7 @@
             <div class="search-container">
                 <input class="search-input" name="search"
                        autocomplete="off"
-                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
                        type="search">
             </div>
         </form>
@@ -538,6 +538,176 @@
 <span id="496">496</span>
 <span id="497">497</span>
 <span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! A library for build scripts to compile custom C code</span>
 <span class='doccomment'>//!</span>
@@ -546,7 +716,7 @@
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```toml</span>
 <span class='doccomment'>//! [build-dependencies]</span>
-<span class='doccomment'>//! gcc = &quot;0.2&quot;</span>
+<span class='doccomment'>//! gcc = &quot;0.3&quot;</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! The purpose of this crate is to provide the utility functions necessary to</span>
@@ -585,13 +755,18 @@
 
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>doc</span>(<span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;http://alexcrichton.com/gcc-rs&quot;</span>)]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>test</span>, <span class='ident'>deny</span>(<span class='ident'>warnings</span>))]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>deny</span>(<span class='ident'>missing_docs</span>)]</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>env</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>OsString</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::{<span class='ident'>OsString</span>, <span class='ident'>OsStr</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::{<span class='ident'>PathBuf</span>, <span class='ident'>Path</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>process</span>::{<span class='ident'>Command</span>, <span class='ident'>Stdio</span>};
+
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>windows</span>)]</span>
+<span class='kw'>mod</span> <span class='ident'>registry</span>;
+<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>windows_registry</span>;
 
 <span class='doccomment'>/// Extra configuration to pass to gcc.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Config</span> {
@@ -601,21 +776,17 @@
     <span class='ident'>flags</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
     <span class='ident'>files</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>PathBuf</span><span class='op'>&gt;</span>,
     <span class='ident'>cpp</span>: <span class='ident'>bool</span>,
-    <span class='ident'>cpp_link_stdlib</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
+    <span class='ident'>cpp_link_stdlib</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span>,
     <span class='ident'>cpp_set_stdlib</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
-}
-
-<span class='doccomment'>/// Returns the default C++ standard library for the current target: `libc++`</span>
-<span class='doccomment'>/// for OS X and `libstdc++` for anything else.</span>
-<span class='kw'>fn</span> <span class='ident'>target_default_cpp_stdlib</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span> {
-    <span class='kw'>let</span> <span class='ident'>target</span> <span class='op'>=</span> <span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;TARGET&quot;</span>);
-    <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {
-        <span class='prelude-val'>None</span>
-    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;darwin&quot;</span>) {
-        <span class='prelude-val'>Some</span>(<span class='string'>&quot;c++&quot;</span>)
-    } <span class='kw'>else</span> {
-        <span class='prelude-val'>Some</span>(<span class='string'>&quot;stdc++&quot;</span>)
-    }
+    <span class='ident'>target</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
+    <span class='ident'>host</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
+    <span class='ident'>out_dir</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathBuf</span><span class='op'>&gt;</span>,
+    <span class='ident'>opt_level</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>u32</span><span class='op'>&gt;</span>,
+    <span class='ident'>debug</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>,
+    <span class='ident'>env</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>OsString</span>, <span class='ident'>OsString</span>)<span class='op'>&gt;</span>,
+    <span class='ident'>compiler</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathBuf</span><span class='op'>&gt;</span>,
+    <span class='ident'>archiver</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>PathBuf</span><span class='op'>&gt;</span>,
+    <span class='ident'>cargo_metadata</span>: <span class='ident'>bool</span>,
 }
 
 <span class='kw'>fn</span> <span class='ident'>getenv</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
@@ -664,8 +835,17 @@
             <span class='ident'>flags</span>: <span class='ident'>Vec</span>::<span class='ident'>new</span>(),
             <span class='ident'>files</span>: <span class='ident'>Vec</span>::<span class='ident'>new</span>(),
             <span class='ident'>cpp</span>: <span class='boolval'>false</span>,
-            <span class='ident'>cpp_link_stdlib</span>: <span class='ident'>target_default_cpp_stdlib</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>into</span>()),
+            <span class='ident'>cpp_link_stdlib</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>cpp_set_stdlib</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>target</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>host</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>out_dir</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>opt_level</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>debug</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>env</span>: <span class='ident'>Vec</span>::<span class='ident'>new</span>(),
+            <span class='ident'>compiler</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>archiver</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>cargo_metadata</span>: <span class='boolval'>true</span>
         }
     }
 
@@ -719,8 +899,9 @@
     <span class='doccomment'>/// otherwise cargo will link against the specified library.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// The given library name must not contain the `lib` prefix.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cpp_link_stdlib</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>cpp_link_stdlib</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
-        <span class='self'>self</span>.<span class='ident'>cpp_link_stdlib</span> <span class='op'>=</span> <span class='ident'>cpp_link_stdlib</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>into</span>());
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cpp_link_stdlib</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>cpp_link_stdlib</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>)
+                           <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
+        <span class='self'>self</span>.<span class='ident'>cpp_link_stdlib</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>cpp_link_stdlib</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>into</span>()));
         <span class='self'>self</span>
     }
 
@@ -744,11 +925,93 @@
     <span class='doccomment'>/// be used, otherwise `-stdlib` is added to the compile invocation.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// The given library name must not contain the `lib` prefix.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cpp_set_stdlib</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>cpp_set_stdlib</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cpp_set_stdlib</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>cpp_set_stdlib</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>)
+                          <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
         <span class='self'>self</span>.<span class='ident'>cpp_set_stdlib</span> <span class='op'>=</span> <span class='ident'>cpp_set_stdlib</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>into</span>());
-
         <span class='self'>self</span>.<span class='ident'>cpp_link_stdlib</span>(<span class='ident'>cpp_set_stdlib</span>);
+        <span class='self'>self</span>
+    }
 
+    <span class='doccomment'>/// Configures the target this configuration will be compiling for.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This option is automatically scraped from the `TARGET` environment</span>
+    <span class='doccomment'>/// variable by build scripts, so it&#39;s not required to call this function.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>target</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
+        <span class='self'>self</span>.<span class='ident'>target</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>target</span>.<span class='ident'>to_string</span>());
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Configures the host assumed by this configuration.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This option is automatically scraped from the `HOST` environment</span>
+    <span class='doccomment'>/// variable by build scripts, so it&#39;s not required to call this function.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>host</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>host</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
+        <span class='self'>self</span>.<span class='ident'>host</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>host</span>.<span class='ident'>to_string</span>());
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Configures the optimization level of the generated object files.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This option is automatically scraped from the `OPT_LEVEL` environment</span>
+    <span class='doccomment'>/// variable by build scripts, so it&#39;s not required to call this function.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>opt_level</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>opt_level</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
+        <span class='self'>self</span>.<span class='ident'>opt_level</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>opt_level</span>);
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Configures whether the compiler will emit debug information when</span>
+    <span class='doccomment'>/// generating object files.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This option is automatically scraped from the `PROFILE` environment</span>
+    <span class='doccomment'>/// variable by build scripts (only enabled when the profile is &quot;debug&quot;), so</span>
+    <span class='doccomment'>/// it&#39;s not required to call this function.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>debug</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>debug</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
+        <span class='self'>self</span>.<span class='ident'>debug</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>debug</span>);
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Configures the output directory where all object files and static</span>
+    <span class='doccomment'>/// libraries will be located.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This option is automatically scraped from the `OUT_DIR` environment</span>
+    <span class='doccomment'>/// variable by build scripts, so it&#39;s not required to call this function.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>out_dir</span><span class='op'>&lt;</span><span class='ident'>P</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>out_dir</span>: <span class='ident'>P</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
+        <span class='self'>self</span>.<span class='ident'>out_dir</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>out_dir</span>.<span class='ident'>as_ref</span>().<span class='ident'>to_owned</span>());
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Configures the compiler to be used to produce output.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This option is automatically determined from the target platform or a</span>
+    <span class='doccomment'>/// number of environment variables, so it&#39;s not required to call this</span>
+    <span class='doccomment'>/// function.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>compiler</span><span class='op'>&lt;</span><span class='ident'>P</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>compiler</span>: <span class='ident'>P</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
+        <span class='self'>self</span>.<span class='ident'>compiler</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>compiler</span>.<span class='ident'>as_ref</span>().<span class='ident'>to_owned</span>());
+        <span class='self'>self</span>
+    }
+
+    <span class='doccomment'>/// Configures the tool used to assemble archives.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// This option is automatically determined from the target platform or a</span>
+    <span class='doccomment'>/// number of environment variables, so it&#39;s not required to call this</span>
+    <span class='doccomment'>/// function.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>archiver</span><span class='op'>&lt;</span><span class='ident'>P</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>Path</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>archiver</span>: <span class='ident'>P</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
+        <span class='self'>self</span>.<span class='ident'>archiver</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>archiver</span>.<span class='ident'>as_ref</span>().<span class='ident'>to_owned</span>());
+        <span class='self'>self</span>
+    }
+    <span class='doccomment'>/// Define whether metadata should be emitted for cargo allowing it to</span>
+    <span class='doccomment'>/// automatically link the binary. Defaults to `true`.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cargo_metadata</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>cargo_metadata</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span> {
+        <span class='self'>self</span>.<span class='ident'>cargo_metadata</span> <span class='op'>=</span> <span class='ident'>cargo_metadata</span>;
+        <span class='self'>self</span>
+    }
+
+
+    <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>__set_env</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>B</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>a</span>: <span class='ident'>A</span>, <span class='ident'>b</span>: <span class='ident'>B</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Config</span>
+        <span class='kw'>where</span> <span class='ident'>A</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>OsStr</span><span class='op'>&gt;</span>, <span class='ident'>B</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>OsStr</span><span class='op'>&gt;</span>
+    {
+        <span class='self'>self</span>.<span class='ident'>env</span>.<span class='ident'>push</span>((<span class='ident'>a</span>.<span class='ident'>as_ref</span>().<span class='ident'>to_owned</span>(), <span class='ident'>b</span>.<span class='ident'>as_ref</span>().<span class='ident'>to_owned</span>()));
         <span class='self'>self</span>
     }
 
@@ -759,119 +1022,107 @@
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>output</span>.<span class='ident'>starts_with</span>(<span class='string'>&quot;lib&quot;</span>));
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>output</span>.<span class='ident'>ends_with</span>(<span class='string'>&quot;.a&quot;</span>));
         <span class='kw'>let</span> <span class='ident'>lib_name</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>output</span>[<span class='number'>3</span>..<span class='ident'>output</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='number'>2</span>];
+        <span class='kw'>let</span> <span class='ident'>dst</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_out_dir</span>();
 
-        <span class='kw'>let</span> <span class='ident'>target</span> <span class='op'>=</span> <span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;TARGET&quot;</span>);
-        <span class='kw'>let</span> <span class='ident'>src</span> <span class='op'>=</span> <span class='ident'>PathBuf</span>::<span class='ident'>from</span>(<span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;CARGO_MANIFEST_DIR&quot;</span>));
-        <span class='kw'>let</span> <span class='ident'>dst</span> <span class='op'>=</span> <span class='ident'>PathBuf</span>::<span class='ident'>from</span>(<span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;OUT_DIR&quot;</span>));
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>objects</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
         <span class='kw'>for</span> <span class='ident'>file</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>files</span>.<span class='ident'>iter</span>() {
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cmd</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>compile_cmd</span>(<span class='kw-2'>&amp;</span><span class='ident'>target</span>);
-            <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='ident'>src</span>.<span class='ident'>join</span>(<span class='ident'>file</span>));
-
             <span class='kw'>let</span> <span class='ident'>obj</span> <span class='op'>=</span> <span class='ident'>dst</span>.<span class='ident'>join</span>(<span class='ident'>file</span>).<span class='ident'>with_extension</span>(<span class='string'>&quot;o&quot;</span>);
-            <span class='ident'>fs</span>::<span class='ident'>create_dir_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>obj</span>.<span class='ident'>parent</span>().<span class='ident'>unwrap</span>()).<span class='ident'>unwrap</span>();
-            <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {
-                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>OsString</span>::<span class='ident'>from</span>(<span class='string'>&quot;/Fo:&quot;</span>);
-                <span class='ident'>s</span>.<span class='ident'>push</span>(<span class='kw-2'>&amp;</span><span class='ident'>obj</span>);
-                <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='ident'>s</span>);
-            } <span class='kw'>else</span> {
-                <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;-o&quot;</span>).<span class='ident'>arg</span>(<span class='kw-2'>&amp;</span><span class='ident'>obj</span>);
-            }
-            <span class='ident'>run</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>cmd</span>, <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>compiler</span>(<span class='kw-2'>&amp;</span><span class='ident'>target</span>));
+            <span class='self'>self</span>.<span class='ident'>compile_object</span>(<span class='ident'>file</span>, <span class='kw-2'>&amp;</span><span class='ident'>obj</span>);
             <span class='ident'>objects</span>.<span class='ident'>push</span>(<span class='ident'>obj</span>);
         }
 
-        <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>out</span> <span class='op'>=</span> <span class='ident'>OsString</span>::<span class='ident'>from</span>(<span class='string'>&quot;/OUT:&quot;</span>);
-            <span class='ident'>out</span>.<span class='ident'>push</span>(<span class='ident'>dst</span>.<span class='ident'>join</span>(<span class='ident'>output</span>));
-            <span class='ident'>run</span>(<span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='string'>&quot;lib&quot;</span>).<span class='ident'>arg</span>(<span class='ident'>out</span>).<span class='ident'>args</span>(<span class='kw-2'>&amp;</span><span class='ident'>objects</span>).<span class='ident'>args</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>objects</span>),
-                <span class='string'>&quot;lib&quot;</span>);
+        <span class='self'>self</span>.<span class='ident'>assemble</span>(<span class='ident'>lib_name</span>, <span class='kw-2'>&amp;</span><span class='ident'>dst</span>.<span class='ident'>join</span>(<span class='ident'>output</span>), <span class='kw-2'>&amp;</span><span class='ident'>objects</span>);
 
-            <span class='comment'>// The Rust compiler will look for libfoo.a and foo.lib, but the</span>
-            <span class='comment'>// MSVC linker will also be passed foo.lib, so be sure that both</span>
-            <span class='comment'>// exist for now.</span>
-            <span class='kw'>let</span> <span class='ident'>lib_dst</span> <span class='op'>=</span> <span class='ident'>dst</span>.<span class='ident'>join</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}.lib&quot;</span>, <span class='ident'>lib_name</span>));
-            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>fs</span>::<span class='ident'>remove_file</span>(<span class='kw-2'>&amp;</span><span class='ident'>lib_dst</span>);
-            <span class='ident'>fs</span>::<span class='ident'>hard_link</span>(<span class='ident'>dst</span>.<span class='ident'>join</span>(<span class='ident'>output</span>), <span class='ident'>lib_dst</span>).<span class='ident'>unwrap</span>();
-        } <span class='kw'>else</span> {
-            <span class='ident'>run</span>(<span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>ar</span>(<span class='kw-2'>&amp;</span><span class='ident'>target</span>)).<span class='ident'>arg</span>(<span class='string'>&quot;crus&quot;</span>)
-                                          .<span class='ident'>arg</span>(<span class='kw-2'>&amp;</span><span class='ident'>dst</span>.<span class='ident'>join</span>(<span class='ident'>output</span>))
-                                          .<span class='ident'>args</span>(<span class='kw-2'>&amp;</span><span class='ident'>objects</span>)
-                                          .<span class='ident'>args</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>objects</span>),
-                <span class='kw-2'>&amp;</span><span class='ident'>ar</span>(<span class='kw-2'>&amp;</span><span class='ident'>target</span>));
-        }
-        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-link-search=native={}&quot;</span>, <span class='ident'>dst</span>.<span class='ident'>display</span>());
-        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-link-lib=static={}&quot;</span>,
-                 <span class='kw-2'>&amp;</span><span class='ident'>output</span>[<span class='number'>3</span>..<span class='ident'>output</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='number'>2</span>]);
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>cargo_metadata</span> {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-link-lib=static={}&quot;</span>,
+                     <span class='kw-2'>&amp;</span><span class='ident'>output</span>[<span class='number'>3</span>..<span class='ident'>output</span>.<span class='ident'>len</span>() <span class='op'>-</span> <span class='number'>2</span>]);
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-link-search=native={}&quot;</span>, <span class='ident'>dst</span>.<span class='ident'>display</span>());
 
-        <span class='comment'>// Add specific C++ libraries, if enabled.</span>
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>cpp</span> {
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>stdlib</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>cpp_link_stdlib</span> {
-                <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-link-lib={}&quot;</span>, <span class='ident'>stdlib</span>);
+            <span class='comment'>// Add specific C++ libraries, if enabled.</span>
+            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>cpp</span> {
+                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>stdlib</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_cpp_link_stdlib</span>() {
+                    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;cargo:rustc-link-lib={}&quot;</span>, <span class='ident'>stdlib</span>);
+                }
             }
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>compiler</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>cpp</span> {
-            <span class='ident'>gxx</span>(<span class='ident'>target</span>)
+    <span class='kw'>fn</span> <span class='ident'>compile_object</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>file</span>: <span class='kw-2'>&amp;</span><span class='ident'>Path</span>, <span class='ident'>dst</span>: <span class='kw-2'>&amp;</span><span class='ident'>Path</span>) {
+        <span class='kw'>let</span> <span class='ident'>is_asm</span> <span class='op'>=</span> <span class='ident'>file</span>.<span class='ident'>extension</span>().<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>to_str</span>()) <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='string'>&quot;asm&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>msvc</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_target</span>().<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>);
+        <span class='kw'>let</span> (<span class='kw-2'>mut</span> <span class='ident'>cmd</span>, <span class='ident'>name</span>) <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>msvc</span> <span class='op'>&amp;&amp;</span> <span class='ident'>is_asm</span> {
+            <span class='self'>self</span>.<span class='ident'>msvc_macro_assembler</span>()
         } <span class='kw'>else</span> {
-            <span class='ident'>gcc</span>(<span class='ident'>target</span>)
+            <span class='self'>self</span>.<span class='ident'>compile_cmd</span>()
+        };
+        <span class='kw'>if</span> <span class='ident'>msvc</span> {
+            <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;/nologo&quot;</span>);
         }
-    }
-
-    <span class='kw'>fn</span> <span class='ident'>compile_flags</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>cpp</span> {
-            <span class='ident'>cxxflags</span>()
+        <span class='ident'>fs</span>::<span class='ident'>create_dir_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>dst</span>.<span class='ident'>parent</span>().<span class='ident'>unwrap</span>()).<span class='ident'>unwrap</span>();
+        <span class='kw'>if</span> <span class='ident'>msvc</span> <span class='op'>&amp;&amp;</span> <span class='ident'>is_asm</span> {
+            <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;/Fo&quot;</span>).<span class='ident'>arg</span>(<span class='ident'>dst</span>);
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>msvc</span> {
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='ident'>OsString</span>::<span class='ident'>from</span>(<span class='string'>&quot;/Fo:&quot;</span>);
+            <span class='ident'>s</span>.<span class='ident'>push</span>(<span class='kw-2'>&amp;</span><span class='ident'>dst</span>);
+            <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='ident'>s</span>);
         } <span class='kw'>else</span> {
-            <span class='ident'>cflags</span>()
+            <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;-o&quot;</span>).<span class='ident'>arg</span>(<span class='kw-2'>&amp;</span><span class='ident'>dst</span>);
         }
-    }
-
-    <span class='kw'>fn</span> <span class='ident'>compile_cmd</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Command</span> {
-        <span class='kw'>let</span> <span class='ident'>opt_level</span> <span class='op'>=</span> <span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;OPT_LEVEL&quot;</span>);
-        <span class='kw'>let</span> <span class='ident'>profile</span> <span class='op'>=</span> <span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;PROFILE&quot;</span>);
-        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{} {}&quot;</span>, <span class='ident'>profile</span>, <span class='ident'>opt_level</span>);
-
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cmd</span> <span class='op'>=</span> <span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>compiler</span>(<span class='kw-2'>&amp;</span><span class='ident'>target</span>));
-
-        <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {
+        <span class='kw'>if</span> <span class='ident'>msvc</span> {
             <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;/c&quot;</span>);
+        }
+        <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='ident'>file</span>);
+
+        <span class='ident'>run</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>cmd</span>, <span class='kw-2'>&amp;</span><span class='ident'>name</span>);
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>compile_cmd</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>Command</span>, <span class='ident'>String</span>) {
+        <span class='kw'>let</span> <span class='ident'>opt_level</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_opt_level</span>();
+        <span class='kw'>let</span> <span class='ident'>debug</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_debug</span>();
+        <span class='kw'>let</span> <span class='ident'>target</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_target</span>();
+        <span class='kw'>let</span> <span class='ident'>msvc</span> <span class='op'>=</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>);
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;debug={} opt-level={}&quot;</span>, <span class='ident'>debug</span>, <span class='ident'>opt_level</span>);
+
+        <span class='kw'>let</span> (<span class='kw-2'>mut</span> <span class='ident'>cmd</span>, <span class='ident'>name</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_compiler</span>();
+
+        <span class='kw'>if</span> <span class='ident'>msvc</span> {
             <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;/MD&quot;</span>); <span class='comment'>// link against msvcrt.dll for now</span>
-            <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;/O{}&quot;</span>, <span class='ident'>opt_level</span>));
+            <span class='kw'>if</span> <span class='ident'>opt_level</span> <span class='op'>!=</span> <span class='number'>0</span> {
+                <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;/O2&quot;</span>);
+            }
         } <span class='kw'>else</span> {
             <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;-O{}&quot;</span>, <span class='ident'>opt_level</span>));
             <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;-c&quot;</span>);
             <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;-ffunction-sections&quot;</span>).<span class='ident'>arg</span>(<span class='string'>&quot;-fdata-sections&quot;</span>);
         }
-        <span class='ident'>cmd</span>.<span class='ident'>args</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>compile_flags</span>());
+        <span class='ident'>cmd</span>.<span class='ident'>args</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>envflags</span>(<span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>cpp</span> {<span class='string'>&quot;CXXFLAGS&quot;</span>} <span class='kw'>else</span> {<span class='string'>&quot;CFLAGS&quot;</span>}));
+
+        <span class='kw'>if</span> <span class='ident'>debug</span> {
+            <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='kw'>if</span> <span class='ident'>msvc</span> {<span class='string'>&quot;/Z7&quot;</span>} <span class='kw'>else</span> {<span class='string'>&quot;-g&quot;</span>});
+        }
 
         <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;-ios&quot;</span>) {
-            <span class='ident'>cmd</span>.<span class='ident'>args</span>(<span class='kw-2'>&amp;</span><span class='ident'>ios_flags</span>(<span class='kw-2'>&amp;</span><span class='ident'>target</span>));
-        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {
-            <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;windows&quot;</span>) {
-                <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;-mwin32&quot;</span>);
-            }
-
+            <span class='self'>self</span>.<span class='ident'>ios_flags</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>cmd</span>);
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>msvc</span> {
             <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;i686&quot;</span>) {
                 <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;-m32&quot;</span>);
             } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;x86_64&quot;</span>) {
                 <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;-m64&quot;</span>);
             }
 
-            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;i686&quot;</span>) {
+            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;i686&quot;</span>) <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;windows-gnu&quot;</span>) {
                 <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;-fPIC&quot;</span>);
             }
         }
 
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>cpp</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>cpp</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>msvc</span> {
             <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>stdlib</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>cpp_set_stdlib</span> {
                 <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;-stdlib=lib{}&quot;</span>, <span class='ident'>stdlib</span>));
             }
         }
 
         <span class='kw'>for</span> <span class='ident'>directory</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>include_directories</span>.<span class='ident'>iter</span>() {
-            <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {<span class='string'>&quot;/I&quot;</span>} <span class='kw'>else</span> {<span class='string'>&quot;-I&quot;</span>});
+            <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='kw'>if</span> <span class='ident'>msvc</span> {<span class='string'>&quot;/I&quot;</span>} <span class='kw'>else</span> {<span class='string'>&quot;-I&quot;</span>});
             <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='ident'>directory</span>);
         }
 
@@ -880,14 +1131,224 @@
         }
 
         <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='ident'>key</span>, <span class='kw-2'>ref</span> <span class='ident'>value</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>definitions</span>.<span class='ident'>iter</span>() {
-            <span class='kw'>let</span> <span class='ident'>lead</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {<span class='string'>&quot;/&quot;</span>} <span class='kw'>else</span> {<span class='string'>&quot;-&quot;</span>};
+            <span class='kw'>let</span> <span class='ident'>lead</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>msvc</span> {<span class='string'>&quot;/&quot;</span>} <span class='kw'>else</span> {<span class='string'>&quot;-&quot;</span>};
             <span class='kw'>if</span> <span class='kw'>let</span> <span class='kw-2'>&amp;</span><span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>value</span>) <span class='op'>=</span> <span class='ident'>value</span> {
                 <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}D{}={}&quot;</span>, <span class='ident'>lead</span>, <span class='ident'>key</span>, <span class='ident'>value</span>));
             } <span class='kw'>else</span> {
                 <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}D{}&quot;</span>, <span class='ident'>lead</span>, <span class='ident'>key</span>));
             }
         }
-        <span class='kw'>return</span> <span class='ident'>cmd</span>;
+        (<span class='ident'>cmd</span>, <span class='ident'>name</span>)
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>msvc_macro_assembler</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>Command</span>, <span class='ident'>String</span>) {
+        <span class='kw'>let</span> <span class='ident'>target</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_target</span>();
+        <span class='kw'>let</span> <span class='ident'>tool</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;x86_64&quot;</span>) {<span class='string'>&quot;ml64.exe&quot;</span>} <span class='kw'>else</span> {<span class='string'>&quot;ml.exe&quot;</span>};
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cmd</span> <span class='op'>=</span> <span class='ident'>windows_registry</span>::<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='ident'>target</span>, <span class='ident'>tool</span>).<span class='ident'>unwrap_or_else</span>(<span class='op'>||</span> {
+            <span class='self'>self</span>.<span class='ident'>cmd</span>(<span class='ident'>tool</span>)
+        });
+        <span class='kw'>for</span> <span class='ident'>directory</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>include_directories</span>.<span class='ident'>iter</span>() {
+            <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;/I&quot;</span>).<span class='ident'>arg</span>(<span class='ident'>directory</span>);
+        }
+        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='ident'>key</span>, <span class='kw-2'>ref</span> <span class='ident'>value</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>definitions</span>.<span class='ident'>iter</span>() {
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='kw-2'>&amp;</span><span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>value</span>) <span class='op'>=</span> <span class='ident'>value</span> {
+                <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;/D{}={}&quot;</span>, <span class='ident'>key</span>, <span class='ident'>value</span>));
+            } <span class='kw'>else</span> {
+                <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;/D{}&quot;</span>, <span class='ident'>key</span>));
+            }
+        }
+        (<span class='ident'>cmd</span>, <span class='ident'>tool</span>.<span class='ident'>to_string</span>())
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>assemble</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>lib_name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>dst</span>: <span class='kw-2'>&amp;</span><span class='ident'>Path</span>, <span class='ident'>objects</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>PathBuf</span>]) {
+        <span class='kw'>let</span> <span class='ident'>target</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_target</span>();
+        <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cmd</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>archiver</span> {
+                <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>cmd</span>(<span class='ident'>s</span>),
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>windows_registry</span>::<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='ident'>target</span>, <span class='string'>&quot;lib.exe&quot;</span>)
+                                         .<span class='ident'>unwrap_or</span>(<span class='self'>self</span>.<span class='ident'>cmd</span>(<span class='string'>&quot;lib.exe&quot;</span>)),
+            };
+            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>out</span> <span class='op'>=</span> <span class='ident'>OsString</span>::<span class='ident'>from</span>(<span class='string'>&quot;/OUT:&quot;</span>);
+            <span class='ident'>out</span>.<span class='ident'>push</span>(<span class='ident'>dst</span>);
+            <span class='ident'>run</span>(<span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='ident'>out</span>).<span class='ident'>arg</span>(<span class='string'>&quot;/nologo&quot;</span>)
+                   .<span class='ident'>args</span>(<span class='ident'>objects</span>)
+                   .<span class='ident'>args</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>objects</span>), <span class='string'>&quot;lib.exe&quot;</span>);
+
+            <span class='comment'>// The Rust compiler will look for libfoo.a and foo.lib, but the</span>
+            <span class='comment'>// MSVC linker will also be passed foo.lib, so be sure that both</span>
+            <span class='comment'>// exist for now.</span>
+            <span class='kw'>let</span> <span class='ident'>lib_dst</span> <span class='op'>=</span> <span class='ident'>dst</span>.<span class='ident'>with_file_name</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}.lib&quot;</span>, <span class='ident'>lib_name</span>));
+            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>fs</span>::<span class='ident'>remove_file</span>(<span class='kw-2'>&amp;</span><span class='ident'>lib_dst</span>);
+            <span class='ident'>fs</span>::<span class='ident'>hard_link</span>(<span class='ident'>dst</span>, <span class='ident'>lib_dst</span>).<span class='ident'>unwrap</span>();
+        } <span class='kw'>else</span> {
+            <span class='kw'>let</span> <span class='ident'>ar</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_ar</span>();
+            <span class='kw'>let</span> <span class='ident'>cmd</span> <span class='op'>=</span> <span class='ident'>ar</span>.<span class='ident'>file_name</span>().<span class='ident'>unwrap</span>().<span class='ident'>to_string_lossy</span>();
+            <span class='ident'>run</span>(<span class='self'>self</span>.<span class='ident'>cmd</span>(<span class='kw-2'>&amp;</span><span class='ident'>ar</span>).<span class='ident'>arg</span>(<span class='string'>&quot;crus&quot;</span>)
+                                 .<span class='ident'>arg</span>(<span class='ident'>dst</span>)
+                                 .<span class='ident'>args</span>(<span class='ident'>objects</span>)
+                                 .<span class='ident'>args</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>objects</span>), <span class='kw-2'>&amp;</span><span class='ident'>cmd</span>);
+        }
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>ios_flags</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>cmd</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Command</span>) {
+        <span class='kw'>enum</span> <span class='ident'>ArchSpec</span> {
+            <span class='ident'>Device</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>),
+            <span class='ident'>Simulator</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>),
+        }
+
+        <span class='kw'>let</span> <span class='ident'>target</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_target</span>();
+        <span class='kw'>let</span> <span class='ident'>arch</span> <span class='op'>=</span> <span class='ident'>target</span>.<span class='ident'>split</span>(<span class='string'>&#39;-&#39;</span>).<span class='ident'>nth</span>(<span class='number'>0</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>arch</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>arch</span> {
+            <span class='string'>&quot;arm&quot;</span> <span class='op'>|</span> <span class='string'>&quot;armv7&quot;</span> <span class='op'>|</span> <span class='string'>&quot;thumbv7&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>ArchSpec</span>::<span class='ident'>Device</span>(<span class='string'>&quot;armv7&quot;</span>),
+            <span class='string'>&quot;armv7s&quot;</span> <span class='op'>|</span> <span class='string'>&quot;thumbv7s&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>ArchSpec</span>::<span class='ident'>Device</span>(<span class='string'>&quot;armv7s&quot;</span>),
+            <span class='string'>&quot;arm64&quot;</span> <span class='op'>|</span> <span class='string'>&quot;aarch64&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>ArchSpec</span>::<span class='ident'>Device</span>(<span class='string'>&quot;arm64&quot;</span>),
+            <span class='string'>&quot;i386&quot;</span> <span class='op'>|</span> <span class='string'>&quot;i686&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>ArchSpec</span>::<span class='ident'>Simulator</span>(<span class='string'>&quot;-m32&quot;</span>),
+            <span class='string'>&quot;x86_64&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>ArchSpec</span>::<span class='ident'>Simulator</span>(<span class='string'>&quot;-m64&quot;</span>),
+            _ <span class='op'>=&gt;</span> <span class='ident'>fail</span>(<span class='string'>&quot;Unknown arch for iOS target&quot;</span>)
+        };
+
+        <span class='kw'>let</span> <span class='ident'>sdk</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>arch</span> {
+            <span class='ident'>ArchSpec</span>::<span class='ident'>Device</span>(<span class='ident'>arch</span>) <span class='op'>=&gt;</span> {
+                <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;-arch&quot;</span>).<span class='ident'>arg</span>(<span class='ident'>arch</span>);
+                <span class='string'>&quot;iphoneos&quot;</span>
+            },
+            <span class='ident'>ArchSpec</span>::<span class='ident'>Simulator</span>(<span class='ident'>arch</span>) <span class='op'>=&gt;</span> {
+                <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='ident'>arch</span>);
+                <span class='string'>&quot;iphonesimulator&quot;</span>
+            }
+        };
+
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Detecting iOS SDK path for {}&quot;</span>, <span class='ident'>sdk</span>);
+        <span class='kw'>let</span> <span class='ident'>sdk_path</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>cmd</span>(<span class='string'>&quot;xcrun&quot;</span>)
+            .<span class='ident'>arg</span>(<span class='string'>&quot;--show-sdk-path&quot;</span>)
+            .<span class='ident'>arg</span>(<span class='string'>&quot;--sdk&quot;</span>)
+            .<span class='ident'>arg</span>(<span class='ident'>sdk</span>)
+            .<span class='ident'>stderr</span>(<span class='ident'>Stdio</span>::<span class='ident'>inherit</span>())
+            .<span class='ident'>output</span>()
+            .<span class='ident'>unwrap</span>()
+            .<span class='ident'>stdout</span>;
+
+        <span class='kw'>let</span> <span class='ident'>sdk_path</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>sdk_path</span>).<span class='ident'>unwrap</span>();
+
+        <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='string'>&quot;-isysroot&quot;</span>);
+        <span class='ident'>cmd</span>.<span class='ident'>arg</span>(<span class='ident'>sdk_path</span>.<span class='ident'>trim</span>());
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>cmd</span><span class='op'>&lt;</span><span class='ident'>P</span>: <span class='ident'>AsRef</span><span class='op'>&lt;</span><span class='ident'>OsStr</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>prog</span>: <span class='ident'>P</span>) <span class='op'>-&gt;</span> <span class='ident'>Command</span> {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>cmd</span> <span class='op'>=</span> <span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='ident'>prog</span>);
+        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>(<span class='kw-2'>ref</span> <span class='ident'>a</span>, <span class='kw-2'>ref</span> <span class='ident'>b</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>env</span>.<span class='ident'>iter</span>() {
+            <span class='ident'>cmd</span>.<span class='ident'>env</span>(<span class='ident'>a</span>, <span class='ident'>b</span>);
+        }
+        <span class='kw'>return</span> <span class='ident'>cmd</span>
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>get_compiler</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>Command</span>, <span class='ident'>String</span>) {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>c</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>compiler</span> {
+            <span class='kw'>return</span> (<span class='self'>self</span>.<span class='ident'>cmd</span>(<span class='ident'>c</span>), <span class='ident'>c</span>.<span class='ident'>file_name</span>().<span class='ident'>unwrap</span>()
+                                  .<span class='ident'>to_string_lossy</span>().<span class='ident'>into_owned</span>())
+        }
+        <span class='kw'>let</span> <span class='ident'>target</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_target</span>();
+        <span class='kw'>let</span> (<span class='ident'>env</span>, <span class='ident'>msvc</span>, <span class='ident'>gnu</span>, <span class='ident'>default</span>) <span class='op'>=</span> <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>cpp</span> {
+            (<span class='string'>&quot;CXX&quot;</span>, <span class='string'>&quot;cl&quot;</span>, <span class='string'>&quot;g++&quot;</span>, <span class='string'>&quot;c++&quot;</span>)
+        } <span class='kw'>else</span> {
+            (<span class='string'>&quot;CC&quot;</span>, <span class='string'>&quot;cl&quot;</span>, <span class='string'>&quot;gcc&quot;</span>, <span class='string'>&quot;cc&quot;</span>)
+        };
+        <span class='self'>self</span>.<span class='ident'>get_var</span>(<span class='ident'>env</span>).<span class='ident'>ok</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>env</span><span class='op'>|</span> {
+            <span class='kw'>let</span> <span class='ident'>fname</span> <span class='op'>=</span> <span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>env</span>).<span class='ident'>file_name</span>().<span class='ident'>unwrap</span>().<span class='ident'>to_string_lossy</span>()
+                                       .<span class='ident'>into_owned</span>();
+            (<span class='self'>self</span>.<span class='ident'>cmd</span>(<span class='ident'>env</span>), <span class='ident'>fname</span>)
+        }).<span class='ident'>or_else</span>(<span class='op'>||</span> {
+            <span class='ident'>windows_registry</span>::<span class='ident'>find</span>(<span class='kw-2'>&amp;</span><span class='ident'>target</span>, <span class='string'>&quot;cl.exe&quot;</span>).<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>cmd</span><span class='op'>|</span> {
+                (<span class='ident'>cmd</span>, <span class='string'>&quot;cl.exe&quot;</span>.<span class='ident'>to_string</span>())
+            })
+        }).<span class='ident'>unwrap_or_else</span>(<span class='op'>||</span> {
+            <span class='kw'>let</span> <span class='ident'>compiler</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;windows&quot;</span>) {
+                <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {
+                    <span class='ident'>msvc</span>.<span class='ident'>to_string</span>()
+                } <span class='kw'>else</span> {
+                    <span class='ident'>gnu</span>.<span class='ident'>to_string</span>()
+                }
+            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;android&quot;</span>) {
+                <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}-{}&quot;</span>, <span class='ident'>target</span>, <span class='ident'>gnu</span>)
+            } <span class='kw'>else</span> {
+                <span class='ident'>default</span>.<span class='ident'>to_string</span>()
+            };
+            (<span class='self'>self</span>.<span class='ident'>cmd</span>(<span class='ident'>compiler</span>.<span class='ident'>clone</span>()), <span class='ident'>compiler</span>)
+        })
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>get_var</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>var_base</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span>, <span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='ident'>target</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_target</span>();
+        <span class='kw'>let</span> <span class='ident'>host</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_host</span>();
+        <span class='kw'>let</span> <span class='ident'>kind</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>host</span> <span class='op'>==</span> <span class='ident'>target</span> {<span class='string'>&quot;HOST&quot;</span>} <span class='kw'>else</span> {<span class='string'>&quot;TARGET&quot;</span>};
+        <span class='kw'>let</span> <span class='ident'>target_u</span> <span class='op'>=</span> <span class='ident'>target</span>.<span class='ident'>replace</span>(<span class='string'>&quot;-&quot;</span>, <span class='string'>&quot;_&quot;</span>);
+        <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>getenv</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_{}&quot;</span>, <span class='ident'>var_base</span>, <span class='ident'>target</span>))
+            .<span class='ident'>or_else</span>(<span class='op'>||</span> <span class='ident'>getenv</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_{}&quot;</span>, <span class='ident'>var_base</span>, <span class='ident'>target_u</span>)))
+            .<span class='ident'>or_else</span>(<span class='op'>||</span> <span class='ident'>getenv</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_{}&quot;</span>, <span class='ident'>kind</span>, <span class='ident'>var_base</span>)))
+            .<span class='ident'>or_else</span>(<span class='op'>||</span> <span class='ident'>getenv</span>(<span class='ident'>var_base</span>));
+
+        <span class='kw'>match</span> <span class='ident'>res</span> {
+            <span class='prelude-val'>Some</span>(<span class='ident'>res</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>res</span>),
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Could not get environment variable&quot;</span>.<span class='ident'>to_string</span>()),
+        }
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>envflags</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>get_var</span>(<span class='ident'>name</span>).<span class='ident'>unwrap_or</span>(<span class='ident'>String</span>::<span class='ident'>new</span>())
+            .<span class='ident'>split</span>(<span class='op'>|</span><span class='ident'>c</span>: <span class='ident'>char</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_whitespace</span>()).<span class='ident'>filter</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='op'>!</span><span class='ident'>s</span>.<span class='ident'>is_empty</span>())
+            .<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>to_string</span>())
+            .<span class='ident'>collect</span>()
+    }
+
+    <span class='doccomment'>/// Returns the default C++ standard library for the current target: `libc++`</span>
+    <span class='doccomment'>/// for OS X and `libstdc++` for anything else.</span>
+    <span class='kw'>fn</span> <span class='ident'>get_cpp_link_stdlib</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>cpp_link_stdlib</span>.<span class='ident'>clone</span>().<span class='ident'>unwrap_or_else</span>(<span class='op'>||</span> {
+            <span class='kw'>let</span> <span class='ident'>target</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>get_target</span>();
+            <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {
+                <span class='prelude-val'>None</span>
+            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;darwin&quot;</span>) {
+                <span class='prelude-val'>Some</span>(<span class='string'>&quot;c++&quot;</span>.<span class='ident'>to_string</span>())
+            } <span class='kw'>else</span> {
+                <span class='prelude-val'>Some</span>(<span class='string'>&quot;stdc++&quot;</span>.<span class='ident'>to_string</span>())
+            }
+        })
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>get_ar</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>PathBuf</span> {
+        <span class='self'>self</span>.<span class='ident'>archiver</span>.<span class='ident'>clone</span>().<span class='ident'>or_else</span>(<span class='op'>||</span> {
+            <span class='self'>self</span>.<span class='ident'>get_var</span>(<span class='string'>&quot;AR&quot;</span>).<span class='ident'>map</span>(<span class='ident'>PathBuf</span>::<span class='ident'>from</span>).<span class='ident'>ok</span>()
+        }).<span class='ident'>unwrap_or_else</span>(<span class='op'>||</span> {
+            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>get_target</span>().<span class='ident'>contains</span>(<span class='string'>&quot;android&quot;</span>) {
+                <span class='ident'>PathBuf</span>::<span class='ident'>from</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}-ar&quot;</span>, <span class='self'>self</span>.<span class='ident'>get_target</span>()))
+            } <span class='kw'>else</span> {
+                <span class='ident'>PathBuf</span>::<span class='ident'>from</span>(<span class='string'>&quot;ar&quot;</span>)
+            }
+        })
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>get_target</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
+        <span class='self'>self</span>.<span class='ident'>target</span>.<span class='ident'>clone</span>().<span class='ident'>unwrap_or_else</span>(<span class='op'>||</span> <span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;TARGET&quot;</span>))
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>get_host</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
+        <span class='self'>self</span>.<span class='ident'>host</span>.<span class='ident'>clone</span>().<span class='ident'>unwrap_or_else</span>(<span class='op'>||</span> <span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;HOST&quot;</span>))
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>get_opt_level</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u32</span> {
+        <span class='self'>self</span>.<span class='ident'>opt_level</span>.<span class='ident'>unwrap_or_else</span>(<span class='op'>||</span> {
+            <span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;OPT_LEVEL&quot;</span>).<span class='ident'>parse</span>().<span class='ident'>unwrap</span>()
+        })
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>get_debug</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='self'>self</span>.<span class='ident'>debug</span>.<span class='ident'>unwrap_or_else</span>(<span class='op'>||</span> <span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;PROFILE&quot;</span>) <span class='op'>==</span> <span class='string'>&quot;debug&quot;</span>)
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>get_out_dir</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>PathBuf</span> {
+        <span class='self'>self</span>.<span class='ident'>out_dir</span>.<span class='ident'>clone</span>().<span class='ident'>unwrap_or_else</span>(<span class='op'>||</span> {
+            <span class='ident'>env</span>::<span class='ident'>var_os</span>(<span class='string'>&quot;OUT_DIR&quot;</span>).<span class='ident'>map</span>(<span class='ident'>PathBuf</span>::<span class='ident'>from</span>).<span class='ident'>unwrap</span>()
+        })
     }
 }
 
@@ -897,7 +1358,7 @@
         <span class='prelude-val'>Ok</span>(<span class='ident'>status</span>) <span class='op'>=&gt;</span> <span class='ident'>status</span>,
         <span class='prelude-val'>Err</span>(<span class='kw-2'>ref</span> <span class='ident'>e</span>) <span class='kw'>if</span> <span class='ident'>e</span>.<span class='ident'>kind</span>() <span class='op'>==</span> <span class='ident'>io</span>::<span class='ident'>ErrorKind</span>::<span class='ident'>NotFound</span> <span class='op'>=&gt;</span> {
             <span class='kw'>let</span> <span class='ident'>extra</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>windows</span>) {
-                <span class='string'>&quot; (see https://github.com/alexcrichton/gcc-rs#windows-notes \
+                <span class='string'>&quot; (see https://github.com/alexcrichton/gcc-rs#compile-time-requirements \
                    for help)&quot;</span>
             } <span class='kw'>else</span> {
                 <span class='string'>&quot;&quot;</span>
@@ -912,127 +1373,6 @@
     }
 }
 
-<span class='kw'>fn</span> <span class='ident'>get_var</span>(<span class='ident'>var_base</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span>, <span class='ident'>String</span><span class='op'>&gt;</span> {
-    <span class='kw'>let</span> <span class='ident'>target</span> <span class='op'>=</span> <span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;TARGET&quot;</span>);
-    <span class='kw'>let</span> <span class='ident'>host</span> <span class='op'>=</span> <span class='ident'>getenv_unwrap</span>(<span class='string'>&quot;HOST&quot;</span>);
-    <span class='kw'>let</span> <span class='ident'>kind</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>host</span> <span class='op'>==</span> <span class='ident'>target</span> {<span class='string'>&quot;HOST&quot;</span>} <span class='kw'>else</span> {<span class='string'>&quot;TARGET&quot;</span>};
-    <span class='kw'>let</span> <span class='ident'>target_u</span> <span class='op'>=</span> <span class='ident'>target</span>.<span class='ident'>replace</span>(<span class='string'>&quot;-&quot;</span>, <span class='string'>&quot;_&quot;</span>);
-    <span class='kw'>let</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>getenv</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_{}&quot;</span>, <span class='ident'>var_base</span>, <span class='ident'>target</span>))
-        .<span class='ident'>or_else</span>(<span class='op'>||</span> <span class='ident'>getenv</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_{}&quot;</span>, <span class='ident'>var_base</span>, <span class='ident'>target_u</span>)))
-        .<span class='ident'>or_else</span>(<span class='op'>||</span> <span class='ident'>getenv</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}_{}&quot;</span>, <span class='ident'>kind</span>, <span class='ident'>var_base</span>)))
-        .<span class='ident'>or_else</span>(<span class='op'>||</span> <span class='ident'>getenv</span>(<span class='ident'>var_base</span>));
-
-    <span class='kw'>match</span> <span class='ident'>res</span> {
-        <span class='prelude-val'>Some</span>(<span class='ident'>res</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>res</span>),
-        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='string'>&quot;Could not get environment variable&quot;</span>.<span class='ident'>to_string</span>()),
-    }
-}
-
-<span class='kw'>fn</span> <span class='ident'>gcc</span>(<span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-    <span class='kw'>let</span> <span class='ident'>is_android</span> <span class='op'>=</span> <span class='ident'>target</span>.<span class='ident'>find</span>(<span class='string'>&quot;android&quot;</span>).<span class='ident'>is_some</span>();
-
-    <span class='ident'>get_var</span>(<span class='string'>&quot;CC&quot;</span>).<span class='ident'>unwrap_or</span>(<span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>windows</span>) {
-        <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {
-            <span class='string'>&quot;cl&quot;</span>.<span class='ident'>to_string</span>()
-        } <span class='kw'>else</span> {
-            <span class='string'>&quot;gcc&quot;</span>.<span class='ident'>to_string</span>()
-        }
-    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>is_android</span> {
-        <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}-gcc&quot;</span>, <span class='ident'>target</span>)
-    } <span class='kw'>else</span> {
-        <span class='string'>&quot;cc&quot;</span>.<span class='ident'>to_string</span>()
-    })
-}
-
-<span class='kw'>fn</span> <span class='ident'>gxx</span>(<span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-    <span class='kw'>let</span> <span class='ident'>is_android</span> <span class='op'>=</span> <span class='ident'>target</span>.<span class='ident'>find</span>(<span class='string'>&quot;android&quot;</span>).<span class='ident'>is_some</span>();
-
-    <span class='ident'>get_var</span>(<span class='string'>&quot;CXX&quot;</span>).<span class='ident'>unwrap_or</span>(<span class='kw'>if</span> <span class='macro'>cfg</span><span class='macro'>!</span>(<span class='ident'>windows</span>) {
-        <span class='kw'>if</span> <span class='ident'>target</span>.<span class='ident'>contains</span>(<span class='string'>&quot;msvc&quot;</span>) {
-            <span class='string'>&quot;cl&quot;</span>.<span class='ident'>to_string</span>()
-        } <span class='kw'>else</span> {
-            <span class='string'>&quot;g++&quot;</span>.<span class='ident'>to_string</span>()
-        }
-    } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>is_android</span> {
-        <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}-g++&quot;</span>, <span class='ident'>target</span>)
-    } <span class='kw'>else</span> {
-        <span class='string'>&quot;c++&quot;</span>.<span class='ident'>to_string</span>()
-    })
-}
-
-<span class='kw'>fn</span> <span class='ident'>ar</span>(<span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-    <span class='kw'>let</span> <span class='ident'>is_android</span> <span class='op'>=</span> <span class='ident'>target</span>.<span class='ident'>find</span>(<span class='string'>&quot;android&quot;</span>).<span class='ident'>is_some</span>();
-
-    <span class='ident'>get_var</span>(<span class='string'>&quot;AR&quot;</span>).<span class='ident'>unwrap_or</span>(<span class='kw'>if</span> <span class='ident'>is_android</span> {
-        <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}-ar&quot;</span>, <span class='ident'>target</span>)
-    } <span class='kw'>else</span> {
-        <span class='string'>&quot;ar&quot;</span>.<span class='ident'>to_string</span>()
-    })
-}
-
-<span class='kw'>fn</span> <span class='ident'>envflags</span>(<span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
-    <span class='ident'>get_var</span>(<span class='ident'>name</span>).<span class='ident'>unwrap_or</span>(<span class='ident'>String</span>::<span class='ident'>new</span>())
-       .<span class='ident'>split</span>(<span class='op'>|</span><span class='ident'>c</span>: <span class='ident'>char</span><span class='op'>|</span> <span class='ident'>c</span>.<span class='ident'>is_whitespace</span>()).<span class='ident'>filter</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='op'>!</span><span class='ident'>s</span>.<span class='ident'>is_empty</span>())
-       .<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>to_string</span>())
-       .<span class='ident'>collect</span>()
-}
-
-<span class='kw'>fn</span> <span class='ident'>cflags</span>() <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
-    <span class='ident'>envflags</span>(<span class='string'>&quot;CFLAGS&quot;</span>)
-}
-
-<span class='kw'>fn</span> <span class='ident'>cxxflags</span>() <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
-    <span class='ident'>envflags</span>(<span class='string'>&quot;CXXFLAGS&quot;</span>)
-}
-
-<span class='kw'>fn</span> <span class='ident'>ios_flags</span>(<span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
-    <span class='kw'>enum</span> <span class='ident'>ArchSpec</span> {
-        <span class='ident'>Device</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>),
-        <span class='ident'>Simulator</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>),
-    }
-
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
-
-    <span class='kw'>let</span> <span class='ident'>arch</span> <span class='op'>=</span> <span class='ident'>target</span>.<span class='ident'>split</span>(<span class='string'>&#39;-&#39;</span>).<span class='ident'>nth</span>(<span class='number'>0</span>).<span class='ident'>expect</span>(<span class='string'>&quot;expected target in format `arch-vendor-os`&quot;</span>);
-    <span class='kw'>let</span> <span class='ident'>arch</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>arch</span> {
-        <span class='string'>&quot;arm&quot;</span> <span class='op'>|</span> <span class='string'>&quot;armv7&quot;</span> <span class='op'>|</span> <span class='string'>&quot;thumbv7&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>ArchSpec</span>::<span class='ident'>Device</span>(<span class='string'>&quot;armv7&quot;</span>),
-        <span class='string'>&quot;armv7s&quot;</span> <span class='op'>|</span> <span class='string'>&quot;thumbv7s&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>ArchSpec</span>::<span class='ident'>Device</span>(<span class='string'>&quot;armv7s&quot;</span>),
-        <span class='string'>&quot;arm64&quot;</span> <span class='op'>|</span> <span class='string'>&quot;aarch64&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>ArchSpec</span>::<span class='ident'>Device</span>(<span class='string'>&quot;arm64&quot;</span>),
-        <span class='string'>&quot;i386&quot;</span> <span class='op'>|</span> <span class='string'>&quot;i686&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>ArchSpec</span>::<span class='ident'>Simulator</span>(<span class='string'>&quot;-m32&quot;</span>),
-        <span class='string'>&quot;x86_64&quot;</span> <span class='op'>=&gt;</span> <span class='ident'>ArchSpec</span>::<span class='ident'>Simulator</span>(<span class='string'>&quot;-m64&quot;</span>),
-        _ <span class='op'>=&gt;</span> <span class='macro'>unreachable</span><span class='macro'>!</span>(<span class='string'>&quot;Unknown arch for iOS target&quot;</span>)
-    };
-
-    <span class='kw'>let</span> <span class='ident'>sdk</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>arch</span> {
-        <span class='ident'>ArchSpec</span>::<span class='ident'>Device</span>(<span class='ident'>arch</span>) <span class='op'>=&gt;</span> {
-            <span class='ident'>res</span>.<span class='ident'>push</span>(<span class='string'>&quot;-arch&quot;</span>.<span class='ident'>to_string</span>());
-            <span class='ident'>res</span>.<span class='ident'>push</span>(<span class='ident'>arch</span>.<span class='ident'>to_string</span>());
-            <span class='string'>&quot;iphoneos&quot;</span>
-        },
-        <span class='ident'>ArchSpec</span>::<span class='ident'>Simulator</span>(<span class='ident'>arch</span>) <span class='op'>=&gt;</span> {
-            <span class='ident'>res</span>.<span class='ident'>push</span>(<span class='ident'>arch</span>.<span class='ident'>to_string</span>());
-            <span class='string'>&quot;iphonesimulator&quot;</span>
-        }
-    };
-
-    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Detecting iOS SDK path for {}&quot;</span>, <span class='ident'>sdk</span>);
-    <span class='kw'>let</span> <span class='ident'>sdk_path</span> <span class='op'>=</span> <span class='ident'>Command</span>::<span class='ident'>new</span>(<span class='string'>&quot;xcrun&quot;</span>)
-        .<span class='ident'>arg</span>(<span class='string'>&quot;--show-sdk-path&quot;</span>)
-        .<span class='ident'>arg</span>(<span class='string'>&quot;--sdk&quot;</span>)
-        .<span class='ident'>arg</span>(<span class='ident'>sdk</span>)
-        .<span class='ident'>stderr</span>(<span class='ident'>Stdio</span>::<span class='ident'>inherit</span>())
-        .<span class='ident'>output</span>()
-        .<span class='ident'>unwrap</span>()
-        .<span class='ident'>stdout</span>;
-
-    <span class='kw'>let</span> <span class='ident'>sdk_path</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>sdk_path</span>).<span class='ident'>unwrap</span>();
-
-    <span class='ident'>res</span>.<span class='ident'>push</span>(<span class='string'>&quot;-isysroot&quot;</span>.<span class='ident'>to_string</span>());
-    <span class='ident'>res</span>.<span class='ident'>push</span>(<span class='ident'>sdk_path</span>.<span class='ident'>trim</span>().<span class='ident'>to_string</span>());
-
-    <span class='ident'>res</span>
-}
-
 <span class='kw'>fn</span> <span class='ident'>fail</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='op'>!</span> {
     <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;\n\n{}\n\n&quot;</span>, <span class='ident'>s</span>);
     <span class='macro'>panic</span><span class='macro'>!</span>()
@@ -1044,37 +1384,44 @@
     <section class="footer"></section>
 
     <div id="help" class="hidden">
-        <div class="shortcuts">
-            <h1>Keyboard shortcuts</h1>
-            <dl>
-                <dt>?</dt>
-                <dd>Show this help dialog</dd>
-                <dt>S</dt>
-                <dd>Focus the search field</dd>
-                <dt>&larrb;</dt>
-                <dd>Move up in search results</dd>
-                <dt>&rarrb;</dt>
-                <dd>Move down in search results</dd>
-                <dt>&#9166;</dt>
-                <dd>Go to active search result</dd>
-            </dl>
-        </div>
-        <div class="infos">
-            <h1>Search tricks</h1>
-            <p>
-                Prefix searches with a type followed by a colon (e.g.
-                <code>fn:</code>) to restrict the search to a given type.
-            </p>
-            <p>
-                Accepted types are: <code>fn</code>, <code>mod</code>,
-                <code>struct</code>, <code>enum</code>,
-                <code>trait</code>, <code>typedef</code> (or
-                <code>tdef</code>).
-            </p>
-            <p>
-                Search functions by type signature (e.g.
-                <code>vec -> usize</code>)
-            </p>
+        <div>
+            <div class="shortcuts">
+                <h1>Keyboard Shortcuts</h1>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h1>Search Tricks</h1>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>typedef</code> (or
+                    <code>tdef</code>).
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
         </div>
     </div>
 
