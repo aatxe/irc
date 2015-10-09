@@ -257,15 +257,15 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
 }
 
 /// An Iterator over an IrcServer's incoming Messages.
-pub struct ServerIterator<'a, T: IrcRead, U: IrcWrite> {
+pub struct ServerIterator<'a, T: IrcRead + 'a, U: IrcWrite + 'a> {
     server: &'a IrcServer<T, U>
 }
 
 /// An Iterator over an IrcServer's incoming Commands.
-pub type ServerCmdIterator<'a, T, U> =
+pub type ServerCmdIterator<'a, T: IrcRead + 'a, U: IrcWrite + 'a> =
     Map<ServerIterator<'a, T, U>, fn(Result<Message>) -> Result<Command>>;
 
-impl<'a, T: IrcRead, U: IrcWrite> ServerIterator<'a, T, U> {
+impl<'a, T: IrcRead + 'a, U: IrcWrite + 'a> ServerIterator<'a, T, U> {
     /// Creates a new ServerIterator for the desired IrcServer.
     pub fn new(server: &IrcServer<T, U>) -> ServerIterator<T, U> {
         ServerIterator { server: server }
@@ -284,7 +284,7 @@ impl<'a, T: IrcRead, U: IrcWrite> ServerIterator<'a, T, U> {
     }
 }
 
-impl<'a, T: IrcRead, U: IrcWrite> Iterator for ServerIterator<'a, T, U> {
+impl<'a, T: IrcRead + 'a, U: IrcWrite + 'a> Iterator for ServerIterator<'a, T, U> {
     type Item = Result<Message>;
     fn next(&mut self) -> Option<Result<Message>> {
         let res = self.get_next_line().and_then(|msg|
