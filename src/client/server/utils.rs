@@ -10,7 +10,7 @@ use client::data::kinds::{IrcRead, IrcWrite};
 use client::server::Server;
 
 /// Extensions for Server capabilities that make it easier to work directly with the protocol.
-pub trait ServerExt<'a, T, U>: Server<'a, T, U> {
+pub trait ServerExt<'a, T: IrcRead, U: IrcWrite>: Server<'a, T, U> {
     /// Sends a request for a list of server capabilities for a specific IRCv3 version.
     fn send_cap_ls(&self, version: NegotiationVersion) -> Result<()> where Self: Sized {
         self.send(CAP(None, LS, match version {
