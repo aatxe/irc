@@ -17,7 +17,7 @@ use client::data::kinds::{IrcRead, IrcWrite};
 pub mod utils;
 
 /// Trait describing core Server functionality.
-pub trait Server<'a, T, U> {
+pub trait Server<'a, T: IrcRead, U: IrcWrite> {
     /// Gets the configuration being used with this Server.
     fn config(&self) -> &Config;
     /// Sends a Command to this Server.
@@ -262,7 +262,7 @@ pub struct ServerIterator<'a, T: IrcRead + 'a, U: IrcWrite + 'a> {
 }
 
 /// An Iterator over an IrcServer's incoming Commands.
-pub type ServerCmdIterator<'a, T: IrcRead + 'a, U: IrcWrite + 'a> =
+pub type ServerCmdIterator<'a, T, U> =
     Map<ServerIterator<'a, T, U>, fn(Result<Message>) -> Result<Command>>;
 
 impl<'a, T: IrcRead + 'a, U: IrcWrite + 'a> ServerIterator<'a, T, U> {
