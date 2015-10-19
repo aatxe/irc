@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["conn","Thread-safe connections on IrcStreams."],["data","Data related to IRC functionality."],["prelude","A client-side IRC prelude, re-exporting all the necessary basics."],["server","Interface for working with IRC Servers."]]});

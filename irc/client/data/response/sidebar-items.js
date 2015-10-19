@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Response","List of all server responses as defined in RFC 2812. All commands are documented with their expected form from the RFC."]]});

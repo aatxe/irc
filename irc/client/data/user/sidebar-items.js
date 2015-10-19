@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["AccessLevel","The user's access level."]],"struct":[["User","IRC User data."]]});

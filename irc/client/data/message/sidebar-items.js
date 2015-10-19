@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Message","IRC Message data."],["Tag","A message tag as defined by IRCv3.2."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["NetStream","An abstraction over different networked streams."]],"struct":[["Connection","A thread-safe connection."]],"type":[["NetConnection","A Connection over a buffered NetStream."]]});

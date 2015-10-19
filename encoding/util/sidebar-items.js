@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["StrCharIndex","A trait providing an `index_iter` method."]]});

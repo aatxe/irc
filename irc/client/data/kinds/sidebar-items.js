@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["IrcRead","Trait describing all possible Readers for this library."],["IrcWrite","Trait describing all possible Writers for this library."]]});
