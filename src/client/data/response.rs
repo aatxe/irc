@@ -342,7 +342,7 @@ make_response! {
     /// 768 <target> <key> :key not set
     ERR_KEYNOTSET           = 768,
     /// 769 <target> <key> :permission denied
-    ERR_KEYNOPERMISSION     = 779,
+    ERR_KEYNOPERMISSION     = 769,
     /// 902 <nick> :You must use a nick assigned to you.
     ERR_NICKLOCKED          = 902,
     /// 904 <nick> :SASL authentication failed
