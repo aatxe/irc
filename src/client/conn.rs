@@ -1,18 +1,18 @@
 //! Thread-safe connections on IrcStreams.
-#[cfg(feature = "ssl")] use std::error::Error as StdError;
+#[cfg(feature = "Tlsv1_2")] use std::error::Error as StdError;
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter, Result};
 use std::io::Error;
 use std::io::ErrorKind;
 use std::net::TcpStream;
-#[cfg(feature = "ssl")] use std::result::Result as StdResult;
+#[cfg(feature = "Tlsv1_2")] use std::result::Result as StdResult;
 use std::sync::{Mutex, MutexGuard};
 #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
 #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
 use client::data::Message;
 use client::data::kinds::{IrcRead, IrcWrite};
-#[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslMethod, SslStream};
-#[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
+#[cfg(feature = "Tlsv1_2")] use openssl::ssl::{SslContext, SslMethod, SslStream};
+#[cfg(feature = "Tlsv1_2")] use openssl::ssl::error::SslError;
 
 /// A thread-safe connection.
 pub struct Connection<T: IrcRead, U: IrcWrite> {
@@ -47,17 +47,17 @@ impl Connection<BufReader<NetStream>, BufWriter<NetStream>> {
     }
 
     /// Connects over SSL to the specified server and returns a reader-writer pair.
-    #[cfg(feature = "ssl")]
+    #[cfg(feature = "Tlsv1_2")]
     fn connect_ssl_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
         let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[..]));
-        let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Tlsv1)));
-        let ssl_socket = try!(ssl_to_io(SslStream::new(&ssl, socket)));
+        let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Tlsv1_2)));
+        let ssl_socket = try!(ssl_to_io(SslStream::connect_generic(&ssl, socket)));
         Ok((BufReader::new(NetStream::SslTcpStream(try!(ssl_socket.try_clone()))),
             BufWriter::new(NetStream::SslTcpStream(ssl_socket))))
     }
 
     /// Panics because SSL support is not compiled in.
-    #[cfg(not(feature = "ssl"))]
+    #[cfg(not(feature = "Tlsv1_2"))]
     fn connect_ssl_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
         panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
     }
@@ -66,7 +66,7 @@ impl Connection<BufReader<NetStream>, BufWriter<NetStream>> {
     pub fn reconnect(&self, host: &str, port: u16) -> Result<()> {
         let use_ssl = match self.reader.lock().unwrap().get_ref() {
             &NetStream::UnsecuredTcpStream(_) =>  false,
-            #[cfg(feature = "ssl")]
+            #[cfg(feature = "Tlsv1_2")]
             &NetStream::SslTcpStream(_) => true,
         };
         let (reader, writer) = if use_ssl {
@@ -183,7 +183,7 @@ impl<T: IrcRead, U: IrcWrite> Connection<T, U> {
 }
 
 /// Converts a Result<T, SslError> into an Result<T>.
-#[cfg(feature = "ssl")]
+#[cfg(feature = "Tlsv1_2")]
 fn ssl_to_io<T>(res: StdResult<T, SslError>) -> Result<T> {
     match res {
         Ok(x) => Ok(x),
@@ -199,7 +199,7 @@ pub enum NetStream {
     UnsecuredTcpStream(TcpStream),
     /// An SSL-secured TcpStream.
     /// This is only available when compiled with SSL support.
-    #[cfg(feature = "ssl")]
+    #[cfg(feature = "Tlsv1_2")]
     SslTcpStream(SslStream<TcpStream>),
 }
 
@@ -207,7 +207,7 @@ impl Read for NetStream {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         match self {
             &mut NetStream::UnsecuredTcpStream(ref mut stream) => stream.read(buf),
-            #[cfg(feature = "ssl")]
+            #[cfg(feature = "Tlsv1_2")]
             &mut NetStream::SslTcpStream(ref mut stream) => stream.read(buf),
         }
     }
@@ -217,7 +217,7 @@ impl Write for NetStream {
     fn write(&mut self, buf: &[u8]) -> Result<usize> {
         match self {
             &mut NetStream::UnsecuredTcpStream(ref mut stream) => stream.write(buf),
-            #[cfg(feature = "ssl")]
+            #[cfg(feature = "Tlsv1_2")]
             &mut NetStream::SslTcpStream(ref mut stream) => stream.write(buf),
         }
     }
@@ -225,7 +225,7 @@ impl Write for NetStream {
     fn flush(&mut self) -> Result<()> {
         match self {
             &mut NetStream::UnsecuredTcpStream(ref mut stream) => stream.flush(),
-            #[cfg(feature = "ssl")]
+            #[cfg(feature = "Tlsv1_2")]
             &mut NetStream::SslTcpStream(ref mut stream) => stream.flush(),
         }
     }
@@ -335,3 +335,4 @@ mod test {
         assert_eq!(&conn.recv("l9").unwrap()[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 }
+
