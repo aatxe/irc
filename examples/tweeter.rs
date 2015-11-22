@@ -2,7 +2,8 @@ extern crate irc;
 
 use std::default::Default;
 use std::sync::Arc;
-use std::thread::{sleep_ms, spawn};
+use std::thread::{sleep, spawn};
+use std::time::Duration;
 use irc::client::prelude::*;
 
 fn main() {
@@ -21,6 +22,6 @@ fn main() {
     });
     loop {
         server.send_privmsg("#vana", "TWEET TWEET").unwrap();
-        sleep_ms(10 * 1000);
+        sleep(Duration::new(10, 0));
     }
 }
