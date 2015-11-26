@@ -47,7 +47,14 @@ impl Message {
 
     /// Gets the nickname of the message source, if it exists.
     pub fn get_source_nickname(&self) -> Option<&str> {
-        self.prefix.as_ref().and_then(|s| s.find('!').map(|i| &s[..i]))
+        self.prefix.as_ref().and_then(|s|
+            match (s.find('!'), s.find('@'), s.find('.')) {
+                (_, _, Some(_)) => None,
+                (Some(i), _, None) => Some(&s[..i]),
+                (None, Some(i), None) => Some(&s[..i]),
+                (None, None, None) => Some(&s)
+            }
+        )
     }
 
     /// Converts a Message into a String according to the IRC protocol.
@@ -151,6 +158,12 @@ mod test {
         ).get_source_nickname(), None);
         assert_eq!(Message::new(
             Some("test!test@test"), "PING", None, None
+        ).get_source_nickname(), Some("test"));
+        assert_eq!(Message::new(
+            Some("test@test"), "PING", None, None
+        ).get_source_nickname(), Some("test"));
+        assert_eq!(Message::new(
+            Some("test"), "PING", None, None
         ).get_source_nickname(), Some("test"));
     }
 
