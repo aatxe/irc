@@ -36,8 +36,8 @@ pub trait Server<'a, T: IrcRead, U: IrcWrite> {
 
 /// A thread-safe implementation of an IRC Server connection.
 pub struct IrcServer<T: IrcRead, U: IrcWrite> {
-    state: Arc<ServerState<T, U>>,
     tx: Sender<Message>,
+    state: Arc<ServerState<T, U>>,
 }
 
 /// Thread-safe internal state for an IRC server connection.
@@ -83,7 +83,7 @@ impl IrcServer<BufReader<NetStream>, BufWriter<NetStream>> {
 
 impl<T: IrcRead, U: IrcWrite> Clone for IrcServer<T, U> {
     fn clone(&self) -> IrcServer<T, U> {
-        IrcServer { state: self.state.clone(), tx: self.tx.clone() }
+        IrcServer { tx: self.tx.clone(), state: self.state.clone() }
     }
 }
 
@@ -143,18 +143,15 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> {
             alt_nick_index: RwLock::new(0),
         });
         let weak = Arc::downgrade(&state);
-        let write_handle = spawn(move || {
-            while let Some(strong) = weak.upgrade() {
-                match rx.recv() {
-                    Ok(msg) => { IrcServer::write(&strong, msg); },
-                    Err(_) => ()
-                }
+        let write_handle = spawn(move || while let Ok(msg) = rx.recv() {
+            if let Some(strong) = weak.upgrade() {
+                IrcServer::write(&strong, msg);
             }
         });
         let state2 = state.clone();
         let mut handle = state2.write_handle.lock().unwrap();
         *handle = Some(write_handle);
-        IrcServer { state: state, tx: tx }
+        IrcServer { tx: tx, state: state }
     }
 
     /// Gets a reference to the IRC server's connection.
