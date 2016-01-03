@@ -1,7 +1,6 @@
 extern crate irc;
 
 use std::default::Default;
-use std::sync::Arc;
 use std::thread::spawn;
 use irc::client::prelude::*;
 
@@ -12,7 +11,7 @@ fn main() {
         channels: Some(vec![format!("#vana")]),
         .. Default::default()
     };
-    let server = Arc::new(IrcServer::from_config(config).unwrap());
+    let server = IrcServer::from_config(config).unwrap();
     server.identify().unwrap();
     let server = server.clone();
     let _ = spawn(move || {

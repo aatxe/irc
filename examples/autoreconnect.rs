@@ -1,7 +1,6 @@
 extern crate irc;
 
 use std::default::Default;
-use std::sync::Arc;
 use std::thread::spawn;
 use irc::client::prelude::*;
 
@@ -12,7 +11,7 @@ fn main() {
         channels: Some(vec![format!("#vana")]),
         .. Default::default()
     };
-    let server = Arc::new(IrcServer::from_config(config).unwrap());
+    let server = IrcServer::from_config(config).unwrap();
     // FIXME: if set_keepalive is stabilized, this can be readded.
     // server.conn().set_keepalive(Some(5)).unwrap();
     let server = server.clone();

@@ -37,6 +37,7 @@ pub struct IrcServer<T: IrcRead, U: IrcWrite> {
     state: Arc<ServerState<T, U>>,
 }
 
+/// Thread-safe internal state for an IRC server connection.
 struct ServerState<T: IrcRead, U: IrcWrite> {
     /// The thread-safe IRC connection.
     conn: Connection<T, U>,
@@ -78,6 +79,12 @@ impl IrcServer<BufReader<NetStream>, BufWriter<NetStream>> {
     /// Reconnects to the IRC server.
     pub fn reconnect(&self) -> Result<()> {
         self.state.conn.reconnect(self.config().server(), self.config().port())
+    }
+}
+
+impl<'a, T: IrcRead, U: IrcWrite> Clone for IrcServer<T, U> {
+    fn clone(&self) -> IrcServer<T, U> {
+        IrcServer { state: self.state.clone() }
     }
 }
 
