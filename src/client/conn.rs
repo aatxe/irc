@@ -1,7 +1,7 @@
 //! Thread-safe connections on IrcStreams.
 #[cfg(feature = "ssl")] use std::error::Error as StdError;
 use std::io::prelude::*;
-use std::io::{BufReader, BufWriter, Result};
+use std::io::{BufReader, BufWriter, Cursor, Empty, Result, Sink};
 use std::io::Error;
 use std::io::ErrorKind;
 use std::net::TcpStream;
@@ -61,24 +61,6 @@ impl Connection<BufReader<NetStream>, BufWriter<NetStream>> {
     fn connect_ssl_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
         panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
     }
-
-    /// Reconnects to the specified server, dropping the current connection.
-    pub fn reconnect(&self, host: &str, port: u16) -> Result<()> {
-        let use_ssl = match self.reader.lock().unwrap().get_ref() {
-            &NetStream::UnsecuredTcpStream(_) =>  false,
-            #[cfg(feature = "ssl")]
-            &NetStream::SslTcpStream(_) => true,
-        };
-        let (reader, writer) = if use_ssl {
-            try!(Connection::connect_ssl_internal(host, port))
-        } else {
-            try!(Connection::connect_internal(host, port))
-        };
-        *self.reader.lock().unwrap() = reader;
-        *self.writer.lock().unwrap() = writer;
-        Ok(())
-    }
-
 
     /*
     FIXME: removed until set_keepalive is stabilized.
@@ -192,6 +174,46 @@ fn ssl_to_io<T>(res: StdResult<T, SslError>) -> Result<T> {
         )),
     }
 }
+
+/// A trait defining the ability to reconnect.
+pub trait Reconnect {
+    /// Reconnects to the specified host and port, dropping the current connection if necessary.
+    fn reconnect(&self, host: &str, port: u16) -> Result<()>;
+}
+
+macro_rules! noop_reconnect {
+    ($T:ty, $U:ty) => {
+        impl Reconnect for Connection<$T, $U> {
+            fn reconnect(&self, _: &str, _: u16) -> Result<()> {
+                Ok(())
+            }
+        }
+    }
+}
+
+impl Reconnect for NetConnection {
+    fn reconnect(&self, host: &str, port: u16) -> Result<()> {
+        let use_ssl = match self.reader.lock().unwrap().get_ref() {
+            &NetStream::UnsecuredTcpStream(_) =>  false,
+            #[cfg(feature = "ssl")]
+            &NetStream::SslTcpStream(_) => true,
+        };
+        let (reader, writer) = if use_ssl {
+            try!(Connection::connect_ssl_internal(host, port))
+        } else {
+            try!(Connection::connect_internal(host, port))
+        };
+        *self.reader.lock().unwrap() = reader;
+        *self.writer.lock().unwrap() = writer;
+        Ok(())
+    }
+}
+
+// TODO: replace all this with specialization when possible. :\
+noop_reconnect!(Cursor<Vec<u8>>, Vec<u8>);
+noop_reconnect!(Cursor<Vec<u8>>, Sink);
+noop_reconnect!(BufReader<Empty>, Vec<u8>);
+noop_reconnect!(BufReader<Empty>, Sink);
 
 /// An abstraction over different networked streams.
 pub enum NetStream {
