@@ -10,17 +10,17 @@ use rustc_serialize::json::{decode, encode};
 /// Configuration data.
 #[derive(Clone, RustcDecodable, RustcEncodable, Default, PartialEq, Debug)]
 pub struct Config {
-    /// A list of the owners of the bot by nickname.
+    /// A list of the owners of the client by nickname (for bots).
     pub owners: Option<Vec<String>>,
-    /// The bot's nickname.
+    /// The client's nickname.
     pub nickname: Option<String>,
-    /// The bot's NICKSERV password.
+    /// The client's NICKSERV password.
     pub nick_password: Option<String>,
-    /// Alternative nicknames for the bots, if the default is taken.
+    /// Alternative nicknames for the client, if the default is taken.
     pub alt_nicks: Option<Vec<String>>,
-    /// The bot's username.
+    /// The client's username.
     pub username: Option<String>,
-    /// The bot's real name.
+    /// The client's real name.
     pub realname: Option<String>,
     /// The server to connect to.
     pub server: Option<String>,
@@ -29,7 +29,7 @@ pub struct Config {
     /// The password to connect to the server.
     pub password: Option<String>,
     /// Whether or not to use SSL.
-    /// Bots will automatically panic if this is enabled without SSL support.
+    /// Clients will automatically panic if this is enabled without SSL support.
     pub use_ssl: Option<bool>,
     /// The encoding type used for this connection.
     /// This is typically UTF-8, but could be something else.
@@ -40,6 +40,10 @@ pub struct Config {
     pub umodes: Option<String>,
     /// The text that'll be sent in response to CTCP USERINFO requests.
     pub user_info: Option<String>,
+    /// The amount of inactivity in seconds before the client will ping the server.
+    pub ping_time: Option<u32>,
+    /// The amount of time in seconds for a client to reconnect due to no ping response.
+    pub ping_timeout: Option<u32>,
     /// A map of additional options to be stored in config.
     pub options: Option<HashMap<String, String>>,
 }
@@ -149,6 +153,19 @@ impl Config {
     /// This defaults to an empty string when not specified.
     pub fn user_info(&self) -> &str {
         self.user_info.as_ref().map(|s| &s[..]).unwrap_or("")
+    }
+
+    /// Gets the amount of time in seconds since last activity necessary for the client to ping the
+    /// server.
+    /// This defaults to 180 seconds when not specified.
+    pub fn ping_time(&self) -> u32 {
+        self.ping_time.as_ref().map(|t| *t).unwrap_or(180)
+    }
+
+    /// Gets the amount of time in seconds for the client to reconnect after no ping response.
+    /// This defaults to 10 seconds when not specified.
+    pub fn ping_timeout(&self) -> u32 {
+        self.ping_timeout.as_ref().map(|t| *t).unwrap_or(10)
     }
 
     /// Looks up the specified string in the options map.
