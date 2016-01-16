@@ -437,6 +437,25 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
     #[cfg(not(feature = "ctcp"))] fn handle_ctcp(&self, _: &Message) {}
 }
 
+impl<T: IrcRead, U: IrcWrite + Clone> IrcServer<T, U> where Connection<T, U>: Reconnect {
+    /// Returns a copy of the server's connection after waiting for all pending messages to be
+    /// written. This function may cause unusual behavior when called on a server with operations
+    /// being performed on other threads. This function is destructive, and is primarily intended
+    /// for writing unit tests. Use it with care.
+    pub fn extract_writer(mut self) -> U {
+        let _ = self.state.tx.lock().unwrap().take();
+        // This is a terrible hack to get the real channel to drop.
+        // Otherwise, joining would never finish.
+        let (tx, _) = channel();
+        self.tx = tx;
+        let mut guard = self.state.write_handle.lock().unwrap();
+        if let Some(handle) = guard.take() {
+            handle.join().unwrap()
+        }
+        self.conn().writer().clone()
+    }
+}
+
 /// An Iterator over an IrcServer's incoming Messages.
 pub struct ServerIterator<'a, T: IrcRead + 'a, U: IrcWrite + 'a> {
     server: &'a IrcServer<T, U>
@@ -494,7 +513,6 @@ mod test {
     use super::{IrcServer, Server};
     use std::default::Default;
     use std::io::{Cursor, sink};
-    use std::sync::mpsc::channel;
     use client::conn::{Connection, Reconnect};
     use client::data::{Config, Message, User};
     use client::data::command::Command::PRIVMSG;
@@ -513,19 +531,9 @@ mod test {
         }
     }
 
-    pub fn get_server_value<T: IrcRead>(mut server: IrcServer<T, Vec<u8>>) -> String
+    pub fn get_server_value<T: IrcRead>(server: IrcServer<T, Vec<u8>>) -> String
         where Connection<T, Vec<u8>>: Reconnect {
-        let _ = server.state.tx.lock().unwrap().take();
-        // This is a terrible hack to get the real channel to drop.
-        // Otherwise, joining would never finish.
-        let (tx, _) = channel();
-        server.tx = tx;
-        let mut guard = server.state.write_handle.lock().unwrap();
-        if let Some(handle) = guard.take() {
-            handle.join().unwrap()
-        }
-        let vec = server.conn().writer().clone();
-        String::from_utf8(vec).unwrap()
+        String::from_utf8(server.extract_writer()).unwrap()
     }
 
     #[test]
