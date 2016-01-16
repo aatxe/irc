@@ -200,6 +200,8 @@ mod test {
             encoding: Some(format!("UTF-8")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             user_info: None,
+            ping_time: None,
+            ping_timeout: None,
             options: Some(HashMap::new()),
         };
         assert_eq!(Config::load(Path::new("client_config.json")).unwrap(), cfg);
@@ -222,6 +224,8 @@ mod test {
             encoding: Some(format!("UTF-8")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             user_info: None,
+            ping_time: None,
+            ping_timeout: None,
             options: Some(HashMap::new()),
         };
         assert_eq!(Config::load("client_config.json").unwrap(), cfg);

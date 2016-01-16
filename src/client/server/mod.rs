@@ -48,6 +48,8 @@ pub struct IrcServer<T: IrcRead, U: IrcWrite> {
 
 /// Thread-safe internal state for an IRC server connection.
 struct ServerState<T: IrcRead, U: IrcWrite> {
+    /// A global copy of the channel for sending messages to write.
+    tx: Mutex<Option<Sender<Message>>>,
     /// The thread-safe IRC connection.
     conn: Connection<T, U>,
     /// The handle for the message sending thread.
@@ -60,8 +62,6 @@ struct ServerState<T: IrcRead, U: IrcWrite> {
     alt_nick_index: RwLock<usize>,
     /// A thread-safe count of reconnection attempts used for synchronization.
     reconnect_count: Mutex<u32>,
-    /// A global copy of the channel for sending messages to write.
-    tx: Mutex<Option<Sender<Message>>>,
     /// A thread-safe store for the time of the last action.
     last_action_time: Mutex<Tm>,
     /// A thread-safe store for the last ping data.
@@ -71,13 +71,13 @@ struct ServerState<T: IrcRead, U: IrcWrite> {
 impl<T: IrcRead, U: IrcWrite> ServerState<T, U> where Connection<T, U>: Reconnect {
     fn new(conn: Connection<T, U>, config: Config) -> ServerState<T, U> {
         ServerState {
+            tx: Mutex::new(None),
             conn: conn,
             write_handle: Mutex::new(None),
             config: config,
             chanlists: Mutex::new(HashMap::new()),
             alt_nick_index: RwLock::new(0),
             reconnect_count: Mutex::new(0),
-            tx: Mutex::new(None),
             last_action_time: Mutex::new(now()),
             last_ping_data: Mutex::new(None),
         }
@@ -145,6 +145,7 @@ impl<T: IrcRead, U: IrcWrite> Clone for IrcServer<T, U> {
 
 impl<T: IrcRead, U: IrcWrite> Drop for ServerState<T, U> {
     fn drop(&mut self) {
+        let _ = self.tx.lock().unwrap().take();
         let mut guard = self.write_handle.lock().unwrap();
         if let Some(handle) = guard.take() {
             handle.join().unwrap()
@@ -493,6 +494,7 @@ mod test {
     use super::{IrcServer, Server};
     use std::default::Default;
     use std::io::{Cursor, sink};
+    use std::sync::mpsc::channel;
     use client::conn::{Connection, Reconnect};
     use client::data::{Config, Message, User};
     use client::data::command::Command::PRIVMSG;
@@ -511,8 +513,17 @@ mod test {
         }
     }
 
-    pub fn get_server_value<T: IrcRead>(server: IrcServer<T, Vec<u8>>) -> String
+    pub fn get_server_value<T: IrcRead>(mut server: IrcServer<T, Vec<u8>>) -> String
         where Connection<T, Vec<u8>>: Reconnect {
+        let _ = server.state.tx.lock().unwrap().take();
+        // This is a terrible hack to get the real channel to drop.
+        // Otherwise, joining would never finish.
+        let (tx, _) = channel();
+        server.tx = tx;
+        let mut guard = server.state.write_handle.lock().unwrap();
+        if let Some(handle) = guard.take() {
+            handle.join().unwrap()
+        }
         let vec = server.conn().writer().clone();
         String::from_utf8(vec).unwrap()
     }
