@@ -2,7 +2,7 @@
 
 #![warn(missing_docs)]
 
-#[cfg(feature = "ctcp")] extern crate time;
+extern crate time;
 #[cfg(feature = "encode")] extern crate encoding;
 extern crate rustc_serialize;
 #[cfg(feature = "ssl")] extern crate openssl;
