@@ -339,14 +339,14 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
         } else if let Ok(cmd) = msg.into() {
             match cmd {
                 PING(data, _) => try!(self.send_pong(&data)),
-                JOIN(chan, _, _) => {
+                JOIN(chan, _, _) => if cfg!(not(feature = "nochanlists")) {
                     if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
                         if let Some(src) = msg.get_source_nickname() {
                             vec.push(User::new(src))
                         }
                     }
                 },
-                PART(chan, _) => {
+                PART(chan, _) => if cfg!(not(feature = "nochanlists")) {
                     if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
                         if let Some(src) = msg.get_source_nickname() {
                             if let Some(n) = vec.iter().position(|x| x.get_nickname() == src) {
