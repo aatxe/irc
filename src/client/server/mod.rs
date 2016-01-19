@@ -182,7 +182,7 @@ impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for ServerState<T, U> where C
 
 
     #[cfg(feature = "nochanlists")]
-    fn list_users(&self, chan: &str) -> Option<Vec<User>> {
+    fn list_users(&self, _: &str) -> Option<Vec<User>> {
         None
     }
 }
@@ -211,7 +211,7 @@ impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for IrcServer<T, U> where Con
 
 
     #[cfg(feature = "nochanlists")]
-    fn list_users(&self, chan: &str) -> Option<Vec<User>> {
+    fn list_users(&self, _: &str) -> Option<Vec<User>> {
         None
     }
 }
@@ -501,7 +501,8 @@ mod test {
     use std::default::Default;
     use std::io::{Cursor, sink};
     use client::conn::{Connection, Reconnect};
-    use client::data::{Config, Message, User};
+    use client::data::{Config, Message};
+    #[cfg(not(feature = "nochanlists"))] use client::data::User;
     use client::data::command::Command::PRIVMSG;
     use client::data::kinds::IrcRead;
     use client::test::buf_empty;
@@ -634,8 +635,8 @@ mod test {
         assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\r\n");
     }
 
-    #[cfg(not(feature = "nochanlists"))]
     #[test]
+    #[cfg(not(feature = "nochanlists"))]
     fn user_tracking_names() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let server = IrcServer::from_connection(test_config(), Connection::new(
@@ -648,8 +649,8 @@ mod test {
         vec![User::new("test"), User::new("~owner"), User::new("&admin")])
     }
 
-    #[cfg(not(feature = "nochanlists"))]
     #[test]
+    #[cfg(not(feature = "nochanlists"))]
     fn user_tracking_names_join() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :test2!test@test JOIN #test\r\n";
@@ -663,8 +664,8 @@ mod test {
         vec![User::new("test"), User::new("~owner"), User::new("&admin"), User::new("test2")])
     }
 
-    #[cfg(not(feature = "nochanlists"))]
     #[test]
+    #[cfg(not(feature = "nochanlists"))]
     fn user_tracking_names_part() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test PART #test\r\n";
@@ -678,8 +679,8 @@ mod test {
         vec![User::new("test"), User::new("&admin")])
     }
 
-    #[cfg(not(feature = "nochanlists"))]
     #[test]
+    #[cfg(not(feature = "nochanlists"))]
     fn user_tracking_names_mode() {
         let value = ":irc.test.net 353 test = #test :+test ~owner &admin\r\n\
                      :test!test@test MODE #test +o test\r\n";
@@ -700,6 +701,19 @@ mod test {
         let mut levels = server.list_users("#test").unwrap()[0].access_levels();
         levels.retain(|l| exp.access_levels().contains(l));
         assert_eq!(levels.len(), exp.access_levels().len());
+    }
+
+    #[test]
+    #[cfg(feature = "nochanlists")]
+    fn no_user_tracking() {
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin";
+        let server = IrcServer::from_connection(test_config(), Connection::new(
+            Cursor::new(value.as_bytes().to_vec()), sink()
+        ));
+        for message in server.iter() {
+            println!("{:?}", message);
+        }
+        assert!(server.list_users("#test").is_none())
     }
 
     #[test]
