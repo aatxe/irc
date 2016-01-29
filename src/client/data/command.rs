@@ -167,6 +167,10 @@ pub enum Command {
     BATCH(String, Option<BatchSubCommand>, Option<Vec<String>>),
     /// CHGHOST user host
     CHGHOST(String, String),
+
+    // Default option.
+    /// A raw IRC command unknown to the crate.
+    RAW(String, Vec<String>, Option<String>),
 }
 
 impl Into<Message> for Command {
@@ -369,6 +373,8 @@ impl Into<Message> for Command {
                 Message::from_owned(None, string("BATCH"), Some(vec![t]), None),
             Command::CHGHOST(u, h) =>
                 Message::from_owned(None, string("CHGHOST"), Some(vec![u, h]), None),
+            Command::RAW(c, a, s) =>
+                Message::from_owned(None, c, Some(a), s),
         }
     }
 }
@@ -1201,7 +1207,7 @@ impl<'a> From<&'a Message> for Result<Command> {
                 }
             }
         } else {
-            return Err(invalid_input())
+            Command::RAW(m.command.clone(), m.args.clone(), m.suffix.clone())
         })
     }
 }
