@@ -33,7 +33,7 @@ impl Message {
     }
 
     /// Gets the nickname of the message source, if it exists.
-    pub fn get_source_nickname(&self) -> Option<&str> {
+    pub fn source_nickname(&self) -> Option<&str> {
         self.prefix.as_ref().and_then(|s|
             match (s.find('!'), s.find('@'), s.find('.')) {
                 (_, _, Some(_)) => None,
@@ -137,22 +137,22 @@ mod test {
     }
 
     #[test]
-    fn get_source_nickname() {
+    fn source_nickname() {
         assert_eq!(Message::new(
             None, "PING", vec![], Some("data")
-        ).unwrap().get_source_nickname(), None);
+        ).unwrap().source_nickname(), None);
         assert_eq!(Message::new(
             Some("irc.test.net"), "PING", vec![], Some("data")
-        ).unwrap().get_source_nickname(), None);
+        ).unwrap().source_nickname(), None);
         assert_eq!(Message::new(
             Some("test!test@test"), "PING", vec![], Some("data")
-        ).unwrap().get_source_nickname(), Some("test"));
+        ).unwrap().source_nickname(), Some("test"));
         assert_eq!(Message::new(
             Some("test@test"), "PING", vec![], Some("data")
-        ).unwrap().get_source_nickname(), Some("test"));
+        ).unwrap().source_nickname(), Some("test"));
         assert_eq!(Message::new(
             Some("test"), "PING", vec![], Some("data")
-        ).unwrap().get_source_nickname(), Some("test"));
+        ).unwrap().source_nickname(), Some("test"));
     }
 
     #[test]

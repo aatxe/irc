@@ -86,7 +86,7 @@ impl Config {
 
     /// Gets the alternate nicknames specified in the configuration.
     /// This defaults to an empty vector when not specified.
-    pub fn get_alternate_nicknames(&self) -> Vec<&str> {
+    pub fn alternate_nicknames(&self) -> Vec<&str> {
         self.alt_nicks.as_ref().map(|v| v.iter().map(|s| &s[..]).collect()).unwrap_or(vec![])
     }
 

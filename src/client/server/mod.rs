@@ -289,14 +289,14 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
             PING(ref data, _) => try!(self.send_pong(&data)),
             JOIN(ref chan, _, _) => if cfg!(not(feature = "nochanlists")) {
                 if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
-                    if let Some(src) = msg.get_source_nickname() {
+                    if let Some(src) = msg.source_nickname() {
                         vec.push(User::new(src))
                     }
                 }
             },
             PART(ref chan, _) => if cfg!(not(feature = "nochanlists")) {
                 if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
-                    if let Some(src) = msg.get_source_nickname() {
+                    if let Some(src) = msg.source_nickname() {
                         if let Some(n) = vec.iter().position(|x| x.get_nickname() == src) {
                             vec.swap_remove(n);
                         }
@@ -321,7 +321,7 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
                 };
                 if target.starts_with("#") {
                     try!(self.handle_ctcp(&target, tokens))
-                } else if let Some(user) = msg.get_source_nickname() {
+                } else if let Some(user) = msg.source_nickname() {
                     try!(self.handle_ctcp(user, tokens))
                 }
             },
@@ -355,7 +355,7 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
             },
             Command::Response(Response::ERR_NICKNAMEINUSE, _, _) |
             Command::Response(Response::ERR_ERRONEOUSNICKNAME, _, _) => {
-                let alt_nicks = self.config().get_alternate_nicknames();
+                let alt_nicks = self.config().alternate_nicknames();
                 let mut index = self.state.alt_nick_index.write().unwrap();
                 if *index >= alt_nicks.len() {
                     panic!("All specified nicknames were in use.")
