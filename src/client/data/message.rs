@@ -138,18 +138,20 @@ mod test {
 
     #[test]
     fn get_source_nickname() {
-        assert_eq!(Message::new(None, "PING", vec![], None).unwrap().get_source_nickname(), None);
         assert_eq!(Message::new(
-            Some("irc.test.net"), "PING", vec![], None
+            None, "PING", vec![], Some("data")
         ).unwrap().get_source_nickname(), None);
         assert_eq!(Message::new(
-            Some("test!test@test"), "PING", vec![], None
+            Some("irc.test.net"), "PING", vec![], Some("data")
+        ).unwrap().get_source_nickname(), None);
+        assert_eq!(Message::new(
+            Some("test!test@test"), "PING", vec![], Some("data")
         ).unwrap().get_source_nickname(), Some("test"));
         assert_eq!(Message::new(
-            Some("test@test"), "PING", vec![], None
+            Some("test@test"), "PING", vec![], Some("data")
         ).unwrap().get_source_nickname(), Some("test"));
         assert_eq!(Message::new(
-            Some("test"), "PING", vec![], None
+            Some("test"), "PING", vec![], Some("data")
         ).unwrap().get_source_nickname(), Some("test"));
     }
 
