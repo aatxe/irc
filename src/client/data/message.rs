@@ -1,6 +1,8 @@
 //! Messages to and from the server.
 use std::borrow::ToOwned;
+use std::io::{Result as IoResult};
 use std::str::FromStr;
+use client::data::Command;
 
 /// IRC Message data.
 #[derive(Clone, PartialEq, Debug)]
@@ -9,40 +11,25 @@ pub struct Message {
     pub tags: Option<Vec<Tag>>,
     /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
     pub prefix: Option<String>,
-    /// The IRC command as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
-    pub command: String,
-    /// The command arguments.
-    pub args: Vec<String>,
-    /// The message suffix as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
-    /// This is the only part of the message that is allowed to contain spaces.
-    pub suffix: Option<String>,
+    /// The IRC command.
+    pub command: Command,
 }
 
 impl Message {
     /// Creates a new Message.
-    pub fn new(prefix: Option<&str>, command: &str, args: Option<Vec<&str>>, suffix: Option<&str>)
-        -> Message {
+    pub fn new(prefix: Option<&str>, command: &str, args: Vec<&str>, suffix: Option<&str>)
+        -> IoResult<Message> {
         Message::with_tags(None, prefix, command, args, suffix)
     }
 
     /// Creates a new Message optionally including IRCv3.2 message tags.
     pub fn with_tags(tags: Option<Vec<Tag>>, prefix: Option<&str>, command: &str,
-                     args: Option<Vec<&str>>, suffix: Option<&str>) -> Message {
-        Message {
+                     args: Vec<&str>, suffix: Option<&str>) -> IoResult<Message> {
+        Ok(Message {
             tags: tags,
             prefix: prefix.map(|s| s.to_owned()),
-            command: command.to_owned(),
-            args: args.map_or(Vec::new(), |v| v.iter().map(|&s| s.to_owned()).collect()),
-            suffix: suffix.map(|s| s.to_owned()),
-        }
-    }
-
-    /// Creates a new Message from already owned data.
-    pub fn from_owned(prefix: Option<String>, command: String, args: Option<Vec<String>>,
-                      suffix: Option<String>) -> Message {
-        Message {
-            tags: None, prefix: prefix, command: command, args: args.unwrap_or(Vec::new()), suffix: suffix
-        }
+            command: try!(Command::new(command, args, suffix)),
+        })
     }
 
     /// Gets the nickname of the message source, if it exists.
@@ -59,23 +46,23 @@ impl Message {
 
     /// Converts a Message into a String according to the IRC protocol.
     pub fn into_string(&self) -> String {
+        // TODO: tags
         let mut ret = String::new();
         if let Some(ref prefix) = self.prefix {
             ret.push(':');
             ret.push_str(&prefix);
             ret.push(' ');
         }
-        ret.push_str(&self.command);
-        for arg in self.args.iter() {
-            ret.push(' ');
-            ret.push_str(&arg);
-        }
-        if let Some(ref suffix) = self.suffix {
-            ret.push_str(" :");
-            ret.push_str(&suffix);
-        }
+        let cmd: String = From::from(&self.command);
+        ret.push_str(&cmd);
         ret.push_str("\r\n");
         ret
+    }
+}
+
+impl From<Command> for Message {
+    fn from(cmd: Command) -> Message {
+        Message { tags: None, prefix: None, command: cmd }
     }
 }
 
@@ -118,9 +105,9 @@ impl FromStr for Message {
         };
         if suffix.is_none() { state = &state[..state.len() - 2] }
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| s.len() != 0).collect();
-        Ok(Message::with_tags(
-            tags, prefix, command, if args.len() > 0 { Some(args) } else { None }, suffix
-        ))
+        Message::with_tags(
+            tags, prefix, command, args, suffix
+        ).map_err(|_| "Invalid input for Command.")
     }
 }
 
@@ -137,34 +124,33 @@ pub struct Tag(String, Option<String>);
 #[cfg(test)]
 mod test {
     use super::{Message, Tag};
+    use client::data::Command::{PRIVMSG, Raw};
 
     #[test]
     fn new() {
         let message = Message {
             tags: None,
             prefix: None,
-            command: format!("PRIVMSG"),
-            args: vec![format!("test")],
-            suffix: Some(format!("Testing!")),
+            command: PRIVMSG(format!("test"), format!("Testing!")),
         };
-        assert_eq!(Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("Testing!")), message);
+        assert_eq!(Message::new(None, "PRIVMSG", vec!["test"], Some("Testing!")).unwrap(), message)
     }
 
     #[test]
     fn get_source_nickname() {
-        assert_eq!(Message::new(None, "PING", None, None).get_source_nickname(), None);
+        assert_eq!(Message::new(None, "PING", vec![], None).unwrap().get_source_nickname(), None);
         assert_eq!(Message::new(
-            Some("irc.test.net"), "PING", None, None
-        ).get_source_nickname(), None);
+            Some("irc.test.net"), "PING", vec![], None
+        ).unwrap().get_source_nickname(), None);
         assert_eq!(Message::new(
-            Some("test!test@test"), "PING", None, None
-        ).get_source_nickname(), Some("test"));
+            Some("test!test@test"), "PING", vec![], None
+        ).unwrap().get_source_nickname(), Some("test"));
         assert_eq!(Message::new(
-            Some("test@test"), "PING", None, None
-        ).get_source_nickname(), Some("test"));
+            Some("test@test"), "PING", vec![], None
+        ).unwrap().get_source_nickname(), Some("test"));
         assert_eq!(Message::new(
-            Some("test"), "PING", None, None
-        ).get_source_nickname(), Some("test"));
+            Some("test"), "PING", vec![], None
+        ).unwrap().get_source_nickname(), Some("test"));
     }
 
     #[test]
@@ -172,17 +158,13 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: format!("PRIVMSG"),
-            args: vec![format!("test")],
-            suffix: Some(format!("Testing!")),
+            command: PRIVMSG(format!("test"), format!("Testing!")),
         };
         assert_eq!(&message.into_string()[..], "PRIVMSG test :Testing!\r\n");
         let message = Message {
             tags: None,
             prefix: Some(format!("test!test@test")),
-            command: format!("PRIVMSG"),
-            args: vec![format!("test")],
-            suffix: Some(format!("Still testing!")),
+            command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
         assert_eq!(&message.into_string()[..], ":test!test@test PRIVMSG test :Still testing!\r\n");
     }
@@ -192,17 +174,13 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: format!("PRIVMSG"),
-            args: vec![format!("test")],
-            suffix: Some(format!("Testing!")),
+            command: PRIVMSG(format!("test"), format!("Testing!")),
         };
         assert_eq!("PRIVMSG test :Testing!\r\n".parse(), Ok(message));
         let message = Message {
             tags: None,
             prefix: Some(format!("test!test@test")),
-            command: format!("PRIVMSG"),
-            args: vec![format!("test")],
-            suffix: Some(format!("Still testing!")),
+            command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
         assert_eq!(":test!test@test PRIVMSG test :Still testing!\r\n".parse(), Ok(message));
         let message = Message {
@@ -210,9 +188,7 @@ mod test {
                             Tag(format!("ccc"), None),
                             Tag(format!("example.com/ddd"), Some(format!("eee")))]),
             prefix: Some(format!("test!test@test")),
-            command: format!("PRIVMSG"),
-            args: vec![format!("test")],
-            suffix: Some(format!("Testing with tags!")),
+            command: PRIVMSG(format!("test"), format!("Testing with tags!")),
         };
         assert_eq!("@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
                     tags!\r\n".parse(), Ok(message))
@@ -223,18 +199,14 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: format!("PRIVMSG"),
-            args: vec![format!("test")],
-            suffix: Some(format!("Testing!")),
+            command: PRIVMSG(format!("test"), format!("Testing!")),
         };
         let msg: Message = "PRIVMSG test :Testing!\r\n".into();
         assert_eq!(msg, message);
         let message = Message {
             tags: None,
             prefix: Some(format!("test!test@test")),
-            command: format!("PRIVMSG"),
-            args: vec![format!("test")],
-            suffix: Some(format!("Still testing!")),
+            command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
         let msg: Message = ":test!test@test PRIVMSG test :Still testing!\r\n".into();
         assert_eq!(msg, message);
@@ -247,9 +219,9 @@ mod test {
         let message = Message {
             tags: None,
             prefix: Some(format!("test!test@test")),
-            command: format!("COMMAND"),
-            args: vec![format!("ARG:test")],
-            suffix: Some(format!("Testing!")),
+            command: Raw(
+                format!("COMMAND"), vec![format!("ARG:test")], Some(format!("Testing!"))
+            ),
         };
         let msg: Message = ":test!test@test COMMAND ARG:test :Testing!\r\n".into();
         assert_eq!(msg, message);

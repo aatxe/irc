@@ -257,7 +257,7 @@ impl Write for NetStream {
 mod test {
     use super::Connection;
     use std::io::{Cursor, sink};
-    use client::data::message::Message;
+    use client::data::Command::PRIVMSG;
     use client::test::buf_empty;
     #[cfg(feature = "encode")] use encoding::{DecoderTrap, Encoding};
     #[cfg(feature = "encode")] use encoding::all::{ISO_8859_15, UTF_8};
@@ -266,9 +266,7 @@ mod test {
     #[cfg(not(feature = "encode"))]
     fn send() {
         let conn = Connection::new(buf_empty(), Vec::new());
-        assert!(conn.send(
-            Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("Testing!"))
-        ).is_ok());
+        assert!(conn.send(PRIVMSG("test".to_owned(), "Testing!".to_owned())).is_ok());
         let data = String::from_utf8(conn.writer().to_vec()).unwrap();
         assert_eq!(&data[..], "PRIVMSG test :Testing!\r\n");
     }
@@ -287,9 +285,7 @@ mod test {
     #[cfg(feature = "encode")]
     fn send_utf8() {
         let conn = Connection::new(buf_empty(), Vec::new());
-        assert!(conn.send(
-            Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("€ŠšŽžŒœŸ")), "UTF-8"
-        ).is_ok());
+        assert!(conn.send(PRIVMSG("test".to_owned(), "€ŠšŽžŒœŸ".to_owned()), "UTF-8").is_ok());
         let data = UTF_8.decode(&conn.writer(), DecoderTrap::Strict).unwrap();
         assert_eq!(&data[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
@@ -308,9 +304,7 @@ mod test {
     #[cfg(feature = "encode")]
     fn send_iso885915() {
         let conn = Connection::new(buf_empty(), Vec::new());
-        assert!(conn.send(
-            Message::new(None, "PRIVMSG", Some(vec!["test"]), Some("€ŠšŽžŒœŸ")), "l9"
-        ).is_ok());
+        assert!(conn.send(PRIVMSG("test".to_owned(), "€ŠšŽžŒœŸ".to_owned()), "l9").is_ok());
         let data = ISO_8859_15.decode(&conn.writer(), DecoderTrap::Strict).unwrap();
         assert_eq!(&data[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }

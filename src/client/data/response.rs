@@ -1,7 +1,6 @@
 //! Enumeration of all the possible server responses.
 #![allow(non_camel_case_types)]
 use std::str::FromStr;
-use client::data::message::Message;
 
 macro_rules! make_response {
     ($(#[$attr:meta] $variant:ident = $value:expr),+) => {
@@ -356,11 +355,6 @@ make_response! {
 }
 
 impl Response {
-    /// Gets a response from a message.
-    pub fn from_message(m: &Message) -> Option<Response> {
-        m.command.parse().ok()
-    }
-
     /// Determines whether or not this response is an error response.
     pub fn is_error(&self) -> bool {
         *self as u16 >= 400
@@ -384,16 +378,6 @@ impl FromStr for Response {
 #[cfg(test)]
 mod test {
     use super::Response;
-
-    #[test]
-    fn from_message() {
-        assert_eq!(Response::from_message(
-            &":irc.test.net 353 test = #test :test\r\n".into()
-        ).unwrap(), Response::RPL_NAMREPLY);
-        assert_eq!(Response::from_message(
-            &":irc.test.net 433 <nick> :Nickname is already in use\r\n".into()
-        ).unwrap(), Response::ERR_NICKNAMEINUSE);
-    }
 
     #[test]
     fn is_error() {

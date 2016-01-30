@@ -6,7 +6,6 @@ use std::cell::Cell;
 use std::collections::HashMap;
 use std::error::Error as StdError;
 use std::io::{BufReader, BufWriter, Error, ErrorKind, Result};
-use std::iter::Map;
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
 use std::sync::mpsc::{Receiver, Sender, TryRecvError, channel};
@@ -28,8 +27,6 @@ pub trait Server<'a, T: IrcRead, U: IrcWrite> {
     fn send<M: Into<Message>>(&self, message: M) -> Result<()> where Self: Sized;
     /// Gets an Iterator over Messages received by this Server.
     fn iter(&'a self) -> ServerIterator<'a, T, U>;
-    /// Gets an Iterator over Commands received by this Server.
-    fn iter_cmd(&'a self) -> ServerCmdIterator<'a, T, U>;
     /// Gets a list of Users in the specified channel. This will be none if the channel is not
     /// being tracked, or if tracking is not supported altogether. For best results, be sure to
     /// request `multi-prefix` support from the server.
@@ -171,10 +168,6 @@ impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for ServerState<T, U> where C
         panic!("unimplemented")
     }
 
-    fn iter_cmd(&'a self) -> ServerCmdIterator<'a, T, U> {
-        self.iter().map(Command::from_message_io)
-    }
-
     #[cfg(not(feature = "nochanlists"))]
     fn list_users(&self, chan: &str) -> Option<Vec<User>> {
         self.chanlists.lock().unwrap().get(&chan.to_owned()).cloned()
@@ -198,10 +191,6 @@ impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for IrcServer<T, U> where Con
 
     fn iter(&'a self) -> ServerIterator<'a, T, U> {
         ServerIterator::new(self)
-    }
-
-    fn iter_cmd(&'a self) -> ServerCmdIterator<'a, T, U> {
-        self.iter().map(Command::from_message_io)
     }
 
     #[cfg(not(feature = "nochanlists"))]
@@ -296,12 +285,51 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
 
     /// Handles messages internally for basic client functionality.
     fn handle_message(&self, msg: &Message) -> Result<()> {
-        if let Some(resp) = Response::from_message(msg) {
-            match resp {
-                Response::RPL_NAMREPLY => if cfg!(not(feature = "nochanlists")) {
-                    if let Some(users) = msg.suffix.clone() {
-                        if msg.args.len() == 3 {
-                            let ref chan = msg.args[2];
+        match msg.command {
+            PING(ref data, _) => try!(self.send_pong(&data)),
+            JOIN(ref chan, _, _) => if cfg!(not(feature = "nochanlists")) {
+                if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
+                    if let Some(src) = msg.get_source_nickname() {
+                        vec.push(User::new(src))
+                    }
+                }
+            },
+            PART(ref chan, _) => if cfg!(not(feature = "nochanlists")) {
+                if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
+                    if let Some(src) = msg.get_source_nickname() {
+                        if let Some(n) = vec.iter().position(|x| x.get_nickname() == src) {
+                            vec.swap_remove(n);
+                        }
+                    }
+                }
+            },
+            MODE(ref chan, ref mode, Some(ref user)) => if cfg!(not(feature = "nochanlists")) {
+                if let Some(vec) = self.chanlists().lock().unwrap().get_mut(chan) {
+                    if let Some(n) = vec.iter().position(|x| x.get_nickname() == user) {
+                        vec[n].update_access_level(&mode)
+                    }
+                }
+            },
+            PRIVMSG(ref target, ref body) => if body.starts_with("\u{001}") {
+                let tokens: Vec<_> = {
+                    let end = if body.ends_with("\u{001}") {
+                        body.len() - 1
+                    } else {
+                        body.len()
+                    };
+                    body[1..end].split(" ").collect()
+                };
+                if target.starts_with("#") {
+                    try!(self.handle_ctcp(&target, tokens))
+                } else if let Some(user) = msg.get_source_nickname() {
+                    try!(self.handle_ctcp(user, tokens))
+                }
+            },
+            Command::Response(Response::RPL_NAMREPLY, ref args, ref suffix) => {
+                if cfg!(not(feature = "nochanlists")) {
+                    if let Some(users) = suffix.clone() {
+                        if args.len() == 3 {
+                            let ref chan = args[2];
                             for user in users.split(" ") {
                                 let mut chanlists = self.state.chanlists.lock().unwrap();
                                 chanlists.entry(chan.clone()).or_insert(Vec::new())
@@ -309,80 +337,36 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
                             }
                         }
                     }
-                },
-                Response::RPL_ENDOFMOTD | Response::ERR_NOMOTD => { // On connection behavior.
-                    if self.config().nick_password() != "" {
-                        try!(self.send(NICKSERV(
-                            format!("IDENTIFY {}", self.config().nick_password())
-                        )))
-                    }
-                    if self.config().umodes() != "" {
-                        try!(self.send_mode(self.config().nickname(), self.config().umodes(), ""))
-                    }
-                    for chan in self.config().channels().into_iter() {
-                        try!(self.send_join(chan))
-                    }
-                },
-                Response::ERR_NICKNAMEINUSE | Response::ERR_ERRONEOUSNICKNAME => {
-                    let alt_nicks = self.config().get_alternate_nicknames();
-                    let mut index = self.state.alt_nick_index.write().unwrap();
-                    if *index >= alt_nicks.len() {
-                        panic!("All specified nicknames were in use.")
-                    } else {
-                        try!(self.send(NICK(alt_nicks[*index].to_owned())));
-                        *index += 1;
-                    }
-                },
-                _ => ()
-            }
-            Ok(())
-        } else if let Ok(cmd) = msg.into() {
-            match cmd {
-                PING(data, _) => try!(self.send_pong(&data)),
-                JOIN(chan, _, _) => if cfg!(not(feature = "nochanlists")) {
-                    if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
-                        if let Some(src) = msg.get_source_nickname() {
-                            vec.push(User::new(src))
-                        }
-                    }
-                },
-                PART(chan, _) => if cfg!(not(feature = "nochanlists")) {
-                    if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
-                        if let Some(src) = msg.get_source_nickname() {
-                            if let Some(n) = vec.iter().position(|x| x.get_nickname() == src) {
-                                vec.swap_remove(n);
-                            }
-                        }
-                    }
-                },
-                MODE(chan, mode, Some(user)) => if cfg!(not(feature = "nochanlists")) {
-                    if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan) {
-                        if let Some(n) = vec.iter().position(|x| x.get_nickname() == user) {
-                            vec[n].update_access_level(&mode)
-                        }
-                    }
-                },
-                PRIVMSG(target, body) => if body.starts_with("\u{001}") {
-                    let tokens: Vec<_> = {
-                        let end = if body.ends_with("\u{001}") {
-                            body.len() - 1
-                        } else {
-                            body.len()
-                        };
-                        body[1..end].split(" ").collect()
-                    };
-                    if target.starts_with("#") {
-                        try!(self.handle_ctcp(&target, tokens))
-                    } else if let Some(user) = msg.get_source_nickname() {
-                        try!(self.handle_ctcp(user, tokens))
-                    }
-                },
-                _ => ()
-            }
-            Ok(())
-        } else {
-            Ok(())
+                }
+            },
+            Command::Response(Response::RPL_ENDOFMOTD, _, _) |
+            Command::Response(Response::ERR_NOMOTD, _, _) => {
+                if self.config().nick_password() != "" {
+                    try!(self.send(NICKSERV(
+                        format!("IDENTIFY {}", self.config().nick_password())
+                    )))
+                }
+                if self.config().umodes() != "" {
+                    try!(self.send_mode(self.config().nickname(), self.config().umodes(), ""))
+                }
+                for chan in self.config().channels().into_iter() {
+                    try!(self.send_join(chan))
+                }
+            },
+            Command::Response(Response::ERR_NICKNAMEINUSE, _, _) |
+            Command::Response(Response::ERR_ERRONEOUSNICKNAME, _, _) => {
+                let alt_nicks = self.config().get_alternate_nicknames();
+                let mut index = self.state.alt_nick_index.write().unwrap();
+                if *index >= alt_nicks.len() {
+                    panic!("All specified nicknames were in use.")
+                } else {
+                    try!(self.send(NICK(alt_nicks[*index].to_owned())));
+                    *index += 1;
+                }
+            },
+            _ => ()
         }
+        Ok(())
     }
 
     /// Handles CTCP requests if the CTCP feature is enabled.
@@ -445,10 +429,6 @@ pub struct ServerIterator<'a, T: IrcRead + 'a, U: IrcWrite + 'a> {
     server: &'a IrcServer<T, U>
 }
 
-/// An Iterator over an IrcServer's incoming Commands.
-pub type ServerCmdIterator<'a, T, U> =
-    Map<ServerIterator<'a, T, U>, fn(Result<Message>) -> Result<Command>>;
-
 impl<'a, T: IrcRead + 'a, U: IrcWrite + 'a> ServerIterator<'a, T, U> where Connection<T, U>: Reconnect {
     /// Creates a new ServerIterator for the desired IrcServer.
     pub fn new(server: &IrcServer<T, U>) -> ServerIterator<T, U> {
@@ -501,7 +481,7 @@ mod test {
     use std::default::Default;
     use std::io::{Cursor, sink};
     use client::conn::{Connection, Reconnect};
-    use client::data::{Config, Message};
+    use client::data::Config;
     #[cfg(not(feature = "nochanlists"))] use client::data::User;
     use client::data::command::Command::PRIVMSG;
     use client::data::kinds::IrcRead;
@@ -534,21 +514,6 @@ mod test {
         let mut messages = String::new();
         for message in server.iter() {
             messages.push_str(&message.unwrap().into_string());
-        }
-        assert_eq!(&messages[..], exp);
-    }
-
-    #[test]
-    fn iterator_cmd() {
-        let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n\
-                   JOIN #test\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(exp.as_bytes().to_vec()), sink()
-        ));
-        let mut messages = String::new();
-        for command in server.iter_cmd() {
-            let msg: Message = command.unwrap().into();
-            messages.push_str(&msg.into_string());
         }
         assert_eq!(&messages[..], exp);
     }

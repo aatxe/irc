@@ -2,13 +2,13 @@
 use std::io::{Error, ErrorKind, Result};
 use std::result::Result as StdResult;
 use std::str::FromStr;
-use client::data::Message;
+use client::data::Response;
 
 /// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This
 /// also includes commands from the
 /// [capabilities extension](https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01).
 /// Additionally, this includes some common additional commands from popular IRCds.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Command {
     // 3.1 Connection Registration
     /// PASS :password
@@ -169,473 +169,503 @@ pub enum Command {
     CHGHOST(String, String),
 
     // Default option.
+    /// An IRC response code with arguments and optional suffix.
+    Response(Response, Vec<String>, Option<String>),
     /// A raw IRC command unknown to the crate.
-    RAW(String, Vec<String>, Option<String>),
+    Raw(String, Vec<String>, Option<String>),
 }
 
-impl Into<Message> for Command {
-    /// Converts a Command into a Message.
-    fn into(self) -> Message {
-        match self {
-            Command::PASS(p) => Message::from_owned(None, string("PASS"), None, Some(p)),
-            Command::NICK(n) => Message::from_owned(None, string("NICK"), None, Some(n)),
-            Command::USER(u, m, r) =>
-                Message::from_owned(None, string("USER"), Some(vec![u, m, string("*")]), Some(r)),
-            Command::OPER(u, p) =>
-                Message::from_owned(None, string("OPER"), Some(vec![u]), Some(p)),
-            Command::MODE(t, m, Some(p)) =>
-                Message::from_owned(None, string("MODE"), Some(vec![t, m, p]), None),
-            Command::MODE(t, m, None) =>
-                Message::from_owned(None, string("MODE"), Some(vec![t, m]), None),
-            Command::SERVICE(n, r, d, t, re, i) =>
-                Message::from_owned(None, string("SERVICE"), Some(vec![n, r, d, t, re]), Some(i)),
-            Command::QUIT(Some(m)) => Message::from_owned(None, string("QUIT"), None, Some(m)),
-            Command::QUIT(None) => Message::from_owned(None, string("QUIT"), None, None),
-            Command::SQUIT(s, c) =>
-                Message::from_owned(None, string("SQUIT"), Some(vec![s]), Some(c)),
-            Command::JOIN(c, Some(k), n) =>
-                Message::from_owned(None, string("JOIN"), Some(vec![c, k]), n),
-            Command::JOIN(c, None, n) =>
-                Message::from_owned(None, string("JOIN"), Some(vec![c]), n),
-            Command::PART(c, Some(m)) =>
-                Message::from_owned(None, string("PART"), Some(vec![c]), Some(m)),
-            Command::PART(c, None) =>
-                Message::from_owned(None, string("PART"), Some(vec![c]), None),
-            Command::TOPIC(c, Some(t)) =>
-                Message::from_owned(None, string("TOPIC"), Some(vec![c]), Some(t)),
-            Command::TOPIC(c, None) =>
-                Message::from_owned(None, string("TOPIC"), Some(vec![c]), None),
-            Command::NAMES(Some(c), Some(t)) =>
-                Message::from_owned(None, string("NAMES"), Some(vec![c]), Some(t)),
-            Command::NAMES(Some(c), None) =>
-                Message::from_owned(None, string("NAMES"), Some(vec![c]), None),
-            Command::NAMES(None, _) => Message::from_owned(None, string("NAMES"), None, None),
-            Command::LIST(Some(c), Some(t)) =>
-                Message::from_owned(None, string("LIST"), Some(vec![c]), Some(t)),
-            Command::LIST(Some(c), None) =>
-                Message::from_owned(None, string("LIST"), Some(vec![c]), None),
-            Command::LIST(None, _) => Message::from_owned(None, string("LIST"), None, None),
-            Command::INVITE(n, c) =>
-                Message::from_owned(None, string("INVITE"), Some(vec![n, c]), None),
-            Command::KICK(c, n, Some(r)) =>
-                Message::from_owned(None, string("KICK"), Some(vec![c, n]), Some(r)),
-            Command::KICK(c, n, None) =>
-                Message::from_owned(None, string("KICK"), Some(vec![c, n]), None),
-            Command::PRIVMSG(t, m) =>
-                Message::from_owned(None, string("PRIVMSG"), Some(vec![t]), Some(m)),
-            Command::NOTICE(t, m) =>
-                Message::from_owned(None, string("NOTICE"), Some(vec![t]), Some(m)),
-            Command::MOTD(Some(t)) => Message::from_owned(None, string("MOTD"), None, Some(t)),
-            Command::MOTD(None) => Message::from_owned(None, string("MOTD"), None, None),
-            Command::LUSERS(Some(m), Some(t)) =>
-                Message::from_owned(None, string("LUSERS"), Some(vec![m]), Some(t)),
-            Command::LUSERS(Some(m), None) =>
-                Message::from_owned(None, string("LUSERS"), Some(vec![m]), None),
-            Command::LUSERS(None, _) => Message::from_owned(None, string("LUSERS"), None, None),
-            Command::VERSION(Some(t)) =>
-                Message::from_owned(None, string("VERSION"), None, Some(t)),
-            Command::VERSION(None) => Message::from_owned(None, string("VERSION"), None, None),
-            Command::STATS(Some(q), Some(t)) =>
-                Message::from_owned(None, string("STATS"), Some(vec![q]), Some(t)),
-            Command::STATS(Some(q), None) =>
-                Message::from_owned(None, string("STATS"), Some(vec![q]), None),
-            Command::STATS(None, _) => Message::from_owned(None, string("STATS"), None, None),
-            Command::LINKS(Some(r), Some(s)) =>
-                Message::from_owned(None, string("LINKS"), Some(vec![r]), Some(s)),
-            Command::LINKS(None, Some(s)) =>
-                Message::from_owned(None, string("LINKS"), None, Some(s)),
-            Command::LINKS(_, None) => Message::from_owned(None, string("LINKS"), None, None),
-            Command::TIME(Some(t)) => Message::from_owned(None, string("TIME"), None, Some(t)),
-            Command::TIME(None) => Message::from_owned(None, string("TIME"), None, None),
-            Command::CONNECT(t, p, Some(r)) =>
-                Message::from_owned(None, string("CONNECT"), Some(vec![t, p]), Some(r)),
-            Command::CONNECT(t, p, None) =>
-                Message::from_owned(None, string("CONNECT"), Some(vec![t, p]), None),
-            Command::TRACE(Some(t)) => Message::from_owned(None, string("TRACE"), None, Some(t)),
-            Command::TRACE(None) => Message::from_owned(None, string("TRACE"), None, None),
-            Command::ADMIN(Some(t)) => Message::from_owned(None, string("ADMIN"), None, Some(t)),
-            Command::ADMIN(None) => Message::from_owned(None, string("ADMIN"), None, None),
-            Command::INFO(Some(t)) => Message::from_owned(None, string("INFO"), None, Some(t)),
-            Command::INFO(None) => Message::from_owned(None, string("INFO"), None, None),
-            Command::SERVLIST(Some(m), Some(t)) =>
-                Message::from_owned(None, string("SERVLIST"), Some(vec![m]), Some(t)),
-            Command::SERVLIST(Some(m), None) =>
-                Message::from_owned(None, string("SERVLIST"), Some(vec![m]), None),
+fn stringify(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> String {
+    let args = args.join(" ");
+    let sp = if args.len() > 0 { " " } else { "" };
+    match suffix {
+        Some(suffix) => format!("{}{}{} :{}", cmd, sp, args, suffix),
+        None => format!("{}{}{}", cmd, sp, args),
+    }
+
+}
+
+impl<'a> From<&'a Command> for String {
+    fn from(cmd: &'a Command) -> String {
+        match *cmd {
+            Command::PASS(ref p) => stringify("PASS", vec![], Some(p)),
+            Command::NICK(ref n) => stringify("NICK", vec![], Some(n)),
+            Command::USER(ref u, ref m, ref r) =>
+                stringify("USER", vec![u, m, "*"], Some(r)),
+            Command::OPER(ref u, ref p) =>
+                stringify("OPER", vec![u], Some(p)),
+            Command::MODE(ref t, ref m, Some(ref p)) =>
+                stringify("MODE", vec![t, m, p], None),
+            Command::MODE(ref t, ref m, None) =>
+                stringify("MODE", vec![t, m], None),
+            Command::SERVICE(ref n, ref r, ref d, ref t, ref re, ref i) =>
+                stringify("SERVICE", vec![n, r, d, t, re], Some(i)),
+            Command::QUIT(Some(ref m)) => stringify("QUIT", vec![], Some(m)),
+            Command::QUIT(None) => stringify("QUIT", vec![], None),
+            Command::SQUIT(ref s, ref c) =>
+                stringify("SQUIT", vec![s], Some(c)),
+            Command::JOIN(ref c, Some(ref k), Some(ref n)) =>
+                stringify("JOIN", vec![c, k], Some(n)),
+            Command::JOIN(ref c, Some(ref k), None) =>
+                stringify("JOIN", vec![c, k], None),
+            Command::JOIN(ref c, None, Some(ref n)) =>
+                stringify("JOIN", vec![c], Some(n)),
+            Command::JOIN(ref c, None, None) =>
+                stringify("JOIN", vec![c], None),
+            Command::PART(ref c, Some(ref m)) =>
+                stringify("PART", vec![c], Some(m)),
+            Command::PART(ref c, None) =>
+                stringify("PART", vec![c], None),
+            Command::TOPIC(ref c, Some(ref t)) =>
+                stringify("TOPIC", vec![c], Some(t)),
+            Command::TOPIC(ref c, None) =>
+                stringify("TOPIC", vec![c], None),
+            Command::NAMES(Some(ref c), Some(ref t)) =>
+                stringify("NAMES", vec![c], Some(t)),
+            Command::NAMES(Some(ref c), None) =>
+                stringify("NAMES", vec![c], None),
+            Command::NAMES(None, _) => stringify("NAMES", vec![], None),
+            Command::LIST(Some(ref c), Some(ref t)) =>
+                stringify("LIST", vec![c], Some(t)),
+            Command::LIST(Some(ref c), None) =>
+                stringify("LIST", vec![c], None),
+            Command::LIST(None, _) => stringify("LIST", vec![], None),
+            Command::INVITE(ref n, ref c) =>
+                stringify("INVITE", vec![n, c], None),
+            Command::KICK(ref c, ref n, Some(ref r)) =>
+                stringify("KICK", vec![c, n], Some(r)),
+            Command::KICK(ref c, ref n, None) =>
+                stringify("KICK", vec![c, n], None),
+            Command::PRIVMSG(ref t, ref m) =>
+                stringify("PRIVMSG", vec![t], Some(m)),
+            Command::NOTICE(ref t, ref m) =>
+                stringify("NOTICE", vec![t], Some(m)),
+            Command::MOTD(Some(ref t)) => stringify("MOTD", vec![], Some(t)),
+            Command::MOTD(None) => stringify("MOTD", vec![], None),
+            Command::LUSERS(Some(ref m), Some(ref t)) =>
+                stringify("LUSERS", vec![m], Some(t)),
+            Command::LUSERS(Some(ref m), None) =>
+                stringify("LUSERS", vec![m], None),
+            Command::LUSERS(None, _) => stringify("LUSERS", vec![], None),
+            Command::VERSION(Some(ref t)) =>
+                stringify("VERSION", vec![], Some(t)),
+            Command::VERSION(None) => stringify("VERSION", vec![], None),
+            Command::STATS(Some(ref q), Some(ref t)) =>
+                stringify("STATS", vec![q], Some(t)),
+            Command::STATS(Some(ref q), None) =>
+                stringify("STATS", vec![q], None),
+            Command::STATS(None, _) => stringify("STATS", vec![], None),
+            Command::LINKS(Some(ref r), Some(ref s)) =>
+                stringify("LINKS", vec![r], Some(s)),
+            Command::LINKS(None, Some(ref s)) =>
+                stringify("LINKS", vec![], Some(s)),
+            Command::LINKS(_, None) => stringify("LINKS", vec![], None),
+            Command::TIME(Some(ref t)) => stringify("TIME", vec![], Some(t)),
+            Command::TIME(None) => stringify("TIME", vec![], None),
+            Command::CONNECT(ref t, ref p, Some(ref r)) =>
+                stringify("CONNECT", vec![t, p], Some(r)),
+            Command::CONNECT(ref t, ref p, None) =>
+                stringify("CONNECT", vec![t, p], None),
+            Command::TRACE(Some(ref t)) => stringify("TRACE", vec![], Some(t)),
+            Command::TRACE(None) => stringify("TRACE", vec![], None),
+            Command::ADMIN(Some(ref t)) => stringify("ADMIN", vec![], Some(t)),
+            Command::ADMIN(None) => stringify("ADMIN", vec![], None),
+            Command::INFO(Some(ref t)) => stringify("INFO", vec![], Some(t)),
+            Command::INFO(None) => stringify("INFO", vec![], None),
+            Command::SERVLIST(Some(ref m), Some(ref t)) =>
+                stringify("SERVLIST", vec![m], Some(t)),
+            Command::SERVLIST(Some(ref m), None) =>
+                stringify("SERVLIST", vec![m], None),
             Command::SERVLIST(None, _) =>
-                Message::from_owned(None, string("SERVLIST"), None, None),
-            Command::SQUERY(s, t) =>
-                Message::from_owned(None, string("SQUERY"), Some(vec![s, t]), None),
-            Command::WHO(Some(s), Some(true)) =>
-                Message::from_owned(None, string("WHO"), Some(vec![s, string("o")]), None),
-            Command::WHO(Some(s), _) =>
-                Message::from_owned(None, string("WHO"), Some(vec![s]), None),
-            Command::WHO(None, _) => Message::from_owned(None, string("WHO"), None, None),
-            Command::WHOIS(Some(t), m) =>
-                Message::from_owned(None, string("WHOIS"), Some(vec![t, m]), None),
-            Command::WHOIS(None, m) =>
-                Message::from_owned(None, string("WHOIS"), Some(vec![m]), None),
-            Command::WHOWAS(n, Some(c), Some(t)) =>
-                Message::from_owned(None, string("WHOWAS"), Some(vec![n, c]), Some(t)),
-            Command::WHOWAS(n, Some(c), None) =>
-                Message::from_owned(None, string("WHOWAS"), Some(vec![n, c]), None),
-            Command::WHOWAS(n, None, _) =>
-                Message::from_owned(None, string("WHOWAS"), Some(vec![n]), None),
-            Command::KILL(n, c) =>
-                Message::from_owned(None, string("KILL"), Some(vec![n]), Some(c)),
-            Command::PING(s, Some(t)) =>
-                Message::from_owned(None, string("PING"), Some(vec![s]), Some(t)),
-            Command::PING(s, None) => Message::from_owned(None, string("PING"), None, Some(s)),
-            Command::PONG(s, Some(t)) =>
-                Message::from_owned(None, string("PONG"), Some(vec![s]), Some(t)),
-            Command::PONG(s, None) => Message::from_owned(None, string("PONG"), None, Some(s)),
-            Command::ERROR(m) => Message::from_owned(None, string("ERROR"), None, Some(m)),
-            Command::AWAY(m) => Message::from_owned(None, string("AWAY"), None, m),
-            Command::REHASH => Message::from_owned(None, string("REHASH"), None, None),
-            Command::DIE => Message::from_owned(None, string("DIE"), None, None),
-            Command::RESTART => Message::from_owned(None, string("RESTART"), None, None),
-            Command::SUMMON(u, Some(t), Some(c)) =>
-                Message::from_owned(None, string("SUMMON"), Some(vec![u, t]), Some(c)),
-            Command::SUMMON(u, Some(t), None) =>
-                Message::from_owned(None, string("SUMMON"), Some(vec![u, t]), None),
-            Command::SUMMON(u, None, _) =>
-                Message::from_owned(None, string("SUMMON"), Some(vec![u]), None),
-            Command::USERS(Some(t)) => Message::from_owned(None, string("USERS"), None, Some(t)),
-            Command::USERS(None) => Message::from_owned(None, string("USERS"), None, None),
-            Command::WALLOPS(t) => Message::from_owned(None, string("WALLOPS"), None, Some(t)),
-            Command::USERHOST(u) => Message::from_owned(None, string("USERHOST"), Some(u), None),
-            Command::ISON(u) => Message::from_owned(None, string("ISON"), Some(u), None),
+                stringify("SERVLIST", vec![], None),
+            Command::SQUERY(ref s, ref t) =>
+                stringify("SQUERY", vec![s, t], None),
+            Command::WHO(Some(ref s), Some(true)) =>
+                stringify("WHO", vec![s, "o"], None),
+            Command::WHO(Some(ref s), _) =>
+                stringify("WHO", vec![s], None),
+            Command::WHO(None, _) => stringify("WHO", vec![], None),
+            Command::WHOIS(Some(ref t), ref m) =>
+                stringify("WHOIS", vec![t, m], None),
+            Command::WHOIS(None, ref m) =>
+                stringify("WHOIS", vec![m], None),
+            Command::WHOWAS(ref n, Some(ref c), Some(ref t)) =>
+                stringify("WHOWAS", vec![n, c], Some(t)),
+            Command::WHOWAS(ref n, Some(ref c), None) =>
+                stringify("WHOWAS", vec![n, c], None),
+            Command::WHOWAS(ref n, None, _) =>
+                stringify("WHOWAS", vec![n], None),
+            Command::KILL(ref n, ref c) =>
+                stringify("KILL", vec![n], Some(c)),
+            Command::PING(ref s, Some(ref t)) =>
+                stringify("PING", vec![s], Some(t)),
+            Command::PING(ref s, None) => stringify("PING", vec![], Some(s)),
+            Command::PONG(ref s, Some(ref t)) =>
+                stringify("PONG", vec![s], Some(t)),
+            Command::PONG(ref s, None) => stringify("PONG", vec![], Some(s)),
+            Command::ERROR(ref m) => stringify("ERROR", vec![], Some(m)),
+            Command::AWAY(Some(ref m)) => stringify("AWAY", vec![], Some(m)),
+            Command::AWAY(None) => stringify("AWAY", vec![], None),
+            Command::REHASH => stringify("REHASH", vec![], None),
+            Command::DIE => stringify("DIE", vec![], None),
+            Command::RESTART => stringify("RESTART", vec![], None),
+            Command::SUMMON(ref u, Some(ref t), Some(ref c)) =>
+                stringify("SUMMON", vec![u, t], Some(c)),
+            Command::SUMMON(ref u, Some(ref t), None) =>
+                stringify("SUMMON", vec![u, t], None),
+            Command::SUMMON(ref u, None, _) =>
+                stringify("SUMMON", vec![u], None),
+            Command::USERS(Some(ref t)) => stringify("USERS", vec![], Some(t)),
+            Command::USERS(None) => stringify("USERS", vec![], None),
+            Command::WALLOPS(ref t) => stringify("WALLOPS", vec![], Some(t)),
+            Command::USERHOST(ref u) => stringify("USERHOST", u.iter().map(|s| &s[..]).collect(), None),
+            Command::ISON(ref u) => stringify("ISON", u.iter().map(|s| &s[..]).collect(), None),
 
-            Command::SAJOIN(n, c) =>
-                Message::from_owned(None, string("SAJOIN"), Some(vec![n, c]), None),
-            Command::SAMODE(t, m, Some(p)) =>
-                Message::from_owned(None, string("SAMODE"), Some(vec![t, m, p]), None),
-            Command::SAMODE(t, m, None) =>
-                Message::from_owned(None, string("SAMODE"), Some(vec![t, m]), None),
-            Command::SANICK(o, n) =>
-                Message::from_owned(None, string("SANICK"), Some(vec![o, n]), None),
-            Command::SAPART(c, r) =>
-                Message::from_owned(None, string("SAPART"), Some(vec![c]), Some(r)),
-            Command::SAQUIT(c, r) =>
-                Message::from_owned(None, string("SAQUIT"), Some(vec![c]), Some(r)),
+            Command::SAJOIN(ref n, ref c) =>
+                stringify("SAJOIN", vec![n, c], None),
+            Command::SAMODE(ref t, ref m, Some(ref p)) =>
+                stringify("SAMODE", vec![t, m, p], None),
+            Command::SAMODE(ref t, ref m, None) =>
+                stringify("SAMODE", vec![t, m], None),
+            Command::SANICK(ref o, ref n) =>
+                stringify("SANICK", vec![o, n], None),
+            Command::SAPART(ref c, ref r) =>
+                stringify("SAPART", vec![c], Some(r)),
+            Command::SAQUIT(ref c, ref r) =>
+                stringify("SAQUIT", vec![c], Some(r)),
 
-            Command::NICKSERV(m) =>
-                Message::from_owned(None, string("NICKSERV"), Some(vec![m]), None),
-            Command::CHANSERV(m) =>
-                Message::from_owned(None, string("CHANSERV"), Some(vec![m]), None),
-            Command::OPERSERV(m) =>
-                Message::from_owned(None, string("OPERSERV"), Some(vec![m]), None),
-            Command::BOTSERV(m) =>
-                Message::from_owned(None, string("BOTSERV"), Some(vec![m]), None),
-            Command::HOSTSERV(m) =>
-                Message::from_owned(None, string("HOSTSERV"), Some(vec![m]), None),
-            Command::MEMOSERV(m) =>
-                Message::from_owned(None, string("MEMOSERV"), Some(vec![m]), None),
+            Command::NICKSERV(ref m) =>
+                stringify("NICKSERV", vec![m], None),
+            Command::CHANSERV(ref m) =>
+                stringify("CHANSERV", vec![m], None),
+            Command::OPERSERV(ref m) =>
+                stringify("OPERSERV", vec![m], None),
+            Command::BOTSERV(ref m) =>
+                stringify("BOTSERV", vec![m], None),
+            Command::HOSTSERV(ref m) =>
+                stringify("HOSTSERV", vec![m], None),
+            Command::MEMOSERV(ref m) =>
+                stringify("MEMOSERV", vec![m], None),
 
-            Command::CAP(None, s, None, p) =>
-                Message::from_owned(None, string("CAP"), Some(vec![s.string()]), p),
-            Command::CAP(Some(k), s, None,  p) =>
-                Message::from_owned(None, string("CAP"), Some(vec![k, s.string()]), p),
-            Command::CAP(None, s, Some(c), p) =>
-                Message::from_owned(None, string("CAP"), Some(vec![s.string(), c]), p),
-            Command::CAP(Some(k), s, Some(c), p) =>
-                Message::from_owned(None, string("CAP"), Some(vec![k, s.string(), c]), p),
+            Command::CAP(None, ref s, None, Some(ref p)) =>
+                stringify("CAP", vec![s.to_str()], Some(p)),
+            Command::CAP(None, ref s, None, None) =>
+                stringify("CAP", vec![s.to_str()], None),
+            Command::CAP(Some(ref k), ref s, None,  Some(ref p)) =>
+                stringify("CAP", vec![k, s.to_str()], Some(p)),
+            Command::CAP(Some(ref k), ref s, None,  None) =>
+                stringify("CAP", vec![k, s.to_str()], None),
+            Command::CAP(None, ref s, Some(ref c), Some(ref p)) =>
+                stringify("CAP", vec![s.to_str(), c], Some(p)),
+            Command::CAP(None, ref s, Some(ref c), None) =>
+                stringify("CAP", vec![s.to_str(), c], None),
+            Command::CAP(Some(ref k), ref s, Some(ref c), Some(ref p)) =>
+                stringify("CAP", vec![k, s.to_str(), c], Some(p)),
+            Command::CAP(Some(ref k), ref s, Some(ref c), None) =>
+                stringify("CAP", vec![k, s.to_str(), c], None),
 
-            Command::AUTHENTICATE(d) =>
-                Message::from_owned(None, string("AUTHENTICATE"), Some(vec![d]), None),
-            Command::ACCOUNT(a) =>
-                Message::from_owned(None, string("ACCOUNT"), Some(vec![a]), None),
+            Command::AUTHENTICATE(ref d) =>
+                stringify("AUTHENTICATE", vec![d], None),
+            Command::ACCOUNT(ref a) =>
+                stringify("ACCOUNT", vec![a], None),
 
-            Command::METADATA(t, Some(c), None, p) =>
-                Message::from_owned(None, string("METADATA"), Some(vec![t, c.string()]), p),
-            Command::METADATA(t, Some(c), Some(a), p) =>
-                Message::from_owned(None, string("METADATA"),
-                                    Some(vec![t, c.string()].into_iter().chain(a).collect()), p),
-            Command::METADATA(t, None, None, p) =>
-                Message::from_owned(None, string("METADATA"), Some(vec![t]), p),
-            Command::METADATA(t, None, Some(a), p) =>
-                Message::from_owned(None, string("METADATA"),
-                                    Some(vec![t].into_iter().chain(a).collect()), p),
-            Command::MONITOR(c, Some(t)) =>
-                Message::from_owned(None, string("MONITOR"), Some(vec![c, t]), None),
-            Command::MONITOR(c, None) =>
-                Message::from_owned(None, string("MONITOR"), Some(vec![c]), None),
-            Command::BATCH(t, Some(c), Some(a)) =>
-                Message::from_owned(None, string("BATCH"), Some(vec![t, c.string()].into_iter()
-                                                                                   .chain(a)
-                                                                                   .collect()),
-                                    None),
-            Command::BATCH(t, Some(c), None) =>
-                Message::from_owned(None, string("BATCH"), Some(vec![t, c.string()]), None),
-            Command::BATCH(t, None, Some(a)) =>
-                Message::from_owned(None, string("BATCH"),
-                                    Some(vec![t].into_iter().chain(a).collect()), None),
-            Command::BATCH(t, None, None) =>
-                Message::from_owned(None, string("BATCH"), Some(vec![t]), None),
-            Command::CHGHOST(u, h) =>
-                Message::from_owned(None, string("CHGHOST"), Some(vec![u, h]), None),
-            Command::RAW(c, a, s) => Message::from_owned(None, c, Some(a), s),
+            Command::METADATA(ref t, Some(ref c), None, Some(ref p)) =>
+                stringify("METADATA", vec![&t[..], c.to_str()], Some(p)),
+            Command::METADATA(ref t, Some(ref c), None, None) =>
+                stringify("METADATA", vec![&t[..], c.to_str()], None),
+
+            Command::METADATA(ref t, Some(ref c), Some(ref a), Some(ref p)) => stringify(
+                "METADATA",
+                vec![t, &c.to_str().to_owned()].iter().map(|s| &s[..])
+                                               .chain(a.iter().map(|s| &s[..])).collect(),
+                Some(p)),
+            Command::METADATA(ref t, Some(ref c), Some(ref a), None) =>
+                stringify("METADATA",
+                vec![t, &c.to_str().to_owned()].iter().map(|s| &s[..])
+                                               .chain(a.iter().map(|s| &s[..])).collect(),
+                None),
+            Command::METADATA(ref t, None, None, Some(ref p)) =>
+                stringify("METADATA", vec![t], Some(p)),
+            Command::METADATA(ref t, None, None, None) =>
+                stringify("METADATA", vec![t], None),
+            Command::METADATA(ref t, None, Some(ref a), Some(ref p)) =>
+                stringify("METADATA", vec![t].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect(), Some(p)),
+            Command::METADATA(ref t, None, Some(ref a), None) =>
+                stringify("METADATA", vec![t].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect(), None),
+            Command::MONITOR(ref c, Some(ref t)) =>
+                stringify("MONITOR", vec![c, t], None),
+            Command::MONITOR(ref c, None) =>
+                stringify("MONITOR", vec![c], None),
+            Command::BATCH(ref t, Some(ref c), Some(ref a)) => stringify(
+                "BATCH", vec![t, &c.to_str().to_owned()].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect(),
+                None
+            ),
+            Command::BATCH(ref t, Some(ref c), None) =>
+                stringify("BATCH", vec![t, c.to_str()], None),
+            Command::BATCH(ref t, None, Some(ref a)) =>
+                stringify("BATCH",
+                                    vec![t].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect(), None),
+            Command::BATCH(ref t, None, None) =>
+                stringify("BATCH", vec![t], None),
+            Command::CHGHOST(ref u, ref h) =>
+                stringify("CHGHOST", vec![u, h], None),
+
+            Command::Response(ref resp, ref a, Some(ref s)) =>
+                stringify(&format!("{}", *resp as u16), a.iter().map(|s| &s[..]).collect(), Some(s)),
+            Command::Response(ref resp, ref a, None) =>
+                stringify(&format!("{}", *resp as u16), a.iter().map(|s| &s[..]).collect(), None),
+            Command::Raw(ref c, ref a, Some(ref s)) =>
+                stringify(c, a.iter().map(|s| &s[..]).collect(), Some(s)),
+            Command::Raw(ref c, ref a, None) =>
+                stringify(c, a.iter().map(|s| &s[..]).collect(), None),
         }
     }
 }
 
-/// Converts a static str to an owned String.
-fn string(s: &'static str) -> String {
-    s.to_owned()
-}
-
-impl From<Message> for Result<Command> {
-    fn from(m: Message) -> Result<Command> {
-        (&m).into()
-    }
-}
-
-impl<'a> From<&'a Message> for Result<Command> {
-    /// Converts a Message into a Command.
-    fn from(m: &'a Message) -> Result<Command> {
-        let cmd = &m.command[..];
-        let args = &m.args[..];
-        let suffix = m.suffix.clone();
+impl Command {
+    /// Constructs a new Command.
+    pub fn new(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> Result<Command> {
         Ok(if let "PASS" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 0 { return Err(invalid_input()) }
-                    Command::PASS(suffix.clone())
+                    Command::PASS(suffix.to_owned())
                 },
                 None => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::PASS(args[0].clone())
+                    Command::PASS(args[0].to_owned())
                 }
             }
         } else if let "NICK" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 0 { return Err(invalid_input()) }
-                    Command::NICK(suffix.clone())
+                    Command::NICK(suffix.to_owned())
                 },
                 None => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::NICK(args[0].clone())
+                    Command::NICK(args[0].to_owned())
                 }
             }
         } else if let "USER" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::USER(args[0].clone(), args[1].clone(), suffix.clone())
+                    Command::USER(args[0].to_owned(), args[1].to_owned(), suffix.to_owned())
                 },
                 None => {
                     if args.len() != 3 { return Err(invalid_input()) }
-                    Command::USER(args[0].clone(), args[1].clone(), args[2].clone())
+                    Command::USER(args[0].to_owned(), args[1].to_owned(), args[2].to_owned())
                 }
             }
         } else if let "OPER" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::OPER(args[0].clone(), suffix.clone())
+                    Command::OPER(args[0].to_owned(), suffix.to_owned())
                 },
                 None => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::OPER(args[0].clone(), args[1].clone())
+                    Command::OPER(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "MODE" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::MODE(args[0].clone(), args[1].clone(), Some(suffix.clone()))
+                    Command::MODE(args[0].to_owned(), args[1].to_owned(), Some(suffix.to_owned()))
                 }
                 None => if args.len() == 3 {
-                    Command::MODE(args[0].clone(), args[1].clone(), Some(args[2].clone()))
+                    Command::MODE(args[0].to_owned(), args[1].to_owned(), Some(args[2].to_owned()))
                 } else if args.len() == 2 {
-                    Command::MODE(args[0].clone(), args[1].clone(), None)
+                    Command::MODE(args[0].to_owned(), args[1].to_owned(), None)
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "SERVICE" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 5 { return Err(invalid_input()) }
-                    Command::SERVICE(args[0].clone(), args[1].clone(), args[2].clone(),
-                                     args[3].clone(), args[4].clone(), suffix.clone())
+                    Command::SERVICE(args[0].to_owned(), args[1].to_owned(), args[2].to_owned(),
+                                     args[3].to_owned(), args[4].to_owned(), suffix.to_owned())
                 },
                 None => {
                     if args.len() != 6 { return Err(invalid_input()) }
-                    Command::SERVICE(args[0].clone(), args[1].clone(), args[2].clone(),
-                                     args[3].clone(), args[4].clone(), args[5].clone())
+                    Command::SERVICE(args[0].to_owned(), args[1].to_owned(), args[2].to_owned(),
+                                     args[3].to_owned(), args[4].to_owned(), args[5].to_owned())
                 }
             }
         } else if let "QUIT" = cmd {
             if args.len() != 0 { return Err(invalid_input()) }
             match suffix {
-                Some(ref suffix) => Command::QUIT(Some(suffix.clone())),
+                Some(suffix) => Command::QUIT(Some(suffix.to_owned())),
                 None => Command::QUIT(None)
             }
         } else if let "SQUIT" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::SQUIT(args[0].clone(), suffix.clone())
+                    Command::SQUIT(args[0].to_owned(), suffix.to_owned())
                 },
                 None => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::SQUIT(args[0].clone(), args[1].clone())
+                    Command::SQUIT(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "JOIN" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::JOIN(suffix.clone(), None, None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::JOIN(suffix.to_owned(), None, None)
                 } else if args.len() == 1 {
-                    Command::JOIN(args[0].clone(), Some(suffix.clone()), None)
+                    Command::JOIN(args[0].to_owned(), Some(suffix.to_owned()), None)
                 } else if args.len() == 2 {
-                    Command::JOIN(args[0].clone(), Some(args[1].clone()), Some(suffix.clone()))
+                    Command::JOIN(args[0].to_owned(), Some(args[1].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 1 {
-                    Command::JOIN(args[0].clone(), None, None)
+                    Command::JOIN(args[0].to_owned(), None, None)
                 } else if args.len() == 2 {
-                    Command::JOIN(args[0].clone(), Some(args[1].clone()), None)
+                    Command::JOIN(args[0].to_owned(), Some(args[1].to_owned()), None)
                 } else if args.len() == 3 {
-                    Command::JOIN(args[0].clone(), Some(args[1].clone()),
-                                  Some(args[2].clone()))
+                    Command::JOIN(args[0].to_owned(), Some(args[1].to_owned()),
+                                  Some(args[2].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "PART" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::PART(suffix.clone(), None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::PART(suffix.to_owned(), None)
                 } else if args.len() == 1 {
-                    Command::PART(args[0].clone(), Some(suffix.clone()))
+                    Command::PART(args[0].to_owned(), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 1 {
-                    Command::PART(args[0].clone(), None)
+                    Command::PART(args[0].to_owned(), None)
                 } else if args.len() == 2 {
-                    Command::PART(args[0].clone(), Some(args[1].clone()))
+                    Command::PART(args[0].to_owned(), Some(args[1].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "TOPIC" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::TOPIC(suffix.clone(), None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::TOPIC(suffix.to_owned(), None)
                 } else if args.len() == 1 {
-                    Command::TOPIC(args[0].clone(), Some(suffix.clone()))
+                    Command::TOPIC(args[0].to_owned(), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 1 {
-                    Command::TOPIC(args[0].clone(), None)
+                    Command::TOPIC(args[0].to_owned(), None)
                 } else if args.len() == 2 {
-                    Command::TOPIC(args[0].clone(), Some(args[1].clone()))
+                    Command::TOPIC(args[0].to_owned(), Some(args[1].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "NAMES" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::NAMES(Some(suffix.clone()), None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::NAMES(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
-                    Command::NAMES(Some(args[0].clone()), Some(suffix.clone()))
+                    Command::NAMES(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 0 {
                     Command::NAMES(None, None)
                 } else if args.len() == 1 {
-                    Command::NAMES(Some(args[0].clone()), None)
+                    Command::NAMES(Some(args[0].to_owned()), None)
                 } else if args.len() == 2 {
-                    Command::NAMES(Some(args[0].clone()), Some(args[1].clone()))
+                    Command::NAMES(Some(args[0].to_owned()), Some(args[1].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "LIST" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::LIST(Some(suffix.clone()), None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::LIST(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
-                    Command::LIST(Some(args[0].clone()), Some(suffix.clone()))
+                    Command::LIST(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 0 {
                     Command::LIST(None, None)
                 } else if args.len() == 1 {
-                    Command::LIST(Some(args[0].clone()), None)
+                    Command::LIST(Some(args[0].to_owned()), None)
                 } else if args.len() == 2 {
-                    Command::LIST(Some(args[0].clone()), Some(args[1].clone()))
+                    Command::LIST(Some(args[0].to_owned()), Some(args[1].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "INVITE" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::INVITE(args[0].clone(), suffix.clone())
+                    Command::INVITE(args[0].to_owned(), suffix.to_owned())
                 },
                 None => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::INVITE(args[0].clone(), args[1].clone())
+                    Command::INVITE(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "KICK" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::KICK(args[0].clone(), args[1].clone(), Some(suffix.clone()))
+                    Command::KICK(args[0].to_owned(), args[1].to_owned(), Some(suffix.to_owned()))
                 },
                 None => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::KICK(args[0].clone(), args[1].clone(), None)
+                    Command::KICK(args[0].to_owned(), args[1].to_owned(), None)
                 },
             }
         } else if let "PRIVMSG" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::PRIVMSG(args[0].clone(), suffix.clone())
+                    Command::PRIVMSG(args[0].to_owned(), suffix.to_owned())
                 },
                 None => return Err(invalid_input())
             }
         } else if let "NOTICE" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::NOTICE(args[0].clone(), suffix.clone())
+                    Command::NOTICE(args[0].to_owned(), suffix.to_owned())
                 },
                 None => return Err(invalid_input())
             }
         } else if let "MOTD" = cmd {
             if args.len() != 0 { return Err(invalid_input()) }
             match suffix {
-                Some(ref suffix) => Command::MOTD(Some(suffix.clone())),
+                Some(suffix) => Command::MOTD(Some(suffix.to_owned())),
                 None => Command::MOTD(None)
             }
         } else if let "LUSERS" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::LUSERS(Some(suffix.clone()), None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::LUSERS(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
-                    Command::LUSERS(Some(args[0].clone()), Some(suffix.clone()))
+                    Command::LUSERS(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 0 {
                     Command::LUSERS(None, None)
                 } else if args.len() == 1 {
-                    Command::LUSERS(Some(args[0].clone()), None)
+                    Command::LUSERS(Some(args[0].to_owned()), None)
                 } else if args.len() == 2 {
-                    Command::LUSERS(Some(args[0].clone()), Some(args[1].clone()))
+                    Command::LUSERS(Some(args[0].to_owned()), Some(args[1].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
@@ -643,34 +673,34 @@ impl<'a> From<&'a Message> for Result<Command> {
         } else if let "VERSION" = cmd {
             if args.len() != 0 { return Err(invalid_input()) }
             match suffix {
-                Some(ref suffix) => Command::VERSION(Some(suffix.clone())),
+                Some(suffix) => Command::VERSION(Some(suffix.to_owned())),
                 None => Command::VERSION(None)
             }
         } else if let "STATS" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::STATS(Some(suffix.clone()), None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::STATS(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
-                    Command::STATS(Some(args[0].clone()), Some(suffix.clone()))
+                    Command::STATS(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 0 {
                     Command::STATS(None, None)
                 } else if args.len() == 1 {
-                    Command::STATS(Some(args[0].clone()), None)
+                    Command::STATS(Some(args[0].to_owned()), None)
                 } else if args.len() == 2 {
-                    Command::STATS(Some(args[0].clone()), Some(args[1].clone()))
+                    Command::STATS(Some(args[0].to_owned()), Some(args[1].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "LINKS" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::LINKS(None, Some(suffix.clone()))
+                Some(suffix) => if args.len() == 0 {
+                    Command::LINKS(None, Some(suffix.to_owned()))
                 } else if args.len() == 1 {
-                    Command::LINKS(Some(args[0].clone()), Some(suffix.clone()))
+                    Command::LINKS(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
@@ -683,176 +713,176 @@ impl<'a> From<&'a Message> for Result<Command> {
         } else if let "TIME" = cmd {
             if args.len() != 0 { return Err(invalid_input()) }
             match suffix {
-                Some(ref suffix) => Command::TIME(Some(suffix.clone())),
+                Some(suffix) => Command::TIME(Some(suffix.to_owned())),
                 None => Command::TIME(None)
             }
         } else if let "CONNECT" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::CONNECT(args[0].clone(), args[1].clone(), Some(suffix.clone()))
+                    Command::CONNECT(args[0].to_owned(), args[1].to_owned(), Some(suffix.to_owned()))
                 },
                 None => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::CONNECT(args[0].clone(), args[1].clone(), None)
+                    Command::CONNECT(args[0].to_owned(), args[1].to_owned(), None)
                 }
             }
         } else if let "TRACE" = cmd {
             if args.len() != 0 { return Err(invalid_input()) }
             match suffix {
-                Some(ref suffix) => Command::TRACE(Some(suffix.clone())),
+                Some(suffix) => Command::TRACE(Some(suffix.to_owned())),
                 None => Command::TRACE(None)
             }
         } else if let "ADMIN" = cmd {
             if args.len() != 0 { return Err(invalid_input()) }
             match suffix {
-                Some(ref suffix) => Command::ADMIN(Some(suffix.clone())),
+                Some(suffix) => Command::ADMIN(Some(suffix.to_owned())),
                 None => Command::ADMIN(None)
             }
         } else if let "INFO" = cmd {
             if args.len() != 0 { return Err(invalid_input()) }
             match suffix {
-                Some(ref suffix) => Command::INFO(Some(suffix.clone())),
+                Some(suffix) => Command::INFO(Some(suffix.to_owned())),
                 None => Command::INFO(None)
             }
         } else if let "SERVLIST" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::SERVLIST(Some(suffix.clone()), None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::SERVLIST(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
-                    Command::SERVLIST(Some(args[0].clone()), Some(suffix.clone()))
+                    Command::SERVLIST(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 0 {
                     Command::SERVLIST(None, None)
                 } else if args.len() == 1 {
-                    Command::SERVLIST(Some(args[0].clone()), None)
+                    Command::SERVLIST(Some(args[0].to_owned()), None)
                 } else if args.len() == 2 {
-                    Command::SERVLIST(Some(args[0].clone()), Some(args[1].clone()))
+                    Command::SERVLIST(Some(args[0].to_owned()), Some(args[1].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "SQUERY" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::SQUERY(args[0].clone(), suffix.clone())
+                    Command::SQUERY(args[0].to_owned(), suffix.to_owned())
                 },
                 None => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::SQUERY(args[0].clone(), args[1].clone())
+                    Command::SQUERY(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "WHO" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::WHO(Some(suffix.clone()), None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::WHO(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
-                    Command::WHO(Some(args[0].clone()), Some(&suffix[..] == "o"))
+                    Command::WHO(Some(args[0].to_owned()), Some(&suffix[..] == "o"))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 0 {
                     Command::WHO(None, None)
                 } else if args.len() == 1 {
-                    Command::WHO(Some(args[0].clone()), None)
+                    Command::WHO(Some(args[0].to_owned()), None)
                 } else if args.len() == 2 {
-                    Command::WHO(Some(args[0].clone()), Some(&args[1][..] == "o"))
+                    Command::WHO(Some(args[0].to_owned()), Some(&args[1][..] == "o"))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "WHOIS" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::WHOIS(None, suffix.clone())
+                Some(suffix) => if args.len() == 0 {
+                    Command::WHOIS(None, suffix.to_owned())
                 } else if args.len() == 1 {
-                    Command::WHOIS(Some(args[0].clone()), suffix.clone())
+                    Command::WHOIS(Some(args[0].to_owned()), suffix.to_owned())
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 1 {
-                    Command::WHOIS(None, args[0].clone())
+                    Command::WHOIS(None, args[0].to_owned())
                 } else if args.len() == 2 {
-                    Command::WHOIS(Some(args[0].clone()), args[1].clone())
+                    Command::WHOIS(Some(args[0].to_owned()), args[1].to_owned())
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "WHOWAS" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::WHOWAS(suffix.clone(), None, None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::WHOWAS(suffix.to_owned(), None, None)
                 } else if args.len() == 1 {
-                    Command::WHOWAS(args[0].clone(), None, Some(suffix.clone()))
+                    Command::WHOWAS(args[0].to_owned(), None, Some(suffix.to_owned()))
                 } else if args.len() == 2 {
-                    Command::WHOWAS(args[0].clone(), Some(args[1].clone()),
-                                    Some(suffix.clone()))
+                    Command::WHOWAS(args[0].to_owned(), Some(args[1].to_owned()),
+                                    Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 1 {
-                    Command::WHOWAS(args[0].clone(), None, None)
+                    Command::WHOWAS(args[0].to_owned(), None, None)
                 } else if args.len() == 2 {
-                    Command::WHOWAS(args[0].clone(), None, Some(args[1].clone()))
+                    Command::WHOWAS(args[0].to_owned(), None, Some(args[1].to_owned()))
                 } else if args.len() == 3 {
-                    Command::WHOWAS(args[0].clone(), Some(args[1].clone()),
-                                    Some(args[2].clone()))
+                    Command::WHOWAS(args[0].to_owned(), Some(args[1].to_owned()),
+                                    Some(args[2].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "KILL" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::KILL(args[0].clone(), suffix.clone())
+                    Command::KILL(args[0].to_owned(), suffix.to_owned())
                 },
                 None => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::KILL(args[0].clone(), args[1].clone())
+                    Command::KILL(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "PING" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::PING(suffix.clone(), None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::PING(suffix.to_owned(), None)
                 } else if args.len() == 1 {
-                    Command::PING(args[0].clone(), Some(suffix.clone()))
+                    Command::PING(args[0].to_owned(), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 1 {
-                    Command::PING(args[0].clone(), None)
+                    Command::PING(args[0].to_owned(), None)
                 } else if args.len() == 2 {
-                    Command::PING(args[0].clone(), Some(args[1].clone()))
+                    Command::PING(args[0].to_owned(), Some(args[1].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "PONG" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::PONG(suffix.clone(), None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::PONG(suffix.to_owned(), None)
                 } else if args.len() == 1 {
-                    Command::PONG(args[0].clone(), Some(suffix.clone()))
+                    Command::PONG(args[0].to_owned(), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 1 {
-                    Command::PONG(args[0].clone(), None)
+                    Command::PONG(args[0].to_owned(), None)
                 } else if args.len() == 2 {
-                    Command::PONG(args[0].clone(), Some(args[1].clone()))
+                    Command::PONG(args[0].to_owned(), Some(args[1].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "ERROR" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::ERROR(suffix.clone())
+                Some(suffix) => if args.len() == 0 {
+                    Command::ERROR(suffix.to_owned())
                 } else {
                     return Err(invalid_input())
                 },
@@ -860,8 +890,8 @@ impl<'a> From<&'a Message> for Result<Command> {
             }
         } else if let "AWAY" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::AWAY(Some(suffix.clone()))
+                Some(suffix) => if args.len() == 0 {
+                    Command::AWAY(Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
@@ -887,193 +917,193 @@ impl<'a> From<&'a Message> for Result<Command> {
             }
         } else if let "SUMMON" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::SUMMON(suffix.clone(), None, None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::SUMMON(suffix.to_owned(), None, None)
                 } else if args.len() == 1 {
-                    Command::SUMMON(args[0].clone(), Some(suffix.clone()), None)
+                    Command::SUMMON(args[0].to_owned(), Some(suffix.to_owned()), None)
                 } else if args.len() == 2 {
-                    Command::SUMMON(args[0].clone(), Some(args[1].clone()),
-                                    Some(suffix.clone()))
+                    Command::SUMMON(args[0].to_owned(), Some(args[1].to_owned()),
+                                    Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 1 {
-                    Command::SUMMON(args[0].clone(), None, None)
+                    Command::SUMMON(args[0].to_owned(), None, None)
                 } else if args.len() == 2 {
-                    Command::SUMMON(args[0].clone(), Some(args[1].clone()), None)
+                    Command::SUMMON(args[0].to_owned(), Some(args[1].to_owned()), None)
                 } else if args.len() == 3 {
-                    Command::SUMMON(args[0].clone(), Some(args[1].clone()),
-                                    Some(args[2].clone()))
+                    Command::SUMMON(args[0].to_owned(), Some(args[1].to_owned()),
+                                    Some(args[2].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "USERS" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 0 { return Err(invalid_input()) }
-                    Command::USERS(Some(suffix.clone()))
+                    Command::USERS(Some(suffix.to_owned()))
                 },
                 None => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::USERS(Some(args[0].clone()))
+                    Command::USERS(Some(args[0].to_owned()))
                 }
             }
         } else if let "WALLOPS" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 0 { return Err(invalid_input()) }
-                    Command::WALLOPS(suffix.clone())
+                    Command::WALLOPS(suffix.to_owned())
                 },
                 None => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::WALLOPS(args[0].clone())
+                    Command::WALLOPS(args[0].to_owned())
                 }
             }
         } else if let "USERHOST" = cmd {
             if suffix.is_none() {
-                Command::USERHOST(args.to_owned())
+                Command::USERHOST(args.into_iter().map(|s| s.to_owned()).collect())
             } else {
                 return Err(invalid_input())
             }
         } else if let "ISON" = cmd {
             if suffix.is_none() {
-                Command::USERHOST(args.to_owned())
+                Command::USERHOST(args.into_iter().map(|s| s.to_owned()).collect())
             } else {
                 return Err(invalid_input())
             }
         } else if let "SAJOIN" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::SAJOIN(args[0].clone(), suffix.clone())
+                    Command::SAJOIN(args[0].to_owned(), suffix.to_owned())
                 },
                 None => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::SAJOIN(args[0].clone(), args[1].clone())
+                    Command::SAJOIN(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "SAMODE" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 1 {
-                    Command::SAMODE(args[0].clone(), suffix.clone(), None)
+                Some(suffix) => if args.len() == 1 {
+                    Command::SAMODE(args[0].to_owned(), suffix.to_owned(), None)
                 } else if args.len() == 2 {
-                    Command::SAMODE(args[0].clone(), args[1].clone(), Some(suffix.clone()))
+                    Command::SAMODE(args[0].to_owned(), args[1].to_owned(), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 2 {
-                    Command::SAMODE(args[0].clone(), args[1].clone(), None)
+                    Command::SAMODE(args[0].to_owned(), args[1].to_owned(), None)
                 } else if args.len() == 3 {
-                    Command::SAMODE(args[0].clone(), args[1].clone(), Some(args[2].clone()))
+                    Command::SAMODE(args[0].to_owned(), args[1].to_owned(), Some(args[2].to_owned()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "SANICK" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::SANICK(args[0].clone(), suffix.clone())
+                    Command::SANICK(args[0].to_owned(), suffix.to_owned())
                 },
                 None => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::SANICK(args[0].clone(), args[1].clone())
+                    Command::SANICK(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "SAPART" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::SAPART(args[0].clone(), suffix.clone())
+                    Command::SAPART(args[0].to_owned(), suffix.to_owned())
                 },
                 None => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::SAPART(args[0].clone(), args[1].clone())
+                    Command::SAPART(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "SAQUIT" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::SAQUIT(args[0].clone(), suffix.clone())
+                    Command::SAQUIT(args[0].to_owned(), suffix.to_owned())
                 },
                 None => {
                     if args.len() != 2 { return Err(invalid_input()) }
-                    Command::SAQUIT(args[0].clone(), args[1].clone())
+                    Command::SAQUIT(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "NICKSERV" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 0 { return Err(invalid_input()) }
-                    Command::NICKSERV(suffix.clone())
+                    Command::NICKSERV(suffix.to_owned())
                 },
                 None => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::NICKSERV(args[0].clone())
+                    Command::NICKSERV(args[0].to_owned())
                 }
             }
         } else if let "CHANSERV" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 0 { return Err(invalid_input()) }
-                    Command::CHANSERV(suffix.clone())
+                    Command::CHANSERV(suffix.to_owned())
                 },
                 None => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::CHANSERV(args[0].clone())
+                    Command::CHANSERV(args[0].to_owned())
                 }
             }
         } else if let "OPERSERV" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 0 { return Err(invalid_input()) }
-                    Command::OPERSERV(suffix.clone())
+                    Command::OPERSERV(suffix.to_owned())
                 },
                 None => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::OPERSERV(args[0].clone())
+                    Command::OPERSERV(args[0].to_owned())
                 }
             }
         } else if let "BOTSERV" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 0 { return Err(invalid_input()) }
-                    Command::BOTSERV(suffix.clone())
+                    Command::BOTSERV(suffix.to_owned())
                 },
                 None => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::BOTSERV(args[0].clone())
+                    Command::BOTSERV(args[0].to_owned())
                 }
             }
         } else if let "HOSTSERV" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 0 { return Err(invalid_input()) }
-                    Command::HOSTSERV(suffix.clone())
+                    Command::HOSTSERV(suffix.to_owned())
                 },
                 None => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::HOSTSERV(args[0].clone())
+                    Command::HOSTSERV(args[0].to_owned())
                 }
             }
         } else if let "MEMOSERV" = cmd {
             match suffix {
-                Some(ref suffix) => {
+                Some(suffix) => {
                     if args.len() != 0 { return Err(invalid_input()) }
-                    Command::MEMOSERV(suffix.clone())
+                    Command::MEMOSERV(suffix.to_owned())
                 },
                 None => {
                     if args.len() != 1 { return Err(invalid_input()) }
-                    Command::MEMOSERV(args[0].clone())
+                    Command::MEMOSERV(args[0].to_owned())
                 }
             }
         } else if let "CAP" = cmd {
             if args.len() == 1 {
                 if let Ok(cmd) = args[0].parse() {
                     match suffix {
-                        Some(ref suffix) => Command::CAP(None, cmd, None, Some(suffix.clone())),
+                        Some(suffix) => Command::CAP(None, cmd, None, Some(suffix.to_owned())),
                         None => Command::CAP(None, cmd, None, None),
                     }
                 } else {
@@ -1082,15 +1112,15 @@ impl<'a> From<&'a Message> for Result<Command> {
             } else if args.len() == 2 {
                 if let Ok(cmd) = args[0].parse() {
                     match suffix {
-                        Some(ref suffix) => Command::CAP(None, cmd, Some(args[1].clone()),
-                                                         Some(suffix.clone())),
-                        None => Command::CAP(None, cmd, Some(args[1].clone()), None),
+                        Some(suffix) => Command::CAP(None, cmd, Some(args[1].to_owned()),
+                                                         Some(suffix.to_owned())),
+                        None => Command::CAP(None, cmd, Some(args[1].to_owned()), None),
                     }
                 } else if let Ok(cmd) = args[1].parse() {
                     match suffix {
-                        Some(ref suffix) => Command::CAP(Some(args[0].clone()), cmd, None,
-                                                         Some(suffix.clone())),
-                        None => Command::CAP(Some(args[0].clone()), cmd, None, None),
+                        Some(suffix) => Command::CAP(Some(args[0].to_owned()), cmd, None,
+                                                         Some(suffix.to_owned())),
+                        None => Command::CAP(Some(args[0].to_owned()), cmd, None, None),
                     }
                 } else {
                     return Err(invalid_input())
@@ -1098,10 +1128,10 @@ impl<'a> From<&'a Message> for Result<Command> {
             } else if args.len() == 3 {
                 if let Ok(cmd) = args[1].parse() {
                     match suffix {
-                        Some(ref suffix) => Command::CAP(Some(args[0].clone()), cmd,
-                                                         Some(args[2].clone()),
-                                                         Some(suffix.clone())),
-                        None => Command::CAP(Some(args[0].clone()), cmd, Some(args[2].clone()),
+                        Some(suffix) => Command::CAP(Some(args[0].to_owned()), cmd,
+                                                         Some(args[2].to_owned()),
+                                                         Some(suffix.to_owned())),
+                        None => Command::CAP(Some(args[0].to_owned()), cmd, Some(args[2].to_owned()),
                                              None),
                     }
                 } else {
@@ -1112,26 +1142,26 @@ impl<'a> From<&'a Message> for Result<Command> {
             }
         } else if let "AUTHENTICATE" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::AUTHENTICATE(suffix.clone())
+                Some(suffix) => if args.len() == 0 {
+                    Command::AUTHENTICATE(suffix.to_owned())
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 1 {
-                    Command::AUTHENTICATE(args[0].clone())
+                    Command::AUTHENTICATE(args[0].to_owned())
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "ACCOUNT" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::ACCOUNT(suffix.clone())
+                Some(suffix) => if args.len() == 0 {
+                    Command::ACCOUNT(suffix.to_owned())
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 1 {
-                    Command::ACCOUNT(args[0].clone())
+                    Command::ACCOUNT(args[0].to_owned())
                 } else {
                     return Err(invalid_input())
                 }
@@ -1141,16 +1171,23 @@ impl<'a> From<&'a Message> for Result<Command> {
                 match suffix {
                     Some(_) => return Err(invalid_input()),
                     None => match args[1].parse() {
-                        Ok(c) => Command::METADATA(args[0].clone(), Some(c), None, None),
+                        Ok(c) => Command::METADATA(args[0].to_owned(), Some(c), None, None),
                         Err(_) => return Err(invalid_input()),
                     },
                 }
             } else if args.len() > 2 {
                 match args[1].parse() {
-                    Ok(c) => Command::METADATA(args[0].clone(), Some(c),
-                                               Some(args[1..].to_owned()), suffix.clone()),
+                    Ok(c) => Command::METADATA(
+                        args[0].to_owned(), Some(c),
+                        Some(args.into_iter().skip(1).map(|s| s.to_owned()).collect()),
+                        suffix.map(|s| s.to_owned())
+                    ),
                     Err(_) => if args.len() == 3 && suffix.is_some() {
-                        Command::METADATA(args[0].clone(), None, Some(args[1..].to_owned()), suffix.clone())
+                        Command::METADATA(
+                            args[0].to_owned(), None,
+                            Some(args.into_iter().skip(1).map(|s| s.to_owned()).collect()),
+                            suffix.map(|s| s.to_owned())
+                        )
                     } else {
                         return Err(invalid_input())
                     },
@@ -1160,64 +1197,67 @@ impl<'a> From<&'a Message> for Result<Command> {
             }
         } else if let "MONITOR" = cmd {
             if args.len() == 1 {
-                Command::MONITOR(args[0].clone(), suffix.clone())
+                Command::MONITOR(args[0].to_owned(), suffix.map(|s| s.to_owned()))
             } else {
                 return Err(invalid_input())
             }
         } else if let "BATCH" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 0 {
-                    Command::BATCH(suffix.clone(), None, None)
+                Some(suffix) => if args.len() == 0 {
+                    Command::BATCH(suffix.to_owned(), None, None)
                 } else if args.len() == 1 {
-                    Command::BATCH(args[0].clone(), Some(
-                        suffix.parse().unwrap_or(return Err(invalid_input()))
+                    Command::BATCH(args[0].to_owned(), Some(
+                        suffix.parse().unwrap()
                     ), None)
                 } else if args.len() > 1 {
-                    Command::BATCH(args[0].clone(), Some(
-                        args[1].parse().unwrap_or(return Err(invalid_input()))
+                    Command::BATCH(args[0].to_owned(), Some(
+                        args[1].parse().unwrap()
                     ), Some(
-                        vec![suffix.clone()].into_iter().chain(args[2..].to_owned()).collect()
+                        vec![suffix.to_owned()].into_iter().chain(
+                            args.into_iter().skip(2).map(|s| s.to_owned())
+                        ).collect()
                     ))
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 1 {
-                    Command::BATCH(args[0].clone(), None, None)
+                    Command::BATCH(args[0].to_owned(), None, None)
                 } else if args.len() == 2 {
-                    Command::BATCH(args[0].clone(), Some(
-                        args[1].parse().unwrap_or(return Err(invalid_input()))
+                    Command::BATCH(args[0].to_owned(), Some(
+                        args[1].parse().unwrap()
                     ), None)
                 } else if args.len() > 2 {
-                    Command::BATCH(args[0].clone(), Some(
-                        args[1].parse().unwrap_or(return Err(invalid_input()))
-                    ), Some(args[2..].to_owned()))
+                    Command::BATCH(args[0].to_owned(), Some(
+                        args[1].parse().unwrap()
+                    ), Some(args.iter().skip(2).map(|&s| s.to_owned()).collect()))
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "CHGHOST" = cmd {
             match suffix {
-                Some(ref suffix) => if args.len() == 1 {
-                    Command::CHGHOST(args[0].clone(), suffix.clone())
+                Some(suffix) => if args.len() == 1 {
+                    Command::CHGHOST(args[0].to_owned(), suffix.to_owned())
                 } else {
                     return Err(invalid_input())
                 },
                 None => if args.len() == 2 {
-                    Command::CHGHOST(args[0].clone(), args[1].clone())
+                    Command::CHGHOST(args[0].to_owned(), args[1].to_owned())
                 } else {
                     return Err(invalid_input())
                 }
             }
+        } else if let Ok(resp) = cmd.parse() {
+            Command::Response(
+                resp, args.into_iter().map(|s| s.to_owned()).collect(),
+                suffix.map(|s| s.to_owned())
+            )
         } else {
-            Command::RAW(m.command.clone(), args.to_owned(), suffix.clone())
+            Command::Raw(
+                cmd.to_owned(), args.into_iter().map(|s| s.to_owned()).collect(),
+                suffix.map(|s| s.to_owned())
+            )
         })
-    }
-}
-
-impl Command {
-    /// Converts a potential Message result into a potential Command result.
-    pub fn from_message_io(m: Result<Message>) -> Result<Command> {
-        m.and_then(|msg| (&msg).into())
     }
 }
 
@@ -1255,11 +1295,6 @@ impl CapSubCommand {
             &CapSubCommand::NEW   => "NEW",
             &CapSubCommand::DEL   => "DEL",
         }
-    }
-
-    // This makes some earlier lines shorter.
-    fn string(&self) -> String {
-        self.to_str().to_owned()
     }
 }
 
@@ -1304,11 +1339,6 @@ impl MetadataSubCommand {
             &MetadataSubCommand::CLEAR => "CLEAR",
         }
     }
-
-    // This makes some earlier lines shorter.
-    fn string(&self) -> String {
-        self.to_str().to_owned()
-    }
 }
 
 impl FromStr for MetadataSubCommand {
@@ -1343,11 +1373,6 @@ impl BatchSubCommand {
             &BatchSubCommand::NETJOIN       => "NETJOIN",
             &BatchSubCommand::CUSTOM(ref s) => &s,
         }
-    }
-
-    // This makes some earlier lines shorter.
-    fn string(&self) -> String {
-        self.to_str().to_owned()
     }
 }
 
