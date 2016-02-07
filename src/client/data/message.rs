@@ -38,10 +38,10 @@ impl Message {
         // <servername> ::= <host>
         self.prefix.as_ref().and_then(|s|
             match (s.find('!'), s.find('@'), s.find('.')) {
-                (Some(i), _, _) => Some(&s[..i]), // nick!user
-                (None, Some(i), _) => Some(&s[..i]), // nick@host
-                (None, None, None) => Some(&s), // nick
-                _ => None // server.name
+                (Some(i), _, _) => Some(&s[..i]), // <nick> '!' <user> [ '@' <host> ]
+                (None, Some(i), _) => Some(&s[..i]), // <nick> '@' <host>
+                (None, None, None) => Some(&s), // <nick>
+                _ => None // <servername>
             }
         )
     }
@@ -157,7 +157,7 @@ mod test {
         ).unwrap().source_nickname(), Some("test"));
 
         assert_eq!(Message::new(
-            Some("test!test@awe.did.you.know.irc.hostnames.have.dots"), "PING", vec![], Some("data")
+            Some("test!test@irc.test.com"), "PING", vec![], Some("data")
         ).unwrap().source_nickname(), Some("test"));
 
         assert_eq!(Message::new(
