@@ -34,12 +34,14 @@ impl Message {
 
     /// Gets the nickname of the message source, if it exists.
     pub fn source_nickname(&self) -> Option<&str> {
+        // <prefix> ::= <servername> | <nick> [ '!' <user> ] [ '@' <host> ]
+        // <servername> ::= <host>
         self.prefix.as_ref().and_then(|s|
             match (s.find('!'), s.find('@'), s.find('.')) {
-                (_, _, Some(_)) => None,
-                (Some(i), _, None) => Some(&s[..i]),
-                (None, Some(i), None) => Some(&s[..i]),
-                (None, None, None) => Some(&s)
+                (Some(i), _, _) => Some(&s[..i]), // nick!user
+                (None, Some(i), _) => Some(&s[..i]), // nick@host
+                (None, None, None) => Some(&s), // nick
+                _ => None // server.name
             }
         )
     }
