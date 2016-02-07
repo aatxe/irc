@@ -141,15 +141,31 @@ mod test {
         assert_eq!(Message::new(
             None, "PING", vec![], Some("data")
         ).unwrap().source_nickname(), None);
+
         assert_eq!(Message::new(
             Some("irc.test.net"), "PING", vec![], Some("data")
         ).unwrap().source_nickname(), None);
+
         assert_eq!(Message::new(
             Some("test!test@test"), "PING", vec![], Some("data")
         ).unwrap().source_nickname(), Some("test"));
+
         assert_eq!(Message::new(
             Some("test@test"), "PING", vec![], Some("data")
         ).unwrap().source_nickname(), Some("test"));
+
+        assert_eq!(Message::new(
+            Some("test!test@awe.did.you.know.irc.hostnames.have.dots"), "PING", vec![], Some("data")
+        ).unwrap().source_nickname(), Some("test"));
+
+        assert_eq!(Message::new(
+            Some("test!test@127.0.0.1"), "PING", vec![], Some("data")
+        ).unwrap().source_nickname(), Some("test"));
+
+        assert_eq!(Message::new(
+            Some("test@test.com"), "PING", vec![], Some("data")
+        ).unwrap().source_nickname(), Some("test"));
+
         assert_eq!(Message::new(
             Some("test"), "PING", vec![], Some("data")
         ).unwrap().source_nickname(), Some("test"));
