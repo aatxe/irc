@@ -44,6 +44,12 @@ pub struct Config {
     pub ping_time: Option<u32>,
     /// The amount of time in seconds for a client to reconnect due to no ping response.
     pub ping_timeout: Option<u32>,
+    /// Whether the client should use NickServ GHOST to reclaim its primary nickname if it is in use.
+    /// This has no effect if `nick_password` is not set.
+    pub should_ghost: Option<bool>,
+    /// The command(s) that should be sent to NickServ to recover a nickname. The nickname and password will be appended in that order after the command.
+    /// E.g. `["RECOVER", "RELEASE"]` means `RECOVER nick pass` and `RELEASE nick pass` will be sent in that order.
+    pub ghost_sequence: Option<Vec<String>>,
     /// A map of additional options to be stored in config.
     pub options: Option<HashMap<String, String>>,
 }
@@ -168,6 +174,18 @@ impl Config {
         self.ping_timeout.as_ref().map(|t| *t).unwrap_or(10)
     }
 
+    /// Gets whether or not to use NickServ GHOST
+    /// This defaults to false when not specified.
+    pub fn should_ghost(&self) -> bool {
+        self.should_ghost.as_ref().map(|u| *u).unwrap_or(false)
+    }
+
+    /// Gets the NickServ command sequence to recover a nickname.
+    /// This defaults to `["GHOST"]` when not specified.
+    pub fn ghost_sequence(&self) -> Vec<&str> {
+        self.ghost_sequence.as_ref().map(|v| v.iter().map(|s| &s[..]).collect()).unwrap_or(vec!["GHOST"])
+    }
+
     /// Looks up the specified string in the options map.
     /// This uses indexing, and thus panics when the string is not present.
     /// This will also panic if used and there are no options.
@@ -202,6 +220,8 @@ mod test {
             user_info: None,
             ping_time: None,
             ping_timeout: None,
+            should_ghost: None,
+            ghost_sequence: None,
             options: Some(HashMap::new()),
         };
         assert_eq!(Config::load(Path::new("client_config.json")).unwrap(), cfg);
@@ -226,6 +246,8 @@ mod test {
             user_info: None,
             ping_time: None,
             ping_timeout: None,
+            should_ghost: None,
+            ghost_sequence: None,
             options: Some(HashMap::new()),
         };
         assert_eq!(Config::load("client_config.json").unwrap(), cfg);

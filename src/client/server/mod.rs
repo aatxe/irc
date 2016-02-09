@@ -342,6 +342,16 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
             Command::Response(Response::RPL_ENDOFMOTD, _, _) |
             Command::Response(Response::ERR_NOMOTD, _, _) => {
                 if self.config().nick_password() != "" {
+                    let mut index = self.state.alt_nick_index.write().unwrap();
+                    if self.config().should_ghost() && *index != 0 {
+                        for seq in self.config().ghost_sequence().iter() {
+                            try!(self.send(NICKSERV(
+                                format!("{} {} {}", seq, self.config().nickname(), self.config().nick_password())
+                            )));
+                        }
+                        *index = 0;
+                        try!(self.send(NICK(self.config().nickname().to_owned())))
+                    }
                     try!(self.send(NICKSERV(
                         format!("IDENTIFY {}", self.config().nick_password())
                     )))
@@ -358,7 +368,7 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
                 let alt_nicks = self.config().alternate_nicknames();
                 let mut index = self.state.alt_nick_index.write().unwrap();
                 if *index >= alt_nicks.len() {
-                    panic!("All specified nicknames were in use.")
+                    panic!("All specified nicknames were in use or disallowed.")
                 } else {
                     try!(self.send(NICK(alt_nicks[*index].to_owned())));
                     *index += 1;
@@ -546,6 +556,49 @@ mod test {
         }
         assert_eq!(&get_server_value(server)[..],
         "NICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n");
+    }
+
+    #[test]
+    fn handle_end_motd_with_ghost() {
+        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
+                     :irc.test.net 376 test2 :End of /MOTD command.\r\n";
+        let server = IrcServer::from_connection(Config {
+            nickname: Some(format!("test")),
+            alt_nicks: Some(vec![format!("test2")]),
+            nick_password: Some(format!("password")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            should_ghost: Some(true),
+            .. Default::default()
+        }, Connection::new(
+           Cursor::new(value.as_bytes().to_vec()), Vec::new()
+        ));
+        for message in server.iter() {
+            println!("{:?}", message);
+        }
+        assert_eq!(&get_server_value(server)[..],
+        "NICK :test2\r\nNICKSERV GHOST test password\r\nNICK :test\r\nNICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n");
+    }
+
+    #[test]
+    fn handle_end_motd_with_ghost_seq() {
+        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
+                     :irc.test.net 376 test2 :End of /MOTD command.\r\n";
+        let server = IrcServer::from_connection(Config {
+            nickname: Some(format!("test")),
+            alt_nicks: Some(vec![format!("test2")]),
+            nick_password: Some(format!("password")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            should_ghost: Some(true),
+            ghost_sequence: Some(vec![format!("RECOVER"), format!("RELEASE")]),
+            .. Default::default()
+        }, Connection::new(
+           Cursor::new(value.as_bytes().to_vec()), Vec::new()
+        ));
+        for message in server.iter() {
+            println!("{:?}", message);
+        }
+        assert_eq!(&get_server_value(server)[..],
+        "NICK :test2\r\nNICKSERV RECOVER test password\r\nNICKSERV RELEASE test password\r\nNICK :test\r\nNICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n");
     }
 
     #[test]
