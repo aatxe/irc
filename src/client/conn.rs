@@ -7,8 +7,6 @@ use std::io::ErrorKind;
 use std::net::TcpStream;
 #[cfg(feature = "ssl")] use std::result::Result as StdResult;
 use std::sync::Mutex;
-#[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
-#[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
 #[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslMethod, SslStream};
 #[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
 
@@ -113,59 +111,22 @@ fn ssl_to_io<T>(res: StdResult<T, SslError>) -> Result<T> {
 impl Connection for NetConnection {
     #[cfg(feature = "encode")]
     fn send(&self, msg: &str, encoding: &str) -> Result<()> {
-        let encoding = match encoding_from_whatwg_label(encoding) {
-            Some(enc) => enc,
-            None => return Err(Error::new(
-                ErrorKind::InvalidInput, &format!("Failed to find encoder. ({})", encoding)[..]
-            ))
-        };
-        let data = match encoding.encode(msg, EncoderTrap::Replace) {
-            Ok(data) => data,
-            Err(data) => return Err(Error::new(ErrorKind::InvalidInput,
-                &format!("Failed to encode {} as {}.", data, encoding.name())[..]
-            ))
-        };
-        let mut writer = self.writer.lock().unwrap();
-        try!(writer.write_all(&data));
-        writer.flush()
+        imp::send(&self.writer, msg, encoding)
     }
 
     #[cfg(not(feature = "encode"))]
     fn send(&self, msg: &str) -> Result<()> {
-        let mut writer = self.writer.lock().unwrap();
-        try!(writer.write_all(msg.as_bytes()));
-        writer.flush()
+        imp::send(&self.writer, msg)
     }
 
     #[cfg(feature = "encoding")]
     fn recv(&self, encoding: &str) -> Result<String> {
-        let encoding = match encoding_from_whatwg_label(encoding) {
-            Some(enc) => enc,
-            None => return Err(Error::new(
-                ErrorKind::InvalidInput, &format!("Failed to find decoder. ({})", encoding)[..]
-            ))
-        };
-        let mut buf = Vec::new();
-        self.reader.lock().unwrap().read_until(b'\n', &mut buf).and_then(|_|
-            match encoding.decode(&buf, DecoderTrap::Replace) {
-                _ if buf.is_empty() => Err(Error::new(ErrorKind::Other, "EOF")),
-                Ok(data) => Ok(data),
-                Err(data) => return Err(Error::new(ErrorKind::InvalidInput,
-                    &format!("Failed to decode {} as {}.", data, encoding.name())[..]
-                ))
-            }
-        )
+        imp::recv(&self.reader, encoding)
     }
 
     #[cfg(not(feature = "encoding"))]
     fn recv(&self) -> Result<String> {
-        let mut ret = String::new();
-        try!(self.reader.lock().unwrap().read_line(&mut ret));
-        if ret.is_empty() {
-            Err(Error::new(ErrorKind::Other, "EOF"))
-        } else {
-            Ok(ret)
-        }
+        imp::recv(&self.reader)
     }
 
     fn written(&self) -> Option<String> {
@@ -215,6 +176,45 @@ impl MockConnection {
 impl Connection for MockConnection {
     #[cfg(feature = "encode")]
     fn send(&self, msg: &str, encoding: &str) -> Result<()> {
+        imp::send(&self.writer, msg, encoding)
+    }
+
+    #[cfg(not(feature = "encode"))]
+    fn send(&self, msg: &str) -> Result<()> {
+        imp::send(&self.writer, msg)
+    }
+
+    #[cfg(feature = "encoding")]
+    fn recv(&self, encoding: &str) -> Result<String> {
+        imp::recv(&self.reader, encoding)
+    }
+
+    #[cfg(not(feature = "encoding"))]
+    fn recv(&self) -> Result<String> {
+        imp::recv(&self.reader)
+    }
+
+    fn written(&self) -> Option<String> {
+        String::from_utf8(self.writer.lock().unwrap().clone()).ok()
+    }
+
+    fn reconnect(&self) -> Result<()> {
+        Ok(())
+    }
+}
+
+mod imp {
+    use std::io::prelude::*;
+    use std::io::Result;
+    use std::io::Error;
+    use std::io::ErrorKind;
+    use std::sync::Mutex;
+    #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
+    #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
+    use client::data::kinds::{IrcRead, IrcWrite};
+
+    #[cfg(feature = "encode")]
+    pub fn send<T: IrcWrite>(writer: &Mutex<T>, msg: &str, encoding: &str) -> Result<()> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
             None => return Err(Error::new(
@@ -227,20 +227,20 @@ impl Connection for MockConnection {
                 &format!("Failed to encode {} as {}.", data, encoding.name())[..]
             ))
         };
-        let mut writer = self.writer.lock().unwrap();
+        let mut writer = writer.lock().unwrap();
         try!(writer.write_all(&data));
         writer.flush()
     }
 
     #[cfg(not(feature = "encode"))]
-    fn send(&self, msg: &str) -> Result<()> {
+    pub fn send<T: IrcWrite>(writer: &Mutex<T>, msg: &str) -> Result<()> {
         let mut writer = self.writer.lock().unwrap();
         try!(writer.write_all(msg.as_bytes()));
         writer.flush()
     }
 
     #[cfg(feature = "encoding")]
-    fn recv(&self, encoding: &str) -> Result<String> {
+    pub fn recv<T: IrcRead>(reader: &Mutex<T>, encoding: &str) -> Result<String> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
             None => return Err(Error::new(
@@ -248,7 +248,7 @@ impl Connection for MockConnection {
             ))
         };
         let mut buf = Vec::new();
-        self.reader.lock().unwrap().read_until(b'\n', &mut buf).and_then(|_|
+        reader.lock().unwrap().read_until(b'\n', &mut buf).and_then(|_|
             match encoding.decode(&buf, DecoderTrap::Replace) {
                 _ if buf.is_empty() => Err(Error::new(ErrorKind::Other, "EOF")),
                 Ok(data) => Ok(data),
@@ -260,26 +260,16 @@ impl Connection for MockConnection {
     }
 
     #[cfg(not(feature = "encoding"))]
-    fn recv(&self) -> Result<String> {
+    pub fn recv<T: IrcRead>(reader: &Mutex<T>) -> Result<String> {
         let mut ret = String::new();
-        try!(self.reader.lock().unwrap().read_line(&mut ret));
+        try!(reader.lock().unwrap().read_line(&mut ret));
         if ret.is_empty() {
             Err(Error::new(ErrorKind::Other, "EOF"))
         } else {
             Ok(ret)
         }
     }
-
-    fn written(&self) -> Option<String> {
-        String::from_utf8(self.writer.lock().unwrap().clone()).ok()
-    }
-
-    fn reconnect(&self) -> Result<()> {
-        Ok(())
-    }
 }
-
-
 
 /// An abstraction over different networked streams.
 pub enum NetStream {
