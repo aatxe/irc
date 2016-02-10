@@ -10,8 +10,8 @@ features. These are, however, strictly optional and can be disabled accordingly.
 
 ## Getting Started ##
 
-To start using this library with cargo, you can simply add `irc = "*"` to your dependencies to your
-Cargo.toml file. You'll likely want to take a look at some of the examples, as well as the
+To start using this library with cargo, you can simply add `irc = "^0.9.0"` to your dependencies to
+your Cargo.toml file. You'll likely want to take a look at some of the examples, as well as the
 documentation. You'll also be able to find a small template to get a feel for the library.
 
 ## Getting Started by Example ##
