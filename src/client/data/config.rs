@@ -174,7 +174,7 @@ impl Config {
         self.ping_timeout.as_ref().map(|t| *t).unwrap_or(10)
     }
 
-    /// Gets whether or not to use NickServ GHOST
+    /// Gets whether or not to attempt nickname reclamation using NickServ GHOST.
     /// This defaults to false when not specified.
     pub fn should_ghost(&self) -> bool {
         self.should_ghost.as_ref().map(|u| *u).unwrap_or(false)

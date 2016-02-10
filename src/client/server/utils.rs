@@ -5,12 +5,11 @@ use client::data::{Capability, NegotiationVersion};
 use client::data::Command::{AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
 use client::data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
 use client::data::command::CapSubCommand::{END, LS, REQ};
-use client::data::kinds::{IrcRead, IrcWrite};
 #[cfg(feature = "ctcp")] use time::get_time;
 use client::server::Server;
 
 /// Extensions for Server capabilities that make it easier to work directly with the protocol.
-pub trait ServerExt<'a, T: IrcRead, U: IrcWrite>: Server<'a, T, U> {
+pub trait ServerExt: Server {
     /// Sends a request for a list of server capabilities for a specific IRCv3 version.
     fn send_cap_ls(&self, version: NegotiationVersion) -> Result<()> where Self: Sized {
         self.send(CAP(None, LS, match version {
@@ -219,7 +218,7 @@ pub trait ServerExt<'a, T: IrcRead, U: IrcWrite>: Server<'a, T, U> {
     }
 }
 
-impl<'a, T: IrcRead, U: IrcWrite, K: Server<'a, T, U>> ServerExt<'a, T, U> for K {}
+impl<S> ServerExt for S where S: Server {}
 
 #[cfg(test)]
 mod test {

@@ -5,28 +5,30 @@ use std::borrow::ToOwned;
 use std::cell::Cell;
 use std::collections::HashMap;
 use std::error::Error as StdError;
-use std::io::{BufReader, BufWriter, Error, ErrorKind, Result};
+use std::io::{Error, ErrorKind, Result};
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
 use std::sync::mpsc::{Receiver, Sender, TryRecvError, channel};
 use std::thread::{JoinHandle, spawn};
-use client::conn::{Connection, NetStream, Reconnect};
+use client::conn::{Connection, NetConnection};
 use client::data::{Command, Config, Message, Response, User};
 use client::data::Command::{JOIN, NICK, NICKSERV, PART, PING, PRIVMSG, MODE};
-use client::data::kinds::{IrcRead, IrcWrite};
 use client::server::utils::ServerExt;
 use time::{Duration, Timespec, Tm, now};
 
 pub mod utils;
 
-/// Trait describing core Server functionality.
-pub trait Server<'a, T: IrcRead, U: IrcWrite> {
+/// An interface for interacting with an IRC server.
+pub trait Server {
     /// Gets the configuration being used with this Server.
     fn config(&self) -> &Config;
+
     /// Sends a Command to this Server.
     fn send<M: Into<Message>>(&self, message: M) -> Result<()> where Self: Sized;
-    /// Gets an Iterator over Messages received by this Server.
-    fn iter(&'a self) -> ServerIterator<'a, T, U>;
+
+    /// Gets an iterator over received messages.
+    fn iter<'a>(&'a self) -> Box<Iterator<Item = Result<Message>> + 'a>;
+
     /// Gets a list of Users in the specified channel. This will be none if the channel is not
     /// being tracked, or if tracking is not supported altogether. For best results, be sure to
     /// request `multi-prefix` support from the server.
@@ -34,21 +36,21 @@ pub trait Server<'a, T: IrcRead, U: IrcWrite> {
 }
 
 /// A thread-safe implementation of an IRC Server connection.
-pub struct IrcServer<T: IrcRead, U: IrcWrite> {
+pub struct IrcServer {
     /// The channel for sending messages to write.
     tx: Sender<Message>,
     /// The internal, thread-safe server state.
-    state: Arc<ServerState<T, U>>,
+    state: Arc<ServerState>,
     /// A thread-local count of reconnection attempts used for synchronization.
     reconnect_count: Cell<u32>,
 }
 
 /// Thread-safe internal state for an IRC server connection.
-struct ServerState<T: IrcRead, U: IrcWrite> {
+struct ServerState {
     /// A global copy of the channel for sending messages to write.
     tx: Mutex<Option<Sender<Message>>>,
     /// The thread-safe IRC connection.
-    conn: Connection<T, U>,
+    conn: Box<Connection + Send + Sync>,
     /// The handle for the message sending thread.
     write_handle: Mutex<Option<JoinHandle<()>>>,
     /// The configuration used with this connection.
@@ -65,11 +67,11 @@ struct ServerState<T: IrcRead, U: IrcWrite> {
     last_ping_data: Mutex<Option<Timespec>>,
 }
 
-impl<T: IrcRead, U: IrcWrite> ServerState<T, U> where Connection<T, U>: Reconnect {
-    fn new(conn: Connection<T, U>, config: Config) -> ServerState<T, U> {
+impl ServerState {
+    fn new<C>(conn: C, config: Config) -> ServerState where C: Connection + Send + Sync + 'static {
         ServerState {
             tx: Mutex::new(None),
-            conn: conn,
+            conn: Box::new(conn),
             write_handle: Mutex::new(None),
             config: config,
             chanlists: Mutex::new(HashMap::new()),
@@ -81,7 +83,7 @@ impl<T: IrcRead, U: IrcWrite> ServerState<T, U> where Connection<T, U>: Reconnec
     }
 
     fn reconnect(&self) -> Result<()> {
-        self.conn.reconnect(self.config.server(), self.config.port())
+        self.conn.reconnect()
     }
 
     fn action_taken(&self) {
@@ -108,30 +110,27 @@ impl<T: IrcRead, U: IrcWrite> ServerState<T, U> where Connection<T, U>: Reconnec
     }
 }
 
-/// An IrcServer over a buffered NetStream.
-pub type NetIrcServer = IrcServer<BufReader<NetStream>, BufWriter<NetStream>>;
-
-impl IrcServer<BufReader<NetStream>, BufWriter<NetStream>> {
+impl IrcServer {
     /// Creates a new IRC Server connection from the configuration at the specified path,
     /// connecting immediately.
-    pub fn new<P: AsRef<Path>>(config: P) -> Result<NetIrcServer> {
+    pub fn new<P: AsRef<Path>>(config: P) -> Result<IrcServer> {
         IrcServer::from_config(try!(Config::load(config)))
     }
 
     /// Creates a new IRC server connection from the specified configuration, connecting
     /// immediately.
-    pub fn from_config(config: Config) -> Result<NetIrcServer> {
+    pub fn from_config(config: Config) -> Result<IrcServer> {
         let conn = try!(if config.use_ssl() {
-            Connection::connect_ssl(config.server(), config.port())
+            NetConnection::connect_ssl(config.server(), config.port())
         } else {
-            Connection::connect(config.server(), config.port())
+            NetConnection::connect(config.server(), config.port())
         });
         Ok(IrcServer::from_connection(config, conn))
     }
 }
 
-impl<T: IrcRead, U: IrcWrite> Clone for IrcServer<T, U> {
-    fn clone(&self) -> IrcServer<T, U> {
+impl Clone for IrcServer {
+    fn clone(&self) -> IrcServer {
         IrcServer {
             tx: self.tx.clone(),
             state: self.state.clone(),
@@ -140,7 +139,7 @@ impl<T: IrcRead, U: IrcWrite> Clone for IrcServer<T, U> {
     }
 }
 
-impl<T: IrcRead, U: IrcWrite> Drop for ServerState<T, U> {
+impl Drop for ServerState {
     fn drop(&mut self) {
         let _ = self.tx.lock().unwrap().take();
         let mut guard = self.write_handle.lock().unwrap();
@@ -150,7 +149,7 @@ impl<T: IrcRead, U: IrcWrite> Drop for ServerState<T, U> {
     }
 }
 
-impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for ServerState<T, U> where Connection<T, U>: Reconnect {
+impl<'a> Server for ServerState {
     fn config(&self) -> &Config {
         &self.config
     }
@@ -164,7 +163,7 @@ impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for ServerState<T, U> where C
         }
     }
 
-    fn iter(&'a self) -> ServerIterator<'a, T, U> {
+    fn iter(&self) -> Box<Iterator<Item = Result<Message>>> {
         panic!("unimplemented")
     }
 
@@ -180,7 +179,7 @@ impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for ServerState<T, U> where C
     }
 }
 
-impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for IrcServer<T, U> where Connection<T, U>: Reconnect {
+impl Server for IrcServer {
     fn config(&self) -> &Config {
         &self.state.config
     }
@@ -189,8 +188,8 @@ impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for IrcServer<T, U> where Con
         self.tx.send(msg.into()).map_err(|e| Error::new(ErrorKind::Other, e))
     }
 
-    fn iter(&'a self) -> ServerIterator<'a, T, U> {
-        ServerIterator::new(self)
+    fn iter<'a>(&'a self) -> Box<Iterator<Item = Result<Message>> + 'a> {
+        Box::new(ServerIterator::new(self))
     }
 
     #[cfg(not(feature = "nochanlists"))]
@@ -205,9 +204,10 @@ impl<'a, T: IrcRead, U: IrcWrite> Server<'a, T, U> for IrcServer<T, U> where Con
     }
 }
 
-impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect {
-    /// Creates an IRC server from the specified configuration, and any arbitrary Connection.
-    pub fn from_connection(config: Config, conn: Connection<T, U>) -> IrcServer<T, U> {
+impl IrcServer {
+    /// Creates an IRC server from the specified configuration, and any arbitrary sync connection.
+    pub fn from_connection<C>(config: Config, conn: C) -> IrcServer
+    where C: Connection + Send + Sync + 'static {
         let (tx, rx): (Sender<Message>, Receiver<Message>) = channel();
         let state = Arc::new(ServerState::new(conn, config));
         let weak = Arc::downgrade(&state);
@@ -251,11 +251,11 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
     }
 
     /// Gets a reference to the IRC server's connection.
-    pub fn conn(&self) -> &Connection<T, U> {
+    pub fn conn(&self) -> &Box<Connection + Send + Sync> {
         &self.state.conn
     }
 
-    /// Reconnects to the IRC server.
+    /// Reconnects to the IRC server, disconnecting if necessary.
     pub fn reconnect(&self) -> Result<()> {
         let mut reconnect_count = self.state.reconnect_count.lock().unwrap();
         let res = if self.reconnect_count.get() == *reconnect_count {
@@ -269,13 +269,13 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
     }
 
     #[cfg(feature = "encode")]
-    fn write<M: Into<Message>>(state: &Arc<ServerState<T, U>>, msg: M) -> Result<()> {
-        state.conn.send(msg, state.config.encoding())
+    fn write<M: Into<Message>>(state: &Arc<ServerState>, msg: M) -> Result<()> {
+        state.conn.send(&msg.into().into_string(), state.config.encoding())
     }
 
     #[cfg(not(feature = "encode"))]
-    fn write<M: Into<Message>>(state: &Arc<ServerState<T, U>>, msg: M) -> Result<()> {
-        state.conn.send(msg)
+    fn write<M: Into<Message>>(state: &Arc<ServerState>, msg: M) -> Result<()> {
+        state.conn.send(&msg.into().into_string())
     }
 
     /// Returns a reference to the server state's channel lists.
@@ -415,33 +415,14 @@ impl<T: IrcRead, U: IrcWrite> IrcServer<T, U> where Connection<T, U>: Reconnect 
     }
 }
 
-impl<T: IrcRead, U: IrcWrite + Clone> IrcServer<T, U> where Connection<T, U>: Reconnect {
-    /// Returns a copy of the server's connection after waiting for all pending messages to be
-    /// written. This function may cause unusual behavior when called on a server with operations
-    /// being performed on other threads. This function is destructive, and is primarily intended
-    /// for writing unit tests. Use it with care.
-    pub fn extract_writer(mut self) -> U {
-        let _ = self.state.tx.lock().unwrap().take();
-        // This is a terrible hack to get the real channel to drop.
-        // Otherwise, joining would never finish.
-        let (tx, _) = channel();
-        self.tx = tx;
-        let mut guard = self.state.write_handle.lock().unwrap();
-        if let Some(handle) = guard.take() {
-            handle.join().unwrap()
-        }
-        self.conn().writer().clone()
-    }
-}
-
 /// An Iterator over an IrcServer's incoming Messages.
-pub struct ServerIterator<'a, T: IrcRead + 'a, U: IrcWrite + 'a> {
-    server: &'a IrcServer<T, U>
+pub struct ServerIterator<'a> {
+    server: &'a IrcServer
 }
 
-impl<'a, T: IrcRead + 'a, U: IrcWrite + 'a> ServerIterator<'a, T, U> where Connection<T, U>: Reconnect {
+impl<'a> ServerIterator<'a> {
     /// Creates a new ServerIterator for the desired IrcServer.
-    pub fn new(server: &IrcServer<T, U>) -> ServerIterator<T, U> {
+    pub fn new(server: &'a IrcServer) -> ServerIterator {
         ServerIterator { server: server }
     }
 
@@ -458,7 +439,7 @@ impl<'a, T: IrcRead + 'a, U: IrcWrite + 'a> ServerIterator<'a, T, U> where Conne
     }
 }
 
-impl<'a, T: IrcRead + 'a, U: IrcWrite + 'a> Iterator for ServerIterator<'a, T, U> where Connection<T, U>: Reconnect {
+impl<'a> Iterator for ServerIterator<'a> {
     type Item = Result<Message>;
     fn next(&mut self) -> Option<Result<Message>> {
         loop {
