@@ -2,11 +2,13 @@
 #[cfg(feature = "ssl")] use std::error::Error as StdError;
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter, Cursor, Result};
-use std::io::Error;
-use std::io::ErrorKind;
+#[cfg(feature = "ssl")] use std::io::Error;
+#[cfg(feature = "ssl")] use std::io::ErrorKind;
 use std::net::TcpStream;
 #[cfg(feature = "ssl")] use std::result::Result as StdResult;
 use std::sync::Mutex;
+#[cfg(feature = "encode")] use encoding::DecoderTrap;
+#[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
 #[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslMethod, SslStream};
 #[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
 
@@ -30,6 +32,12 @@ pub trait Connection {
 
     /// Gets the full record of all sent messages if the Connection records this.
     /// This is intended for use in writing tests.
+    #[cfg(feature = "encoding")]
+    fn written(&self, encoding: &str) -> Option<String>;
+
+    /// Gets the full record of all sent messages if the Connection records this.
+    /// This is intended for use in writing tests.
+    #[cfg(not(feature = "encoding"))]
     fn written(&self) -> Option<String>;
 
     /// Re-establishes this connection, disconnecting from the existing case if necessary.
@@ -129,6 +137,12 @@ impl Connection for NetConnection {
         imp::recv(&self.reader)
     }
 
+    #[cfg(feature = "encoding")]
+    fn written(&self, _: &str) -> Option<String> {
+        None
+    }
+
+    #[cfg(not(feature = "encoding"))]
     fn written(&self) -> Option<String> {
         None
     }
@@ -159,6 +173,11 @@ pub struct MockConnection {
 }
 
 impl MockConnection {
+    /// Creates a new mock connection with an empty read buffer.
+    pub fn empty() -> MockConnection {
+        MockConnection::from_byte_vec(Vec::new())
+    }
+
     /// Creates a new mock connection with the specified string in the read buffer.
     pub fn new(input: &str) -> MockConnection {
         MockConnection::from_byte_vec(input.as_bytes().to_vec())
@@ -194,6 +213,14 @@ impl Connection for MockConnection {
         imp::recv(&self.reader)
     }
 
+    #[cfg(feature = "encoding")]
+    fn written(&self, encoding: &str) -> Option<String> {
+        encoding_from_whatwg_label(encoding).and_then(|enc|
+            enc.decode(&self.writer.lock().unwrap(), DecoderTrap::Replace).ok()
+        )
+    }
+
+    #[cfg(not(feature = "encoding"))]
     fn written(&self) -> Option<String> {
         String::from_utf8(self.writer.lock().unwrap().clone()).ok()
     }
@@ -234,7 +261,7 @@ mod imp {
 
     #[cfg(not(feature = "encode"))]
     pub fn send<T: IrcWrite>(writer: &Mutex<T>, msg: &str) -> Result<()> {
-        let mut writer = self.writer.lock().unwrap();
+        let mut writer = writer.lock().unwrap();
         try!(writer.write_all(msg.as_bytes()));
         writer.flush()
     }
@@ -311,19 +338,28 @@ impl Write for NetStream {
 
 #[cfg(test)]
 mod test {
-    use super::Connection;
-    use std::io::{Cursor, sink};
+    use super::{Connection, MockConnection};
+    use std::io::Result;
+    use client::data::Message;
     use client::data::Command::PRIVMSG;
-    use client::test::buf_empty;
-    #[cfg(feature = "encode")] use encoding::{DecoderTrap, Encoding};
-    #[cfg(feature = "encode")] use encoding::all::{ISO_8859_15, UTF_8};
+
+    #[cfg(feature = "encode")]
+    fn send_to<C: Connection, M: Into<Message>>(conn: &C, msg: M, encoding: &str) -> Result<()> {
+        conn.send(&msg.into().into_string(), encoding)
+    }
+
+    #[cfg(not(feature = "encode"))]
+    fn send_to<C: Connection, M: Into<Message>>(conn: &C, msg: M) -> Result<()> {
+        conn.send(&msg.into().into_string())
+    }
+
 
     #[test]
     #[cfg(not(feature = "encode"))]
     fn send() {
-        let conn = Connection::new(buf_empty(), Vec::new());
-        assert!(conn.send(PRIVMSG("test".to_owned(), "Testing!".to_owned())).is_ok());
-        let data = String::from_utf8(conn.writer().to_vec()).unwrap();
+        let conn = MockConnection::empty();
+        assert!(send_to(&conn, PRIVMSG("test".to_owned(), "Testing!".to_owned())).is_ok());
+        let data = conn.written().unwrap();
         assert_eq!(&data[..], "PRIVMSG test :Testing!\r\n");
     }
 
@@ -331,18 +367,18 @@ mod test {
     #[cfg(not(feature = "encode"))]
     fn send_str() {
         let exp = "PRIVMSG test :Testing!\r\n";
-        let conn = Connection::new(buf_empty(), Vec::new());
-        assert!(conn.send(exp).is_ok());
-        let data = String::from_utf8(conn.writer().to_vec()).unwrap();
+        let conn = MockConnection::empty();
+        assert!(send_to(&conn, exp).is_ok());
+        let data = conn.written().unwrap();
         assert_eq!(&data[..], exp);
     }
 
     #[test]
     #[cfg(feature = "encode")]
     fn send_utf8() {
-        let conn = Connection::new(buf_empty(), Vec::new());
-        assert!(conn.send(PRIVMSG("test".to_owned(), "€ŠšŽžŒœŸ".to_owned()), "UTF-8").is_ok());
-        let data = UTF_8.decode(&conn.writer(), DecoderTrap::Strict).unwrap();
+        let conn = MockConnection::empty();
+        assert!(send_to(&conn, PRIVMSG("test".to_owned(), "€ŠšŽžŒœŸ".to_owned()), "UTF-8").is_ok());
+        let data = conn.written("UTF-8").unwrap();
         assert_eq!(&data[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 
@@ -350,18 +386,18 @@ mod test {
     #[cfg(feature = "encode")]
     fn send_utf8_str() {
         let exp = "PRIVMSG test :€ŠšŽžŒœŸ\r\n";
-        let conn = Connection::new(buf_empty(), Vec::new());
-        assert!(conn.send(exp, "UTF-8").is_ok());
-        let data = UTF_8.decode(&conn.writer(), DecoderTrap::Strict).unwrap();
+        let conn = MockConnection::empty();
+        assert!(send_to(&conn, exp, "UTF-8").is_ok());
+        let data = conn.written("UTF-8").unwrap();
         assert_eq!(&data[..], exp);
     }
 
     #[test]
     #[cfg(feature = "encode")]
     fn send_iso885915() {
-        let conn = Connection::new(buf_empty(), Vec::new());
-        assert!(conn.send(PRIVMSG("test".to_owned(), "€ŠšŽžŒœŸ".to_owned()), "l9").is_ok());
-        let data = ISO_8859_15.decode(&conn.writer(), DecoderTrap::Strict).unwrap();
+        let conn = MockConnection::empty();
+        assert!(send_to(&conn, PRIVMSG("test".to_owned(), "€ŠšŽžŒœŸ".to_owned()), "l9").is_ok());
+        let data = conn.written("l9").unwrap();
         assert_eq!(&data[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 
@@ -369,27 +405,23 @@ mod test {
     #[cfg(feature = "encode")]
     fn send_iso885915_str() {
         let exp = "PRIVMSG test :€ŠšŽžŒœŸ\r\n";
-        let conn = Connection::new(buf_empty(), Vec::new());
-        assert!(conn.send(exp, "l9").is_ok());
-        let data = ISO_8859_15.decode(&conn.writer(), DecoderTrap::Strict).unwrap();
+        let conn = MockConnection::empty();
+        assert!(send_to(&conn, exp, "l9").is_ok());
+        let data = conn.written("l9").unwrap();
         assert_eq!(&data[..], exp);
     }
 
     #[test]
     #[cfg(not(feature = "encode"))]
     fn recv() {
-        let conn = Connection::new(
-            Cursor::new("PRIVMSG test :Testing!\r\n".as_bytes().to_vec()), sink()
-        );
+        let conn = MockConnection::new("PRIVMSG test :Testing!\r\n");
         assert_eq!(&conn.recv().unwrap()[..], "PRIVMSG test :Testing!\r\n");
     }
 
     #[test]
     #[cfg(feature = "encode")]
     fn recv_utf8() {
-        let conn = Connection::new(
-            Cursor::new(b"PRIVMSG test :Testing!\r\n".to_vec()), sink()
-        );
+        let conn = MockConnection::new("PRIVMSG test :Testing!\r\n");
         assert_eq!(&conn.recv("UTF-8").unwrap()[..], "PRIVMSG test :Testing!\r\n");
     }
 
@@ -397,13 +429,13 @@ mod test {
     #[cfg(feature = "encode")]
     fn recv_iso885915() {
         let data = [0xA4, 0xA6, 0xA8, 0xB4, 0xB8, 0xBC, 0xBD, 0xBE];
-        let conn = Connection::new(Cursor::new({
+        let conn = MockConnection::from_byte_vec({
             let mut vec = Vec::new();
             vec.extend("PRIVMSG test :".as_bytes());
             vec.extend(data.iter());
             vec.extend("\r\n".as_bytes());
             vec.into_iter().collect::<Vec<_>>()
-        }), sink());
+        });
         assert_eq!(&conn.recv("l9").unwrap()[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
 }

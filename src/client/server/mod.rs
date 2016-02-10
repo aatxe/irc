@@ -413,6 +413,22 @@ impl IrcServer {
     fn handle_ctcp(&self, _: &str, _: Vec<&str>) -> Result<()> {
         Ok(())
     }
+
+    /// Waits for the completion of all writes for messages in this server's write queue. This
+    /// function may cause unusual behavior when called on a server with operations being performed
+    /// on other threads. This function is destructive, and is primarily intended for writing unit
+    /// tests. Use it with care.
+    pub fn await_writing(&mut self) {
+        let _ = self.state.tx.lock().unwrap().take();
+        // This is a terrible hack to get the real channel to drop.
+        // Otherwise, joining would never finish.
+        let (tx, _) = channel();
+        self.tx = tx;
+        let mut guard = self.state.write_handle.lock().unwrap();
+        if let Some(handle) = guard.take() {
+            handle.join().unwrap()
+        }
+    }
 }
 
 /// An Iterator over an IrcServer's incoming Messages.
@@ -470,13 +486,10 @@ impl<'a> Iterator for ServerIterator<'a> {
 mod test {
     use super::{IrcServer, Server};
     use std::default::Default;
-    use std::io::{Cursor, sink};
-    use client::conn::{Connection, Reconnect};
+    use client::conn::MockConnection;
     use client::data::Config;
     #[cfg(not(feature = "nochanlists"))] use client::data::User;
     use client::data::command::Command::PRIVMSG;
-    use client::data::kinds::IrcRead;
-    use client::test::buf_empty;
 
     pub fn test_config() -> Config {
         Config {
@@ -490,18 +503,23 @@ mod test {
         }
     }
 
-    pub fn get_server_value<T: IrcRead>(server: IrcServer<T, Vec<u8>>) -> String
-        where Connection<T, Vec<u8>>: Reconnect {
-        String::from_utf8(server.extract_writer()).unwrap()
+    #[cfg(feature = "encode")]
+    pub fn get_server_value(mut server: IrcServer) -> String {
+        server.await_writing();
+        server.conn().written(server.config().encoding()).unwrap()
+    }
+
+    #[cfg(not(feature = "encode"))]
+    pub fn get_server_value(mut server: IrcServer) -> String {
+        server.await_writing();
+        server.conn().written().unwrap()
     }
 
     #[test]
     fn iterator() {
         let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n\
                    :test!test@test JOIN #test\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(exp.as_bytes().to_vec()), sink()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(exp));
         let mut messages = String::new();
         for message in server.iter() {
             messages.push_str(&message.unwrap().into_string());
@@ -512,9 +530,7 @@ mod test {
     #[test]
     fn handle_message() {
         let value = "PING :irc.test.net\r\n:irc.test.net 376 test :End of /MOTD command.\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-           Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -529,9 +545,7 @@ mod test {
             nick_password: Some(format!("password")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             .. Default::default()
-        }, Connection::new(
-           Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        }, MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -550,9 +564,7 @@ mod test {
             channels: Some(vec![format!("#test"), format!("#test2")]),
             should_ghost: Some(true),
             .. Default::default()
-        }, Connection::new(
-           Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        }, MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -572,9 +584,7 @@ mod test {
             should_ghost: Some(true),
             ghost_sequence: Some(vec![format!("RECOVER"), format!("RELEASE")]),
             .. Default::default()
-        }, Connection::new(
-           Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        }, MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -590,9 +600,7 @@ mod test {
             umodes: Some(format!("+B")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             .. Default::default()
-        }, Connection::new(
-           Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        }, MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -603,9 +611,7 @@ mod test {
     #[test]
     fn nickname_in_use() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-           Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -617,9 +623,7 @@ mod test {
     fn ran_out_of_nicknames() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-           Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -627,9 +631,7 @@ mod test {
 
     #[test]
     fn send() {
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-           buf_empty(), Vec::new()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
         assert!(server.send(PRIVMSG(format!("#test"), format!("Hi there!"))).is_ok());
         assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\r\n");
     }
@@ -638,9 +640,7 @@ mod test {
     #[cfg(not(feature = "nochanlists"))]
     fn user_tracking_names() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-           Cursor::new(value.as_bytes().to_vec()), sink()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -653,9 +653,7 @@ mod test {
     fn user_tracking_names_join() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :test2!test@test JOIN #test\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(value.as_bytes().to_vec()), sink()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -668,9 +666,7 @@ mod test {
     fn user_tracking_names_part() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test PART #test\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(value.as_bytes().to_vec()), sink()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -683,9 +679,7 @@ mod test {
     fn user_tracking_names_mode() {
         let value = ":irc.test.net 353 test = #test :+test ~owner &admin\r\n\
                      :test!test@test MODE #test +o test\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(value.as_bytes().to_vec()), sink()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -706,9 +700,7 @@ mod test {
     #[cfg(feature = "nochanlists")]
     fn no_user_tracking() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(value.as_bytes().to_vec()), sink()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -719,9 +711,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn finger_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -733,9 +723,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn version_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}VERSION\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -747,9 +735,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn source_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}SOURCE\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -762,9 +748,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn ctcp_ping_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}PING test\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -775,9 +759,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn time_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}TIME\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }
@@ -790,9 +772,7 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn user_info_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}USERINFO\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), Connection::new(
-            Cursor::new(value.as_bytes().to_vec()), Vec::new()
-        ));
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
         for message in server.iter() {
             println!("{:?}", message);
         }

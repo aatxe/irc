@@ -11,12 +11,3 @@ pub mod prelude {
     pub use client::data::{Capability, Command, Config, Message, NegotiationVersion, Response};
     pub use client::data::kinds::{IrcRead, IrcWrite};
 }
-
-#[cfg(test)]
-pub mod test {
-    use std::io::{BufReader, Empty, empty};
-
-    pub fn buf_empty() -> BufReader<Empty> {
-        BufReader::new(empty())
-    }
-}
