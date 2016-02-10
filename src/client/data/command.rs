@@ -471,10 +471,13 @@ impl Command {
             }
         } else if let "MODE" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() == 2 {
                     Command::MODE(args[0].to_owned(), args[1].to_owned(), Some(suffix.to_owned()))
-                }
+                } else if args.len() == 1 {
+                    Command::MODE(args[0].to_owned(), suffix.to_owned(), None)
+                } else {
+                    return Err(invalid_input())
+                },
                 None => if args.len() == 3 {
                     Command::MODE(args[0].to_owned(), args[1].to_owned(), Some(args[2].to_owned()))
                 } else if args.len() == 2 {
