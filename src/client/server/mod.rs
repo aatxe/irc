@@ -268,6 +268,16 @@ impl IrcServer {
         res
     }
 
+    /// Gets the current nickname in use.
+    pub fn current_nickname(&self) -> &str {
+        let alt_nicks = self.config().alternate_nicknames();
+        let index = self.state.alt_nick_index.read().unwrap();
+        match *index {
+            0 => self.config().nickname(),
+            i => alt_nicks[i - 1]
+        }
+    }
+
     #[cfg(feature = "encode")]
     fn write<M: Into<Message>>(state: &Arc<ServerState>, msg: M) -> Result<()> {
         state.conn.send(&msg.into().into_string(), state.config.encoding())
@@ -357,7 +367,7 @@ impl IrcServer {
                     )))
                 }
                 if self.config().umodes() != "" {
-                    try!(self.send_mode(self.config().nickname(), self.config().umodes(), ""))
+                    try!(self.send_mode(self.current_nickname(), self.config().umodes(), ""))
                 }
                 for chan in self.config().channels().into_iter() {
                     try!(self.send_join(chan))
