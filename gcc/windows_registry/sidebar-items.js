@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["find","Attempts to find a tool within an MSVC installation using the Windows registry as a point to search from."]]});

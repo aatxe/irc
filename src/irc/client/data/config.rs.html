@@ -9,6 +9,7 @@
 
     <title>config.rs.html -- source</title>
 
+    <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../../main.css">
 
     
@@ -24,10 +25,10 @@
 
     
 
-    <section class="sidebar">
+    <nav class="sidebar">
         
         
-    </section>
+    </nav>
 
     <nav class="sub">
         <form class="search-form js-only">
@@ -277,6 +278,49 @@
 <span id="235">235</span>
 <span id="236">236</span>
 <span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! JSON configuration files using libserialize.</span>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>ToOwned</span>;
@@ -290,17 +334,17 @@
 <span class='doccomment'>/// Configuration data.</span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>RustcDecodable</span>, <span class='ident'>RustcEncodable</span>, <span class='ident'>Default</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Debug</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Config</span> {
-    <span class='doccomment'>/// A list of the owners of the bot by nickname.</span>
+    <span class='doccomment'>/// A list of the owners of the client by nickname (for bots).</span>
     <span class='kw'>pub</span> <span class='ident'>owners</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span>,
-    <span class='doccomment'>/// The bot&#39;s nickname.</span>
+    <span class='doccomment'>/// The client&#39;s nickname.</span>
     <span class='kw'>pub</span> <span class='ident'>nickname</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
-    <span class='doccomment'>/// The bot&#39;s NICKSERV password.</span>
+    <span class='doccomment'>/// The client&#39;s NICKSERV password.</span>
     <span class='kw'>pub</span> <span class='ident'>nick_password</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
-    <span class='doccomment'>/// Alternative nicknames for the bots, if the default is taken.</span>
+    <span class='doccomment'>/// Alternative nicknames for the client, if the default is taken.</span>
     <span class='kw'>pub</span> <span class='ident'>alt_nicks</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span>,
-    <span class='doccomment'>/// The bot&#39;s username.</span>
+    <span class='doccomment'>/// The client&#39;s username.</span>
     <span class='kw'>pub</span> <span class='ident'>username</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
-    <span class='doccomment'>/// The bot&#39;s real name.</span>
+    <span class='doccomment'>/// The client&#39;s real name.</span>
     <span class='kw'>pub</span> <span class='ident'>realname</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// The server to connect to.</span>
     <span class='kw'>pub</span> <span class='ident'>server</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
@@ -309,7 +353,7 @@
     <span class='doccomment'>/// The password to connect to the server.</span>
     <span class='kw'>pub</span> <span class='ident'>password</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// Whether or not to use SSL.</span>
-    <span class='doccomment'>/// Bots will automatically panic if this is enabled without SSL support.</span>
+    <span class='doccomment'>/// Clients will automatically panic if this is enabled without SSL support.</span>
     <span class='kw'>pub</span> <span class='ident'>use_ssl</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// The encoding type used for this connection.</span>
     <span class='doccomment'>/// This is typically UTF-8, but could be something else.</span>
@@ -320,6 +364,16 @@
     <span class='kw'>pub</span> <span class='ident'>umodes</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// The text that&#39;ll be sent in response to CTCP USERINFO requests.</span>
     <span class='kw'>pub</span> <span class='ident'>user_info</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
+    <span class='doccomment'>/// The amount of inactivity in seconds before the client will ping the server.</span>
+    <span class='kw'>pub</span> <span class='ident'>ping_time</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>u32</span><span class='op'>&gt;</span>,
+    <span class='doccomment'>/// The amount of time in seconds for a client to reconnect due to no ping response.</span>
+    <span class='kw'>pub</span> <span class='ident'>ping_timeout</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>u32</span><span class='op'>&gt;</span>,
+    <span class='doccomment'>/// Whether the client should use NickServ GHOST to reclaim its primary nickname if it is in use.</span>
+    <span class='doccomment'>/// This has no effect if `nick_password` is not set.</span>
+    <span class='kw'>pub</span> <span class='ident'>should_ghost</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>,
+    <span class='doccomment'>/// The command(s) that should be sent to NickServ to recover a nickname. The nickname and password will be appended in that order after the command.</span>
+    <span class='doccomment'>/// E.g. `[&quot;RECOVER&quot;, &quot;RELEASE&quot;]` means `RECOVER nick pass` and `RELEASE nick pass` will be sent in that order.</span>
+    <span class='kw'>pub</span> <span class='ident'>ghost_sequence</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span>,
     <span class='doccomment'>/// A map of additional options to be stored in config.</span>
     <span class='kw'>pub</span> <span class='ident'>options</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>String</span>, <span class='ident'>String</span><span class='op'>&gt;&gt;</span>,
 }
@@ -362,7 +416,7 @@
 
     <span class='doccomment'>/// Gets the alternate nicknames specified in the configuration.</span>
     <span class='doccomment'>/// This defaults to an empty vector when not specified.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_alternate_nicknames</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>alternate_nicknames</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>alt_nicks</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> <span class='ident'>v</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>s</span>[..]).<span class='ident'>collect</span>()).<span class='ident'>unwrap_or</span>(<span class='macro'>vec</span><span class='macro'>!</span>[])
     }
 
@@ -431,6 +485,31 @@
         <span class='self'>self</span>.<span class='ident'>user_info</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>s</span>[..]).<span class='ident'>unwrap_or</span>(<span class='string'>&quot;&quot;</span>)
     }
 
+    <span class='doccomment'>/// Gets the amount of time in seconds since last activity necessary for the client to ping the</span>
+    <span class='doccomment'>/// server.</span>
+    <span class='doccomment'>/// This defaults to 180 seconds when not specified.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>ping_time</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u32</span> {
+        <span class='self'>self</span>.<span class='ident'>ping_time</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>t</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>t</span>).<span class='ident'>unwrap_or</span>(<span class='number'>180</span>)
+    }
+
+    <span class='doccomment'>/// Gets the amount of time in seconds for the client to reconnect after no ping response.</span>
+    <span class='doccomment'>/// This defaults to 10 seconds when not specified.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>ping_timeout</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u32</span> {
+        <span class='self'>self</span>.<span class='ident'>ping_timeout</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>t</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>t</span>).<span class='ident'>unwrap_or</span>(<span class='number'>10</span>)
+    }
+
+    <span class='doccomment'>/// Gets whether or not to attempt nickname reclamation using NickServ GHOST.</span>
+    <span class='doccomment'>/// This defaults to false when not specified.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>should_ghost</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+        <span class='self'>self</span>.<span class='ident'>should_ghost</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>u</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>u</span>).<span class='ident'>unwrap_or</span>(<span class='boolval'>false</span>)
+    }
+
+    <span class='doccomment'>/// Gets the NickServ command sequence to recover a nickname.</span>
+    <span class='doccomment'>/// This defaults to `[&quot;GHOST&quot;]` when not specified.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>ghost_sequence</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>ghost_sequence</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>v</span><span class='op'>|</span> <span class='ident'>v</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span> <span class='kw-2'>&amp;</span><span class='ident'>s</span>[..]).<span class='ident'>collect</span>()).<span class='ident'>unwrap_or</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;GHOST&quot;</span>])
+    }
+
     <span class='doccomment'>/// Looks up the specified string in the options map.</span>
     <span class='doccomment'>/// This uses indexing, and thus panics when the string is not present.</span>
     <span class='doccomment'>/// This will also panic if used and there are no options.</span>
@@ -463,6 +542,10 @@
             <span class='ident'>encoding</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;UTF-8&quot;</span>)),
             <span class='ident'>channels</span>: <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;#test&quot;</span>), <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;#test2&quot;</span>)]),
             <span class='ident'>user_info</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>ping_time</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>ping_timeout</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>should_ghost</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>ghost_sequence</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>options</span>: <span class='prelude-val'>Some</span>(<span class='ident'>HashMap</span>::<span class='ident'>new</span>()),
         };
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>Config</span>::<span class='ident'>load</span>(<span class='ident'>Path</span>::<span class='ident'>new</span>(<span class='string'>&quot;client_config.json&quot;</span>)).<span class='ident'>unwrap</span>(), <span class='ident'>cfg</span>);
@@ -485,6 +568,10 @@
             <span class='ident'>encoding</span>: <span class='prelude-val'>Some</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;UTF-8&quot;</span>)),
             <span class='ident'>channels</span>: <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;#test&quot;</span>), <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;#test2&quot;</span>)]),
             <span class='ident'>user_info</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>ping_time</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>ping_timeout</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>should_ghost</span>: <span class='prelude-val'>None</span>,
+            <span class='ident'>ghost_sequence</span>: <span class='prelude-val'>None</span>,
             <span class='ident'>options</span>: <span class='prelude-val'>Some</span>(<span class='ident'>HashMap</span>::<span class='ident'>new</span>()),
         };
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>Config</span>::<span class='ident'>load</span>(<span class='string'>&quot;client_config.json&quot;</span>).<span class='ident'>unwrap</span>(), <span class='ident'>cfg</span>);
@@ -521,10 +608,12 @@
 
     <section class="footer"></section>
 
-    <div id="help" class="hidden">
+    <aside id="help" class="hidden">
         <div>
+            <h1 class="hidden">Help</h1>
+
             <div class="shortcuts">
-                <h1>Keyboard Shortcuts</h1>
+                <h2>Keyboard Shortcuts</h2>
 
                 <dl>
                     <dt>?</dt>
@@ -541,7 +630,7 @@
             </div>
 
             <div class="infos">
-                <h1>Search Tricks</h1>
+                <h2>Search Tricks</h2>
 
                 <p>
                     Prefix searches with a type followed by a colon (e.g.
@@ -551,8 +640,8 @@
                 <p>
                     Accepted types are: <code>fn</code>, <code>mod</code>,
                     <code>struct</code>, <code>enum</code>,
-                    <code>trait</code>, <code>typedef</code> (or
-                    <code>tdef</code>).
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
                 </p>
 
                 <p>
@@ -561,7 +650,7 @@
                 </p>
             </div>
         </div>
-    </div>
+    </aside>
 
     
 
@@ -573,6 +662,6 @@
     <script src="../../../../jquery.js"></script>
     <script src="../../../../main.js"></script>
     
-    <script async src="../../../../search-index.js"></script>
+    <script defer src="../../../../search-index.js"></script>
 </body>
 </html>

@@ -9,6 +9,7 @@
 
     <title>openssl::ssl - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     
@@ -24,10 +25,10 @@
 
     
 
-    <section class="sidebar">
+    <nav class="sidebar">
         
         <p class='location'><a href='../index.html'>openssl</a></p><script>window.sidebarCurrent = {name: 'ssl', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
-    </section>
+    </nav>
 
     <nav class="sub">
         <form class="search-form js-only">
@@ -45,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-8722' class='srclink' href='../../src/openssl/ssl/mod.rs.html#1-1443' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1282' class='srclink' href='../../src/openssl/ssl/mod.rs.html#1-1529' title='goto source code'>[src]</a></span></h1>
 <h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                     <tr class=' module-item'>
@@ -57,6 +58,15 @@
                     </tr>
                 </table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.NonblockingSslStream.html'
+                               title='openssl::ssl::NonblockingSslStream'>NonblockingSslStream</a></td>
+                        <td class='docblock short'>
+                             
+<h1 id='deprecated' class='section-header'><a href='#deprecated'>Deprecated</a></h1>
+                        </td>
+                    </tr>
+                
                     <tr class=' module-item'>
                         <td><a class='struct' href='struct.Ssl.html'
                                title='openssl::ssl::Ssl'>Ssl</a></td>
@@ -100,6 +110,15 @@
                     </tr>
                 </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
+                    <tr class=' module-item'>
+                        <td><a class='enum' href='enum.Error.html'
+                               title='openssl::ssl::Error'>Error</a></td>
+                        <td class='docblock short'>
+                             <p>An SSL error.</p>
+
+                        </td>
+                    </tr>
+                
                     <tr class=' module-item'>
                         <td><a class='enum' href='enum.MaybeSslStream.html'
                                title='openssl::ssl::MaybeSslStream'>MaybeSslStream</a></td>
@@ -481,6 +500,23 @@ It is optional to call this function and safe to do so more than once.</p>
                 </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
 <table>
                     <tr class=' module-item'>
+                        <td><a class='type' href='type.ServerNameCallback.html'
+                               title='openssl::ssl::ServerNameCallback'>ServerNameCallback</a></td>
+                        <td class='docblock short'>
+                             <p>The signature of functions that can be used to choose the context depending on the server name</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='type' href='type.ServerNameCallbackData.html'
+                               title='openssl::ssl::ServerNameCallbackData'>ServerNameCallbackData</a></td>
+                        <td class='docblock short'>
+                             
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
                         <td><a class='type' href='type.VerifyCallback.html'
                                title='openssl::ssl::VerifyCallback'>VerifyCallback</a></td>
                         <td class='docblock short'>
@@ -504,10 +540,12 @@ when user-data should be carried for all verification process</p>
 
     <section class="footer"></section>
 
-    <div id="help" class="hidden">
+    <aside id="help" class="hidden">
         <div>
+            <h1 class="hidden">Help</h1>
+
             <div class="shortcuts">
-                <h1>Keyboard Shortcuts</h1>
+                <h2>Keyboard Shortcuts</h2>
 
                 <dl>
                     <dt>?</dt>
@@ -524,7 +562,7 @@ when user-data should be carried for all verification process</p>
             </div>
 
             <div class="infos">
-                <h1>Search Tricks</h1>
+                <h2>Search Tricks</h2>
 
                 <p>
                     Prefix searches with a type followed by a colon (e.g.
@@ -534,8 +572,8 @@ when user-data should be carried for all verification process</p>
                 <p>
                     Accepted types are: <code>fn</code>, <code>mod</code>,
                     <code>struct</code>, <code>enum</code>,
-                    <code>trait</code>, <code>typedef</code> (or
-                    <code>tdef</code>).
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
                 </p>
 
                 <p>
@@ -544,7 +582,7 @@ when user-data should be carried for all verification process</p>
                 </p>
             </div>
         </div>
-    </div>
+    </aside>
 
     
 
@@ -556,6 +594,6 @@ when user-data should be carried for all verification process</p>
     <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     
-    <script async src="../../search-index.js"></script>
+    <script defer src="../../search-index.js"></script>
 </body>
 </html>

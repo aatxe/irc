@@ -9,6 +9,7 @@
 
     <title>encoding::codec::utf_16::UTF16Encoding - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
 
     
@@ -24,10 +25,10 @@
 
     
 
-    <section class="sidebar">
+    <nav class="sidebar">
         
         <p class='location'><a href='../../index.html'>encoding</a>::<wbr><a href='../index.html'>codec</a>::<wbr><a href='index.html'>utf_16</a></p><script>window.sidebarCurrent = {name: 'UTF16Encoding', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
-    </section>
+    </nav>
 
     <nav class="sub">
         <form class="search-form js-only">
@@ -45,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-4180' class='srclink' href='../../../src/encoding/codec/utf_16.rs.html#72-74' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-635' class='srclink' href='../../../src/encoding/codec/utf_16.rs.html#72-74' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct UTF16Encoding&lt;E&gt; {
     // some fields omitted
 }</pre><div class='docblock'><p>UTF-16 (UCS Transformation Format, 16-bit).</p>
@@ -57,29 +58,30 @@ which are represented as a pair of lower surrogate and upper surrogate character
 In this effect, surrogate characters (U+D800..DFFF) cannot appear alone
 and cannot be included in a valid Unicode string.</p>
 
-<h2 id="specialization" class='section-header'><a
-                           href="#specialization">Specialization</a></h2>
+<h2 id='specialization' class='section-header'><a href='#specialization'>Specialization</a></h2>
 <p>This type is specialized with endianness type <code>E</code>,
 which should be either <code>Little</code> (little endian) or <code>Big</code> (big endian).</p>
-</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;E: Endian&gt; <a class='trait' href='../../../encoding/types/trait.Encoding.html' title='encoding::types::Encoding'>Encoding</a> for <a class='struct' href='../../../encoding/codec/utf_16/struct.UTF16Encoding.html' title='encoding::codec::utf_16::UTF16Encoding'>UTF16Encoding</a>&lt;E&gt;</code></h3><div class='impl-items'><h4 id='method.name' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.name' class='fnname'>name</a>(&amp;self) -&gt; &amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
-<h4 id='method.whatwg_name' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.whatwg_name' class='fnname'>whatwg_name</a>(&amp;self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h4>
-<h4 id='method.raw_encoder' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.raw_encoder' class='fnname'>raw_encoder</a>(&amp;self) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../encoding/types/trait.RawEncoder.html' title='encoding::types::RawEncoder'>RawEncoder</a>&gt;</code></h4>
-<h4 id='method.raw_decoder' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.raw_decoder' class='fnname'>raw_decoder</a>(&amp;self) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../encoding/types/trait.RawDecoder.html' title='encoding::types::RawDecoder'>RawDecoder</a>&gt;</code></h4>
-<h4 id='method.encode' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.encode' class='fnname'>encode</a>(&amp;self, input: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h4>
-<h4 id='method.encode_to' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.encode_to' class='fnname'>encode_to</a>(&amp;self, input: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>, ret: &amp;mut <a class='trait' href='../../../encoding/types/trait.ByteWriter.html' title='encoding::types::ByteWriter'>ByteWriter</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h4>
-<h4 id='method.decode' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.decode' class='fnname'>decode</a>(&amp;self, input: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h4>
-<h4 id='method.decode_to' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.decode_to' class='fnname'>decode_to</a>(&amp;self, input: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>, ret: &amp;mut <a class='trait' href='../../../encoding/types/trait.StringWriter.html' title='encoding::types::StringWriter'>StringWriter</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h4>
-</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl&lt;E: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='struct' href='../../../encoding/codec/utf_16/struct.UTF16Encoding.html' title='encoding::codec::utf_16::UTF16Encoding'>UTF16Encoding</a>&lt;E&gt;</code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;E: <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../../encoding/codec/utf_16/struct.UTF16Encoding.html' title='encoding::codec::utf_16::UTF16Encoding'>UTF16Encoding</a>&lt;E&gt;</code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../encoding/codec/utf_16/struct.UTF16Encoding.html' title='encoding::codec::utf_16::UTF16Encoding'>UTF16Encoding</a>&lt;E&gt;</code></h4>
-<h4 id='method.clone_from' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;E: Endian&gt; <a class='trait' href='../../../encoding/types/trait.Encoding.html' title='encoding::types::Encoding'>Encoding</a> for <a class='struct' href='../../../encoding/codec/utf_16/struct.UTF16Encoding.html' title='encoding::codec::utf_16::UTF16Encoding'>UTF16Encoding</a>&lt;E&gt;</code></h3><div class='impl-items'><h4 id='method.name' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.name' class='fnname'>name</a>(&amp;self) -&gt; &amp;'static <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<h4 id='method.whatwg_name' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.whatwg_name' class='fnname'>whatwg_name</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'static <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h4>
+<h4 id='method.raw_encoder' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.raw_encoder' class='fnname'>raw_encoder</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../encoding/types/trait.RawEncoder.html' title='encoding::types::RawEncoder'>RawEncoder</a>&gt;</code></h4>
+<h4 id='method.raw_decoder' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.raw_decoder' class='fnname'>raw_decoder</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../encoding/types/trait.RawDecoder.html' title='encoding::types::RawDecoder'>RawDecoder</a>&gt;</code></h4>
+<h4 id='method.encode' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.encode' class='fnname'>encode</a>(&amp;self, input: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h4>
+<h4 id='method.encode_to' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.encode_to' class='fnname'>encode_to</a>(&amp;self, input: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>, ret: &amp;mut <a class='trait' href='../../../encoding/types/trait.ByteWriter.html' title='encoding::types::ByteWriter'>ByteWriter</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h4>
+<h4 id='method.decode' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.decode' class='fnname'>decode</a>(&amp;self, input: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h4>
+<h4 id='method.decode_to' class='method'><code>fn <a href='../../../encoding/types/trait.Encoding.html#method.decode_to' class='fnname'>decode_to</a>(&amp;self, input: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>, ret: &amp;mut <a class='trait' href='../../../encoding/types/trait.StringWriter.html' title='encoding::types::StringWriter'>StringWriter</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl&lt;E: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='struct' href='../../../encoding/codec/utf_16/struct.UTF16Encoding.html' title='encoding::codec::utf_16::UTF16Encoding'>UTF16Encoding</a>&lt;E&gt;</code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;E: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../../encoding/codec/utf_16/struct.UTF16Encoding.html' title='encoding::codec::utf_16::UTF16Encoding'>UTF16Encoding</a>&lt;E&gt;</code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../encoding/codec/utf_16/struct.UTF16Encoding.html' title='encoding::codec::utf_16::UTF16Encoding'>UTF16Encoding</a>&lt;E&gt;</code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
 
-    <div id="help" class="hidden">
+    <aside id="help" class="hidden">
         <div>
+            <h1 class="hidden">Help</h1>
+
             <div class="shortcuts">
-                <h1>Keyboard Shortcuts</h1>
+                <h2>Keyboard Shortcuts</h2>
 
                 <dl>
                     <dt>?</dt>
@@ -96,7 +98,7 @@ which should be either <code>Little</code> (little endian) or <code>Big</code> (
             </div>
 
             <div class="infos">
-                <h1>Search Tricks</h1>
+                <h2>Search Tricks</h2>
 
                 <p>
                     Prefix searches with a type followed by a colon (e.g.
@@ -106,8 +108,8 @@ which should be either <code>Little</code> (little endian) or <code>Big</code> (
                 <p>
                     Accepted types are: <code>fn</code>, <code>mod</code>,
                     <code>struct</code>, <code>enum</code>,
-                    <code>trait</code>, <code>typedef</code> (or
-                    <code>tdef</code>).
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
                 </p>
 
                 <p>
@@ -116,7 +118,7 @@ which should be either <code>Little</code> (little endian) or <code>Big</code> (
                 </p>
             </div>
         </div>
-    </div>
+    </aside>
 
     
 
@@ -128,6 +130,6 @@ which should be either <code>Little</code> (little endian) or <code>Big</code> (
     <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
     
-    <script async src="../../../search-index.js"></script>
+    <script defer src="../../../search-index.js"></script>
 </body>
 </html>

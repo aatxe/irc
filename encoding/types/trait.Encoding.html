@@ -9,6 +9,7 @@
 
     <title>encoding::types::Encoding - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     
@@ -24,10 +25,10 @@
 
     
 
-    <section class="sidebar">
+    <nav class="sidebar">
         
         <p class='location'><a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a></p><script>window.sidebarCurrent = {name: 'Encoding', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
-    </section>
+    </nav>
 
     <nav class="sub">
         <form class="search-form js-only">
@@ -45,41 +46,41 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-657' class='srclink' href='../../src/encoding/types.rs.html#184-292' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-150' class='srclink' href='../../src/encoding/types.rs.html#184-292' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Encoding {
-    fn <a href='#tymethod.name' class='fnname'>name</a>(&amp;self) -&gt; &amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>;
-    fn <a href='#tymethod.raw_encoder' class='fnname'>raw_encoder</a>(&amp;self) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../encoding/types/trait.RawEncoder.html' title='encoding::types::RawEncoder'>RawEncoder</a>&gt;;
-    fn <a href='#tymethod.raw_decoder' class='fnname'>raw_decoder</a>(&amp;self) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../encoding/types/trait.RawDecoder.html' title='encoding::types::RawDecoder'>RawDecoder</a>&gt;;
+    fn <a href='#tymethod.name' class='fnname'>name</a>(&amp;self) -&gt; &amp;'static <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>;
+    fn <a href='#tymethod.raw_encoder' class='fnname'>raw_encoder</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../encoding/types/trait.RawEncoder.html' title='encoding::types::RawEncoder'>RawEncoder</a>&gt;;
+    fn <a href='#tymethod.raw_decoder' class='fnname'>raw_decoder</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../encoding/types/trait.RawDecoder.html' title='encoding::types::RawDecoder'>RawDecoder</a>&gt;;
 
-    fn <a href='#method.whatwg_name' class='fnname'>whatwg_name</a>(&amp;self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; { ... }
-    fn <a href='#method.encode' class='fnname'>encode</a>(&amp;self, input: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt; { ... }
-    fn <a href='#method.encode_to' class='fnname'>encode_to</a>(&amp;self, input: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>, ret: &amp;mut <a class='trait' href='../../encoding/types/trait.ByteWriter.html' title='encoding::types::ByteWriter'>ByteWriter</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt; { ... }
-    fn <a href='#method.decode' class='fnname'>decode</a>(&amp;self, input: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt; { ... }
-    fn <a href='#method.decode_to' class='fnname'>decode_to</a>(&amp;self, input: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>, ret: &amp;mut <a class='trait' href='../../encoding/types/trait.StringWriter.html' title='encoding::types::StringWriter'>StringWriter</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt; { ... }
+    fn <a href='#method.whatwg_name' class='fnname'>whatwg_name</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'static <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; { ... }
+    fn <a href='#method.encode' class='fnname'>encode</a>(&amp;self, input: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt; { ... }
+    fn <a href='#method.encode_to' class='fnname'>encode_to</a>(&amp;self, input: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>, ret: &amp;mut <a class='trait' href='../../encoding/types/trait.ByteWriter.html' title='encoding::types::ByteWriter'>ByteWriter</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt; { ... }
+    fn <a href='#method.decode' class='fnname'>decode</a>(&amp;self, input: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt; { ... }
+    fn <a href='#method.decode_to' class='fnname'>decode_to</a>(&amp;self, input: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>, ret: &amp;mut <a class='trait' href='../../encoding/types/trait.StringWriter.html' title='encoding::types::StringWriter'>StringWriter</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt; { ... }
 }</pre><div class='docblock'><p>Character encoding.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.name' class='method stab '><code>fn <a href='#tymethod.name' class='fnname'>name</a>(&amp;self) -&gt; &amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns the canonical name of given encoding.
+        <h3 id='tymethod.name' class='method stab '><code>fn <a href='#tymethod.name' class='fnname'>name</a>(&amp;self) -&gt; &amp;'static <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h3><div class='docblock'><p>Returns the canonical name of given encoding.
 This name is guaranteed to be unique across built-in encodings,
 but it is not normative and would be at most arbitrary.</p>
-</div><h3 id='tymethod.raw_encoder' class='method stab '><code>fn <a href='#tymethod.raw_encoder' class='fnname'>raw_encoder</a>(&amp;self) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../encoding/types/trait.RawEncoder.html' title='encoding::types::RawEncoder'>RawEncoder</a>&gt;</code></h3><div class='docblock'><p>Creates a new encoder.</p>
-</div><h3 id='tymethod.raw_decoder' class='method stab '><code>fn <a href='#tymethod.raw_decoder' class='fnname'>raw_decoder</a>(&amp;self) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../encoding/types/trait.RawDecoder.html' title='encoding::types::RawDecoder'>RawDecoder</a>&gt;</code></h3><div class='docblock'><p>Creates a new decoder.</p>
+</div><h3 id='tymethod.raw_encoder' class='method stab '><code>fn <a href='#tymethod.raw_encoder' class='fnname'>raw_encoder</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../encoding/types/trait.RawEncoder.html' title='encoding::types::RawEncoder'>RawEncoder</a>&gt;</code></h3><div class='docblock'><p>Creates a new encoder.</p>
+</div><h3 id='tymethod.raw_decoder' class='method stab '><code>fn <a href='#tymethod.raw_decoder' class='fnname'>raw_decoder</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../encoding/types/trait.RawDecoder.html' title='encoding::types::RawDecoder'>RawDecoder</a>&gt;</code></h3><div class='docblock'><p>Creates a new decoder.</p>
 </div></div>
             <h2 id='provided-methods'>Provided Methods</h2>
             <div class='methods'>
-        <h3 id='method.whatwg_name' class='method stab '><code>fn <a href='#method.whatwg_name' class='fnname'>whatwg_name</a>(&amp;self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'static <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h3><div class='docblock'><p>Returns a name of given encoding defined in the WHATWG Encoding standard, if any.
+        <h3 id='method.whatwg_name' class='method stab '><code>fn <a href='#method.whatwg_name' class='fnname'>whatwg_name</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;'static <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></h3><div class='docblock'><p>Returns a name of given encoding defined in the WHATWG Encoding standard, if any.
 This name often differs from <code>name</code> due to the compatibility reason.</p>
-</div><h3 id='method.encode' class='method stab '><code>fn <a href='#method.encode' class='fnname'>encode</a>(&amp;self, input: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h3><div class='docblock'><p>An easy-to-use interface to <code>RawEncoder</code>.
+</div><h3 id='method.encode' class='method stab '><code>fn <a href='#method.encode' class='fnname'>encode</a>(&amp;self, input: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h3><div class='docblock'><p>An easy-to-use interface to <code>RawEncoder</code>.
 On the encoder error <code>trap</code> is called,
 which may return a replacement sequence to continue processing,
 or a failure to return the error.</p>
-</div><h3 id='method.encode_to' class='method stab '><code>fn <a href='#method.encode_to' class='fnname'>encode_to</a>(&amp;self, input: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>, ret: &amp;mut <a class='trait' href='../../encoding/types/trait.ByteWriter.html' title='encoding::types::ByteWriter'>ByteWriter</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h3><div class='docblock'><p>Encode into a <code>ByteWriter</code>.</p>
-</div><h3 id='method.decode' class='method stab '><code>fn <a href='#method.decode' class='fnname'>decode</a>(&amp;self, input: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h3><div class='docblock'><p>An easy-to-use interface to <code>RawDecoder</code>.
+</div><h3 id='method.encode_to' class='method stab '><code>fn <a href='#method.encode_to' class='fnname'>encode_to</a>(&amp;self, input: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, trap: <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a>, ret: &amp;mut <a class='trait' href='../../encoding/types/trait.ByteWriter.html' title='encoding::types::ByteWriter'>ByteWriter</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h3><div class='docblock'><p>Encode into a <code>ByteWriter</code>.</p>
+</div><h3 id='method.decode' class='method stab '><code>fn <a href='#method.decode' class='fnname'>decode</a>(&amp;self, input: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h3><div class='docblock'><p>An easy-to-use interface to <code>RawDecoder</code>.
 On the decoder error <code>trap</code> is called,
 which may return a replacement string to continue processing,
 or a failure to return the error.</p>
-</div><h3 id='method.decode_to' class='method stab '><code>fn <a href='#method.decode_to' class='fnname'>decode_to</a>(&amp;self, input: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>, ret: &amp;mut <a class='trait' href='../../encoding/types/trait.StringWriter.html' title='encoding::types::StringWriter'>StringWriter</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='http://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h3><div class='docblock'><p>Decode into a <code>StringWriter</code>.</p>
+</div><h3 id='method.decode_to' class='method stab '><code>fn <a href='#method.decode_to' class='fnname'>decode_to</a>(&amp;self, input: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, trap: <a class='enum' href='../../encoding/types/enum.DecoderTrap.html' title='encoding::types::DecoderTrap'>DecoderTrap</a>, ret: &amp;mut <a class='trait' href='../../encoding/types/trait.StringWriter.html' title='encoding::types::StringWriter'>StringWriter</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code></h3><div class='docblock'><p>Decode into a <code>StringWriter</code>.</p>
 
 <p>This does <em>not</em> handle partial characters at the beginning or end of <code>input</code>!
 Use <code>RawDecoder</code> for incremental decoding.</p>
@@ -106,10 +107,12 @@ Use <code>RawDecoder</code> for incremental decoding.</p>
 
     <section class="footer"></section>
 
-    <div id="help" class="hidden">
+    <aside id="help" class="hidden">
         <div>
+            <h1 class="hidden">Help</h1>
+
             <div class="shortcuts">
-                <h1>Keyboard Shortcuts</h1>
+                <h2>Keyboard Shortcuts</h2>
 
                 <dl>
                     <dt>?</dt>
@@ -126,7 +129,7 @@ Use <code>RawDecoder</code> for incremental decoding.</p>
             </div>
 
             <div class="infos">
-                <h1>Search Tricks</h1>
+                <h2>Search Tricks</h2>
 
                 <p>
                     Prefix searches with a type followed by a colon (e.g.
@@ -136,8 +139,8 @@ Use <code>RawDecoder</code> for incremental decoding.</p>
                 <p>
                     Accepted types are: <code>fn</code>, <code>mod</code>,
                     <code>struct</code>, <code>enum</code>,
-                    <code>trait</code>, <code>typedef</code> (or
-                    <code>tdef</code>).
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
                 </p>
 
                 <p>
@@ -146,7 +149,7 @@ Use <code>RawDecoder</code> for incremental decoding.</p>
                 </p>
             </div>
         </div>
-    </div>
+    </aside>
 
     
 
@@ -158,6 +161,6 @@ Use <code>RawDecoder</code> for incremental decoding.</p>
     <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     
-    <script async src="../../search-index.js"></script>
+    <script defer src="../../search-index.js"></script>
 </body>
 </html>

@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["compile_library","Compile a library from the given set of input C files."]],"mod":[["windows_registry","A helper module to probe the Windows Registry when looking for windows-specific tools."]],"struct":[["Config","Extra configuration to pass to gcc."]]});

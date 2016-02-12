@@ -9,6 +9,7 @@
 
     <title>irc::client::server::Server - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
 
     
@@ -24,10 +25,10 @@
 
     
 
-    <section class="sidebar">
+    <nav class="sidebar">
         
         <p class='location'><a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>client</a>::<wbr><a href='index.html'>server</a></p><script>window.sidebarCurrent = {name: 'Server', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
-    </section>
+    </nav>
 
     <nav class="sub">
         <form class="search-form js-only">
@@ -45,28 +46,26 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-24912' class='srclink' href='../../../src/irc/client/server/mod.rs.html#20-33' title='goto source code'>[src]</a></span></h1>
-<pre class='rust trait'>pub trait Server&lt;'a, T, U&gt; {
+        </span><a id='src-3102' class='srclink' href='../../../src/irc/client/server/mod.rs.html#22-36' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Server {
     fn <a href='#tymethod.config' class='fnname'>config</a>(&amp;self) -&gt; &amp;<a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a>;
-    fn <a href='#tymethod.send' class='fnname'>send</a>&lt;M: <a class='trait' href='http://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>&gt;&gt;(&amp;self, message: M) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span>;
-    fn <a href='#tymethod.iter' class='fnname'>iter</a>(&amp;'a self) -&gt; <a class='struct' href='../../../irc/client/server/struct.ServerIterator.html' title='irc::client::server::ServerIterator'>ServerIterator</a>&lt;'a, T, U&gt;;
-    fn <a href='#tymethod.iter_cmd' class='fnname'>iter_cmd</a>(&amp;'a self) -&gt; <a class='type' href='../../../irc/client/server/type.ServerCmdIterator.html' title='irc::client::server::ServerCmdIterator'>ServerCmdIterator</a>&lt;'a, T, U&gt;;
-    fn <a href='#tymethod.list_users' class='fnname'>list_users</a>(&amp;self, channel: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../../irc/client/data/user/struct.User.html' title='irc::client::data::user::User'>User</a>&gt;&gt;;
-}</pre><div class='docblock'><p>Trait describing core Server functionality.</p>
+    fn <a href='#tymethod.send' class='fnname'>send</a>&lt;M: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>&gt;&gt;(&amp;self, message: M) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span>;
+    fn <a href='#tymethod.iter' class='fnname'>iter</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.Iterator.html' title='core::iter::Iterator'>Iterator</a>&lt;Item=<a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>&gt;&gt; + 'a&gt;;
+    fn <a href='#tymethod.list_users' class='fnname'>list_users</a>(&amp;self, channel: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../../irc/client/data/user/struct.User.html' title='irc::client::data::user::User'>User</a>&gt;&gt;;
+}</pre><div class='docblock'><p>An interface for interacting with an IRC server.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
         <h3 id='tymethod.config' class='method stab '><code>fn <a href='#tymethod.config' class='fnname'>config</a>(&amp;self) -&gt; &amp;<a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a></code></h3><div class='docblock'><p>Gets the configuration being used with this Server.</p>
-</div><h3 id='tymethod.send' class='method stab '><code>fn <a href='#tymethod.send' class='fnname'>send</a>&lt;M: <a class='trait' href='http://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>&gt;&gt;(&amp;self, message: M) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Sends a Command to this Server.</p>
-</div><h3 id='tymethod.iter' class='method stab '><code>fn <a href='#tymethod.iter' class='fnname'>iter</a>(&amp;'a self) -&gt; <a class='struct' href='../../../irc/client/server/struct.ServerIterator.html' title='irc::client::server::ServerIterator'>ServerIterator</a>&lt;'a, T, U&gt;</code></h3><div class='docblock'><p>Gets an Iterator over Messages received by this Server.</p>
-</div><h3 id='tymethod.iter_cmd' class='method stab '><code>fn <a href='#tymethod.iter_cmd' class='fnname'>iter_cmd</a>(&amp;'a self) -&gt; <a class='type' href='../../../irc/client/server/type.ServerCmdIterator.html' title='irc::client::server::ServerCmdIterator'>ServerCmdIterator</a>&lt;'a, T, U&gt;</code></h3><div class='docblock'><p>Gets an Iterator over Commands received by this Server.</p>
-</div><h3 id='tymethod.list_users' class='method stab '><code>fn <a href='#tymethod.list_users' class='fnname'>list_users</a>(&amp;self, channel: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../../irc/client/data/user/struct.User.html' title='irc::client::data::user::User'>User</a>&gt;&gt;</code></h3><div class='docblock'><p>Gets a list of Users in the specified channel. This will be none if the channel is not
+</div><h3 id='tymethod.send' class='method stab '><code>fn <a href='#tymethod.send' class='fnname'>send</a>&lt;M: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>&gt;&gt;(&amp;self, message: M) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h3><div class='docblock'><p>Sends a Command to this Server.</p>
+</div><h3 id='tymethod.iter' class='method stab '><code>fn <a href='#tymethod.iter' class='fnname'>iter</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.Iterator.html' title='core::iter::Iterator'>Iterator</a>&lt;Item=<a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>&gt;&gt; + 'a&gt;</code></h3><div class='docblock'><p>Gets an iterator over received messages.</p>
+</div><h3 id='tymethod.list_users' class='method stab '><code>fn <a href='#tymethod.list_users' class='fnname'>list_users</a>(&amp;self, channel: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../../irc/client/data/user/struct.User.html' title='irc::client::data::user::User'>User</a>&gt;&gt;</code></h3><div class='docblock'><p>Gets a list of Users in the specified channel. This will be none if the channel is not
 being tracked, or if tracking is not supported altogether. For best results, be sure to
 request <code>multi-prefix</code> support from the server.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl&lt;'a, T: <a class='trait' href='../../../irc/client/data/kinds/trait.IrcRead.html' title='irc::client::data::kinds::IrcRead'>IrcRead</a>, U: <a class='trait' href='../../../irc/client/data/kinds/trait.IrcWrite.html' title='irc::client::data::kinds::IrcWrite'>IrcWrite</a>&gt; <a class='trait' href='../../../irc/client/server/trait.Server.html' title='irc::client::server::Server'>Server</a>&lt;'a, T, U&gt; for <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a>&lt;T, U&gt;</code></li>
+    <li><code>impl <a class='trait' href='../../../irc/client/server/trait.Server.html' title='irc::client::server::Server'>Server</a> for <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a></code></li>
 </ul><script type="text/javascript" async
                               src="../../../implementors/irc/client/server/trait.Server.js">
                       </script></section>
@@ -74,10 +73,12 @@ request <code>multi-prefix</code> support from the server.</p>
 
     <section class="footer"></section>
 
-    <div id="help" class="hidden">
+    <aside id="help" class="hidden">
         <div>
+            <h1 class="hidden">Help</h1>
+
             <div class="shortcuts">
-                <h1>Keyboard Shortcuts</h1>
+                <h2>Keyboard Shortcuts</h2>
 
                 <dl>
                     <dt>?</dt>
@@ -94,7 +95,7 @@ request <code>multi-prefix</code> support from the server.</p>
             </div>
 
             <div class="infos">
-                <h1>Search Tricks</h1>
+                <h2>Search Tricks</h2>
 
                 <p>
                     Prefix searches with a type followed by a colon (e.g.
@@ -104,8 +105,8 @@ request <code>multi-prefix</code> support from the server.</p>
                 <p>
                     Accepted types are: <code>fn</code>, <code>mod</code>,
                     <code>struct</code>, <code>enum</code>,
-                    <code>trait</code>, <code>typedef</code> (or
-                    <code>tdef</code>).
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
                 </p>
 
                 <p>
@@ -114,7 +115,7 @@ request <code>multi-prefix</code> support from the server.</p>
                 </p>
             </div>
         </div>
-    </div>
+    </aside>
 
     
 
@@ -126,6 +127,6 @@ request <code>multi-prefix</code> support from the server.</p>
     <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
     
-    <script async src="../../../search-index.js"></script>
+    <script defer src="../../../search-index.js"></script>
 </body>
 </html>

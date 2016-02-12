@@ -4,11 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-0a35038f75765ae4/openssl-sys-0.6.5/src/probe.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-88ac128001ac3a9a/openssl-sys-0.7.6/src/probe.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>probe.rs.html -- source</title>
 
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     
@@ -24,10 +25,10 @@
 
     
 
-    <section class="sidebar">
+    <nav class="sidebar">
         
         
-    </section>
+    </nav>
 
     <nav class="sub">
         <form class="search-form js-only">
@@ -113,6 +114,10 @@
 <span id="71">71</span>
 <span id="72">72</span>
 <span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>env</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>;
@@ -173,10 +178,14 @@
     <span class='kw'>for</span> <span class='ident'>certs_dir</span> <span class='kw'>in</span> <span class='ident'>find_certs_dirs</span>().<span class='ident'>iter</span>() {
         <span class='comment'>// cert.pem looks to be an openssl 1.0.1 thing, while</span>
         <span class='comment'>// certs/ca-certificates.crt appears to be a 0.9.8 thing</span>
-        <span class='ident'>try</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>result</span>.<span class='ident'>cert_file</span>, <span class='ident'>certs_dir</span>.<span class='ident'>join</span>(<span class='string'>&quot;cert.pem&quot;</span>));
-        <span class='ident'>try</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>result</span>.<span class='ident'>cert_file</span>, <span class='ident'>certs_dir</span>.<span class='ident'>join</span>(<span class='string'>&quot;certs/ca-certificates.crt&quot;</span>));
-        <span class='ident'>try</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>result</span>.<span class='ident'>cert_file</span>, <span class='ident'>certs_dir</span>.<span class='ident'>join</span>(<span class='string'>&quot;certs/ca-root-nss.crt&quot;</span>));
-
+        <span class='kw'>for</span> <span class='ident'>cert</span> <span class='kw'>in</span> [
+            <span class='string'>&quot;cert.pem&quot;</span>,
+            <span class='string'>&quot;certs.pem&quot;</span>,
+            <span class='string'>&quot;certs/ca-certificates.crt&quot;</span>,
+            <span class='string'>&quot;certs/ca-root-nss.crt&quot;</span>
+        ].<span class='ident'>iter</span>() {
+            <span class='ident'>try</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>result</span>.<span class='ident'>cert_file</span>, <span class='ident'>certs_dir</span>.<span class='ident'>join</span>(<span class='ident'>cert</span>));
+        }
         <span class='ident'>try</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>result</span>.<span class='ident'>cert_dir</span>, <span class='ident'>certs_dir</span>.<span class='ident'>join</span>(<span class='string'>&quot;certs&quot;</span>));
     }
     <span class='ident'>result</span>
@@ -193,10 +202,12 @@
 
     <section class="footer"></section>
 
-    <div id="help" class="hidden">
+    <aside id="help" class="hidden">
         <div>
+            <h1 class="hidden">Help</h1>
+
             <div class="shortcuts">
-                <h1>Keyboard Shortcuts</h1>
+                <h2>Keyboard Shortcuts</h2>
 
                 <dl>
                     <dt>?</dt>
@@ -213,7 +224,7 @@
             </div>
 
             <div class="infos">
-                <h1>Search Tricks</h1>
+                <h2>Search Tricks</h2>
 
                 <p>
                     Prefix searches with a type followed by a colon (e.g.
@@ -223,8 +234,8 @@
                 <p>
                     Accepted types are: <code>fn</code>, <code>mod</code>,
                     <code>struct</code>, <code>enum</code>,
-                    <code>trait</code>, <code>typedef</code> (or
-                    <code>tdef</code>).
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
                 </p>
 
                 <p>
@@ -233,7 +244,7 @@
                 </p>
             </div>
         </div>
-    </div>
+    </aside>
 
     
 
@@ -245,6 +256,6 @@
     <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     
-    <script async src="../../search-index.js"></script>
+    <script defer src="../../search-index.js"></script>
 </body>
 </html>

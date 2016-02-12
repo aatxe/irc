@@ -9,6 +9,7 @@
 
     <title>conn.rs.html -- source</title>
 
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
 
     
@@ -24,10 +25,10 @@
 
     
 
-    <section class="sidebar">
+    <nav class="sidebar">
         
         
-    </section>
+    </nav>
 
     <nav class="sub">
         <form class="search-form js-only">
@@ -377,39 +378,185 @@
 <span id="335">335</span>
 <span id="336">336</span>
 <span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Thread-safe connections on IrcStreams.</span>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>error</span>::<span class='ident'>Error</span> <span class='kw'>as</span> <span class='ident'>StdError</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>BufReader</span>, <span class='ident'>BufWriter</span>, <span class='prelude-ty'>Result</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Error</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>ErrorKind</span>;
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>BufReader</span>, <span class='ident'>BufWriter</span>, <span class='ident'>Cursor</span>, <span class='prelude-ty'>Result</span>};
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Error</span>;
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>ErrorKind</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>net</span>::<span class='ident'>TcpStream</span>;
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>result</span>::<span class='prelude-ty'>Result</span> <span class='kw'>as</span> <span class='ident'>StdResult</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::{<span class='ident'>Mutex</span>, <span class='ident'>MutexGuard</span>};
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>DecoderTrap</span>, <span class='ident'>EncoderTrap</span>, <span class='ident'>Encoding</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Mutex</span>;
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>DecoderTrap</span>;
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>label</span>::<span class='ident'>encoding_from_whatwg_label</span>;
-<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Message</span>;
-<span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>kinds</span>::{<span class='ident'>IrcRead</span>, <span class='ident'>IrcWrite</span>};
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>openssl</span>::<span class='ident'>ssl</span>::{<span class='ident'>SslContext</span>, <span class='ident'>SslMethod</span>, <span class='ident'>SslStream</span>};
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>openssl</span>::<span class='ident'>ssl</span>::<span class='ident'>error</span>::<span class='ident'>SslError</span>;
 
-<span class='doccomment'>/// A thread-safe connection.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Connection</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>IrcRead</span>, <span class='ident'>U</span>: <span class='ident'>IrcWrite</span><span class='op'>&gt;</span> {
-    <span class='ident'>reader</span>: <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>,
-    <span class='ident'>writer</span>: <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>U</span><span class='op'>&gt;</span>,
+<span class='doccomment'>/// A connection.</span>
+<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Connection</span> {
+    <span class='doccomment'>/// Sends a message over this connection.</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>;
+
+    <span class='doccomment'>/// Sends a message over this connection.</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
+    <span class='kw'>fn</span> <span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>;
+
+    <span class='doccomment'>/// Receives a single line from this connection.</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>;
+
+    <span class='doccomment'>/// Receives a single line from this connection.</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>))]</span>
+    <span class='kw'>fn</span> <span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>;
+
+    <span class='doccomment'>/// Gets the full record of all sent messages if the Connection records this.</span>
+    <span class='doccomment'>/// This is intended for use in writing tests.</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>written</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>;
+
+    <span class='doccomment'>/// Gets the full record of all sent messages if the Connection records this.</span>
+    <span class='doccomment'>/// This is intended for use in writing tests.</span>
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>))]</span>
+    <span class='kw'>fn</span> <span class='ident'>written</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>;
+
+    <span class='doccomment'>/// Re-establishes this connection, disconnecting from the existing case if necessary.</span>
+    <span class='kw'>fn</span> <span class='ident'>reconnect</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>;
 }
 
-<span class='doccomment'>/// A Connection over a buffered NetStream.</span>
-<span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>NetConnection</span> <span class='op'>=</span> <span class='ident'>Connection</span><span class='op'>&lt;</span><span class='ident'>BufReader</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>, <span class='ident'>BufWriter</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;&gt;</span>;
-<span class='doccomment'>/// An internal type</span>
-<span class='kw'>type</span> <span class='ident'>NetReadWritePair</span> <span class='op'>=</span> (<span class='ident'>BufReader</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>, <span class='ident'>BufWriter</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>);
 
-<span class='kw'>impl</span> <span class='ident'>Connection</span><span class='op'>&lt;</span><span class='ident'>BufReader</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>, <span class='ident'>BufWriter</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;&gt;</span> {
+<span class='doccomment'>/// Useful internal type definitions.</span>
+<span class='kw'>type</span> <span class='ident'>NetReader</span> <span class='op'>=</span> <span class='ident'>BufReader</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>;
+<span class='kw'>type</span> <span class='ident'>NetWriter</span> <span class='op'>=</span> <span class='ident'>BufWriter</span><span class='op'>&lt;</span><span class='ident'>NetStream</span><span class='op'>&gt;</span>;
+<span class='kw'>type</span> <span class='ident'>NetReadWritePair</span> <span class='op'>=</span> (<span class='ident'>NetReader</span>, <span class='ident'>NetWriter</span>);
+
+<span class='doccomment'>/// A thread-safe connection over a buffered NetStream.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>NetConnection</span> {
+    <span class='ident'>host</span>: <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>,
+    <span class='ident'>port</span>: <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;</span>,
+    <span class='ident'>reader</span>: <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>NetReader</span><span class='op'>&gt;</span>,
+    <span class='ident'>writer</span>: <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>NetWriter</span><span class='op'>&gt;</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>NetConnection</span> {
+    <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>host</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>port</span>: <span class='ident'>u16</span>, <span class='ident'>reader</span>: <span class='ident'>NetReader</span>, <span class='ident'>writer</span>: <span class='ident'>NetWriter</span>) <span class='op'>-&gt;</span> <span class='ident'>NetConnection</span> {
+        <span class='ident'>NetConnection</span> {
+            <span class='ident'>host</span>: <span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='ident'>host</span>.<span class='ident'>to_owned</span>()),
+            <span class='ident'>port</span>: <span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='ident'>port</span>),
+            <span class='ident'>reader</span>: <span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='ident'>reader</span>),
+            <span class='ident'>writer</span>: <span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='ident'>writer</span>),
+        }
+    }
+
     <span class='doccomment'>/// Creates a thread-safe TCP connection to the specified server.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>connect</span>(<span class='ident'>host</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>port</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>NetConnection</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> (<span class='ident'>reader</span>, <span class='ident'>writer</span>) <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>Connection</span>::<span class='ident'>connect_internal</span>(<span class='ident'>host</span>, <span class='ident'>port</span>));
-        <span class='prelude-val'>Ok</span>(<span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>reader</span>, <span class='ident'>writer</span>))
+        <span class='kw'>let</span> (<span class='ident'>reader</span>, <span class='ident'>writer</span>) <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>NetConnection</span>::<span class='ident'>connect_internal</span>(<span class='ident'>host</span>, <span class='ident'>port</span>));
+        <span class='prelude-val'>Ok</span>(<span class='ident'>NetConnection</span>::<span class='ident'>new</span>(<span class='ident'>host</span>, <span class='ident'>port</span>, <span class='ident'>reader</span>, <span class='ident'>writer</span>))
     }
 
     <span class='doccomment'>/// connects to the specified server and returns a reader-writer pair.</span>
@@ -422,8 +569,8 @@
     <span class='doccomment'>/// Creates a thread-safe TCP connection to the specified server over SSL.</span>
     <span class='doccomment'>/// If the library is compiled without SSL support, this method panics.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>connect_ssl</span>(<span class='ident'>host</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>port</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>NetConnection</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> (<span class='ident'>reader</span>, <span class='ident'>writer</span>) <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>Connection</span>::<span class='ident'>connect_ssl_internal</span>(<span class='ident'>host</span>, <span class='ident'>port</span>));
-        <span class='prelude-val'>Ok</span>(<span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>reader</span>, <span class='ident'>writer</span>))
+        <span class='kw'>let</span> (<span class='ident'>reader</span>, <span class='ident'>writer</span>) <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>NetConnection</span>::<span class='ident'>connect_ssl_internal</span>(<span class='ident'>host</span>, <span class='ident'>port</span>));
+        <span class='prelude-val'>Ok</span>(<span class='ident'>NetConnection</span>::<span class='ident'>new</span>(<span class='ident'>host</span>, <span class='ident'>port</span>, <span class='ident'>reader</span>, <span class='ident'>writer</span>))
     }
 
     <span class='doccomment'>/// Connects over SSL to the specified server and returns a reader-writer pair.</span>
@@ -431,7 +578,7 @@
     <span class='kw'>fn</span> <span class='ident'>connect_ssl_internal</span>(<span class='ident'>host</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>port</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>NetReadWritePair</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>socket</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>TcpStream</span>::<span class='ident'>connect</span>(<span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}:{}&quot;</span>, <span class='ident'>host</span>, <span class='ident'>port</span>)[..]));
         <span class='kw'>let</span> <span class='ident'>ssl</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>ssl_to_io</span>(<span class='ident'>SslContext</span>::<span class='ident'>new</span>(<span class='ident'>SslMethod</span>::<span class='ident'>Tlsv1</span>)));
-        <span class='kw'>let</span> <span class='ident'>ssl_socket</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>ssl_to_io</span>(<span class='ident'>SslStream</span>::<span class='ident'>new</span>(<span class='kw-2'>&amp;</span><span class='ident'>ssl</span>, <span class='ident'>socket</span>)));
+        <span class='kw'>let</span> <span class='ident'>ssl_socket</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>ssl_to_io</span>(<span class='ident'>SslStream</span>::<span class='ident'>connect_generic</span>(<span class='kw-2'>&amp;</span><span class='ident'>ssl</span>, <span class='ident'>socket</span>)));
         <span class='prelude-val'>Ok</span>((<span class='ident'>BufReader</span>::<span class='ident'>new</span>(<span class='ident'>NetStream</span>::<span class='ident'>SslTcpStream</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>ssl_socket</span>.<span class='ident'>try_clone</span>()))),
             <span class='ident'>BufWriter</span>::<span class='ident'>new</span>(<span class='ident'>NetStream</span>::<span class='ident'>SslTcpStream</span>(<span class='ident'>ssl_socket</span>))))
     }
@@ -440,125 +587,6 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>))]</span>
     <span class='kw'>fn</span> <span class='ident'>connect_ssl_internal</span>(<span class='ident'>host</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>port</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>NetReadWritePair</span><span class='op'>&gt;</span> {
         <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;Cannot connect to {}:{} over SSL without compiling with SSL support.&quot;</span>, <span class='ident'>host</span>, <span class='ident'>port</span>)
-    }
-
-    <span class='doccomment'>/// Reconnects to the specified server, dropping the current connection.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>reconnect</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>host</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>port</span>: <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>use_ssl</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>get_ref</span>() {
-            <span class='kw-2'>&amp;</span><span class='ident'>NetStream</span>::<span class='ident'>UnsecuredTcpStream</span>(_) <span class='op'>=&gt;</span>  <span class='boolval'>false</span>,
-            <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span>
-            <span class='kw-2'>&amp;</span><span class='ident'>NetStream</span>::<span class='ident'>SslTcpStream</span>(_) <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        };
-        <span class='kw'>let</span> (<span class='ident'>reader</span>, <span class='ident'>writer</span>) <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>use_ssl</span> {
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>Connection</span>::<span class='ident'>connect_ssl_internal</span>(<span class='ident'>host</span>, <span class='ident'>port</span>))
-        } <span class='kw'>else</span> {
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>Connection</span>::<span class='ident'>connect_internal</span>(<span class='ident'>host</span>, <span class='ident'>port</span>))
-        };
-        <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>() <span class='op'>=</span> <span class='ident'>reader</span>;
-        <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>writer</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>() <span class='op'>=</span> <span class='ident'>writer</span>;
-        <span class='prelude-val'>Ok</span>(())
-    }
-
-
-    <span class='comment'>/*
-    FIXME: removed until set_keepalive is stabilized.
-    /// Sets the keepalive for the network stream.
-    #[unstable = &quot;Rust IO has not stabilized.&quot;]
-    pub fn set_keepalive(&amp;self, delay_in_seconds: Option&lt;u32&gt;) -&gt; Result&lt;()&gt; {
-        self.mod_stream(|tcp| tcp.set_keepalive(delay_in_seconds))
-    }
-
-    /// Modifies the internal TcpStream using a function.
-    fn mod_stream&lt;F&gt;(&amp;self, f: F) -&gt; Result&lt;()&gt; where F: FnOnce(&amp;mut TcpStream) -&gt; Result&lt;()&gt; {
-        match self.reader.lock().unwrap().get_mut() {
-            &amp;mut NetStream::UnsecuredTcpStream(ref mut tcp) =&gt; f(tcp),
-            #[cfg(feature = &quot;ssl&quot;)]
-            &amp;mut NetStream::SslTcpStream(ref mut ssl) =&gt; f(ssl.get_mut()),
-        }
-    }
-    */</span>
-}
-
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>IrcRead</span>, <span class='ident'>U</span>: <span class='ident'>IrcWrite</span><span class='op'>&gt;</span> <span class='ident'>Connection</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span> {
-    <span class='doccomment'>/// Creates a new connection from an IrcReader and an IrcWriter.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>reader</span>: <span class='ident'>T</span>, <span class='ident'>writer</span>: <span class='ident'>U</span>) <span class='op'>-&gt;</span> <span class='ident'>Connection</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>U</span><span class='op'>&gt;</span> {
-        <span class='ident'>Connection</span> {
-            <span class='ident'>reader</span>: <span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='ident'>reader</span>),
-            <span class='ident'>writer</span>: <span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='ident'>writer</span>),
-        }
-    }
-
-    <span class='doccomment'>/// Sends a Message over this connection.</span>
-    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send</span><span class='op'>&lt;</span><span class='ident'>M</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>to_msg</span>: <span class='ident'>M</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>encoding</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>encoding_from_whatwg_label</span>(<span class='ident'>encoding</span>) {
-            <span class='prelude-val'>Some</span>(<span class='ident'>enc</span>) <span class='op'>=&gt;</span> <span class='ident'>enc</span>,
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(
-                <span class='ident'>ErrorKind</span>::<span class='ident'>InvalidInput</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Failed to find encoder. ({})&quot;</span>, <span class='ident'>encoding</span>)[..]
-            ))
-        };
-        <span class='kw'>let</span> <span class='ident'>msg</span>: <span class='ident'>Message</span> <span class='op'>=</span> <span class='ident'>to_msg</span>.<span class='ident'>into</span>();
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>encoding</span>.<span class='ident'>encode</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>into_string</span>(), <span class='ident'>EncoderTrap</span>::<span class='ident'>Replace</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>data</span>) <span class='op'>=&gt;</span> <span class='ident'>data</span>,
-            <span class='prelude-val'>Err</span>(<span class='ident'>data</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidInput</span>,
-                <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Failed to encode {} as {}.&quot;</span>, <span class='ident'>data</span>, <span class='ident'>encoding</span>.<span class='ident'>name</span>())[..]
-            ))
-        };
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>writer</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>writer</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>writer</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>));
-        <span class='ident'>writer</span>.<span class='ident'>flush</span>()
-    }
-
-    <span class='doccomment'>/// Sends a message over this connection.</span>
-    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send</span><span class='op'>&lt;</span><span class='ident'>M</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>to_msg</span>: <span class='ident'>M</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>writer</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>writer</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>msg</span>: <span class='ident'>Message</span> <span class='op'>=</span> <span class='ident'>to_msg</span>.<span class='ident'>into</span>();
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>writer</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>into_string</span>().<span class='ident'>as_bytes</span>()));
-        <span class='ident'>writer</span>.<span class='ident'>flush</span>()
-    }
-
-    <span class='doccomment'>/// Receives a single line from this connection.</span>
-    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>encoding</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>encoding_from_whatwg_label</span>(<span class='ident'>encoding</span>) {
-            <span class='prelude-val'>Some</span>(<span class='ident'>enc</span>) <span class='op'>=&gt;</span> <span class='ident'>enc</span>,
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(
-                <span class='ident'>ErrorKind</span>::<span class='ident'>InvalidInput</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Failed to find decoder. ({})&quot;</span>, <span class='ident'>encoding</span>)[..]
-            ))
-        };
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
-        <span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>read_until</span>(<span class='string'>b&#39;\n&#39;</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>buf</span>).<span class='ident'>and_then</span>(<span class='op'>|</span>_<span class='op'>|</span>
-            <span class='kw'>match</span> <span class='ident'>encoding</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span><span class='ident'>buf</span>, <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>) {
-                _ <span class='kw'>if</span> <span class='ident'>buf</span>.<span class='ident'>is_empty</span>() <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>Other</span>, <span class='string'>&quot;EOF&quot;</span>)),
-                <span class='prelude-val'>Ok</span>(<span class='ident'>data</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>data</span>),
-                <span class='prelude-val'>Err</span>(<span class='ident'>data</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidInput</span>,
-                    <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Failed to decode {} as {}.&quot;</span>, <span class='ident'>data</span>, <span class='ident'>encoding</span>.<span class='ident'>name</span>())[..]
-                ))
-            }
-        )
-    }
-
-    <span class='doccomment'>/// Receives a single line from this connection.</span>
-    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>))]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>read_line</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ret</span>));
-        <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_empty</span>() {
-            <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>Other</span>, <span class='string'>&quot;EOF&quot;</span>))
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>ret</span>)
-        }
-    }
-
-    <span class='doccomment'>/// Acquires the Reader lock.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>reader</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>MutexGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span><span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>()
-    }
-
-    <span class='doccomment'>/// Acquires the Writer lock.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>writer</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>MutexGuard</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>U</span><span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>writer</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>()
     }
 }
 
@@ -570,6 +598,188 @@
         <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>Other</span>,
             <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;An SSL error occurred. ({})&quot;</span>, <span class='ident'>e</span>.<span class='ident'>description</span>())[..]
         )),
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>Connection</span> <span class='kw'>for</span> <span class='ident'>NetConnection</span> {
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='ident'>imp</span>::<span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>writer</span>, <span class='ident'>msg</span>, <span class='ident'>encoding</span>)
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
+    <span class='kw'>fn</span> <span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='ident'>imp</span>::<span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>writer</span>, <span class='ident'>msg</span>)
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='ident'>imp</span>::<span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>reader</span>, <span class='ident'>encoding</span>)
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>))]</span>
+    <span class='kw'>fn</span> <span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='ident'>imp</span>::<span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>reader</span>)
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>written</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, _: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='prelude-val'>None</span>
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>))]</span>
+    <span class='kw'>fn</span> <span class='ident'>written</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='prelude-val'>None</span>
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>reconnect</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='ident'>use_ssl</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>get_ref</span>() {
+            <span class='kw-2'>&amp;</span><span class='ident'>NetStream</span>::<span class='ident'>UnsecuredTcpStream</span>(_) <span class='op'>=&gt;</span>  <span class='boolval'>false</span>,
+            <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;ssl&quot;</span>)]</span>
+            <span class='kw-2'>&amp;</span><span class='ident'>NetStream</span>::<span class='ident'>SslTcpStream</span>(_) <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
+        };
+        <span class='kw'>let</span> <span class='ident'>host</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>host</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>port</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>port</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> (<span class='ident'>reader</span>, <span class='ident'>writer</span>) <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>use_ssl</span> {
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>NetConnection</span>::<span class='ident'>connect_ssl_internal</span>(<span class='kw-2'>&amp;</span><span class='ident'>host</span>, <span class='op'>*</span><span class='ident'>port</span>))
+        } <span class='kw'>else</span> {
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>NetConnection</span>::<span class='ident'>connect_internal</span>(<span class='kw-2'>&amp;</span><span class='ident'>host</span>, <span class='op'>*</span><span class='ident'>port</span>))
+        };
+        <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>reader</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>() <span class='op'>=</span> <span class='ident'>reader</span>;
+        <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>writer</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>() <span class='op'>=</span> <span class='ident'>writer</span>;
+        <span class='prelude-val'>Ok</span>(())
+    }
+}
+
+<span class='doccomment'>/// A mock connection for testing purposes.</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MockConnection</span> {
+    <span class='ident'>reader</span>: <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>Cursor</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
+    <span class='ident'>writer</span>: <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;&gt;</span>,
+}
+
+<span class='kw'>impl</span> <span class='ident'>MockConnection</span> {
+    <span class='doccomment'>/// Creates a new mock connection with an empty read buffer.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>empty</span>() <span class='op'>-&gt;</span> <span class='ident'>MockConnection</span> {
+        <span class='ident'>MockConnection</span>::<span class='ident'>from_byte_vec</span>(<span class='ident'>Vec</span>::<span class='ident'>new</span>())
+    }
+
+    <span class='doccomment'>/// Creates a new mock connection with the specified string in the read buffer.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>MockConnection</span> {
+        <span class='ident'>MockConnection</span>::<span class='ident'>from_byte_vec</span>(<span class='ident'>input</span>.<span class='ident'>as_bytes</span>().<span class='ident'>to_vec</span>())
+    }
+
+    <span class='doccomment'>/// Creates a new mock connection with the specified bytes in the read buffer.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_byte_vec</span>(<span class='ident'>input</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>MockConnection</span> {
+        <span class='ident'>MockConnection</span> {
+            <span class='ident'>reader</span>: <span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='ident'>Cursor</span>::<span class='ident'>new</span>(<span class='ident'>input</span>)),
+            <span class='ident'>writer</span>: <span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='ident'>Vec</span>::<span class='ident'>new</span>()),
+        }
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>Connection</span> <span class='kw'>for</span> <span class='ident'>MockConnection</span> {
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='ident'>imp</span>::<span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>writer</span>, <span class='ident'>msg</span>, <span class='ident'>encoding</span>)
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
+    <span class='kw'>fn</span> <span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='ident'>imp</span>::<span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>writer</span>, <span class='ident'>msg</span>)
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='ident'>imp</span>::<span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>reader</span>, <span class='ident'>encoding</span>)
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>))]</span>
+    <span class='kw'>fn</span> <span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='ident'>imp</span>::<span class='ident'>recv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>reader</span>)
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>written</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='ident'>encoding_from_whatwg_label</span>(<span class='ident'>encoding</span>).<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>enc</span><span class='op'>|</span>
+            <span class='ident'>enc</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>writer</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>(), <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>).<span class='ident'>ok</span>()
+        )
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>))]</span>
+    <span class='kw'>fn</span> <span class='ident'>written</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='self'>self</span>.<span class='ident'>writer</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>clone</span>()).<span class='ident'>ok</span>()
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>reconnect</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='prelude-val'>Ok</span>(())
+    }
+}
+
+<span class='kw'>mod</span> <span class='ident'>imp</span> {
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Error</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>ErrorKind</span>;
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>Mutex</span>;
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>DecoderTrap</span>, <span class='ident'>EncoderTrap</span>, <span class='ident'>Encoding</span>};
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>label</span>::<span class='ident'>encoding_from_whatwg_label</span>;
+    <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>kinds</span>::{<span class='ident'>IrcRead</span>, <span class='ident'>IrcWrite</span>};
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>IrcWrite</span><span class='op'>&gt;</span>(<span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='ident'>encoding</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>encoding_from_whatwg_label</span>(<span class='ident'>encoding</span>) {
+            <span class='prelude-val'>Some</span>(<span class='ident'>enc</span>) <span class='op'>=&gt;</span> <span class='ident'>enc</span>,
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(
+                <span class='ident'>ErrorKind</span>::<span class='ident'>InvalidInput</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Failed to find encoder. ({})&quot;</span>, <span class='ident'>encoding</span>)[..]
+            ))
+        };
+        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>encoding</span>.<span class='ident'>encode</span>(<span class='ident'>msg</span>, <span class='ident'>EncoderTrap</span>::<span class='ident'>Replace</span>) {
+            <span class='prelude-val'>Ok</span>(<span class='ident'>data</span>) <span class='op'>=&gt;</span> <span class='ident'>data</span>,
+            <span class='prelude-val'>Err</span>(<span class='ident'>data</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidInput</span>,
+                <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Failed to encode {} as {}.&quot;</span>, <span class='ident'>data</span>, <span class='ident'>encoding</span>.<span class='ident'>name</span>())[..]
+            ))
+        };
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>writer</span> <span class='op'>=</span> <span class='ident'>writer</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>writer</span>.<span class='ident'>write_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>));
+        <span class='ident'>writer</span>.<span class='ident'>flush</span>()
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>send</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>IrcWrite</span><span class='op'>&gt;</span>(<span class='ident'>writer</span>: <span class='kw-2'>&amp;</span><span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>msg</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>writer</span> <span class='op'>=</span> <span class='ident'>writer</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>writer</span>.<span class='ident'>write_all</span>(<span class='ident'>msg</span>.<span class='ident'>as_bytes</span>()));
+        <span class='ident'>writer</span>.<span class='ident'>flush</span>()
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>)]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>recv</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>IrcRead</span><span class='op'>&gt;</span>(<span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='ident'>encoding</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>encoding_from_whatwg_label</span>(<span class='ident'>encoding</span>) {
+            <span class='prelude-val'>Some</span>(<span class='ident'>enc</span>) <span class='op'>=&gt;</span> <span class='ident'>enc</span>,
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(
+                <span class='ident'>ErrorKind</span>::<span class='ident'>InvalidInput</span>, <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Failed to find decoder. ({})&quot;</span>, <span class='ident'>encoding</span>)[..]
+            ))
+        };
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+        <span class='ident'>reader</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>read_until</span>(<span class='string'>b&#39;\n&#39;</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>buf</span>).<span class='ident'>and_then</span>(<span class='op'>|</span>_<span class='op'>|</span>
+            <span class='kw'>match</span> <span class='ident'>encoding</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span><span class='ident'>buf</span>, <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>) {
+                _ <span class='kw'>if</span> <span class='ident'>buf</span>.<span class='ident'>is_empty</span>() <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>Other</span>, <span class='string'>&quot;EOF&quot;</span>)),
+                <span class='prelude-val'>Ok</span>(<span class='ident'>data</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>data</span>),
+                <span class='prelude-val'>Err</span>(<span class='ident'>data</span>) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>InvalidInput</span>,
+                    <span class='kw-2'>&amp;</span><span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Failed to decode {} as {}.&quot;</span>, <span class='ident'>data</span>, <span class='ident'>encoding</span>.<span class='ident'>name</span>())[..]
+                ))
+            }
+        )
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encoding&quot;</span>))]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>recv</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>IrcRead</span><span class='op'>&gt;</span>(<span class='ident'>reader</span>: <span class='kw-2'>&amp;</span><span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>reader</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>read_line</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ret</span>));
+        <span class='kw'>if</span> <span class='ident'>ret</span>.<span class='ident'>is_empty</span>() {
+            <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>Other</span>, <span class='string'>&quot;EOF&quot;</span>))
+        } <span class='kw'>else</span> {
+            <span class='prelude-val'>Ok</span>(<span class='ident'>ret</span>)
+        }
     }
 }
 
@@ -613,21 +823,28 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>Connection</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>Cursor</span>, <span class='ident'>sink</span>};
-    <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>message</span>::<span class='ident'>Message</span>;
-    <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>test</span>::<span class='ident'>buf_empty</span>;
-    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>encoding</span>::{<span class='ident'>DecoderTrap</span>, <span class='ident'>Encoding</span>};
-    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span> <span class='kw'>use</span> <span class='ident'>encoding</span>::<span class='ident'>all</span>::{<span class='ident'>ISO_8859_15</span>, <span class='ident'>UTF_8</span>};
+    <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Connection</span>, <span class='ident'>MockConnection</span>};
+    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='prelude-ty'>Result</span>;
+    <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Message</span>;
+    <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Command</span>::<span class='ident'>PRIVMSG</span>;
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>send_to</span><span class='op'>&lt;</span><span class='ident'>C</span>: <span class='ident'>Connection</span>, <span class='ident'>M</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span>(<span class='ident'>conn</span>: <span class='kw-2'>&amp;</span><span class='ident'>C</span>, <span class='ident'>msg</span>: <span class='ident'>M</span>, <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='ident'>conn</span>.<span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>into</span>().<span class='ident'>into_string</span>(), <span class='ident'>encoding</span>)
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
+    <span class='kw'>fn</span> <span class='ident'>send_to</span><span class='op'>&lt;</span><span class='ident'>C</span>: <span class='ident'>Connection</span>, <span class='ident'>M</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span>(<span class='ident'>conn</span>: <span class='kw-2'>&amp;</span><span class='ident'>C</span>, <span class='ident'>msg</span>: <span class='ident'>M</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='ident'>conn</span>.<span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>into</span>().<span class='ident'>into_string</span>())
+    }
+
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
     <span class='kw'>fn</span> <span class='ident'>send</span>() {
-        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>());
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>conn</span>.<span class='ident'>send</span>(
-            <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;PRIVMSG&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;test&quot;</span>]), <span class='prelude-val'>Some</span>(<span class='string'>&quot;Testing!&quot;</span>))
-        ).<span class='ident'>is_ok</span>());
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>conn</span>.<span class='ident'>writer</span>().<span class='ident'>to_vec</span>()).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>MockConnection</span>::<span class='ident'>empty</span>();
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>send_to</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>, <span class='ident'>PRIVMSG</span>(<span class='string'>&quot;test&quot;</span>.<span class='ident'>to_owned</span>(), <span class='string'>&quot;Testing!&quot;</span>.<span class='ident'>to_owned</span>())).<span class='ident'>is_ok</span>());
+        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>conn</span>.<span class='ident'>written</span>().<span class='ident'>unwrap</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>[..], <span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>);
     }
 
@@ -635,20 +852,18 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
     <span class='kw'>fn</span> <span class='ident'>send_str</span>() {
         <span class='kw'>let</span> <span class='ident'>exp</span> <span class='op'>=</span> <span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>;
-        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>());
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>conn</span>.<span class='ident'>send</span>(<span class='ident'>exp</span>).<span class='ident'>is_ok</span>());
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>conn</span>.<span class='ident'>writer</span>().<span class='ident'>to_vec</span>()).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>MockConnection</span>::<span class='ident'>empty</span>();
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>send_to</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>, <span class='ident'>exp</span>).<span class='ident'>is_ok</span>());
+        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>conn</span>.<span class='ident'>written</span>().<span class='ident'>unwrap</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>[..], <span class='ident'>exp</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_utf8</span>() {
-        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>());
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>conn</span>.<span class='ident'>send</span>(
-            <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;PRIVMSG&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;test&quot;</span>]), <span class='prelude-val'>Some</span>(<span class='string'>&quot;€ŠšŽžŒœŸ&quot;</span>)), <span class='string'>&quot;UTF-8&quot;</span>
-        ).<span class='ident'>is_ok</span>());
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>UTF_8</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>.<span class='ident'>writer</span>(), <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>MockConnection</span>::<span class='ident'>empty</span>();
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>send_to</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>, <span class='ident'>PRIVMSG</span>(<span class='string'>&quot;test&quot;</span>.<span class='ident'>to_owned</span>(), <span class='string'>&quot;€ŠšŽžŒœŸ&quot;</span>.<span class='ident'>to_owned</span>()), <span class='string'>&quot;UTF-8&quot;</span>).<span class='ident'>is_ok</span>());
+        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>conn</span>.<span class='ident'>written</span>(<span class='string'>&quot;UTF-8&quot;</span>).<span class='ident'>unwrap</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>[..], <span class='string'>&quot;PRIVMSG test :€ŠšŽžŒœŸ\r\n&quot;</span>);
     }
 
@@ -656,20 +871,18 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_utf8_str</span>() {
         <span class='kw'>let</span> <span class='ident'>exp</span> <span class='op'>=</span> <span class='string'>&quot;PRIVMSG test :€ŠšŽžŒœŸ\r\n&quot;</span>;
-        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>());
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>conn</span>.<span class='ident'>send</span>(<span class='ident'>exp</span>, <span class='string'>&quot;UTF-8&quot;</span>).<span class='ident'>is_ok</span>());
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>UTF_8</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>.<span class='ident'>writer</span>(), <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>MockConnection</span>::<span class='ident'>empty</span>();
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>send_to</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>, <span class='ident'>exp</span>, <span class='string'>&quot;UTF-8&quot;</span>).<span class='ident'>is_ok</span>());
+        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>conn</span>.<span class='ident'>written</span>(<span class='string'>&quot;UTF-8&quot;</span>).<span class='ident'>unwrap</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>[..], <span class='ident'>exp</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_iso885915</span>() {
-        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>());
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>conn</span>.<span class='ident'>send</span>(
-            <span class='ident'>Message</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>, <span class='string'>&quot;PRIVMSG&quot;</span>, <span class='prelude-val'>Some</span>(<span class='macro'>vec</span><span class='macro'>!</span>[<span class='string'>&quot;test&quot;</span>]), <span class='prelude-val'>Some</span>(<span class='string'>&quot;€ŠšŽžŒœŸ&quot;</span>)), <span class='string'>&quot;l9&quot;</span>
-        ).<span class='ident'>is_ok</span>());
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>ISO_8859_15</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>.<span class='ident'>writer</span>(), <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>MockConnection</span>::<span class='ident'>empty</span>();
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>send_to</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>, <span class='ident'>PRIVMSG</span>(<span class='string'>&quot;test&quot;</span>.<span class='ident'>to_owned</span>(), <span class='string'>&quot;€ŠšŽžŒœŸ&quot;</span>.<span class='ident'>to_owned</span>()), <span class='string'>&quot;l9&quot;</span>).<span class='ident'>is_ok</span>());
+        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>conn</span>.<span class='ident'>written</span>(<span class='string'>&quot;l9&quot;</span>).<span class='ident'>unwrap</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>[..], <span class='string'>&quot;PRIVMSG test :€ŠšŽžŒœŸ\r\n&quot;</span>);
     }
 
@@ -677,27 +890,23 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>send_iso885915_str</span>() {
         <span class='kw'>let</span> <span class='ident'>exp</span> <span class='op'>=</span> <span class='string'>&quot;PRIVMSG test :€ŠšŽžŒœŸ\r\n&quot;</span>;
-        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>buf_empty</span>(), <span class='ident'>Vec</span>::<span class='ident'>new</span>());
-        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>conn</span>.<span class='ident'>send</span>(<span class='ident'>exp</span>, <span class='string'>&quot;l9&quot;</span>).<span class='ident'>is_ok</span>());
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>ISO_8859_15</span>.<span class='ident'>decode</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>.<span class='ident'>writer</span>(), <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>).<span class='ident'>unwrap</span>();
+        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>MockConnection</span>::<span class='ident'>empty</span>();
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>send_to</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>, <span class='ident'>exp</span>, <span class='string'>&quot;l9&quot;</span>).<span class='ident'>is_ok</span>());
+        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>conn</span>.<span class='ident'>written</span>(<span class='string'>&quot;l9&quot;</span>).<span class='ident'>unwrap</span>();
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>data</span>[..], <span class='ident'>exp</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
     <span class='kw'>fn</span> <span class='ident'>recv</span>() {
-        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>Connection</span>::<span class='ident'>new</span>(
-            <span class='ident'>Cursor</span>::<span class='ident'>new</span>(<span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>.<span class='ident'>as_bytes</span>().<span class='ident'>to_vec</span>()), <span class='ident'>sink</span>()
-        );
+        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>MockConnection</span>::<span class='ident'>new</span>(<span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>.<span class='ident'>recv</span>().<span class='ident'>unwrap</span>()[..], <span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>);
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>recv_utf8</span>() {
-        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>Connection</span>::<span class='ident'>new</span>(
-            <span class='ident'>Cursor</span>::<span class='ident'>new</span>(<span class='string'>b&quot;PRIVMSG test :Testing!\r\n&quot;</span>.<span class='ident'>to_vec</span>()), <span class='ident'>sink</span>()
-        );
+        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>MockConnection</span>::<span class='ident'>new</span>(<span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>);
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>.<span class='ident'>recv</span>(<span class='string'>&quot;UTF-8&quot;</span>).<span class='ident'>unwrap</span>()[..], <span class='string'>&quot;PRIVMSG test :Testing!\r\n&quot;</span>);
     }
 
@@ -705,13 +914,13 @@
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
     <span class='kw'>fn</span> <span class='ident'>recv_iso885915</span>() {
         <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> [<span class='number'>0xA4</span>, <span class='number'>0xA6</span>, <span class='number'>0xA8</span>, <span class='number'>0xB4</span>, <span class='number'>0xB8</span>, <span class='number'>0xBC</span>, <span class='number'>0xBD</span>, <span class='number'>0xBE</span>];
-        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>Connection</span>::<span class='ident'>new</span>(<span class='ident'>Cursor</span>::<span class='ident'>new</span>({
+        <span class='kw'>let</span> <span class='ident'>conn</span> <span class='op'>=</span> <span class='ident'>MockConnection</span>::<span class='ident'>from_byte_vec</span>({
             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>vec</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
             <span class='ident'>vec</span>.<span class='ident'>extend</span>(<span class='string'>&quot;PRIVMSG test :&quot;</span>.<span class='ident'>as_bytes</span>());
             <span class='ident'>vec</span>.<span class='ident'>extend</span>(<span class='ident'>data</span>.<span class='ident'>iter</span>());
             <span class='ident'>vec</span>.<span class='ident'>extend</span>(<span class='string'>&quot;\r\n&quot;</span>.<span class='ident'>as_bytes</span>());
             <span class='ident'>vec</span>.<span class='ident'>into_iter</span>().<span class='ident'>collect</span>::<span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;&gt;</span>()
-        }), <span class='ident'>sink</span>());
+        });
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='kw-2'>&amp;</span><span class='ident'>conn</span>.<span class='ident'>recv</span>(<span class='string'>&quot;l9&quot;</span>).<span class='ident'>unwrap</span>()[..], <span class='string'>&quot;PRIVMSG test :€ŠšŽžŒœŸ\r\n&quot;</span>);
     }
 }
@@ -721,10 +930,12 @@
 
     <section class="footer"></section>
 
-    <div id="help" class="hidden">
+    <aside id="help" class="hidden">
         <div>
+            <h1 class="hidden">Help</h1>
+
             <div class="shortcuts">
-                <h1>Keyboard Shortcuts</h1>
+                <h2>Keyboard Shortcuts</h2>
 
                 <dl>
                     <dt>?</dt>
@@ -741,7 +952,7 @@
             </div>
 
             <div class="infos">
-                <h1>Search Tricks</h1>
+                <h2>Search Tricks</h2>
 
                 <p>
                     Prefix searches with a type followed by a colon (e.g.
@@ -751,8 +962,8 @@
                 <p>
                     Accepted types are: <code>fn</code>, <code>mod</code>,
                     <code>struct</code>, <code>enum</code>,
-                    <code>trait</code>, <code>typedef</code> (or
-                    <code>tdef</code>).
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
                 </p>
 
                 <p>
@@ -761,7 +972,7 @@
                 </p>
             </div>
         </div>
-    </div>
+    </aside>
 
     
 
@@ -773,6 +984,6 @@
     <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
     
-    <script async src="../../../search-index.js"></script>
+    <script defer src="../../../search-index.js"></script>
 </body>
 </html>

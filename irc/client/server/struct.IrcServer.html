@@ -9,6 +9,7 @@
 
     <title>irc::client::server::IrcServer - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
 
     
@@ -24,10 +25,10 @@
 
     
 
-    <section class="sidebar">
+    <nav class="sidebar">
         
         <p class='location'><a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>client</a>::<wbr><a href='index.html'>server</a></p><script>window.sidebarCurrent = {name: 'IrcServer', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
-    </section>
+    </nav>
 
     <nav class="sub">
         <form class="search-form js-only">
@@ -45,36 +46,46 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-24971' class='srclink' href='../../../src/irc/client/server/mod.rs.html#36-45' title='goto source code'>[src]</a></span></h1>
-<pre class='rust struct'>pub struct IrcServer&lt;T: <a class='trait' href='../../../irc/client/data/kinds/trait.IrcRead.html' title='irc::client::data::kinds::IrcRead'>IrcRead</a>, U: <a class='trait' href='../../../irc/client/data/kinds/trait.IrcWrite.html' title='irc::client::data::kinds::IrcWrite'>IrcWrite</a>&gt; {
+        </span><a id='src-3115' class='srclink' href='../../../src/irc/client/server/mod.rs.html#39-46' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct IrcServer {
     // some fields omitted
 }</pre><div class='docblock'><p>A thread-safe implementation of an IRC Server connection.</p>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/std/io/buffered/struct.BufReader.html' title='std::io::buffered::BufReader'>BufReader</a>&lt;<a class='enum' href='../../../irc/client/conn/enum.NetStream.html' title='irc::client::conn::NetStream'>NetStream</a>&gt;, <a class='struct' href='http://doc.rust-lang.org/nightly/std/io/buffered/struct.BufWriter.html' title='std::io::buffered::BufWriter'>BufWriter</a>&lt;<a class='enum' href='../../../irc/client/conn/enum.NetStream.html' title='irc::client::conn::NetStream'>NetStream</a>&gt;&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>&lt;P: <a class='trait' href='http://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/std/path/struct.Path.html' title='std::path::Path'>Path</a>&gt;&gt;(config: P) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='type' href='../../../irc/client/server/type.NetIrcServer.html' title='irc::client::server::NetIrcServer'>NetIrcServer</a>&gt;</code></h4>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>&lt;P: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/path/struct.Path.html' title='std::path::Path'>Path</a>&gt;&gt;(config: P) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a>&gt;</code></h4>
 <div class='docblock'><p>Creates a new IRC Server connection from the configuration at the specified path,
 connecting immediately.</p>
-</div><h4 id='method.from_config' class='method'><code>fn <a href='#method.from_config' class='fnname'>from_config</a>(config: <a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='type' href='../../../irc/client/server/type.NetIrcServer.html' title='irc::client::server::NetIrcServer'>NetIrcServer</a>&gt;</code></h4>
+</div><h4 id='method.from_config' class='method'><code>fn <a href='#method.from_config' class='fnname'>from_config</a>(config: <a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a>&gt;</code></h4>
 <div class='docblock'><p>Creates a new IRC server connection from the specified configuration, connecting
 immediately.</p>
-</div><h4 id='method.reconnect' class='method'><code>fn <a href='#method.reconnect' class='fnname'>reconnect</a>(&amp;self) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
-<div class='docblock'><p>Reconnects to the IRC server.</p>
-</div></div><h3 class='impl'><code>impl&lt;T: <a class='trait' href='../../../irc/client/data/kinds/trait.IrcRead.html' title='irc::client::data::kinds::IrcRead'>IrcRead</a>, U: <a class='trait' href='../../../irc/client/data/kinds/trait.IrcWrite.html' title='irc::client::data::kinds::IrcWrite'>IrcWrite</a>&gt; <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a>&lt;T, U&gt;</code></h3><div class='impl-items'><h4 id='method.from_connection' class='method'><code>fn <a href='#method.from_connection' class='fnname'>from_connection</a>(config: <a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a>, conn: <a class='struct' href='../../../irc/client/conn/struct.Connection.html' title='irc::client::conn::Connection'>Connection</a>&lt;T, U&gt;) -&gt; <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a>&lt;T, U&gt;</code></h4>
-<div class='docblock'><p>Creates an IRC server from the specified configuration, and any arbitrary Connection.</p>
-</div><h4 id='method.conn' class='method'><code>fn <a href='#method.conn' class='fnname'>conn</a>(&amp;self) -&gt; &amp;<a class='struct' href='../../../irc/client/conn/struct.Connection.html' title='irc::client::conn::Connection'>Connection</a>&lt;T, U&gt;</code></h4>
+</div></div><h3 class='impl'><code>impl <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a></code></h3><div class='impl-items'><h4 id='method.from_connection' class='method'><code>fn <a href='#method.from_connection' class='fnname'>from_connection</a>&lt;C&gt;(config: <a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a>, conn: C) -&gt; <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a> <span class='where'>where C: <a class='trait' href='../../../irc/client/conn/trait.Connection.html' title='irc::client::conn::Connection'>Connection</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html' title='core::marker::Sync'>Sync</a> + 'static</span></code></h4>
+<div class='docblock'><p>Creates an IRC server from the specified configuration, and any arbitrary sync connection.</p>
+</div><h4 id='method.conn' class='method'><code>fn <a href='#method.conn' class='fnname'>conn</a>(&amp;self) -&gt; &amp;<a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../../../irc/client/conn/trait.Connection.html' title='irc::client::conn::Connection'>Connection</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html' title='core::marker::Sync'>Sync</a>&gt;</code></h4>
 <div class='docblock'><p>Gets a reference to the IRC server&#39;s connection.</p>
-</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;'a, T: <a class='trait' href='../../../irc/client/data/kinds/trait.IrcRead.html' title='irc::client::data::kinds::IrcRead'>IrcRead</a>, U: <a class='trait' href='../../../irc/client/data/kinds/trait.IrcWrite.html' title='irc::client::data::kinds::IrcWrite'>IrcWrite</a>&gt; <a class='trait' href='../../../irc/client/server/trait.Server.html' title='irc::client::server::Server'>Server</a>&lt;'a, T, U&gt; for <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a>&lt;T, U&gt;</code></h3><div class='impl-items'><h4 id='method.config' class='method'><code>fn <a href='../../../irc/client/server/trait.Server.html#method.config' class='fnname'>config</a>(&amp;self) -&gt; &amp;<a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a></code></h4>
-<h4 id='method.send' class='method'><code>fn <a href='../../../irc/client/server/trait.Server.html#method.send' class='fnname'>send</a>&lt;M: <a class='trait' href='http://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>&gt;&gt;(&amp;self, msg: M) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
-<h4 id='method.iter' class='method'><code>fn <a href='../../../irc/client/server/trait.Server.html#method.iter' class='fnname'>iter</a>(&amp;'a self) -&gt; <a class='struct' href='../../../irc/client/server/struct.ServerIterator.html' title='irc::client::server::ServerIterator'>ServerIterator</a>&lt;'a, T, U&gt;</code></h4>
-<h4 id='method.iter_cmd' class='method'><code>fn <a href='../../../irc/client/server/trait.Server.html#method.iter_cmd' class='fnname'>iter_cmd</a>(&amp;'a self) -&gt; <a class='type' href='../../../irc/client/server/type.ServerCmdIterator.html' title='irc::client::server::ServerCmdIterator'>ServerCmdIterator</a>&lt;'a, T, U&gt;</code></h4>
-<h4 id='method.list_users' class='method'><code>fn <a href='../../../irc/client/server/trait.Server.html#method.list_users' class='fnname'>list_users</a>(&amp;self, chan: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../../irc/client/data/user/struct.User.html' title='irc::client::data::user::User'>User</a>&gt;&gt;</code></h4>
+</div><h4 id='method.reconnect' class='method'><code>fn <a href='#method.reconnect' class='fnname'>reconnect</a>(&amp;self) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Reconnects to the IRC server, disconnecting if necessary.</p>
+</div><h4 id='method.current_nickname' class='method'><code>fn <a href='#method.current_nickname' class='fnname'>current_nickname</a>(&amp;self) -&gt; &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<div class='docblock'><p>Gets the current nickname in use.</p>
+</div><h4 id='method.await_writing' class='method'><code>fn <a href='#method.await_writing' class='fnname'>await_writing</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Waits for the completion of all writes for messages in this server&#39;s write queue. This
+function may cause unusual behavior when called on a server with operations being performed
+on other threads. This function is destructive, and is primarily intended for writing unit
+tests. Use it with care.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a></code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='../../../irc/client/server/trait.Server.html' title='irc::client::server::Server'>Server</a> for <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a></code></h3><div class='impl-items'><h4 id='method.config' class='method'><code>fn <a href='../../../irc/client/server/trait.Server.html#method.config' class='fnname'>config</a>(&amp;self) -&gt; &amp;<a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a></code></h4>
+<h4 id='method.send' class='method'><code>fn <a href='../../../irc/client/server/trait.Server.html#method.send' class='fnname'>send</a>&lt;M: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>&gt;&gt;(&amp;self, msg: M) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.iter' class='method'><code>fn <a href='../../../irc/client/server/trait.Server.html#method.iter' class='fnname'>iter</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.Iterator.html' title='core::iter::Iterator'>Iterator</a>&lt;Item=<a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>&gt;&gt; + 'a&gt;</code></h4>
+<h4 id='method.list_users' class='method'><code>fn <a href='../../../irc/client/server/trait.Server.html#method.list_users' class='fnname'>list_users</a>(&amp;self, chan: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../../irc/client/data/user/struct.User.html' title='irc::client::data::user::User'>User</a>&gt;&gt;</code></h4>
 </div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
 
-    <div id="help" class="hidden">
+    <aside id="help" class="hidden">
         <div>
+            <h1 class="hidden">Help</h1>
+
             <div class="shortcuts">
-                <h1>Keyboard Shortcuts</h1>
+                <h2>Keyboard Shortcuts</h2>
 
                 <dl>
                     <dt>?</dt>
@@ -91,7 +102,7 @@ immediately.</p>
             </div>
 
             <div class="infos">
-                <h1>Search Tricks</h1>
+                <h2>Search Tricks</h2>
 
                 <p>
                     Prefix searches with a type followed by a colon (e.g.
@@ -101,8 +112,8 @@ immediately.</p>
                 <p>
                     Accepted types are: <code>fn</code>, <code>mod</code>,
                     <code>struct</code>, <code>enum</code>,
-                    <code>trait</code>, <code>typedef</code> (or
-                    <code>tdef</code>).
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
                 </p>
 
                 <p>
@@ -111,7 +122,7 @@ immediately.</p>
                 </p>
             </div>
         </div>
-    </div>
+    </aside>
 
     
 
@@ -123,6 +134,6 @@ immediately.</p>
     <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
     
-    <script async src="../../../search-index.js"></script>
+    <script defer src="../../../search-index.js"></script>
 </body>
 </html>

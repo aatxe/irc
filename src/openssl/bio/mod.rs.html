@@ -4,11 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-0a35038f75765ae4/openssl-0.6.5/src/bio/mod.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-88ac128001ac3a9a/openssl-0.7.6/src/bio/mod.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>mod.rs.html -- source</title>
 
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
 
     
@@ -24,10 +25,10 @@
 
     
 
-    <section class="sidebar">
+    <nav class="sidebar">
         
         
-    </section>
+    </nav>
 
     <nav class="sub">
         <form class="search-form js-only">
@@ -144,6 +145,9 @@
 <span id="102">102</span>
 <span id="103">103</span>
 <span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>libc</span>::{<span class='ident'>c_void</span>, <span class='ident'>c_int</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
@@ -152,11 +156,12 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>;
 
 <span class='kw'>use</span> <span class='ident'>ffi</span>;
-<span class='kw'>use</span> <span class='ident'>ssl</span>::<span class='ident'>error</span>::{<span class='ident'>SslError</span>};
+<span class='kw'>use</span> <span class='ident'>ffi_extras</span>;
+<span class='kw'>use</span> <span class='ident'>ssl</span>::<span class='ident'>error</span>::<span class='ident'>SslError</span>;
 
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MemBio</span> {
     <span class='ident'>bio</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>ffi</span>::<span class='ident'>BIO</span>,
-    <span class='ident'>owned</span>: <span class='ident'>bool</span>
+    <span class='ident'>owned</span>: <span class='ident'>bool</span>,
 }
 
 <span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>MemBio</span> {
@@ -179,7 +184,7 @@
 
         <span class='prelude-val'>Ok</span>(<span class='ident'>MemBio</span> {
             <span class='ident'>bio</span>: <span class='ident'>bio</span>,
-            <span class='ident'>owned</span>: <span class='boolval'>true</span>
+            <span class='ident'>owned</span>: <span class='boolval'>true</span>,
         })
     }
 
@@ -187,7 +192,7 @@
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>borrowed</span>(<span class='ident'>bio</span>: <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>ffi</span>::<span class='ident'>BIO</span>) <span class='op'>-&gt;</span> <span class='ident'>MemBio</span> {
         <span class='ident'>MemBio</span> {
             <span class='ident'>bio</span>: <span class='ident'>bio</span>,
-            <span class='ident'>owned</span>: <span class='boolval'>false</span>
+            <span class='ident'>owned</span>: <span class='boolval'>false</span>,
         }
     }
 
@@ -206,20 +211,24 @@
 
     <span class='doccomment'>/// Sets the BIO&#39;s EOF state.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_eof</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>eof</span>: <span class='ident'>bool</span>) {
-        <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>eof</span> { <span class='number'>0</span> } <span class='kw'>else</span> { <span class='op'>-</span><span class='number'>1</span> };
-        <span class='kw'>unsafe</span> { <span class='ident'>ffi</span>::<span class='ident'>BIO_set_mem_eof_return</span>(<span class='self'>self</span>.<span class='ident'>bio</span>, <span class='ident'>v</span>); }
+        <span class='kw'>let</span> <span class='ident'>v</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>eof</span> {
+            <span class='number'>0</span>
+        } <span class='kw'>else</span> {
+            <span class='op'>-</span><span class='number'>1</span>
+        };
+        <span class='kw'>unsafe</span> {
+            <span class='ident'>ffi_extras</span>::<span class='ident'>BIO_set_mem_eof_return</span>(<span class='self'>self</span>.<span class='ident'>bio</span>, <span class='ident'>v</span>);
+        }
     }
 }
 
 <span class='kw'>impl</span> <span class='ident'>Read</span> <span class='kw'>for</span> <span class='ident'>MemBio</span> {
     <span class='kw'>fn</span> <span class='ident'>read</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> [<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>cmp</span>::<span class='ident'>min</span>(<span class='ident'>c_int</span>::<span class='ident'>max_value</span>() <span class='kw'>as</span> <span class='ident'>usize</span>, <span class='ident'>buf</span>.<span class='ident'>len</span>()) <span class='kw'>as</span> <span class='ident'>c_int</span>;
-        <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
-            <span class='ident'>ffi</span>::<span class='ident'>BIO_read</span>(<span class='self'>self</span>.<span class='ident'>bio</span>, <span class='ident'>buf</span>.<span class='ident'>as_ptr</span>() <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>, <span class='ident'>len</span>)
-        };
+        <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>ffi</span>::<span class='ident'>BIO_read</span>(<span class='self'>self</span>.<span class='ident'>bio</span>, <span class='ident'>buf</span>.<span class='ident'>as_ptr</span>() <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>, <span class='ident'>len</span>) };
 
         <span class='kw'>if</span> <span class='ident'>ret</span> <span class='op'>&lt;=</span> <span class='number'>0</span> {
-            <span class='kw'>let</span> <span class='ident'>is_eof</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>ffi</span>::<span class='ident'>BIO_eof</span>(<span class='self'>self</span>.<span class='ident'>bio</span>) };
+            <span class='kw'>let</span> <span class='ident'>is_eof</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>ffi_extras</span>::<span class='ident'>BIO_eof</span>(<span class='self'>self</span>.<span class='ident'>bio</span>) };
             <span class='kw'>if</span> <span class='ident'>is_eof</span> <span class='op'>!=</span> <span class='number'>0</span> {
                 <span class='prelude-val'>Ok</span>(<span class='number'>0</span>)
             } <span class='kw'>else</span> {
@@ -234,9 +243,7 @@
 <span class='kw'>impl</span> <span class='ident'>Write</span> <span class='kw'>for</span> <span class='ident'>MemBio</span> {
     <span class='kw'>fn</span> <span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>buf</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>]) <span class='op'>-&gt;</span> <span class='ident'>io</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>cmp</span>::<span class='ident'>min</span>(<span class='ident'>c_int</span>::<span class='ident'>max_value</span>() <span class='kw'>as</span> <span class='ident'>usize</span>, <span class='ident'>buf</span>.<span class='ident'>len</span>()) <span class='kw'>as</span> <span class='ident'>c_int</span>;
-        <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
-            <span class='ident'>ffi</span>::<span class='ident'>BIO_write</span>(<span class='self'>self</span>.<span class='ident'>bio</span>, <span class='ident'>buf</span>.<span class='ident'>as_ptr</span>() <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_void</span>, <span class='ident'>len</span>)
-        };
+        <span class='kw'>let</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>ffi</span>::<span class='ident'>BIO_write</span>(<span class='self'>self</span>.<span class='ident'>bio</span>, <span class='ident'>buf</span>.<span class='ident'>as_ptr</span>() <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>c_void</span>, <span class='ident'>len</span>) };
 
         <span class='kw'>if</span> <span class='ident'>ret</span> <span class='op'>&lt;</span> <span class='number'>0</span> {
             <span class='prelude-val'>Err</span>(<span class='ident'>io</span>::<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>io</span>::<span class='ident'>ErrorKind</span>::<span class='ident'>Other</span>, <span class='ident'>SslError</span>::<span class='ident'>get</span>()))
@@ -255,10 +262,12 @@
 
     <section class="footer"></section>
 
-    <div id="help" class="hidden">
+    <aside id="help" class="hidden">
         <div>
+            <h1 class="hidden">Help</h1>
+
             <div class="shortcuts">
-                <h1>Keyboard Shortcuts</h1>
+                <h2>Keyboard Shortcuts</h2>
 
                 <dl>
                     <dt>?</dt>
@@ -275,7 +284,7 @@
             </div>
 
             <div class="infos">
-                <h1>Search Tricks</h1>
+                <h2>Search Tricks</h2>
 
                 <p>
                     Prefix searches with a type followed by a colon (e.g.
@@ -285,8 +294,8 @@
                 <p>
                     Accepted types are: <code>fn</code>, <code>mod</code>,
                     <code>struct</code>, <code>enum</code>,
-                    <code>trait</code>, <code>typedef</code> (or
-                    <code>tdef</code>).
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
                 </p>
 
                 <p>
@@ -295,7 +304,7 @@
                 </p>
             </div>
         </div>
-    </div>
+    </aside>
 
     
 
@@ -307,6 +316,6 @@
     <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
     
-    <script async src="../../../search-index.js"></script>
+    <script defer src="../../../search-index.js"></script>
 </body>
 </html>
