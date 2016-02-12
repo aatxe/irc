@@ -1,6 +1,4 @@
 //! Interface for working with IRC Servers.
-//!
-//! There are currently two recommended ways to work
 use std::borrow::ToOwned;
 use std::cell::Cell;
 use std::collections::HashMap;
