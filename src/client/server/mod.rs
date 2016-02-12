@@ -355,9 +355,10 @@ impl IrcServer {
                     let mut index = self.state.alt_nick_index.write().unwrap();
                     if self.config().should_ghost() && *index != 0 {
                         for seq in self.config().ghost_sequence().iter() {
-                            try!(self.send(NICKSERV(
-                                format!("{} {} {}", seq, self.config().nickname(), self.config().nick_password())
-                            )));
+                            try!(self.send(NICKSERV(format!(
+                                "{} {} {}", seq, self.config().nickname(),
+                                self.config().nick_password()
+                            ))));
                         }
                         *index = 0;
                         try!(self.send(NICK(self.config().nickname().to_owned())))
@@ -559,8 +560,8 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..],
-        "NICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n");
+        assert_eq!(&get_server_value(server)[..], "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
+                   JOIN #test2\r\n");
     }
 
     #[test]
@@ -578,8 +579,8 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..],
-        "NICK :test2\r\nNICKSERV GHOST test password\r\nNICK :test\r\nNICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n");
+        assert_eq!(&get_server_value(server)[..], "NICK :test2\r\nNICKSERV GHOST test password\r\n\
+                   NICK :test\r\nNICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n");
     }
 
     #[test]
@@ -598,8 +599,9 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..],
-        "NICK :test2\r\nNICKSERV RECOVER test password\r\nNICKSERV RELEASE test password\r\nNICK :test\r\nNICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n");
+        assert_eq!(&get_server_value(server)[..], "NICK :test2\r\nNICKSERV RECOVER test password\
+                   \r\nNICKSERV RELEASE test password\r\nNICK :test\r\nNICKSERV IDENTIFY password\
+                   \r\nJOIN #test\r\nJOIN #test2\r\n");
     }
 
     #[test]
