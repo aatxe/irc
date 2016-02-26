@@ -789,50 +789,6 @@
 <span id="746">746</span>
 <span id="747">747</span>
 <span id="748">748</span>
-<span id="749">749</span>
-<span id="750">750</span>
-<span id="751">751</span>
-<span id="752">752</span>
-<span id="753">753</span>
-<span id="754">754</span>
-<span id="755">755</span>
-<span id="756">756</span>
-<span id="757">757</span>
-<span id="758">758</span>
-<span id="759">759</span>
-<span id="760">760</span>
-<span id="761">761</span>
-<span id="762">762</span>
-<span id="763">763</span>
-<span id="764">764</span>
-<span id="765">765</span>
-<span id="766">766</span>
-<span id="767">767</span>
-<span id="768">768</span>
-<span id="769">769</span>
-<span id="770">770</span>
-<span id="771">771</span>
-<span id="772">772</span>
-<span id="773">773</span>
-<span id="774">774</span>
-<span id="775">775</span>
-<span id="776">776</span>
-<span id="777">777</span>
-<span id="778">778</span>
-<span id="779">779</span>
-<span id="780">780</span>
-<span id="781">781</span>
-<span id="782">782</span>
-<span id="783">783</span>
-<span id="784">784</span>
-<span id="785">785</span>
-<span id="786">786</span>
-<span id="787">787</span>
-<span id="788">788</span>
-<span id="789">789</span>
-<span id="790">790</span>
-<span id="791">791</span>
-<span id="792">792</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Interface for working with IRC Servers.</span>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>ToOwned</span>;
@@ -842,8 +798,8 @@
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>Error</span>, <span class='ident'>ErrorKind</span>, <span class='prelude-ty'>Result</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::<span class='ident'>Path</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::{<span class='ident'>Arc</span>, <span class='ident'>Mutex</span>, <span class='ident'>RwLock</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>sync</span>::<span class='ident'>mpsc</span>::{<span class='ident'>Receiver</span>, <span class='ident'>Sender</span>, <span class='ident'>TryRecvError</span>, <span class='ident'>channel</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>thread</span>::{<span class='ident'>JoinHandle</span>, <span class='ident'>spawn</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>thread</span>::{<span class='ident'>spawn</span>, <span class='ident'>sleep</span>};
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>time</span>::<span class='ident'>Duration</span> <span class='kw'>as</span> <span class='ident'>StdDuration</span>;
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>conn</span>::{<span class='ident'>Connection</span>, <span class='ident'>NetConnection</span>};
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::{<span class='ident'>Command</span>, <span class='ident'>Config</span>, <span class='ident'>Message</span>, <span class='ident'>Response</span>, <span class='ident'>User</span>};
 <span class='kw'>use</span> <span class='ident'>client</span>::<span class='ident'>data</span>::<span class='ident'>Command</span>::{<span class='ident'>JOIN</span>, <span class='ident'>NICK</span>, <span class='ident'>NICKSERV</span>, <span class='ident'>PART</span>, <span class='ident'>PING</span>, <span class='ident'>PRIVMSG</span>, <span class='ident'>MODE</span>};
@@ -871,8 +827,6 @@
 
 <span class='doccomment'>/// A thread-safe implementation of an IRC Server connection.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>IrcServer</span> {
-    <span class='doccomment'>/// The channel for sending messages to write.</span>
-    <span class='ident'>tx</span>: <span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// The internal, thread-safe server state.</span>
     <span class='ident'>state</span>: <span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>ServerState</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// A thread-local count of reconnection attempts used for synchronization.</span>
@@ -881,12 +835,8 @@
 
 <span class='doccomment'>/// Thread-safe internal state for an IRC server connection.</span>
 <span class='kw'>struct</span> <span class='ident'>ServerState</span> {
-    <span class='doccomment'>/// A global copy of the channel for sending messages to write.</span>
-    <span class='ident'>tx</span>: <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// The thread-safe IRC connection.</span>
     <span class='ident'>conn</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Connection</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='ident'>Sync</span><span class='op'>&gt;</span>,
-    <span class='doccomment'>/// The handle for the message sending thread.</span>
-    <span class='ident'>write_handle</span>: <span class='ident'>Mutex</span><span class='op'>&lt;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>JoinHandle</span><span class='op'>&lt;</span>()<span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
     <span class='doccomment'>/// The configuration used with this connection.</span>
     <span class='ident'>config</span>: <span class='ident'>Config</span>,
     <span class='doccomment'>/// A thread-safe map of channels to the list of users in them.</span>
@@ -904,9 +854,7 @@
 <span class='kw'>impl</span> <span class='ident'>ServerState</span> {
     <span class='kw'>fn</span> <span class='ident'>new</span><span class='op'>&lt;</span><span class='ident'>C</span><span class='op'>&gt;</span>(<span class='ident'>conn</span>: <span class='ident'>C</span>, <span class='ident'>config</span>: <span class='ident'>Config</span>) <span class='op'>-&gt;</span> <span class='ident'>ServerState</span> <span class='kw'>where</span> <span class='ident'>C</span>: <span class='ident'>Connection</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='ident'>Sync</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {
         <span class='ident'>ServerState</span> {
-            <span class='ident'>tx</span>: <span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>),
             <span class='ident'>conn</span>: <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>conn</span>),
-            <span class='ident'>write_handle</span>: <span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='prelude-val'>None</span>),
             <span class='ident'>config</span>: <span class='ident'>config</span>,
             <span class='ident'>chanlists</span>: <span class='ident'>Mutex</span>::<span class='ident'>new</span>(<span class='ident'>HashMap</span>::<span class='ident'>new</span>()),
             <span class='ident'>alt_nick_index</span>: <span class='ident'>RwLock</span>::<span class='ident'>new</span>(<span class='number'>0</span>),
@@ -942,6 +890,23 @@
     <span class='kw'>fn</span> <span class='ident'>last_ping_data</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Timespec</span><span class='op'>&gt;</span> {
         <span class='self'>self</span>.<span class='ident'>last_ping_data</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>clone</span>()
     }
+
+    <span class='kw'>fn</span> <span class='ident'>send_impl</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='ident'>Message</span>) {
+        <span class='kw'>while</span> <span class='kw'>let</span> <span class='prelude-val'>Err</span>(_) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>write</span>(<span class='ident'>msg</span>.<span class='ident'>clone</span>()) {
+            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>reconnect</span>().<span class='ident'>and_then</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='self'>self</span>.<span class='ident'>identify</span>());
+        }
+        <span class='self'>self</span>.<span class='ident'>action_taken</span>();
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>write</span><span class='op'>&lt;</span><span class='ident'>M</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='ident'>M</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>conn</span>.<span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>into</span>().<span class='ident'>into_string</span>(), <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>encoding</span>())
+    }
+
+    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
+    <span class='kw'>fn</span> <span class='ident'>write</span><span class='op'>&lt;</span><span class='ident'>M</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='ident'>M</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
+        <span class='self'>self</span>.<span class='ident'>conn</span>.<span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>into</span>().<span class='ident'>into_string</span>())
+    }
 }
 
 <span class='kw'>impl</span> <span class='ident'>IrcServer</span> {
@@ -966,19 +931,8 @@
 <span class='kw'>impl</span> <span class='ident'>Clone</span> <span class='kw'>for</span> <span class='ident'>IrcServer</span> {
     <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IrcServer</span> {
         <span class='ident'>IrcServer</span> {
-            <span class='ident'>tx</span>: <span class='self'>self</span>.<span class='ident'>tx</span>.<span class='ident'>clone</span>(),
             <span class='ident'>state</span>: <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>clone</span>(),
             <span class='ident'>reconnect_count</span>: <span class='self'>self</span>.<span class='ident'>reconnect_count</span>.<span class='ident'>clone</span>()
-        }
-    }
-}
-
-<span class='kw'>impl</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>ServerState</span> {
-    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>tx</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>take</span>();
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>write_handle</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>handle</span>) <span class='op'>=</span> <span class='ident'>guard</span>.<span class='ident'>take</span>() {
-            <span class='ident'>handle</span>.<span class='ident'>join</span>().<span class='ident'>unwrap</span>()
         }
     }
 }
@@ -989,12 +943,8 @@
     }
 
     <span class='kw'>fn</span> <span class='ident'>send</span><span class='op'>&lt;</span><span class='ident'>M</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='ident'>M</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> <span class='kw'>where</span> <span class='kw'>Self</span>: <span class='ident'>Sized</span> {
-        <span class='kw'>let</span> <span class='ident'>opt_tx</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>tx</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='kw-2'>ref</span> <span class='ident'>rf_tx</span> <span class='op'>=</span> <span class='op'>*</span><span class='ident'>opt_tx</span>;
-        <span class='kw'>match</span> <span class='ident'>rf_tx</span> {
-            <span class='kw-2'>&amp;</span><span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>tx</span>) <span class='op'>=&gt;</span> <span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>msg</span>.<span class='ident'>into</span>()).<span class='ident'>map_err</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> <span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>Other</span>, <span class='ident'>e</span>)),
-            <span class='kw-2'>&amp;</span><span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>NotFound</span>, <span class='string'>&quot;Channel was not found.&quot;</span>))
-        }
+        <span class='self'>self</span>.<span class='ident'>send_impl</span>(<span class='ident'>msg</span>.<span class='ident'>into</span>());
+        <span class='prelude-val'>Ok</span>(())
     }
 
     <span class='kw'>fn</span> <span class='ident'>iter</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span> {
@@ -1019,7 +969,7 @@
     }
 
     <span class='kw'>fn</span> <span class='ident'>send</span><span class='op'>&lt;</span><span class='ident'>M</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>msg</span>: <span class='ident'>M</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> <span class='kw'>where</span> <span class='kw'>Self</span>: <span class='ident'>Sized</span> {
-        <span class='self'>self</span>.<span class='ident'>tx</span>.<span class='ident'>send</span>(<span class='ident'>msg</span>.<span class='ident'>into</span>()).<span class='ident'>map_err</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> <span class='ident'>Error</span>::<span class='ident'>new</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>Other</span>, <span class='ident'>e</span>))
+        <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>send</span>(<span class='ident'>msg</span>)
     }
 
     <span class='kw'>fn</span> <span class='ident'>iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Iterator</span><span class='op'>&lt;</span><span class='ident'>Item</span> <span class='op'>=</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span> <span class='op'>+</span> <span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
@@ -1042,46 +992,36 @@
     <span class='doccomment'>/// Creates an IRC server from the specified configuration, and any arbitrary sync connection.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_connection</span><span class='op'>&lt;</span><span class='ident'>C</span><span class='op'>&gt;</span>(<span class='ident'>config</span>: <span class='ident'>Config</span>, <span class='ident'>conn</span>: <span class='ident'>C</span>) <span class='op'>-&gt;</span> <span class='ident'>IrcServer</span>
     <span class='kw'>where</span> <span class='ident'>C</span>: <span class='ident'>Connection</span> <span class='op'>+</span> <span class='ident'>Send</span> <span class='op'>+</span> <span class='ident'>Sync</span> <span class='op'>+</span> <span class='lifetime'>&#39;static</span> {
-        <span class='kw'>let</span> (<span class='ident'>tx</span>, <span class='ident'>rx</span>): (<span class='ident'>Sender</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;</span>, <span class='ident'>Receiver</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;</span>) <span class='op'>=</span> <span class='ident'>channel</span>();
         <span class='kw'>let</span> <span class='ident'>state</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>new</span>(<span class='ident'>ServerState</span>::<span class='ident'>new</span>(<span class='ident'>conn</span>, <span class='ident'>config</span>));
+        <span class='kw'>let</span> <span class='ident'>ping_time</span> <span class='op'>=</span> (<span class='ident'>state</span>.<span class='ident'>config</span>.<span class='ident'>ping_time</span>() <span class='kw'>as</span> <span class='ident'>i64</span>) <span class='op'>*</span> <span class='number'>1000</span>;
         <span class='kw'>let</span> <span class='ident'>weak</span> <span class='op'>=</span> <span class='ident'>Arc</span>::<span class='ident'>downgrade</span>(<span class='kw-2'>&amp;</span><span class='ident'>state</span>);
-        <span class='kw'>let</span> <span class='ident'>write_handle</span> <span class='op'>=</span> <span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> <span class='kw'>loop</span> {
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>strong</span>) <span class='op'>=</span> <span class='ident'>weak</span>.<span class='ident'>upgrade</span>() {
-                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>time</span>) <span class='op'>=</span> <span class='ident'>strong</span>.<span class='ident'>last_ping_data</span>() {
-                    <span class='kw'>if</span> <span class='ident'>now</span>().<span class='ident'>to_timespec</span>() <span class='op'>-</span> <span class='ident'>time</span> <span class='op'>&gt;</span> <span class='ident'>strong</span>.<span class='ident'>ping_timeout_duration</span>() {
+
+        <span class='ident'>spawn</span>(<span class='kw'>move</span> <span class='op'>||</span> <span class='kw'>while</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>strong</span>) <span class='op'>=</span> <span class='ident'>weak</span>.<span class='ident'>upgrade</span>() {
+            <span class='kw'>let</span> <span class='ident'>sleep_dur</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>time</span>) <span class='op'>=</span> <span class='ident'>strong</span>.<span class='ident'>last_ping_data</span>() {
+                <span class='kw'>if</span> <span class='ident'>now</span>().<span class='ident'>to_timespec</span>() <span class='op'>-</span> <span class='ident'>time</span> <span class='op'>&gt;</span> <span class='ident'>strong</span>.<span class='ident'>ping_timeout_duration</span>() {
+                    <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>strong</span>.<span class='ident'>reconnect</span>();
+                    <span class='kw'>while</span> <span class='kw'>let</span> <span class='prelude-val'>Err</span>(_) <span class='op'>=</span> <span class='ident'>strong</span>.<span class='ident'>identify</span>() {
                         <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>strong</span>.<span class='ident'>reconnect</span>();
-                        <span class='kw'>while</span> <span class='kw'>let</span> <span class='prelude-val'>Err</span>(_) <span class='op'>=</span> <span class='ident'>strong</span>.<span class='ident'>identify</span>() {
-                            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>strong</span>.<span class='ident'>reconnect</span>();
-                        }
                     }
                 }
+                <span class='ident'>ping_time</span> <span class='op'>-</span> (<span class='ident'>now</span>().<span class='ident'>to_timespec</span>() <span class='op'>-</span> <span class='ident'>time</span>).<span class='ident'>num_milliseconds</span>()
+            } <span class='kw'>else</span> {
+                <span class='ident'>ping_time</span>
+            };
+
+            <span class='kw'>if</span> <span class='ident'>sleep_dur</span> <span class='op'>&gt;</span> <span class='number'>0</span> {
+                <span class='ident'>sleep</span>(<span class='ident'>StdDuration</span>::<span class='ident'>from_millis</span>(<span class='ident'>sleep_dur</span> <span class='kw'>as</span> <span class='ident'>u64</span>))
             }
-            <span class='kw'>match</span> <span class='ident'>rx</span>.<span class='ident'>try_recv</span>() {
-                <span class='prelude-val'>Ok</span>(<span class='ident'>msg</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>strong</span>) <span class='op'>=</span> <span class='ident'>weak</span>.<span class='ident'>upgrade</span>() {
-                    <span class='kw'>while</span> <span class='kw'>let</span> <span class='prelude-val'>Err</span>(_) <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='ident'>strong</span>, <span class='ident'>msg</span>.<span class='ident'>clone</span>()) {
-                        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>strong</span>.<span class='ident'>reconnect</span>().<span class='ident'>and_then</span>(<span class='op'>|</span>_<span class='op'>|</span> <span class='ident'>strong</span>.<span class='ident'>identify</span>());
-                    }
-                    <span class='ident'>strong</span>.<span class='ident'>action_taken</span>();
-                },
-                <span class='prelude-val'>Err</span>(<span class='ident'>TryRecvError</span>::<span class='ident'>Disconnected</span>) <span class='op'>=&gt;</span> <span class='kw'>break</span>,
-                <span class='prelude-val'>Err</span>(<span class='ident'>TryRecvError</span>::<span class='ident'>Empty</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>strong</span>) <span class='op'>=</span> <span class='ident'>weak</span>.<span class='ident'>upgrade</span>() {
-                    <span class='kw'>if</span> <span class='ident'>strong</span>.<span class='ident'>should_ping</span>() {
-                        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>now</span>().<span class='ident'>to_timespec</span>();
-                        <span class='ident'>strong</span>.<span class='ident'>update_ping_data</span>(<span class='ident'>data</span>);
-                        <span class='kw'>let</span> <span class='ident'>fmt</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>data</span>.<span class='ident'>sec</span>);
-                        <span class='kw'>while</span> <span class='kw'>let</span> <span class='prelude-val'>Err</span>(_) <span class='op'>=</span> <span class='ident'>IrcServer</span>::<span class='ident'>write</span>(<span class='kw-2'>&amp;</span><span class='ident'>strong</span>, <span class='ident'>PING</span>(<span class='ident'>fmt</span>.<span class='ident'>clone</span>(), <span class='prelude-val'>None</span>)) {
-                            <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>strong</span>.<span class='ident'>reconnect</span>();
-                        }
-                    }
-                },
+            <span class='kw'>if</span> <span class='ident'>strong</span>.<span class='ident'>should_ping</span>() {
+                <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>now</span>().<span class='ident'>to_timespec</span>();
+                <span class='ident'>strong</span>.<span class='ident'>update_ping_data</span>(<span class='ident'>data</span>);
+                <span class='kw'>let</span> <span class='ident'>fmt</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>data</span>.<span class='ident'>sec</span>);
+                <span class='kw'>while</span> <span class='kw'>let</span> <span class='prelude-val'>Err</span>(_) <span class='op'>=</span> <span class='ident'>strong</span>.<span class='ident'>write</span>(<span class='ident'>PING</span>(<span class='ident'>fmt</span>.<span class='ident'>clone</span>(), <span class='prelude-val'>None</span>)) {
+                    <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>strong</span>.<span class='ident'>reconnect</span>();
+                }
             }
         });
-        <span class='kw'>let</span> <span class='ident'>state2</span> <span class='op'>=</span> <span class='ident'>state</span>.<span class='ident'>clone</span>();
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>state2</span>.<span class='ident'>write_handle</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
-        <span class='op'>*</span><span class='ident'>handle</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>write_handle</span>);
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>state_tx</span> <span class='op'>=</span> <span class='ident'>state2</span>.<span class='ident'>tx</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
-        <span class='op'>*</span><span class='ident'>state_tx</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>tx</span>.<span class='ident'>clone</span>());
-        <span class='ident'>IrcServer</span> { <span class='ident'>tx</span>: <span class='ident'>tx</span>, <span class='ident'>state</span>: <span class='ident'>state</span>, <span class='ident'>reconnect_count</span>: <span class='ident'>Cell</span>::<span class='ident'>new</span>(<span class='number'>0</span>) }
+        <span class='ident'>IrcServer</span> { <span class='ident'>state</span>: <span class='ident'>state</span>, <span class='ident'>reconnect_count</span>: <span class='ident'>Cell</span>::<span class='ident'>new</span>(<span class='number'>0</span>) }
     }
 
     <span class='doccomment'>/// Gets a reference to the IRC server&#39;s connection.</span>
@@ -1110,16 +1050,6 @@
             <span class='number'>0</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>config</span>().<span class='ident'>nickname</span>(),
             <span class='ident'>i</span> <span class='op'>=&gt;</span> <span class='ident'>alt_nicks</span>[<span class='ident'>i</span> <span class='op'>-</span> <span class='number'>1</span>]
         }
-    }
-
-    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>write</span><span class='op'>&lt;</span><span class='ident'>M</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span>(<span class='ident'>state</span>: <span class='kw-2'>&amp;</span><span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>ServerState</span><span class='op'>&gt;</span>, <span class='ident'>msg</span>: <span class='ident'>M</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='ident'>state</span>.<span class='ident'>conn</span>.<span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>into</span>().<span class='ident'>into_string</span>(), <span class='ident'>state</span>.<span class='ident'>config</span>.<span class='ident'>encoding</span>())
-    }
-
-    <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
-    <span class='kw'>fn</span> <span class='ident'>write</span><span class='op'>&lt;</span><span class='ident'>M</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Message</span><span class='op'>&gt;&gt;</span>(<span class='ident'>state</span>: <span class='kw-2'>&amp;</span><span class='ident'>Arc</span><span class='op'>&lt;</span><span class='ident'>ServerState</span><span class='op'>&gt;</span>, <span class='ident'>msg</span>: <span class='ident'>M</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='ident'>state</span>.<span class='ident'>conn</span>.<span class='ident'>send</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>.<span class='ident'>into</span>().<span class='ident'>into_string</span>())
     }
 
     <span class='doccomment'>/// Returns a reference to the server state&#39;s channel lists.</span>
@@ -1258,22 +1188,6 @@
     <span class='kw'>fn</span> <span class='ident'>handle_ctcp</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, _: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, _: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='prelude-val'>Ok</span>(())
     }
-
-    <span class='doccomment'>/// Waits for the completion of all writes for messages in this server&#39;s write queue. This</span>
-    <span class='doccomment'>/// function may cause unusual behavior when called on a server with operations being performed</span>
-    <span class='doccomment'>/// on other threads. This function is destructive, and is primarily intended for writing unit</span>
-    <span class='doccomment'>/// tests. Use it with care.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>await_writing</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>let</span> _ <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>tx</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>().<span class='ident'>take</span>();
-        <span class='comment'>// This is a terrible hack to get the real channel to drop.</span>
-        <span class='comment'>// Otherwise, joining would never finish.</span>
-        <span class='kw'>let</span> (<span class='ident'>tx</span>, _) <span class='op'>=</span> <span class='ident'>channel</span>();
-        <span class='self'>self</span>.<span class='ident'>tx</span> <span class='op'>=</span> <span class='ident'>tx</span>;
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>guard</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>state</span>.<span class='ident'>write_handle</span>.<span class='ident'>lock</span>().<span class='ident'>unwrap</span>();
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>handle</span>) <span class='op'>=</span> <span class='ident'>guard</span>.<span class='ident'>take</span>() {
-            <span class='ident'>handle</span>.<span class='ident'>join</span>().<span class='ident'>unwrap</span>()
-        }
-    }
 }
 
 <span class='doccomment'>/// An Iterator over an IrcServer&#39;s incoming Messages.</span>
@@ -1349,14 +1263,12 @@
     }
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_server_value</span>(<span class='kw-2'>mut</span> <span class='ident'>server</span>: <span class='ident'>IrcServer</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='ident'>server</span>.<span class='ident'>await_writing</span>();
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_server_value</span>(<span class='ident'>server</span>: <span class='ident'>IrcServer</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
         <span class='ident'>server</span>.<span class='ident'>conn</span>().<span class='ident'>written</span>(<span class='ident'>server</span>.<span class='ident'>config</span>().<span class='ident'>encoding</span>()).<span class='ident'>unwrap</span>()
     }
 
     <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>not</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;encode&quot;</span>))]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_server_value</span>(<span class='kw-2'>mut</span> <span class='ident'>server</span>: <span class='ident'>IrcServer</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='ident'>server</span>.<span class='ident'>await_writing</span>();
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_server_value</span>(<span class='ident'>server</span>: <span class='ident'>IrcServer</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
         <span class='ident'>server</span>.<span class='ident'>conn</span>().<span class='ident'>written</span>().<span class='ident'>unwrap</span>()
     }
 

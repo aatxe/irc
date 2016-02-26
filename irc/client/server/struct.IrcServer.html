@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-3115' class='srclink' href='../../../src/irc/client/server/mod.rs.html#37-44' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-3115' class='srclink' href='../../../src/irc/client/server/mod.rs.html#37-42' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct IrcServer {
     // some fields omitted
 }</pre><div class='docblock'><p>A thread-safe implementation of an IRC Server connection.</p>
@@ -64,11 +64,6 @@ immediately.</p>
 <div class='docblock'><p>Reconnects to the IRC server, disconnecting if necessary.</p>
 </div><h4 id='method.current_nickname' class='method'><code>fn <a href='#method.current_nickname' class='fnname'>current_nickname</a>(&amp;self) -&gt; &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
 <div class='docblock'><p>Gets the current nickname in use.</p>
-</div><h4 id='method.await_writing' class='method'><code>fn <a href='#method.await_writing' class='fnname'>await_writing</a>(&amp;mut self)</code></h4>
-<div class='docblock'><p>Waits for the completion of all writes for messages in this server&#39;s write queue. This
-function may cause unusual behavior when called on a server with operations being performed
-on other threads. This function is destructive, and is primarily intended for writing unit
-tests. Use it with care.</p>
 </div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a></code></h4>
 <h4 id='method.clone_from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
 </div><h3 class='impl'><code>impl <a class='trait' href='../../../irc/client/server/trait.Server.html' title='irc::client::server::Server'>Server</a> for <a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a></code></h3><div class='impl-items'><h4 id='method.config' class='method'><code>fn <a href='../../../irc/client/server/trait.Server.html#method.config' class='fnname'>config</a>(&amp;self) -&gt; &amp;<a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a></code></h4>
