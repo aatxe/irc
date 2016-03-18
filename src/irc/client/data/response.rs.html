@@ -458,330 +458,330 @@
 
 <span class='macro'>make_response</span><span class='macro'>!</span> {
     <span class='comment'>// Expected replies</span>
-    <span class='doccomment'>/// 001 Welcome to the Internet Relay Network &lt;nick&gt;!&lt;user&gt;@&lt;host&gt;</span>
+    <span class='doccomment'>/// `001 Welcome to the Internet Relay Network &lt;nick&gt;!&lt;user&gt;@&lt;host&gt;`</span>
     <span class='ident'>RPL_WELCOME</span>         <span class='op'>=</span> <span class='number'>001</span>,
-    <span class='doccomment'>/// 002 Your host is &lt;servername&gt;, running version &lt;ver&gt;</span>
+    <span class='doccomment'>/// `002 Your host is &lt;servername&gt;, running version &lt;ver&gt;`</span>
     <span class='ident'>RPL_YOURHOST</span>        <span class='op'>=</span> <span class='number'>002</span>,
-    <span class='doccomment'>/// 003 This server was created &lt;date&gt;</span>
+    <span class='doccomment'>/// `003 This server was created &lt;date&gt;`</span>
     <span class='ident'>RPL_CREATED</span>         <span class='op'>=</span> <span class='number'>003</span>,
-    <span class='doccomment'>/// 004 &lt;servername&gt; &lt;version&gt; &lt;available user modes&gt; available channel modes&gt;</span>
+    <span class='doccomment'>/// `004 &lt;servername&gt; &lt;version&gt; &lt;available user modes&gt; available channel modes&gt;`</span>
     <span class='ident'>RPL_MYINFO</span>          <span class='op'>=</span> <span class='number'>004</span>,
-    <span class='doccomment'>/// 005 Try server &lt;server name&gt;, port &lt;port number&gt;</span>
+    <span class='doccomment'>/// `005 Try server &lt;server name&gt;, port &lt;port number&gt;`</span>
     <span class='ident'>RPL_BOUNCE</span>          <span class='op'>=</span> <span class='number'>005</span>,
-    <span class='doccomment'>/// 302 :*1&lt;reply&gt; *( &quot; &quot; &lt;reply&gt; )</span>
+    <span class='doccomment'>/// `302 :*1&lt;reply&gt; *( &quot; &quot; &lt;reply&gt; )`</span>
     <span class='ident'>RPL_USERHOST</span>        <span class='op'>=</span> <span class='number'>302</span>,
-    <span class='doccomment'>/// 303 :*1&lt;nick&gt; *( &quot; &quot; &lt;nick&gt; )</span>
+    <span class='doccomment'>/// `303 :*1&lt;nick&gt; *( &quot; &quot; &lt;nick&gt; )`</span>
     <span class='ident'>RPL_ISON</span>            <span class='op'>=</span> <span class='number'>303</span>,
-    <span class='doccomment'>/// 301 &lt;nick&gt; :&lt;away message&gt;</span>
+    <span class='doccomment'>/// `301 &lt;nick&gt; :&lt;away message&gt;`</span>
     <span class='ident'>RPL_AWAY</span>            <span class='op'>=</span> <span class='number'>301</span>,
-    <span class='doccomment'>/// 305 :You are no longer marked as being away</span>
+    <span class='doccomment'>/// `305 :You are no longer marked as being away`</span>
     <span class='ident'>RPL_UNAWAY</span>          <span class='op'>=</span> <span class='number'>305</span>,
-    <span class='doccomment'>/// 306 :You have been marked as being away</span>
+    <span class='doccomment'>/// `306 :You have been marked as being away`</span>
     <span class='ident'>RPL_NOWAWAY</span>         <span class='op'>=</span> <span class='number'>306</span>,
-    <span class='doccomment'>/// 311 &lt;nick&gt; &lt;user&gt; &lt;host&gt; * :&lt;real name&gt;</span>
+    <span class='doccomment'>/// `311 &lt;nick&gt; &lt;user&gt; &lt;host&gt; * :&lt;real name&gt;`</span>
     <span class='ident'>RPL_WHOISUSER</span>       <span class='op'>=</span> <span class='number'>311</span>,
-    <span class='doccomment'>/// 312 &lt;nick&gt; &lt;server&gt; :&lt;server info&gt;</span>
+    <span class='doccomment'>/// `312 &lt;nick&gt; &lt;server&gt; :&lt;server info&gt;`</span>
     <span class='ident'>RPL_WHOISSERVER</span>     <span class='op'>=</span> <span class='number'>312</span>,
-    <span class='doccomment'>/// 313 &lt;nick&gt; :is an IRC operator</span>
+    <span class='doccomment'>/// `313 &lt;nick&gt; :is an IRC operator`</span>
     <span class='ident'>RPL_WHOISOPERATOR</span>   <span class='op'>=</span> <span class='number'>313</span>,
-    <span class='doccomment'>/// 317 &lt;nick&gt; &lt;integer&gt; :seconds idle</span>
+    <span class='doccomment'>/// `317 &lt;nick&gt; &lt;integer&gt; :seconds idle`</span>
     <span class='ident'>RPL_WHOISIDLE</span>       <span class='op'>=</span> <span class='number'>317</span>,
-    <span class='doccomment'>/// 318 &lt;nick&gt; :End of WHOIS list</span>
+    <span class='doccomment'>/// `318 &lt;nick&gt; :End of WHOIS list`</span>
     <span class='ident'>RPL_ENDOFWHOIS</span>      <span class='op'>=</span> <span class='number'>318</span>,
-    <span class='doccomment'>/// 319 &lt;nick&gt; :*( ( &quot;@&quot; / &quot;+&quot; ) &lt;channel&gt; &quot; &quot; )</span>
+    <span class='doccomment'>/// `319 &lt;nick&gt; :*( ( &quot;@&quot; / &quot;+&quot; ) &lt;channel&gt; &quot; &quot; )`</span>
     <span class='ident'>RPL_WHOISCHANNELS</span>   <span class='op'>=</span> <span class='number'>319</span>,
-    <span class='doccomment'>/// 314 &lt;nick&gt; &lt;user&gt; &lt;host&gt; * :&lt;real name&gt;</span>
+    <span class='doccomment'>/// `314 &lt;nick&gt; &lt;user&gt; &lt;host&gt; * :&lt;real name&gt;`</span>
     <span class='ident'>RPL_WHOWASUSER</span>      <span class='op'>=</span> <span class='number'>314</span>,
-    <span class='doccomment'>/// 369 &lt;nick&gt; :End of WHOWAS</span>
+    <span class='doccomment'>/// `369 &lt;nick&gt; :End of WHOWAS`</span>
     <span class='ident'>RPL_ENDOFWHOWAS</span>     <span class='op'>=</span> <span class='number'>369</span>,
     <span class='doccomment'>/// Obsolete. Not used.</span>
     <span class='ident'>RPL_LISTSTART</span>       <span class='op'>=</span> <span class='number'>321</span>,
-    <span class='doccomment'>/// 322 &lt;channel&gt; &lt;# visible&gt; :&lt;topic&gt;</span>
+    <span class='doccomment'>/// `322 &lt;channel&gt; &lt;# visible&gt; :&lt;topic&gt;`</span>
     <span class='ident'>RPL_LIST</span>            <span class='op'>=</span> <span class='number'>322</span>,
-    <span class='doccomment'>/// 323 :End of LIST</span>
+    <span class='doccomment'>/// `323 :End of LIST</span>
     <span class='ident'>RPL_LISTEND</span>         <span class='op'>=</span> <span class='number'>323</span>,
-    <span class='doccomment'>/// 325 &lt;channel&gt; &lt;nickname&gt;</span>
+    <span class='doccomment'>/// `325 &lt;channel&gt; &lt;nickname&gt;`</span>
     <span class='ident'>RPL_UNIQOPIS</span>        <span class='op'>=</span> <span class='number'>325</span>,
-    <span class='doccomment'>/// 324 &lt;channel&gt; &lt;mode&gt; &lt;mode params&gt;</span>
+    <span class='doccomment'>/// `324 &lt;channel&gt; &lt;mode&gt; &lt;mode params&gt;`</span>
     <span class='ident'>RPL_CHANNELMODEIS</span>   <span class='op'>=</span> <span class='number'>324</span>,
-    <span class='doccomment'>/// 331 &lt;channel&gt; :No topic is set</span>
+    <span class='doccomment'>/// `331 &lt;channel&gt; :No topic is set`</span>
     <span class='ident'>RPL_NOTOPIC</span>         <span class='op'>=</span> <span class='number'>331</span>,
-    <span class='doccomment'>/// 332 &lt;channel&gt; :&lt;topic&gt;</span>
+    <span class='doccomment'>/// `332 &lt;channel&gt; :&lt;topic&gt;`</span>
     <span class='ident'>RPL_TOPIC</span>           <span class='op'>=</span> <span class='number'>332</span>,
-    <span class='doccomment'>/// 341 &lt;channel&gt; &lt;nick&gt;</span>
+    <span class='doccomment'>/// `341 &lt;channel&gt; &lt;nick&gt;`</span>
     <span class='ident'>RPL_INVITING</span>        <span class='op'>=</span> <span class='number'>341</span>,
-    <span class='doccomment'>/// 342 &lt;user&gt; :Summoning user to IRC</span>
+    <span class='doccomment'>/// `342 &lt;user&gt; :Summoning user to IRC`</span>
     <span class='ident'>RPL_SUMMONING</span>       <span class='op'>=</span> <span class='number'>342</span>,
-    <span class='doccomment'>/// 346 &lt;channel&gt; &lt;invitemask&gt;</span>
+    <span class='doccomment'>/// `346 &lt;channel&gt; &lt;invitemask&gt;`</span>
     <span class='ident'>RPL_INVITELIST</span>      <span class='op'>=</span> <span class='number'>346</span>,
-    <span class='doccomment'>/// 347 &lt;channel&gt; :End of channel invite list</span>
+    <span class='doccomment'>/// `347 &lt;channel&gt; :End of channel invite list`</span>
     <span class='ident'>RPL_ENDOFINVITELIST</span> <span class='op'>=</span> <span class='number'>347</span>,
-    <span class='doccomment'>/// 348 &lt;channel&gt; &lt;exceptionmask&gt;</span>
+    <span class='doccomment'>/// `348 &lt;channel&gt; &lt;exceptionmask&gt;`</span>
     <span class='ident'>RPL_EXCEPTLIST</span>      <span class='op'>=</span> <span class='number'>348</span>,
-    <span class='doccomment'>/// 349 &lt;channel&gt; :End of channel exception list</span>
+    <span class='doccomment'>/// `349 &lt;channel&gt; :End of channel exception list`</span>
     <span class='ident'>RPL_ENDOFEXCEPTLIST</span> <span class='op'>=</span> <span class='number'>349</span>,
-    <span class='doccomment'>/// 351 &lt;version&gt;.&lt;debuglevel&gt; &lt;server&gt; :&lt;comments&gt;</span>
+    <span class='doccomment'>/// `351 &lt;version&gt;.&lt;debuglevel&gt; &lt;server&gt; :&lt;comments&gt;`</span>
     <span class='ident'>RPL_VERSION</span>         <span class='op'>=</span> <span class='number'>351</span>,
-    <span class='doccomment'>/** 352 &lt;channel&gt; &lt;user&gt; &lt;host&gt; &lt;server&gt; &lt;nick&gt; ( &quot;H&quot; / &quot;G&quot; &gt; [&quot;*&quot;] [ ( &quot;@&quot; / &quot;+&quot; ) ]
-        :&lt;hopcount&gt; &lt;real name&gt; **/</span>
+    <span class='doccomment'>/** `352 &lt;channel&gt; &lt;user&gt; &lt;host&gt; &lt;server&gt; &lt;nick&gt; ( &quot;H&quot; / &quot;G&quot; &gt; [&quot;*&quot;] [ ( &quot;@&quot; / &quot;+&quot; ) ]
+        :&lt;hopcount&gt; &lt;real name&gt;` **/</span>
     <span class='ident'>RPL_WHOREPLY</span>        <span class='op'>=</span> <span class='number'>352</span>,
-    <span class='doccomment'>/// 315 &lt;name&gt; :End of WHO list</span>
+    <span class='doccomment'>/// `315 &lt;name&gt; :End of WHO list`</span>
     <span class='ident'>RPL_ENDOFWHO</span>        <span class='op'>=</span> <span class='number'>315</span>,
-    <span class='doccomment'>/// 353 ( &quot;=&quot; / &quot;*&quot; / &quot;@&quot; ) &lt;channel&gt; :[ &quot;@&quot; / &quot;+&quot; ] &lt;nick&gt; *( &quot; &quot; [ &quot;@&quot; / &quot;+&quot; ] &lt;nick&gt; )</span>
+    <span class='doccomment'>/// `353 ( &quot;=&quot; / &quot;*&quot; / &quot;@&quot; ) &lt;channel&gt; :[ &quot;@&quot; / &quot;+&quot; ] &lt;nick&gt; *( &quot; &quot; [ &quot;@&quot; / &quot;+&quot; ] &lt;nick&gt; )`</span>
     <span class='ident'>RPL_NAMREPLY</span>        <span class='op'>=</span> <span class='number'>353</span>,
-    <span class='doccomment'>/// 366 &lt;channel&gt; :End of NAMES list</span>
+    <span class='doccomment'>/// `366 &lt;channel&gt; :End of NAMES list`</span>
     <span class='ident'>RPL_ENDOFNAMES</span>      <span class='op'>=</span> <span class='number'>366</span>,
-    <span class='doccomment'>/// 364 &lt;mask&gt; &lt;server&gt; :&lt;hopcount&gt; &lt;server info&gt;</span>
+    <span class='doccomment'>/// `364 &lt;mask&gt; &lt;server&gt; :&lt;hopcount&gt; &lt;server info&gt;`</span>
     <span class='ident'>RPL_LINKS</span>           <span class='op'>=</span> <span class='number'>364</span>,
-    <span class='doccomment'>/// 365 &lt;mask&gt; :End of LINKS list</span>
+    <span class='doccomment'>/// `365 &lt;mask&gt; :End of LINKS list`</span>
     <span class='ident'>RPL_ENDOFLINKS</span>      <span class='op'>=</span> <span class='number'>365</span>,
-    <span class='doccomment'>/// 367 &lt;channel&gt; &lt;banmask&gt;</span>
+    <span class='doccomment'>/// `367 &lt;channel&gt; &lt;banmask&gt;`</span>
     <span class='ident'>RPL_BANLIST</span>         <span class='op'>=</span> <span class='number'>367</span>,
-    <span class='doccomment'>/// 368 &lt;channel&gt; :End of channel ban list</span>
+    <span class='doccomment'>/// `368 &lt;channel&gt; :End of channel ban list`</span>
     <span class='ident'>RPL_ENDOFBANLIST</span>    <span class='op'>=</span> <span class='number'>368</span>,
-    <span class='doccomment'>/// 371 :&lt;string&gt;</span>
+    <span class='doccomment'>/// `371 :&lt;string&gt;`</span>
     <span class='ident'>RPL_INFO</span>            <span class='op'>=</span> <span class='number'>371</span>,
-    <span class='doccomment'>/// 374 :End of INFO list</span>
+    <span class='doccomment'>/// `374 :End of INFO list`</span>
     <span class='ident'>RPL_ENDOFINFO</span>       <span class='op'>=</span> <span class='number'>374</span>,
-    <span class='doccomment'>/// 375 :- &lt;server&gt; Message of the day -</span>
+    <span class='doccomment'>/// `375 :- &lt;server&gt; Message of the day -`</span>
     <span class='ident'>RPL_MOTDSTART</span>       <span class='op'>=</span> <span class='number'>375</span>,
-    <span class='doccomment'>/// 372 :- &lt;text&gt;</span>
+    <span class='doccomment'>/// `372 :- &lt;text&gt;</span>
     <span class='ident'>RPL_MOTD</span>            <span class='op'>=</span> <span class='number'>372</span>,
-    <span class='doccomment'>/// 376 :End of MOTD command</span>
+    <span class='doccomment'>/// `376 :End of MOTD command</span>
     <span class='ident'>RPL_ENDOFMOTD</span>       <span class='op'>=</span> <span class='number'>376</span>,
-    <span class='doccomment'>/// 381 :You are now an IRC operator</span>
+    <span class='doccomment'>/// `381 :You are now an IRC operator</span>
     <span class='ident'>RPL_YOUREOPER</span>       <span class='op'>=</span> <span class='number'>381</span>,
-    <span class='doccomment'>/// 382 &lt;config file&gt; :Rehashing</span>
+    <span class='doccomment'>/// `382 &lt;config file&gt; :Rehashing</span>
     <span class='ident'>RPL_REHASHING</span>       <span class='op'>=</span> <span class='number'>382</span>,
-    <span class='doccomment'>/// 383 You are service &lt;servicename&gt;</span>
+    <span class='doccomment'>/// `383 You are service &lt;servicename&gt;</span>
     <span class='ident'>RPL_YOURESERVICE</span>    <span class='op'>=</span> <span class='number'>383</span>,
-    <span class='doccomment'>/// 391 &lt;server&gt; :&lt;string showing server&#39;s local time&gt;</span>
+    <span class='doccomment'>/// `391 &lt;server&gt; :&lt;string showing server&#39;s local time&gt;</span>
     <span class='ident'>RPL_TIME</span>            <span class='op'>=</span> <span class='number'>391</span>,
-    <span class='doccomment'>/// 392 :UserID   Terminal  Host</span>
+    <span class='doccomment'>/// `392 :UserID   Terminal  Host</span>
     <span class='ident'>RPL_USERSSTART</span>      <span class='op'>=</span> <span class='number'>392</span>,
-    <span class='doccomment'>/// 393 :&lt;username&gt; &lt;ttyline&gt; &lt;hostname&gt;</span>
+    <span class='doccomment'>/// `393 :&lt;username&gt; &lt;ttyline&gt; &lt;hostname&gt;</span>
     <span class='ident'>RPL_USERS</span>           <span class='op'>=</span> <span class='number'>393</span>,
-    <span class='doccomment'>/// 394 :End of users</span>
+    <span class='doccomment'>/// `394 :End of users</span>
     <span class='ident'>RPL_ENDOFUSERS</span>      <span class='op'>=</span> <span class='number'>394</span>,
-    <span class='doccomment'>/// 395 :Nobody logged in</span>
+    <span class='doccomment'>/// `395 :Nobody logged in</span>
     <span class='ident'>RPL_NOUSERS</span>         <span class='op'>=</span> <span class='number'>395</span>,
-    <span class='doccomment'>/** 200 Link &lt;version &amp; debug level&gt; &lt;destination&gt; &lt;next server&gt; V&lt;protocol version&gt;
+    <span class='doccomment'>/** `200 Link &lt;version &amp; debug level&gt; &lt;destination&gt; &lt;next server&gt; V&lt;protocol version&gt;
         &lt;link uptime in seconds&gt; &lt;backstream sendq&gt; &lt;upstream sendq&gt; **/</span>
     <span class='ident'>RPL_TRACELINK</span>       <span class='op'>=</span> <span class='number'>200</span>,
-    <span class='doccomment'>/// 201 Try. &lt;class&gt; &lt;server&gt;</span>
+    <span class='doccomment'>/// `201 Try. &lt;class&gt; &lt;server&gt;</span>
     <span class='ident'>RPL_TRACECONNECTING</span> <span class='op'>=</span> <span class='number'>201</span>,
-    <span class='doccomment'>/// 202 H.S. &lt;class&gt; &lt;server&gt;</span>
+    <span class='doccomment'>/// `202 H.S. &lt;class&gt; &lt;server&gt;</span>
     <span class='ident'>RPL_TRACEHANDSHAKE</span>  <span class='op'>=</span> <span class='number'>202</span>,
-    <span class='doccomment'>/// 203 ???? &lt;class&gt; [&lt;client IP address in dot form&gt;]</span>
+    <span class='doccomment'>/// `203 ???? &lt;class&gt; [&lt;client IP address in dot form&gt;]</span>
     <span class='ident'>RPL_TRACEUKNOWN</span>     <span class='op'>=</span> <span class='number'>203</span>,
-    <span class='doccomment'>/// 204 Oper &lt;class&gt; &lt;nick&gt;</span>
+    <span class='doccomment'>/// `204 Oper &lt;class&gt; &lt;nick&gt;</span>
     <span class='ident'>RPL_TRACEOPERATOR</span>   <span class='op'>=</span> <span class='number'>204</span>,
-    <span class='doccomment'>/// 205 User &lt;class&gt; &lt;nick&gt;</span>
+    <span class='doccomment'>/// `205 User &lt;class&gt; &lt;nick&gt;</span>
     <span class='ident'>RPL_TRACEUSER</span>       <span class='op'>=</span> <span class='number'>205</span>,
-    <span class='doccomment'>/// 206 Serv &lt;class&gt; &lt;int&gt;S &lt;int&gt;C &lt;server&gt; &lt;nick!user|*!*&gt;@&lt;host|server&gt; V&lt;protocol version&gt;</span>
+    <span class='doccomment'>/// `206 Serv &lt;class&gt; &lt;int&gt;S &lt;int&gt;C &lt;server&gt; &lt;nick!user|*!*&gt;@&lt;host|server&gt; V&lt;protocol version&gt;</span>
     <span class='ident'>RPL_TRACESERVER</span>     <span class='op'>=</span> <span class='number'>206</span>,
-    <span class='doccomment'>/// 207 Service &lt;class&gt; &lt;name&gt; &lt;type&gt; &lt;active type&gt;</span>
+    <span class='doccomment'>/// `207 Service &lt;class&gt; &lt;name&gt; &lt;type&gt; &lt;active type&gt;</span>
     <span class='ident'>RPL_TRACESERVICE</span>    <span class='op'>=</span> <span class='number'>207</span>,
-    <span class='doccomment'>/// 208 &lt;newtype&gt; 0 &lt;client name&gt;</span>
+    <span class='doccomment'>/// `208 &lt;newtype&gt; 0 &lt;client name&gt;</span>
     <span class='ident'>RPL_TRACENEWTYPE</span>    <span class='op'>=</span> <span class='number'>208</span>,
-    <span class='doccomment'>/// 209 Class &lt;class&gt; &lt;count&gt;</span>
+    <span class='doccomment'>/// `209 Class &lt;class&gt; &lt;count&gt;</span>
     <span class='ident'>RPL_TRACECLASS</span>      <span class='op'>=</span> <span class='number'>209</span>,
     <span class='doccomment'>/// Unused.</span>
     <span class='ident'>RPL_TRACERECONNECT</span>  <span class='op'>=</span> <span class='number'>210</span>,
-    <span class='doccomment'>/// 261 File &lt;logfile&gt; &lt;debug level&gt;</span>
+    <span class='doccomment'>/// `261 File &lt;logfile&gt; &lt;debug level&gt;</span>
     <span class='ident'>RPL_TRACELOG</span>        <span class='op'>=</span> <span class='number'>261</span>,
-    <span class='doccomment'>/// 262 &lt;server name&gt; &lt;version &amp; debug level&gt; :End of TRACE</span>
+    <span class='doccomment'>/// `262 &lt;server name&gt; &lt;version &amp; debug level&gt; :End of TRACE</span>
     <span class='ident'>RPL_TRACEEND</span>        <span class='op'>=</span> <span class='number'>262</span>,
-    <span class='doccomment'>/** 211 &lt;linkname&gt; &lt;sendq&gt; &lt;sent messages&gt; &lt;sent Kbytes&gt; &lt;received messages&gt; &lt;received Kbytes&gt;
+    <span class='doccomment'>/** `211 &lt;linkname&gt; &lt;sendq&gt; &lt;sent messages&gt; &lt;sent Kbytes&gt; &lt;received messages&gt; &lt;received Kbytes&gt;
         &lt;time open&gt; **/</span>
     <span class='ident'>RPL_STATSLINKINFO</span>   <span class='op'>=</span> <span class='number'>211</span>,
-    <span class='doccomment'>/// 212 &lt;command&gt; &lt;count&gt; &lt;byte count&gt; &lt;remote count&gt;</span>
+    <span class='doccomment'>/// `212 &lt;command&gt; &lt;count&gt; &lt;byte count&gt; &lt;remote count&gt;</span>
     <span class='ident'>RPL_STATSCOMMANDS</span>   <span class='op'>=</span> <span class='number'>212</span>,
-    <span class='doccomment'>/// 219 &lt;stats letter&gt; :End of STATS report</span>
+    <span class='doccomment'>/// `219 &lt;stats letter&gt; :End of STATS report</span>
     <span class='ident'>RPL_ENDOFSTATS</span>      <span class='op'>=</span> <span class='number'>219</span>,
-    <span class='doccomment'>/// 242 :Server Up %d days %d:%02d:%02d</span>
+    <span class='doccomment'>/// `242 :Server Up %d days %d:%02d:%02d</span>
     <span class='ident'>RPL_STATSUPTIME</span>     <span class='op'>=</span> <span class='number'>242</span>,
-    <span class='doccomment'>/// O &lt;hostmask&gt; * &lt;name&gt;</span>
+    <span class='doccomment'>/// `243 O &lt;hostmask&gt; * &lt;name&gt;</span>
     <span class='ident'>RPL_STATSOLINE</span>      <span class='op'>=</span> <span class='number'>243</span>,
-    <span class='doccomment'>/// 221 &lt;user mode string&gt;</span>
+    <span class='doccomment'>/// `221 &lt;user mode string&gt;</span>
     <span class='ident'>RPL_UMODEIS</span>         <span class='op'>=</span> <span class='number'>221</span>,
-    <span class='doccomment'>/// 234 &lt;name&gt; &lt;server&gt; &lt;mask&gt; &lt;type&gt; &lt;hopcount&gt; &lt;info&gt;</span>
+    <span class='doccomment'>/// `234 &lt;name&gt; &lt;server&gt; &lt;mask&gt; &lt;type&gt; &lt;hopcount&gt; &lt;info&gt;</span>
     <span class='ident'>RPL_SERVLIST</span>        <span class='op'>=</span> <span class='number'>234</span>,
-    <span class='doccomment'>/// 235 &lt;mask&gt; &lt;type&gt; :End of service listing</span>
+    <span class='doccomment'>/// `235 &lt;mask&gt; &lt;type&gt; :End of service listing</span>
     <span class='ident'>RPL_SERVLISTEND</span>     <span class='op'>=</span> <span class='number'>235</span>,
-    <span class='doccomment'>/// 251 :There are &lt;integer&gt; users and &lt;integer&gt; services on &lt;integer&gt; servers</span>
+    <span class='doccomment'>/// `251 :There are &lt;integer&gt; users and &lt;integer&gt; services on &lt;integer&gt; servers</span>
     <span class='ident'>RPL_LUSERCLIENT</span>     <span class='op'>=</span> <span class='number'>251</span>,
-    <span class='doccomment'>/// 252 &lt;integer&gt; :operator(s) online</span>
+    <span class='doccomment'>/// `252 &lt;integer&gt; :operator(s) online</span>
     <span class='ident'>RPL_LUSEROP</span>         <span class='op'>=</span> <span class='number'>252</span>,
-    <span class='doccomment'>/// 253 &lt;integer&gt; :unknown connection(s)</span>
+    <span class='doccomment'>/// `253 &lt;integer&gt; :unknown connection(s)</span>
     <span class='ident'>RPL_LUSERUNKNOWN</span>    <span class='op'>=</span> <span class='number'>253</span>,
-    <span class='doccomment'>/// 254 &lt;integer&gt; :channels formed</span>
+    <span class='doccomment'>/// `254 &lt;integer&gt; :channels formed</span>
     <span class='ident'>RPL_LUSERCHANNELS</span>   <span class='op'>=</span> <span class='number'>254</span>,
-    <span class='doccomment'>/// 255 :I have &lt;integer&gt; clients and &lt;integer&gt; servers</span>
+    <span class='doccomment'>/// `255 :I have &lt;integer&gt; clients and &lt;integer&gt; servers</span>
     <span class='ident'>RPL_LUSERME</span>         <span class='op'>=</span> <span class='number'>255</span>,
-    <span class='doccomment'>/// 256 &lt;server&gt; :Administrative info</span>
+    <span class='doccomment'>/// `256 &lt;server&gt; :Administrative info</span>
     <span class='ident'>RPL_ADMINME</span>         <span class='op'>=</span> <span class='number'>256</span>,
-    <span class='doccomment'>/// 257 :&lt;admin info&gt;</span>
+    <span class='doccomment'>/// `257 :&lt;admin info&gt;</span>
     <span class='ident'>RPL_ADMINLOC1</span>       <span class='op'>=</span> <span class='number'>257</span>,
-    <span class='doccomment'>/// 258 :&lt;admin info&gt;</span>
+    <span class='doccomment'>/// `258 :&lt;admin info&gt;</span>
     <span class='ident'>RPL_ADMINLOC2</span>       <span class='op'>=</span> <span class='number'>258</span>,
-    <span class='doccomment'>/// 259 :&lt;admin info&gt;</span>
+    <span class='doccomment'>/// `259 :&lt;admin info&gt;</span>
     <span class='ident'>RPL_ADMINEMAIL</span>      <span class='op'>=</span> <span class='number'>259</span>,
-    <span class='doccomment'>/// 263 &lt;command&gt; :Please wait a while and try again.</span>
+    <span class='doccomment'>/// `263 &lt;command&gt; :Please wait a while and try again.</span>
     <span class='ident'>RPL_TRYAGAIN</span>        <span class='op'>=</span> <span class='number'>263</span>,
-    <span class='doccomment'>/// 730 &lt;nick&gt; :target[,target2]*</span>
+    <span class='doccomment'>/// `730 &lt;nick&gt; :target[,target2]*</span>
     <span class='ident'>RPL_MONONLINE</span>       <span class='op'>=</span> <span class='number'>730</span>,
-    <span class='doccomment'>/// 731 &lt;nick&gt; :target[,target2]*</span>
+    <span class='doccomment'>/// `731 &lt;nick&gt; :target[,target2]*</span>
     <span class='ident'>RPL_MONOFFLINE</span>      <span class='op'>=</span> <span class='number'>731</span>,
-    <span class='doccomment'>/// 732 &lt;nick&gt; :target[,target2]*</span>
+    <span class='doccomment'>/// `732 &lt;nick&gt; :target[,target2]*</span>
     <span class='ident'>RPL_MONLIST</span>         <span class='op'>=</span> <span class='number'>732</span>,
-    <span class='doccomment'>/// 733 &lt;nick&gt; :End of MONITOR list</span>
+    <span class='doccomment'>/// `733 &lt;nick&gt; :End of MONITOR list</span>
     <span class='ident'>RPL_ENDOFMONLIST</span>    <span class='op'>=</span> <span class='number'>733</span>,
-    <span class='doccomment'>/// 760 &lt;target&gt; &lt;key&gt; &lt;visibility&gt; :&lt;value&gt;</span>
+    <span class='doccomment'>/// `760 &lt;target&gt; &lt;key&gt; &lt;visibility&gt; :&lt;value&gt;</span>
     <span class='ident'>RPL_WHOISKEYVALUE</span>   <span class='op'>=</span> <span class='number'>760</span>,
-    <span class='doccomment'>/// 761 &lt;target&gt; &lt;key&gt; &lt;visibility&gt; :[&lt;value&gt;]</span>
+    <span class='doccomment'>/// `761 &lt;target&gt; &lt;key&gt; &lt;visibility&gt; :[&lt;value&gt;]</span>
     <span class='ident'>RPL_KEYVALUE</span>        <span class='op'>=</span> <span class='number'>761</span>,
-    <span class='doccomment'>/// 762 :end of metadata</span>
+    <span class='doccomment'>/// `762 :end of metadata</span>
     <span class='ident'>RPL_METADATAEND</span>     <span class='op'>=</span> <span class='number'>762</span>,
-    <span class='doccomment'>/// 900 &lt;nick&gt; &lt;nick&gt;!&lt;ident&gt;@&lt;host&gt; &lt;account&gt; :You are now logged in as &lt;user&gt;</span>
+    <span class='doccomment'>/// `900 &lt;nick&gt; &lt;nick&gt;!&lt;ident&gt;@&lt;host&gt; &lt;account&gt; :You are now logged in as &lt;user&gt;</span>
     <span class='ident'>RPL_LOGGEDIN</span>        <span class='op'>=</span> <span class='number'>900</span>,
-    <span class='doccomment'>/// 901 &lt;nick&gt; &lt;nick&gt;!&lt;ident&gt;@&lt;host&gt; :You are now logged out</span>
+    <span class='doccomment'>/// `901 &lt;nick&gt; &lt;nick&gt;!&lt;ident&gt;@&lt;host&gt; :You are now logged out</span>
     <span class='ident'>RPL_LOGGEDOUT</span>       <span class='op'>=</span> <span class='number'>901</span>,
-    <span class='doccomment'>/// 903 &lt;nick&gt; :SASL authentication successful</span>
+    <span class='doccomment'>/// `903 &lt;nick&gt; :SASL authentication successful</span>
     <span class='ident'>RPL_SASLSUCCESS</span>     <span class='op'>=</span> <span class='number'>903</span>,
-    <span class='doccomment'>/// 908 &lt;nick&gt; &lt;mechanisms&gt; :are available SASL mechanisms</span>
+    <span class='doccomment'>/// `908 &lt;nick&gt; &lt;mechanisms&gt; :are available SASL mechanisms</span>
     <span class='ident'>RPL_SASLMECHS</span>       <span class='op'>=</span> <span class='number'>908</span>,
 
     <span class='comment'>// Error replies</span>
-    <span class='doccomment'>/// 401 &lt;nickname&gt; :No such nick/channel</span>
+    <span class='doccomment'>/// `401 &lt;nickname&gt; :No such nick/channel</span>
     <span class='ident'>ERR_NOSUCHNICK</span>          <span class='op'>=</span> <span class='number'>401</span>,
-    <span class='doccomment'>/// 402 &lt;server name&gt; :No such server</span>
+    <span class='doccomment'>/// `402 &lt;server name&gt; :No such server</span>
     <span class='ident'>ERR_NOSUCHSERVER</span>        <span class='op'>=</span> <span class='number'>402</span>,
-    <span class='doccomment'>/// 403 &lt;channel name&gt; :No such channel</span>
+    <span class='doccomment'>/// `403 &lt;channel name&gt; :No such channel</span>
     <span class='ident'>ERR_NOSUCHCHANNEL</span>       <span class='op'>=</span> <span class='number'>403</span>,
-    <span class='doccomment'>/// 404 &lt;channel name&gt; :Cannot send to channel</span>
+    <span class='doccomment'>/// `404 &lt;channel name&gt; :Cannot send to channel</span>
     <span class='ident'>ERR_CANNOTSENDTOCHAN</span>    <span class='op'>=</span> <span class='number'>404</span>,
-    <span class='doccomment'>/// 405 &lt;channel name&gt; :You have joined too many channels</span>
+    <span class='doccomment'>/// `405 &lt;channel name&gt; :You have joined too many channels</span>
     <span class='ident'>ERR_TOOMANYCHANNELS</span>     <span class='op'>=</span> <span class='number'>405</span>,
-    <span class='doccomment'>/// 406 &lt;nickname&gt; :There was no such nickname</span>
+    <span class='doccomment'>/// `406 &lt;nickname&gt; :There was no such nickname</span>
     <span class='ident'>ERR_WASNOSUCHNICK</span>       <span class='op'>=</span> <span class='number'>406</span>,
-    <span class='doccomment'>/// 407 &lt;target&gt; :&lt;error code&gt; recipients. &lt;abort message&gt;</span>
+    <span class='doccomment'>/// `407 &lt;target&gt; :&lt;error code&gt; recipients. &lt;abort message&gt;</span>
     <span class='ident'>ERR_TOOMANYTARGETS</span>      <span class='op'>=</span> <span class='number'>407</span>,
-    <span class='doccomment'>/// 408 &lt;service name&gt; :No such service</span>
+    <span class='doccomment'>/// `408 &lt;service name&gt; :No such service</span>
     <span class='ident'>ERR_NOSUCHSERVICE</span>       <span class='op'>=</span> <span class='number'>408</span>,
-    <span class='doccomment'>/// 409 :No origin specified</span>
+    <span class='doccomment'>/// `409 :No origin specified</span>
     <span class='ident'>ERR_NOORIGIN</span>            <span class='op'>=</span> <span class='number'>409</span>,
-    <span class='doccomment'>/// 411 :No recipient given (&lt;command&gt;)</span>
+    <span class='doccomment'>/// `411 :No recipient given (&lt;command&gt;)</span>
     <span class='ident'>ERR_NORECIPIENT</span>         <span class='op'>=</span> <span class='number'>411</span>,
-    <span class='doccomment'>/// 412 :No text to send</span>
+    <span class='doccomment'>/// `412 :No text to send</span>
     <span class='ident'>ERR_NOTEXTTOSEND</span>        <span class='op'>=</span> <span class='number'>412</span>,
-    <span class='doccomment'>/// 413 &lt;mask&gt; :No toplevel domain specified</span>
+    <span class='doccomment'>/// `413 &lt;mask&gt; :No toplevel domain specified</span>
     <span class='ident'>ERR_NOTOPLEVEL</span>          <span class='op'>=</span> <span class='number'>413</span>,
-    <span class='doccomment'>/// 414 &lt;mask&gt; :Wildcard in toplevel domain</span>
+    <span class='doccomment'>/// `414 &lt;mask&gt; :Wildcard in toplevel domain</span>
     <span class='ident'>ERR_WILDTOPLEVEL</span>        <span class='op'>=</span> <span class='number'>414</span>,
-    <span class='doccomment'>/// 415 &lt;mask&gt; :Bad Server/host mask</span>
+    <span class='doccomment'>/// `415 &lt;mask&gt; :Bad Server/host mask</span>
     <span class='ident'>ERR_BADMASK</span>             <span class='op'>=</span> <span class='number'>415</span>,
-    <span class='doccomment'>/// 421 &lt;command&gt; :Unknown command</span>
+    <span class='doccomment'>/// `421 &lt;command&gt; :Unknown command</span>
     <span class='ident'>ERR_UNKNOWNCOMMAND</span>      <span class='op'>=</span> <span class='number'>421</span>,
-    <span class='doccomment'>/// 422 :MOTD File is missing</span>
+    <span class='doccomment'>/// `422 :MOTD File is missing</span>
     <span class='ident'>ERR_NOMOTD</span>              <span class='op'>=</span> <span class='number'>422</span>,
-    <span class='doccomment'>/// 423 &lt;server&gt; :No administrative info available</span>
+    <span class='doccomment'>/// `423 &lt;server&gt; :No administrative info available</span>
     <span class='ident'>ERR_NOADMININFO</span>         <span class='op'>=</span> <span class='number'>423</span>,
-    <span class='doccomment'>/// 424 :File error doing &lt;file op&gt; on &lt;file&gt;</span>
+    <span class='doccomment'>/// `424 :File error doing &lt;file op&gt; on &lt;file&gt;</span>
     <span class='ident'>ERR_FILEERROR</span>           <span class='op'>=</span> <span class='number'>424</span>,
-    <span class='doccomment'>/// 431 :No nickname given</span>
+    <span class='doccomment'>/// `431 :No nickname given</span>
     <span class='ident'>ERR_NONICKNAMEGIVEN</span>     <span class='op'>=</span> <span class='number'>431</span>,
-    <span class='doccomment'>/// 432 &lt;nick&gt; :Erroneous nickname&quot;</span>
+    <span class='doccomment'>/// `432 &lt;nick&gt; :Erroneous nickname&quot;</span>
     <span class='ident'>ERR_ERRONEOUSNICKNAME</span>   <span class='op'>=</span> <span class='number'>432</span>,
-    <span class='doccomment'>/// 433 &lt;nick&gt; :Nickname is already in use</span>
+    <span class='doccomment'>/// `433 &lt;nick&gt; :Nickname is already in use</span>
     <span class='ident'>ERR_NICKNAMEINUSE</span>       <span class='op'>=</span> <span class='number'>433</span>,
-    <span class='doccomment'>/// 436 &lt;nick&gt; :Nickname collision KILL from &lt;user&gt;@&lt;host&gt;</span>
+    <span class='doccomment'>/// `436 &lt;nick&gt; :Nickname collision KILL from &lt;user&gt;@&lt;host&gt;</span>
     <span class='ident'>ERR_NICKCOLLISION</span>       <span class='op'>=</span> <span class='number'>436</span>,
-    <span class='doccomment'>/// 437 &lt;nick/channel&gt; :Nick/channel is temporarily unavailable</span>
+    <span class='doccomment'>/// `437 &lt;nick/channel&gt; :Nick/channel is temporarily unavailable</span>
     <span class='ident'>ERR_UNAVAILRESOURCE</span>     <span class='op'>=</span> <span class='number'>437</span>,
-    <span class='doccomment'>/// 441 &lt;nick&gt; &lt;channel&gt; :They aren&#39;t on that channel</span>
+    <span class='doccomment'>/// `441 &lt;nick&gt; &lt;channel&gt; :They aren&#39;t on that channel</span>
     <span class='ident'>ERR_USERNOTINCHANNEL</span>    <span class='op'>=</span> <span class='number'>441</span>,
-    <span class='doccomment'>/// 442 &lt;channel&gt; :You&#39;re not on that channel</span>
+    <span class='doccomment'>/// `442 &lt;channel&gt; :You&#39;re not on that channel</span>
     <span class='ident'>ERR_NOTONCHANNEL</span>        <span class='op'>=</span> <span class='number'>442</span>,
-    <span class='doccomment'>/// 443 &lt;user&gt; &lt;channel&gt; :is already on channel</span>
+    <span class='doccomment'>/// `443 &lt;user&gt; &lt;channel&gt; :is already on channel</span>
     <span class='ident'>ERR_USERONCHANNEL</span>       <span class='op'>=</span> <span class='number'>443</span>,
-    <span class='doccomment'>/// 444 &lt;user&gt; :User not logged in</span>
+    <span class='doccomment'>/// `444 &lt;user&gt; :User not logged in</span>
     <span class='ident'>ERR_NOLOGIN</span>             <span class='op'>=</span> <span class='number'>444</span>,
-    <span class='doccomment'>/// 445 :SUMMON has been disabled</span>
+    <span class='doccomment'>/// `445 :SUMMON has been disabled</span>
     <span class='ident'>ERR_SUMMONDISABLED</span>      <span class='op'>=</span> <span class='number'>445</span>,
-    <span class='doccomment'>/// 446 :USERS has been disabled</span>
+    <span class='doccomment'>/// `446 :USERS has been disabled</span>
     <span class='ident'>ERR_USERSDISABLED</span>       <span class='op'>=</span> <span class='number'>446</span>,
-    <span class='doccomment'>/// 451 :You have not registered</span>
+    <span class='doccomment'>/// `451 :You have not registered</span>
     <span class='ident'>ERR_NOTREGISTERED</span>       <span class='op'>=</span> <span class='number'>451</span>,
-    <span class='doccomment'>/// 461 &lt;command&gt; :Not enough parameters</span>
+    <span class='doccomment'>/// `461 &lt;command&gt; :Not enough parameters</span>
     <span class='ident'>ERR_NEEDMOREPARAMS</span>      <span class='op'>=</span> <span class='number'>461</span>,
-    <span class='doccomment'>/// 462 :Unauthorized command (already registered)</span>
+    <span class='doccomment'>/// `462 :Unauthorized command (already registered)</span>
     <span class='ident'>ERR_ALREADYREGISTRED</span>    <span class='op'>=</span> <span class='number'>462</span>,
-    <span class='doccomment'>/// 463 :Your host isn&#39;t among the privileged</span>
+    <span class='doccomment'>/// `463 :Your host isn&#39;t among the privileged</span>
     <span class='ident'>ERR_NOPERMFORHOST</span>       <span class='op'>=</span> <span class='number'>463</span>,
-    <span class='doccomment'>/// 464 :Password incorrect</span>
+    <span class='doccomment'>/// `464 :Password incorrect</span>
     <span class='ident'>ERR_PASSWDMISMATCH</span>      <span class='op'>=</span> <span class='number'>464</span>,
-    <span class='doccomment'>/// 465 :You are banned from this server</span>
+    <span class='doccomment'>/// `465 :You are banned from this server</span>
     <span class='ident'>ERR_YOUREBANNEDCREEP</span>    <span class='op'>=</span> <span class='number'>465</span>,
-    <span class='doccomment'>/// 466</span>
+    <span class='doccomment'>/// `466</span>
     <span class='ident'>ERR_YOUWILLBEBANNED</span>     <span class='op'>=</span> <span class='number'>466</span>,
-    <span class='doccomment'>/// 467 &lt;channel&gt; :Channel key already set</span>
+    <span class='doccomment'>/// `467 &lt;channel&gt; :Channel key already set</span>
     <span class='ident'>ERR_KEYSET</span>              <span class='op'>=</span> <span class='number'>467</span>,
-    <span class='doccomment'>/// 471 &lt;channel&gt; :Cannot join channel (+l)</span>
+    <span class='doccomment'>/// `471 &lt;channel&gt; :Cannot join channel (+l)</span>
     <span class='ident'>ERR_CHANNELISFULL</span>       <span class='op'>=</span> <span class='number'>471</span>,
-    <span class='doccomment'>/// 472 &lt;char&gt; :is unknown mode char to me for &lt;channel&gt;</span>
+    <span class='doccomment'>/// `472 &lt;char&gt; :is unknown mode char to me for &lt;channel&gt;</span>
     <span class='ident'>ERR_UNKNOWNMODE</span>         <span class='op'>=</span> <span class='number'>472</span>,
-    <span class='doccomment'>/// 473 &lt;channel&gt; :Cannot join channel (+i)</span>
+    <span class='doccomment'>/// `473 &lt;channel&gt; :Cannot join channel (+i)</span>
     <span class='ident'>ERR_INVITEONLYCHAN</span>      <span class='op'>=</span> <span class='number'>473</span>,
-    <span class='doccomment'>/// 474 &lt;channel&gt; :Cannot join channel (+b)</span>
+    <span class='doccomment'>/// `474 &lt;channel&gt; :Cannot join channel (+b)</span>
     <span class='ident'>ERR_BANNEDFROMCHAN</span>      <span class='op'>=</span> <span class='number'>474</span>,
-    <span class='doccomment'>/// 475 &lt;channel&gt; :Cannot join channel (+k)</span>
+    <span class='doccomment'>/// `475 &lt;channel&gt; :Cannot join channel (+k)</span>
     <span class='ident'>ERR_BADCHANNELKEY</span>       <span class='op'>=</span> <span class='number'>475</span>,
-    <span class='doccomment'>/// 476 &lt;channel&gt; :Bad Channel Mask</span>
+    <span class='doccomment'>/// `476 &lt;channel&gt; :Bad Channel Mask</span>
     <span class='ident'>ERR_BADCHANMASK</span>         <span class='op'>=</span> <span class='number'>476</span>,
-    <span class='doccomment'>/// 477 &lt;channel&gt; :Channel doesn&#39;t support modes</span>
+    <span class='doccomment'>/// `477 &lt;channel&gt; :Channel doesn&#39;t support modes</span>
     <span class='ident'>ERR_NOCHANMODES</span>         <span class='op'>=</span> <span class='number'>477</span>,
-    <span class='doccomment'>/// 478 &lt;channel&gt; &lt;char&gt; :Channel list is full</span>
+    <span class='doccomment'>/// `478 &lt;channel&gt; &lt;char&gt; :Channel list is full</span>
     <span class='ident'>ERR_BANLISTFULL</span>         <span class='op'>=</span> <span class='number'>478</span>,
-    <span class='doccomment'>/// 481 :Permission Denied- You&#39;re not an IRC operator</span>
+    <span class='doccomment'>/// `481 :Permission Denied- You&#39;re not an IRC operator</span>
     <span class='ident'>ERR_NOPRIVILEGES</span>        <span class='op'>=</span> <span class='number'>481</span>,
-    <span class='doccomment'>/// 482 &lt;channel&gt; :You&#39;re not channel operator</span>
+    <span class='doccomment'>/// `482 &lt;channel&gt; :You&#39;re not channel operator</span>
     <span class='ident'>ERR_CHANOPRIVSNEEDED</span>    <span class='op'>=</span> <span class='number'>482</span>,
-    <span class='doccomment'>/// 483 :You can&#39;t kill a server!</span>
+    <span class='doccomment'>/// `483 :You can&#39;t kill a server!</span>
     <span class='ident'>ERR_CANTKILLSERVER</span>      <span class='op'>=</span> <span class='number'>483</span>,
-    <span class='doccomment'>/// 484 :Your connection is restricted!</span>
+    <span class='doccomment'>/// `484 :Your connection is restricted!</span>
     <span class='ident'>ERR_RESTRICTED</span>          <span class='op'>=</span> <span class='number'>484</span>,
-    <span class='doccomment'>/// 485 :You&#39;re not the original channel operator</span>
+    <span class='doccomment'>/// `485 :You&#39;re not the original channel operator</span>
     <span class='ident'>ERR_UNIQOPPRIVSNEEDED</span>   <span class='op'>=</span> <span class='number'>485</span>,
-    <span class='doccomment'>/// 491 :No O-lines for your host</span>
+    <span class='doccomment'>/// `491 :No O-lines for your host</span>
     <span class='ident'>ERR_NOOPERHOST</span>          <span class='op'>=</span> <span class='number'>491</span>,
-    <span class='doccomment'>/// 501 :Unknown MODE flag</span>
+    <span class='doccomment'>/// `501 :Unknown MODE flag</span>
     <span class='ident'>ERR_UMODEUNKNOWNFLAG</span>    <span class='op'>=</span> <span class='number'>501</span>,
-    <span class='doccomment'>/// 502 :Cannot change mode for other users</span>
+    <span class='doccomment'>/// `502 :Cannot change mode for other users</span>
     <span class='ident'>ERR_USERSDONTMATCH</span>      <span class='op'>=</span> <span class='number'>502</span>,
-    <span class='doccomment'>/// 734 &lt;nick&gt; &lt;limit&gt; &lt;targets&gt; :Monitor list is full.</span>
+    <span class='doccomment'>/// `734 &lt;nick&gt; &lt;limit&gt; &lt;targets&gt; :Monitor list is full.</span>
     <span class='ident'>ERR_MONLISTFULL</span>         <span class='op'>=</span> <span class='number'>734</span>,
-    <span class='doccomment'>/// 764 &lt;target&gt; :metadata limit reached</span>
+    <span class='doccomment'>/// `764 &lt;target&gt; :metadata limit reached</span>
     <span class='ident'>ERR_METADATALIMIT</span>       <span class='op'>=</span> <span class='number'>764</span>,
-    <span class='doccomment'>/// 765 &lt;target&gt; :invalid metadata target</span>
+    <span class='doccomment'>/// `765 &lt;target&gt; :invalid metadata target</span>
     <span class='ident'>ERR_TARGETINVALID</span>       <span class='op'>=</span> <span class='number'>765</span>,
-    <span class='doccomment'>/// 766 &lt;key&gt; :no matching key</span>
+    <span class='doccomment'>/// `766 &lt;key&gt; :no matching key</span>
     <span class='ident'>ERR_NOMATCHINGKEY</span>       <span class='op'>=</span> <span class='number'>766</span>,
-    <span class='doccomment'>/// 767 &lt;key&gt; :invalid metadata key</span>
+    <span class='doccomment'>/// `767 &lt;key&gt; :invalid metadata key</span>
     <span class='ident'>ERR_KEYINVALID</span>          <span class='op'>=</span> <span class='number'>767</span>,
-    <span class='doccomment'>/// 768 &lt;target&gt; &lt;key&gt; :key not set</span>
+    <span class='doccomment'>/// `768 &lt;target&gt; &lt;key&gt; :key not set</span>
     <span class='ident'>ERR_KEYNOTSET</span>           <span class='op'>=</span> <span class='number'>768</span>,
-    <span class='doccomment'>/// 769 &lt;target&gt; &lt;key&gt; :permission denied</span>
+    <span class='doccomment'>/// `769 &lt;target&gt; &lt;key&gt; :permission denied</span>
     <span class='ident'>ERR_KEYNOPERMISSION</span>     <span class='op'>=</span> <span class='number'>769</span>,
-    <span class='doccomment'>/// 902 &lt;nick&gt; :You must use a nick assigned to you.</span>
+    <span class='doccomment'>/// `902 &lt;nick&gt; :You must use a nick assigned to you.</span>
     <span class='ident'>ERR_NICKLOCKED</span>          <span class='op'>=</span> <span class='number'>902</span>,
-    <span class='doccomment'>/// 904 &lt;nick&gt; :SASL authentication failed</span>
+    <span class='doccomment'>/// `904 &lt;nick&gt; :SASL authentication failed</span>
     <span class='ident'>ERR_SASLFAIL</span>            <span class='op'>=</span> <span class='number'>904</span>,
-    <span class='doccomment'>/// 905 &lt;nick&gt; :SASL message too long</span>
+    <span class='doccomment'>/// `905 &lt;nick&gt; :SASL message too long</span>
     <span class='ident'>ERR_SASLTOOLONG</span>         <span class='op'>=</span> <span class='number'>905</span>,
-    <span class='doccomment'>/// 906 &lt;nick&gt; :SASL authentication aborted</span>
+    <span class='doccomment'>/// `906 &lt;nick&gt; :SASL authentication aborted</span>
     <span class='ident'>ERR_SASLABORT</span>           <span class='op'>=</span> <span class='number'>906</span>,
-    <span class='doccomment'>/// 907 &lt;nick&gt; :You have already authenticated using SASL</span>
+    <span class='doccomment'>/// `907 &lt;nick&gt; :You have already authenticated using SASL</span>
     <span class='ident'>ERR_SASLALREADY</span>         <span class='op'>=</span> <span class='number'>907</span>
 }
 

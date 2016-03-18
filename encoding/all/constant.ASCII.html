@@ -47,7 +47,31 @@
                 [<span class='inner'>&#x2212;</span>]
             </a>
         </span><a id='src-2408' class='srclink' href='../../src/encoding/all.rs.html#16' title='goto source code'>[src]</a></span></h1>
-<pre class='rust const'>pub const ASCII: &amp;'static <a class='struct' href='../../encoding/codec/ascii/struct.ASCIIEncoding.html' title='encoding::codec::ascii::ASCIIEncoding'>ASCIIEncoding</a><code> = </code><code>&$($module)::+::$val</code></pre></section>
+<pre class='rust const'>pub const ASCII: &amp;'static <a class='struct' href='../../encoding/codec/ascii/struct.ASCIIEncoding.html' title='encoding::codec::ascii::ASCIIEncoding'>ASCIIEncoding</a><code> = </code><code>&$($module)::+::$val;
+    );
+);
+
+macro_rules! singlebyte(
+    ($(#[$attr:meta])* var=$var:ident, mod=$($module:ident)::+, name=$name:expr) => (
+        singlebyte!($(#[$attr])* var=$var, mod=$($module)::+, name=$name, whatwg=None);
+    );
+    ($(#[$attr:meta])* var=$var:ident, mod=$($module:ident)::+, name|whatwg=$name:expr) => (
+        singlebyte!($(#[$attr])* var=$var, mod=$($module)::+, name=$name, whatwg=Some($name));
+    );
+    ($(#[$attr:meta])* var=$var:ident, mod=$($module:ident)::+,
+                       name=$name:expr, whatwg=$whatwg:expr) => (
+        $(#[$attr])* pub const $var: &'static codec::singlebyte::SingleByteEncoding =
+            &codec::singlebyte::SingleByteEncoding {
+                name: $name,
+                whatwg_name: $whatwg,
+                index_forward: $($module)::+::forward,
+                index_backward: $($module)::+::backward,
+            };
+    )
+);
+
+unique!(var=ERROR, mod=codec::error, val=ErrorEncoding);
+unique!(var=ASCII, mod=codec::ascii, val=ASCIIEncoding</code></pre></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

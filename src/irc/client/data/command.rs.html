@@ -1617,7 +1617,7 @@
 
 <span class='kw'>fn</span> <span class='ident'>stringify</span>(<span class='ident'>cmd</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>, <span class='ident'>suffix</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
     <span class='kw'>let</span> <span class='ident'>args</span> <span class='op'>=</span> <span class='ident'>args</span>.<span class='ident'>join</span>(<span class='string'>&quot; &quot;</span>);
-    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> { <span class='string'>&quot; &quot;</span> } <span class='kw'>else</span> { <span class='string'>&quot;&quot;</span> };
+    <span class='kw'>let</span> <span class='ident'>sp</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='string'>&quot;&quot;</span> } <span class='kw'>else</span> { <span class='string'>&quot; &quot;</span> };
     <span class='kw'>match</span> <span class='ident'>suffix</span> {
         <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}{}{} :{}&quot;</span>, <span class='ident'>cmd</span>, <span class='ident'>sp</span>, <span class='ident'>args</span>, <span class='ident'>suffix</span>),
         <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}{}{}&quot;</span>, <span class='ident'>cmd</span>, <span class='ident'>sp</span>, <span class='ident'>args</span>),
@@ -1868,7 +1868,7 @@
         <span class='prelude-val'>Ok</span>(<span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;PASS&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+                    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
                     <span class='ident'>Command</span>::<span class='ident'>PASS</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 },
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -1879,7 +1879,7 @@
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;NICK&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+                    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
                     <span class='ident'>Command</span>::<span class='ident'>NICK</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 },
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -1940,7 +1940,7 @@
                 }
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;QUIT&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
-            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>QUIT</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())),
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>QUIT</span>(<span class='prelude-val'>None</span>)
@@ -1958,7 +1958,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;JOIN&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>(), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>JOIN</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
@@ -1980,7 +1980,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;PART&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>PART</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>(), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>PART</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
@@ -1997,7 +1997,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;TOPIC&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>TOPIC</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>(), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>TOPIC</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
@@ -2014,14 +2014,14 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;NAMES&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>NAMES</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>NAMES</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 },
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>NAMES</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>NAMES</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
@@ -2033,14 +2033,14 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;LIST&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>LIST</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>LIST</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 },
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>LIST</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>LIST</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
@@ -2089,21 +2089,21 @@
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;MOTD&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
-            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>MOTD</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())),
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>MOTD</span>(<span class='prelude-val'>None</span>)
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;LUSERS&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>LUSERS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>LUSERS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 },
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>LUSERS</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>LUSERS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
@@ -2114,21 +2114,21 @@
                 }
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;VERSION&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
-            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>VERSION</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())),
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>VERSION</span>(<span class='prelude-val'>None</span>)
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;STATS&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>STATS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>STATS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 },
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>STATS</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>STATS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
@@ -2140,21 +2140,21 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;LINKS&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>LINKS</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>LINKS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 },
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>LINKS</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 }
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;TIME&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
-            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>TIME</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())),
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>TIME</span>(<span class='prelude-val'>None</span>)
@@ -2171,33 +2171,33 @@
                 }
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;TRACE&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
-            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>TRACE</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())),
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>TRACE</span>(<span class='prelude-val'>None</span>)
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;ADMIN&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
-            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>ADMIN</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())),
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>ADMIN</span>(<span class='prelude-val'>None</span>)
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;INFO&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
-            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+            <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>INFO</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())),
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>Command</span>::<span class='ident'>INFO</span>(<span class='prelude-val'>None</span>)
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;SERVLIST&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>SERVLIST</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>SERVLIST</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 },
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>SERVLIST</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>SERVLIST</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
@@ -2220,14 +2220,14 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;WHO&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>WHO</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>WHO</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='ident'>suffix</span>[..] <span class='op'>==</span> <span class='string'>&quot;o&quot;</span>))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
                 },
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>WHO</span>(<span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>WHO</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
@@ -2239,7 +2239,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;WHOIS&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>WHOIS</span>(<span class='prelude-val'>None</span>, <span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>WHOIS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>()), <span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
@@ -2256,7 +2256,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;WHOWAS&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>(), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>WHOWAS</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>(), <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
@@ -2290,7 +2290,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;PING&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>PING</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>(), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>PING</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
@@ -2307,7 +2307,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;PONG&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>PONG</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>(), <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>PONG</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
@@ -2324,7 +2324,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;ERROR&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>ERROR</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
@@ -2333,7 +2333,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;AWAY&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>AWAY</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
@@ -2341,26 +2341,26 @@
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;REHASH&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
-            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                 <span class='ident'>Command</span>::<span class='ident'>REHASH</span>
             } <span class='kw'>else</span> {
                 <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;DIE&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
-            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                 <span class='ident'>Command</span>::<span class='ident'>DIE</span>
             } <span class='kw'>else</span> {
                 <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;RESTART&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
-            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                 <span class='ident'>Command</span>::<span class='ident'>RESTART</span>
             } <span class='kw'>else</span> {
                 <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;SUMMON&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>(), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>SUMMON</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()), <span class='prelude-val'>None</span>)
@@ -2384,7 +2384,7 @@
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;USERS&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+                    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
                     <span class='ident'>Command</span>::<span class='ident'>USERS</span>(<span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>()))
                 },
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -2395,7 +2395,7 @@
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;WALLOPS&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+                    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
                     <span class='ident'>Command</span>::<span class='ident'>WALLOPS</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 },
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -2479,7 +2479,7 @@
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;NICKSERV&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+                    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
                     <span class='ident'>Command</span>::<span class='ident'>NICKSERV</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 },
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -2490,7 +2490,7 @@
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;CHANSERV&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+                    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
                     <span class='ident'>Command</span>::<span class='ident'>CHANSERV</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 },
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -2501,7 +2501,7 @@
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;OPERSERV&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+                    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
                     <span class='ident'>Command</span>::<span class='ident'>OPERSERV</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 },
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -2512,7 +2512,7 @@
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;BOTSERV&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+                    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
                     <span class='ident'>Command</span>::<span class='ident'>BOTSERV</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 },
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -2523,7 +2523,7 @@
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;HOSTSERV&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+                    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
                     <span class='ident'>Command</span>::<span class='ident'>HOSTSERV</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 },
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -2534,7 +2534,7 @@
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;MEMOSERV&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
                 <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
+                    <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>args</span>.<span class='ident'>is_empty</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>()) }
                     <span class='ident'>Command</span>::<span class='ident'>MEMOSERV</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 },
                 <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> {
@@ -2585,7 +2585,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;AUTHENTICATE&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>AUTHENTICATE</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
@@ -2598,7 +2598,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;ACCOUNT&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>ACCOUNT</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>())
                 } <span class='kw'>else</span> {
                     <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>invalid_input</span>())
@@ -2646,7 +2646,7 @@
             }
         } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='string'>&quot;BATCH&quot;</span> <span class='op'>=</span> <span class='ident'>cmd</span> {
             <span class='kw'>match</span> <span class='ident'>suffix</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> {
+                <span class='prelude-val'>Some</span>(<span class='ident'>suffix</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>is_empty</span>() {
                     <span class='ident'>Command</span>::<span class='ident'>BATCH</span>(<span class='ident'>suffix</span>.<span class='ident'>to_owned</span>(), <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>)
                 } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>args</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>1</span> {
                     <span class='ident'>Command</span>::<span class='ident'>BATCH</span>(<span class='ident'>args</span>[<span class='number'>0</span>].<span class='ident'>to_owned</span>(), <span class='prelude-val'>Some</span>(
@@ -2728,15 +2728,15 @@
 <span class='kw'>impl</span> <span class='ident'>CapSubCommand</span> {
     <span class='doccomment'>/// Gets the string that corresponds to this subcommand.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>to_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> {
-        <span class='kw'>match</span> <span class='self'>self</span> {
-            <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>LS</span>    <span class='op'>=&gt;</span> <span class='string'>&quot;LS&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>LIST</span>  <span class='op'>=&gt;</span> <span class='string'>&quot;LIST&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>REQ</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;REQ&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>ACK</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;ACK&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>NAK</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;NAK&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>END</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;END&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>NEW</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;NEW&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>CapSubCommand</span>::<span class='ident'>DEL</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;DEL&quot;</span>,
+        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
+            <span class='ident'>CapSubCommand</span>::<span class='ident'>LS</span>    <span class='op'>=&gt;</span> <span class='string'>&quot;LS&quot;</span>,
+            <span class='ident'>CapSubCommand</span>::<span class='ident'>LIST</span>  <span class='op'>=&gt;</span> <span class='string'>&quot;LIST&quot;</span>,
+            <span class='ident'>CapSubCommand</span>::<span class='ident'>REQ</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;REQ&quot;</span>,
+            <span class='ident'>CapSubCommand</span>::<span class='ident'>ACK</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;ACK&quot;</span>,
+            <span class='ident'>CapSubCommand</span>::<span class='ident'>NAK</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;NAK&quot;</span>,
+            <span class='ident'>CapSubCommand</span>::<span class='ident'>END</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;END&quot;</span>,
+            <span class='ident'>CapSubCommand</span>::<span class='ident'>NEW</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;NEW&quot;</span>,
+            <span class='ident'>CapSubCommand</span>::<span class='ident'>DEL</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;DEL&quot;</span>,
         }
     }
 }
@@ -2775,11 +2775,11 @@
 <span class='kw'>impl</span> <span class='ident'>MetadataSubCommand</span> {
     <span class='doccomment'>/// Gets the string that corresponds to this subcommand.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>to_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> {
-        <span class='kw'>match</span> <span class='self'>self</span> {
-            <span class='kw-2'>&amp;</span><span class='ident'>MetadataSubCommand</span>::<span class='ident'>GET</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;GET&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>MetadataSubCommand</span>::<span class='ident'>LIST</span>  <span class='op'>=&gt;</span> <span class='string'>&quot;LIST&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>MetadataSubCommand</span>::<span class='ident'>SET</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;SET&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>MetadataSubCommand</span>::<span class='ident'>CLEAR</span> <span class='op'>=&gt;</span> <span class='string'>&quot;CLEAR&quot;</span>,
+        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
+            <span class='ident'>MetadataSubCommand</span>::<span class='ident'>GET</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;GET&quot;</span>,
+            <span class='ident'>MetadataSubCommand</span>::<span class='ident'>LIST</span>  <span class='op'>=&gt;</span> <span class='string'>&quot;LIST&quot;</span>,
+            <span class='ident'>MetadataSubCommand</span>::<span class='ident'>SET</span>   <span class='op'>=&gt;</span> <span class='string'>&quot;SET&quot;</span>,
+            <span class='ident'>MetadataSubCommand</span>::<span class='ident'>CLEAR</span> <span class='op'>=&gt;</span> <span class='string'>&quot;CLEAR&quot;</span>,
         }
     }
 }
@@ -2811,10 +2811,10 @@
 <span class='kw'>impl</span> <span class='ident'>BatchSubCommand</span> {
     <span class='doccomment'>/// Gets the string that corresponds to this subcommand.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>to_str</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> {
-        <span class='kw'>match</span> <span class='self'>self</span> {
-            <span class='kw-2'>&amp;</span><span class='ident'>BatchSubCommand</span>::<span class='ident'>NETSPLIT</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;NETSPLIT&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>BatchSubCommand</span>::<span class='ident'>NETJOIN</span>       <span class='op'>=&gt;</span> <span class='string'>&quot;NETJOIN&quot;</span>,
-            <span class='kw-2'>&amp;</span><span class='ident'>BatchSubCommand</span>::<span class='ident'>CUSTOM</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>s</span>,
+        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
+            <span class='ident'>BatchSubCommand</span>::<span class='ident'>NETSPLIT</span>      <span class='op'>=&gt;</span> <span class='string'>&quot;NETSPLIT&quot;</span>,
+            <span class='ident'>BatchSubCommand</span>::<span class='ident'>NETJOIN</span>       <span class='op'>=&gt;</span> <span class='string'>&quot;NETJOIN&quot;</span>,
+            <span class='ident'>BatchSubCommand</span>::<span class='ident'>CUSTOM</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>s</span>,
         }
     }
 }

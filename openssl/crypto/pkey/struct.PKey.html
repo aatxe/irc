@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-860' class='srclink' href='../../../src/openssl/crypto/pkey.rs.html#60-63' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-863' class='srclink' href='../../../src/openssl/crypto/pkey.rs.html#60-63' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct PKey {
     // some fields omitted
 }</pre><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../openssl/crypto/pkey/struct.PKey.html' title='openssl::crypto::pkey::PKey'>PKey</a></code></h3><div class='docblock'><p>Represents a public key, optionally with a private key attached.</p>
@@ -61,7 +61,11 @@
 </div><h4 id='method.public_rsa_key_from_pem' class='method'><code>fn <a href='#method.public_rsa_key_from_pem' class='fnname'>public_rsa_key_from_pem</a>&lt;R&gt;(reader: &amp;mut R) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../../openssl/crypto/pkey/struct.PKey.html' title='openssl::crypto::pkey::PKey'>PKey</a>, <a class='enum' href='../../../openssl/ssl/error/enum.SslError.html' title='openssl::ssl::error::SslError'>SslError</a>&gt; <span class='where'>where R: <a class='trait' href='https://doc.rust-lang.org/nightly/std/io/trait.Read.html' title='std::io::Read'>Read</a></span></code></h4>
 <div class='docblock'><p>Reads an RSA public key from PEM, takes ownership of handle</p>
 </div><h4 id='method.gen' class='method'><code>fn <a href='#method.gen' class='fnname'>gen</a>(&amp;mut self, keysz: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
-<h4 id='method.save_pub' class='method'><code>fn <a href='#method.save_pub' class='fnname'>save_pub</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;</code></h4>
+<h4 id='method.set_rsa' class='method'><code>fn <a href='#method.set_rsa' class='fnname'>set_rsa</a>(&amp;mut self, rsa: &amp;<a class='struct' href='../../../openssl/crypto/rsa/struct.RSA.html' title='openssl::crypto::rsa::RSA'>RSA</a>)</code></h4>
+<div class='docblock'><p>assign RSA key to this pkey</p>
+</div><h4 id='method.get_rsa' class='method'><code>fn <a href='#method.get_rsa' class='fnname'>get_rsa</a>(&amp;self) -&gt; <a class='struct' href='../../../openssl/crypto/rsa/struct.RSA.html' title='openssl::crypto::rsa::RSA'>RSA</a></code></h4>
+<div class='docblock'><p>get a reference to the interal RSA key for direct access to the key components</p>
+</div><h4 id='method.save_pub' class='method'><code>fn <a href='#method.save_pub' class='fnname'>save_pub</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;</code></h4>
 <div class='docblock'><p>Returns a DER serialized form of the public key, suitable for load_pub().</p>
 </div><h4 id='method.load_pub' class='method'><code>fn <a href='#method.load_pub' class='fnname'>load_pub</a>(&amp;mut self, s: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h4>
 <div class='docblock'><p>Loads a DER serialized form of the public key, as produced by save_pub().</p>

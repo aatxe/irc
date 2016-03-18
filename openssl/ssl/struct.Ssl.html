@@ -46,16 +46,19 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-2496' class='srclink' href='../../src/openssl/ssl/mod.rs.html#772-774' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-2550' class='srclink' href='../../src/openssl/ssl/mod.rs.html#839-841' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Ssl {
     // some fields omitted
 }</pre><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../openssl/ssl/struct.Ssl.html' title='openssl::ssl::Ssl'>Ssl</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(ctx: &amp;<a class='struct' href='../../openssl/ssl/struct.SslContext.html' title='openssl::ssl::SslContext'>SslContext</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../openssl/ssl/struct.Ssl.html' title='openssl::ssl::Ssl'>Ssl</a>, <a class='enum' href='../../openssl/ssl/error/enum.SslError.html' title='openssl::ssl::error::SslError'>SslError</a>&gt;</code></h4>
+<h4 id='method.get_current_cipher' class='method'><code>fn <a href='#method.get_current_cipher' class='fnname'>get_current_cipher</a>&lt;'a&gt;(&amp;'a self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../openssl/ssl/struct.SslCipher.html' title='openssl::ssl::SslCipher'>SslCipher</a>&lt;'a&gt;&gt;</code></h4>
 <h4 id='method.state_string' class='method'><code>fn <a href='#method.state_string' class='fnname'>state_string</a>(&amp;self) -&gt; &amp;'static <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
 <h4 id='method.state_string_long' class='method'><code>fn <a href='#method.state_string_long' class='fnname'>state_string_long</a>(&amp;self) -&gt; &amp;'static <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
 <h4 id='method.set_hostname' class='method'><code>fn <a href='#method.set_hostname' class='fnname'>set_hostname</a>(&amp;self, hostname: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../../openssl/ssl/error/enum.SslError.html' title='openssl::ssl::error::SslError'>SslError</a>&gt;</code></h4>
 <div class='docblock'><p>Sets the host name to be used with SNI (Server Name Indication).</p>
 </div><h4 id='method.peer_certificate' class='method'><code>fn <a href='#method.peer_certificate' class='fnname'>peer_certificate</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../openssl/x509/struct.X509.html' title='openssl::x509::X509'>X509</a>&gt;</code></h4>
 <div class='docblock'><p>Returns the certificate of the peer, if present.</p>
+</div><h4 id='method.version' class='method'><code>fn <a href='#method.version' class='fnname'>version</a>(&amp;self) -&gt; &amp;'static <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<div class='docblock'><p>Returns the name of the protocol used for the connection, e.g. &quot;TLSv1.2&quot;, &quot;SSLv3&quot;, etc.</p>
 </div><h4 id='method.pending' class='method'><code>fn <a href='#method.pending' class='fnname'>pending</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
 <div class='docblock'><p>Returns the number of bytes remaining in the currently processed TLS
 record.</p>

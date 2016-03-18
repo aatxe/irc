@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.4/src/unix/bsd/apple/b64.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-88ac128001ac3a9a/libc-0.2.8/src/unix/bsd/apple/b64.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>b64.rs.html -- source</title>
@@ -62,16 +62,16 @@
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>c_long</span> <span class='op'>=</span> <span class='ident'>i64</span>;
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>c_ulong</span> <span class='op'>=</span> <span class='ident'>u64</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>__PTHREAD_MUTEX_SIZE__</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>56</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>__PTHREAD_COND_SIZE__</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>40</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>__PTHREAD_RWLOCK_SIZE__</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>192</span>;
-
 <span class='macro'>s</span><span class='macro'>!</span> {
     <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>pthread_attr_t</span> {
         <span class='ident'>__sig</span>: <span class='ident'>c_long</span>,
         <span class='ident'>__opaque</span>: [::<span class='ident'>c_char</span>; <span class='number'>56</span>]
     }
 }
+
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>__PTHREAD_MUTEX_SIZE__</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>56</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>__PTHREAD_COND_SIZE__</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>40</span>;
+<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>__PTHREAD_RWLOCK_SIZE__</span>: <span class='ident'>usize</span> <span class='op'>=</span> <span class='number'>192</span>;
 </pre>
 </section>
     <section id='search' class="content hidden"></section>
