@@ -1,5 +1,6 @@
 //! Messages to and from the server.
 use std::borrow::ToOwned;
+use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::io::{Result as IoResult};
 use std::str::FromStr;
 use client::data::Command;
@@ -116,6 +117,12 @@ impl FromStr for Message {
 impl<'a> From<&'a str> for Message {
     fn from(s: &'a str) -> Message {
         s.parse().unwrap()
+    }
+}
+
+impl Display for Message {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        write!(f, "{}", self.to_string())
     }
 }
 
