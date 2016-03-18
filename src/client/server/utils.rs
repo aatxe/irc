@@ -95,7 +95,7 @@ pub trait ServerExt: Server {
     /// Sets the topic of a channel or requests the current one.
     /// If `topic` is an empty string, it won't be included in the message.
     fn send_topic(&self, channel: &str, topic: &str) -> Result<()> where Self: Sized {
-        self.send(TOPIC(channel.to_owned(), if topic.len() == 0 {
+        self.send(TOPIC(channel.to_owned(), if topic.is_empty() {
             None
         } else {
             Some(topic.to_owned())
@@ -111,7 +111,7 @@ pub trait ServerExt: Server {
     /// If `message` is an empty string, it won't be included in the message.
     fn send_kick(&self, chanlist: &str, nicklist: &str, message: &str) -> Result<()>
     where Self: Sized {
-        self.send(KICK(chanlist.to_owned(), nicklist.to_owned(), if message.len() == 0 {
+        self.send(KICK(chanlist.to_owned(), nicklist.to_owned(), if message.is_empty() {
             None
         } else {
             Some(message.to_owned())
@@ -122,7 +122,7 @@ pub trait ServerExt: Server {
     /// If `modeparmas` is an empty string, it won't be included in the message.
     fn send_mode(&self, target: &str, mode: &str, modeparams: &str) -> Result<()>
     where Self: Sized {
-        self.send(MODE(target.to_owned(), mode.to_owned(), if modeparams.len() == 0 {
+        self.send(MODE(target.to_owned(), mode.to_owned(), if modeparams.is_empty() {
             None
         } else {
             Some(modeparams.to_owned())
@@ -133,7 +133,7 @@ pub trait ServerExt: Server {
     /// If `modeparams` is an empty string, it won't be included in the message.
     fn send_samode(&self, target: &str, mode: &str, modeparams: &str) -> Result<()>
     where Self: Sized {
-        self.send(SAMODE(target.to_owned(), mode.to_owned(), if modeparams.len() == 0 {
+        self.send(SAMODE(target.to_owned(), mode.to_owned(), if modeparams.is_empty() {
             None
         } else {
             Some(modeparams.to_owned())
@@ -153,7 +153,7 @@ pub trait ServerExt: Server {
     /// Quits the server entirely with a message.
     /// This defaults to `Powered by Rust.` if none is specified.
     fn send_quit(&self, msg: &str) -> Result<()> where Self: Sized {
-        self.send(QUIT(Some(if msg.len() == 0 {
+        self.send(QUIT(Some(if msg.is_empty() {
             "Powered by Rust.".to_owned()
         } else {
             msg.to_owned()

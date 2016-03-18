@@ -77,8 +77,8 @@ impl NetConnection {
     /// connects to the specified server and returns a reader-writer pair.
     fn connect_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
         let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[..]));
-        Ok((BufReader::new(NetStream::UnsecuredTcpStream(try!(socket.try_clone()))),
-            BufWriter::new(NetStream::UnsecuredTcpStream(socket))))
+        Ok((BufReader::new(NetStream::Unsecured(try!(socket.try_clone()))),
+            BufWriter::new(NetStream::Unsecured(socket))))
     }
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
@@ -94,8 +94,8 @@ impl NetConnection {
         let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[..]));
         let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Tlsv1)));
         let ssl_socket = try!(ssl_to_io(SslStream::connect_generic(&ssl, socket)));
-        Ok((BufReader::new(NetStream::SslTcpStream(try!(ssl_socket.try_clone()))),
-            BufWriter::new(NetStream::SslTcpStream(ssl_socket))))
+        Ok((BufReader::new(NetStream::Ssl(try!(ssl_socket.try_clone()))),
+            BufWriter::new(NetStream::Ssl(ssl_socket))))
     }
 
     /// Panics because SSL support is not compiled in.
@@ -148,10 +148,10 @@ impl Connection for NetConnection {
     }
 
     fn reconnect(&self) -> Result<()> {
-        let use_ssl = match self.reader.lock().unwrap().get_ref() {
-            &NetStream::UnsecuredTcpStream(_) =>  false,
+        let use_ssl = match *self.reader.lock().unwrap().get_ref() {
+            NetStream::Unsecured(_) =>  false,
             #[cfg(feature = "ssl")]
-            &NetStream::SslTcpStream(_) => true,
+            NetStream::Ssl(_) => true,
         };
         let host = self.host.lock().unwrap();
         let port = self.port.lock().unwrap();
@@ -279,7 +279,7 @@ mod imp {
             match encoding.decode(&buf, DecoderTrap::Replace) {
                 _ if buf.is_empty() => Err(Error::new(ErrorKind::Other, "EOF")),
                 Ok(data) => Ok(data),
-                Err(data) => return Err(Error::new(ErrorKind::InvalidInput,
+                Err(data) => Err(Error::new(ErrorKind::InvalidInput,
                     &format!("Failed to decode {} as {}.", data, encoding.name())[..]
                 ))
             }
@@ -301,37 +301,37 @@ mod imp {
 /// An abstraction over different networked streams.
 pub enum NetStream {
     /// An unsecured TcpStream.
-    UnsecuredTcpStream(TcpStream),
+    Unsecured(TcpStream),
     /// An SSL-secured TcpStream.
     /// This is only available when compiled with SSL support.
     #[cfg(feature = "ssl")]
-    SslTcpStream(SslStream<TcpStream>),
+    Ssl(SslStream<TcpStream>),
 }
 
 impl Read for NetStream {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
-        match self {
-            &mut NetStream::UnsecuredTcpStream(ref mut stream) => stream.read(buf),
+        match *self {
+            NetStream::Unsecured(ref mut stream) => stream.read(buf),
             #[cfg(feature = "ssl")]
-            &mut NetStream::SslTcpStream(ref mut stream) => stream.read(buf),
+            NetStream::Ssl(ref mut stream) => stream.read(buf),
         }
     }
 }
 
 impl Write for NetStream {
     fn write(&mut self, buf: &[u8]) -> Result<usize> {
-        match self {
-            &mut NetStream::UnsecuredTcpStream(ref mut stream) => stream.write(buf),
+        match *self {
+            NetStream::Unsecured(ref mut stream) => stream.write(buf),
             #[cfg(feature = "ssl")]
-            &mut NetStream::SslTcpStream(ref mut stream) => stream.write(buf),
+            NetStream::Ssl(ref mut stream) => stream.write(buf),
         }
     }
 
     fn flush(&mut self) -> Result<()> {
-        match self {
-            &mut NetStream::UnsecuredTcpStream(ref mut stream) => stream.flush(),
+        match *self {
+            NetStream::Unsecured(ref mut stream) => stream.flush(),
             #[cfg(feature = "ssl")]
-            &mut NetStream::SslTcpStream(ref mut stream) => stream.flush(),
+            NetStream::Ssl(ref mut stream) => stream.flush(),
         }
     }
 }
@@ -345,12 +345,12 @@ mod test {
 
     #[cfg(feature = "encode")]
     fn send_to<C: Connection, M: Into<Message>>(conn: &C, msg: M, encoding: &str) -> Result<()> {
-        conn.send(&msg.into().into_string(), encoding)
+        conn.send(&msg.into().to_string(), encoding)
     }
 
     #[cfg(not(feature = "encode"))]
     fn send_to<C: Connection, M: Into<Message>>(conn: &C, msg: M) -> Result<()> {
-        conn.send(&msg.into().into_string())
+        conn.send(&msg.into().to_string())
     }
 
 

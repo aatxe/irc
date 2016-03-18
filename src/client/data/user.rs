@@ -98,7 +98,7 @@ impl User {
         if level > self.highest_access_level() {
             self.highest_access_level = level
         }
-        self.access_levels.push(level.clone())
+        self.access_levels.push(level)
     }
 
     /// Removes an access level from the list, and updates the highest level if necessary.
@@ -109,9 +109,9 @@ impl User {
         if level == self.highest_access_level() {
             self.highest_access_level = {
                 let mut max = AccessLevel::Member;
-                for level in self.access_levels.iter() {
+                for level in &self.access_levels {
                     if level > &max {
-                        max = level.clone()
+                        max = *level
                     }
                 }
                 max
@@ -147,37 +147,37 @@ pub enum AccessLevel {
 impl PartialOrd for AccessLevel {
     fn partial_cmp(&self, other: &AccessLevel) -> Option<Ordering> {
         if self == other { return Some(Equal) }
-        match self {
-            &AccessLevel::Owner => Some(Greater),
-            &AccessLevel::Admin => {
+        match *self {
+            AccessLevel::Owner => Some(Greater),
+            AccessLevel::Admin => {
                 if other == &AccessLevel::Owner {
                     Some(Less)
                 } else {
                     Some(Greater)
                 }
             },
-            &AccessLevel::Oper => {
+            AccessLevel::Oper => {
                 if other == &AccessLevel::Owner || other == &AccessLevel::Admin {
                     Some(Less)
                 } else {
                     Some(Greater)
                 }
             },
-            &AccessLevel::HalfOp => {
+            AccessLevel::HalfOp => {
                 if other == &AccessLevel::Voice || other == &AccessLevel::Member {
                     Some(Greater)
                 } else {
                     Some(Less)
                 }
             },
-            &AccessLevel::Voice => {
+            AccessLevel::Voice => {
                 if other == &AccessLevel::Member {
                     Some(Greater)
                 } else {
                     Some(Less)
                 }
             },
-            &AccessLevel::Member => Some(Less),
+            AccessLevel::Member => Some(Less),
         }
     }
 }
@@ -212,7 +212,7 @@ impl Iterator for AccessLevelIterator {
     type Item = AccessLevel;
     fn next(&mut self) -> Option<AccessLevel> {
         let ret = self.value.parse();
-        if self.value.len() > 0 {
+        if !self.value.is_empty() {
             self.value = self.value.chars().skip(1).collect()
         }
         ret.ok()

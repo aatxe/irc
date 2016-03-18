@@ -47,7 +47,7 @@ impl Message {
     }
 
     /// Converts a Message into a String according to the IRC protocol.
-    pub fn into_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         // TODO: tags
         let mut ret = String::new();
         if let Some(ref prefix) = self.prefix {
@@ -71,20 +71,20 @@ impl From<Command> for Message {
 impl FromStr for Message {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Message, &'static str> {
-        let mut state = s.clone();
-        if s.len() == 0 { return Err("Cannot parse an empty string as a message.") }
-        let tags = if state.starts_with("@") {
+        let mut state = s;
+        if s.is_empty() { return Err("Cannot parse an empty string as a message.") }
+        let tags = if state.starts_with('@') {
             let tags = state.find(' ').map(|i| &state[1..i]);
             state = state.find(' ').map_or("", |i| &state[i+1..]);
-            tags.map(|ts| ts.split(";").filter(|s| s.len() != 0).map(|s: &str| {
-                let mut iter = s.splitn(2, "=");
+            tags.map(|ts| ts.split(';').filter(|s| !s.is_empty()).map(|s: &str| {
+                let mut iter = s.splitn(2, '=');
                 let (fst, snd) = (iter.next(), iter.next());
                 Tag(fst.unwrap_or("").to_owned(), snd.map(|s| s.to_owned()))
             }).collect::<Vec<_>>())
         } else {
             None
         };
-        let prefix = if state.starts_with(":") {
+        let prefix = if state.starts_with(':') {
             let prefix = state.find(' ').map(|i| &state[1..i]);
             state = state.find(' ').map_or("", |i| &state[i+1..]);
             prefix
@@ -106,7 +106,7 @@ impl FromStr for Message {
             _ => return Err("Cannot parse a message without a command.")
         };
         if suffix.is_none() { state = &state[..state.len() - 2] }
-        let args: Vec<_> = state.splitn(14, ' ').filter(|s| s.len() != 0).collect();
+        let args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
         Message::with_tags(
             tags, prefix, command, args, suffix
         ).map_err(|_| "Invalid input for Command.")
@@ -174,19 +174,19 @@ mod test {
     }
 
     #[test]
-    fn into_string() {
+    fn to_string() {
         let message = Message {
             tags: None,
             prefix: None,
             command: PRIVMSG(format!("test"), format!("Testing!")),
         };
-        assert_eq!(&message.into_string()[..], "PRIVMSG test :Testing!\r\n");
+        assert_eq!(&message.to_string()[..], "PRIVMSG test :Testing!\r\n");
         let message = Message {
             tags: None,
             prefix: Some(format!("test!test@test")),
             command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
-        assert_eq!(&message.into_string()[..], ":test!test@test PRIVMSG test :Still testing!\r\n");
+        assert_eq!(&message.to_string()[..], ":test!test@test PRIVMSG test :Still testing!\r\n");
     }
 
     #[test]

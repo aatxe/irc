@@ -75,7 +75,7 @@ impl Config {
 
     /// Determines whether or not the nickname provided is the owner of the bot.
     pub fn is_owner(&self, nickname: &str) -> bool {
-        self.owners.as_ref().map(|o| o.contains(&nickname.to_string())).unwrap()
+        self.owners.as_ref().map(|o| o.contains(&nickname.to_owned())).unwrap()
     }
 
     /// Gets the nickname specified in the configuration.
@@ -87,26 +87,26 @@ impl Config {
     /// Gets the bot's nickserv password specified in the configuration.
     /// This defaults to an empty string when not specified.
     pub fn nick_password(&self) -> &str {
-        self.nick_password.as_ref().map(|s| &s[..]).unwrap_or("")
+        self.nick_password.as_ref().map_or("", |s| &s[..])
     }
 
     /// Gets the alternate nicknames specified in the configuration.
     /// This defaults to an empty vector when not specified.
     pub fn alternate_nicknames(&self) -> Vec<&str> {
-        self.alt_nicks.as_ref().map(|v| v.iter().map(|s| &s[..]).collect()).unwrap_or(vec![])
+        self.alt_nicks.as_ref().map_or(vec![], |v| v.iter().map(|s| &s[..]).collect())
     }
 
 
     /// Gets the username specified in the configuration.
     /// This defaults to the user's nickname when not specified.
     pub fn username(&self) -> &str {
-        self.username.as_ref().map(|s| &s[..]).unwrap_or(self.nickname())
+        self.username.as_ref().map_or(self.nickname(), |s| &s[..])
     }
 
     /// Gets the real name specified in the configuration.
     /// This defaults to the user's nickname when not specified.
     pub fn real_name(&self) -> &str {
-        self.realname.as_ref().map(|s| &s[..]).unwrap_or(self.nickname())
+        self.realname.as_ref().map_or(self.nickname(), |s| &s[..])
     }
 
     /// Gets the address of the server specified in the configuration.
@@ -118,7 +118,7 @@ impl Config {
     /// Gets the port of the server specified in the configuration.
     /// This defaults to 6667 (or 6697 if use_ssl is specified as true) when not specified.
     pub fn port(&self) -> u16 {
-        self.port.as_ref().map(|p| *p).unwrap_or(if self.use_ssl() {
+        self.port.as_ref().cloned().unwrap_or(if self.use_ssl() {
             6697
         } else {
             6667
@@ -128,62 +128,62 @@ impl Config {
     /// Gets the server password specified in the configuration.
     /// This defaults to a blank string when not specified.
     pub fn password(&self) -> &str {
-        self.password.as_ref().map(|s| &s[..]).unwrap_or("")
+        self.password.as_ref().map_or("", |s| &s[..])
     }
 
     /// Gets whether or not to use SSL with this connection.
     /// This defaults to false when not specified.
     pub fn use_ssl(&self) -> bool {
-        self.use_ssl.as_ref().map(|u| *u).unwrap_or(false)
+        self.use_ssl.as_ref().cloned().unwrap_or(false)
     }
 
     /// Gets the encoding to use for this connection. This requires the encode feature to work.
     /// This defaults to UTF-8 when not specified.
     pub fn encoding(&self) -> &str {
-        self.encoding.as_ref().map(|s| &s[..]).unwrap_or("UTF-8")
+        self.encoding.as_ref().map_or("UTF-8", |s| &s[..])
     }
 
     /// Gets the channels to join upon connection.
     /// This defaults to an empty vector if it's not specified.
     pub fn channels(&self) -> Vec<&str> {
-        self.channels.as_ref().map(|v| v.iter().map(|s| &s[..]).collect()).unwrap_or(vec![])
+        self.channels.as_ref().map_or(vec![], |v| v.iter().map(|s| &s[..]).collect())
     }
 
     /// Gets the user modes to set on connect specified in the configuration.
     /// This defaults to an empty string when not specified.
     pub fn umodes(&self) -> &str {
-        self.umodes.as_ref().map(|s| &s[..]).unwrap_or("")
+        self.umodes.as_ref().map_or("", |s| &s[..])
     }
 
     /// Gets the string to be sent in response to CTCP USERINFO requests.
     /// This defaults to an empty string when not specified.
     pub fn user_info(&self) -> &str {
-        self.user_info.as_ref().map(|s| &s[..]).unwrap_or("")
+        self.user_info.as_ref().map_or("", |s| &s[..])
     }
 
     /// Gets the amount of time in seconds since last activity necessary for the client to ping the
     /// server.
     /// This defaults to 180 seconds when not specified.
     pub fn ping_time(&self) -> u32 {
-        self.ping_time.as_ref().map(|t| *t).unwrap_or(180)
+        self.ping_time.as_ref().cloned().unwrap_or(180)
     }
 
     /// Gets the amount of time in seconds for the client to reconnect after no ping response.
     /// This defaults to 10 seconds when not specified.
     pub fn ping_timeout(&self) -> u32 {
-        self.ping_timeout.as_ref().map(|t| *t).unwrap_or(10)
+        self.ping_timeout.as_ref().cloned().unwrap_or(10)
     }
 
     /// Gets whether or not to attempt nickname reclamation using NickServ GHOST.
     /// This defaults to false when not specified.
     pub fn should_ghost(&self) -> bool {
-        self.should_ghost.as_ref().map(|u| *u).unwrap_or(false)
+        self.should_ghost.as_ref().cloned().unwrap_or(false)
     }
 
     /// Gets the NickServ command sequence to recover a nickname.
     /// This defaults to `["GHOST"]` when not specified.
     pub fn ghost_sequence(&self) -> Vec<&str> {
-        self.ghost_sequence.as_ref().map(|v| v.iter().map(|s| &s[..]).collect()).unwrap_or(vec!["GHOST"])
+        self.ghost_sequence.as_ref().map_or(vec!["GHOST"], |v| v.iter().map(|s| &s[..]).collect())
     }
 
     /// Looks up the specified string in the options map.

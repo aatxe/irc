@@ -177,7 +177,7 @@ pub enum Command {
 
 fn stringify(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> String {
     let args = args.join(" ");
-    let sp = if args.len() > 0 { " " } else { "" };
+    let sp = if args.is_empty() { "" } else { " " };
     match suffix {
         Some(suffix) => format!("{}{}{} :{}", cmd, sp, args, suffix),
         None => format!("{}{}{}", cmd, sp, args),
@@ -428,7 +428,7 @@ impl Command {
         Ok(if let "PASS" = cmd {
             match suffix {
                 Some(suffix) => {
-                    if args.len() != 0 { return Err(invalid_input()) }
+                    if !args.is_empty() { return Err(invalid_input()) }
                     Command::PASS(suffix.to_owned())
                 },
                 None => {
@@ -439,7 +439,7 @@ impl Command {
         } else if let "NICK" = cmd {
             match suffix {
                 Some(suffix) => {
-                    if args.len() != 0 { return Err(invalid_input()) }
+                    if !args.is_empty() { return Err(invalid_input()) }
                     Command::NICK(suffix.to_owned())
                 },
                 None => {
@@ -500,7 +500,7 @@ impl Command {
                 }
             }
         } else if let "QUIT" = cmd {
-            if args.len() != 0 { return Err(invalid_input()) }
+            if !args.is_empty() { return Err(invalid_input()) }
             match suffix {
                 Some(suffix) => Command::QUIT(Some(suffix.to_owned())),
                 None => Command::QUIT(None)
@@ -518,7 +518,7 @@ impl Command {
             }
         } else if let "JOIN" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::JOIN(suffix.to_owned(), None, None)
                 } else if args.len() == 1 {
                     Command::JOIN(args[0].to_owned(), Some(suffix.to_owned()), None)
@@ -540,7 +540,7 @@ impl Command {
             }
         } else if let "PART" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::PART(suffix.to_owned(), None)
                 } else if args.len() == 1 {
                     Command::PART(args[0].to_owned(), Some(suffix.to_owned()))
@@ -557,7 +557,7 @@ impl Command {
             }
         } else if let "TOPIC" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::TOPIC(suffix.to_owned(), None)
                 } else if args.len() == 1 {
                     Command::TOPIC(args[0].to_owned(), Some(suffix.to_owned()))
@@ -574,14 +574,14 @@ impl Command {
             }
         } else if let "NAMES" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::NAMES(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
                     Command::NAMES(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
-                None => if args.len() == 0 {
+                None => if args.is_empty() {
                     Command::NAMES(None, None)
                 } else if args.len() == 1 {
                     Command::NAMES(Some(args[0].to_owned()), None)
@@ -593,14 +593,14 @@ impl Command {
             }
         } else if let "LIST" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::LIST(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
                     Command::LIST(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
-                None => if args.len() == 0 {
+                None => if args.is_empty() {
                     Command::LIST(None, None)
                 } else if args.len() == 1 {
                     Command::LIST(Some(args[0].to_owned()), None)
@@ -649,21 +649,21 @@ impl Command {
                 None => return Err(invalid_input())
             }
         } else if let "MOTD" = cmd {
-            if args.len() != 0 { return Err(invalid_input()) }
+            if !args.is_empty() { return Err(invalid_input()) }
             match suffix {
                 Some(suffix) => Command::MOTD(Some(suffix.to_owned())),
                 None => Command::MOTD(None)
             }
         } else if let "LUSERS" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::LUSERS(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
                     Command::LUSERS(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
-                None => if args.len() == 0 {
+                None => if args.is_empty() {
                     Command::LUSERS(None, None)
                 } else if args.len() == 1 {
                     Command::LUSERS(Some(args[0].to_owned()), None)
@@ -674,21 +674,21 @@ impl Command {
                 }
             }
         } else if let "VERSION" = cmd {
-            if args.len() != 0 { return Err(invalid_input()) }
+            if !args.is_empty() { return Err(invalid_input()) }
             match suffix {
                 Some(suffix) => Command::VERSION(Some(suffix.to_owned())),
                 None => Command::VERSION(None)
             }
         } else if let "STATS" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::STATS(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
                     Command::STATS(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
-                None => if args.len() == 0 {
+                None => if args.is_empty() {
                     Command::STATS(None, None)
                 } else if args.len() == 1 {
                     Command::STATS(Some(args[0].to_owned()), None)
@@ -700,21 +700,21 @@ impl Command {
             }
         } else if let "LINKS" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::LINKS(None, Some(suffix.to_owned()))
                 } else if args.len() == 1 {
                     Command::LINKS(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
-                None => if args.len() == 0 {
+                None => if args.is_empty() {
                     Command::LINKS(None, None)
                 } else {
                     return Err(invalid_input())
                 }
             }
         } else if let "TIME" = cmd {
-            if args.len() != 0 { return Err(invalid_input()) }
+            if !args.is_empty() { return Err(invalid_input()) }
             match suffix {
                 Some(suffix) => Command::TIME(Some(suffix.to_owned())),
                 None => Command::TIME(None)
@@ -731,33 +731,33 @@ impl Command {
                 }
             }
         } else if let "TRACE" = cmd {
-            if args.len() != 0 { return Err(invalid_input()) }
+            if !args.is_empty() { return Err(invalid_input()) }
             match suffix {
                 Some(suffix) => Command::TRACE(Some(suffix.to_owned())),
                 None => Command::TRACE(None)
             }
         } else if let "ADMIN" = cmd {
-            if args.len() != 0 { return Err(invalid_input()) }
+            if !args.is_empty() { return Err(invalid_input()) }
             match suffix {
                 Some(suffix) => Command::ADMIN(Some(suffix.to_owned())),
                 None => Command::ADMIN(None)
             }
         } else if let "INFO" = cmd {
-            if args.len() != 0 { return Err(invalid_input()) }
+            if !args.is_empty() { return Err(invalid_input()) }
             match suffix {
                 Some(suffix) => Command::INFO(Some(suffix.to_owned())),
                 None => Command::INFO(None)
             }
         } else if let "SERVLIST" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::SERVLIST(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
                     Command::SERVLIST(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
                 },
-                None => if args.len() == 0 {
+                None => if args.is_empty() {
                     Command::SERVLIST(None, None)
                 } else if args.len() == 1 {
                     Command::SERVLIST(Some(args[0].to_owned()), None)
@@ -780,14 +780,14 @@ impl Command {
             }
         } else if let "WHO" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::WHO(Some(suffix.to_owned()), None)
                 } else if args.len() == 1 {
                     Command::WHO(Some(args[0].to_owned()), Some(&suffix[..] == "o"))
                 } else {
                     return Err(invalid_input())
                 },
-                None => if args.len() == 0 {
+                None => if args.is_empty() {
                     Command::WHO(None, None)
                 } else if args.len() == 1 {
                     Command::WHO(Some(args[0].to_owned()), None)
@@ -799,7 +799,7 @@ impl Command {
             }
         } else if let "WHOIS" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::WHOIS(None, suffix.to_owned())
                 } else if args.len() == 1 {
                     Command::WHOIS(Some(args[0].to_owned()), suffix.to_owned())
@@ -816,7 +816,7 @@ impl Command {
             }
         } else if let "WHOWAS" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::WHOWAS(suffix.to_owned(), None, None)
                 } else if args.len() == 1 {
                     Command::WHOWAS(args[0].to_owned(), None, Some(suffix.to_owned()))
@@ -850,7 +850,7 @@ impl Command {
             }
         } else if let "PING" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::PING(suffix.to_owned(), None)
                 } else if args.len() == 1 {
                     Command::PING(args[0].to_owned(), Some(suffix.to_owned()))
@@ -867,7 +867,7 @@ impl Command {
             }
         } else if let "PONG" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::PONG(suffix.to_owned(), None)
                 } else if args.len() == 1 {
                     Command::PONG(args[0].to_owned(), Some(suffix.to_owned()))
@@ -884,7 +884,7 @@ impl Command {
             }
         } else if let "ERROR" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::ERROR(suffix.to_owned())
                 } else {
                     return Err(invalid_input())
@@ -893,7 +893,7 @@ impl Command {
             }
         } else if let "AWAY" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::AWAY(Some(suffix.to_owned()))
                 } else {
                     return Err(invalid_input())
@@ -901,26 +901,26 @@ impl Command {
                 None => return Err(invalid_input())
             }
         } else if let "REHASH" = cmd {
-            if args.len() == 0 {
+            if args.is_empty() {
                 Command::REHASH
             } else {
                 return Err(invalid_input())
             }
         } else if let "DIE" = cmd {
-            if args.len() == 0 {
+            if args.is_empty() {
                 Command::DIE
             } else {
                 return Err(invalid_input())
             }
         } else if let "RESTART" = cmd {
-            if args.len() == 0 {
+            if args.is_empty() {
                 Command::RESTART
             } else {
                 return Err(invalid_input())
             }
         } else if let "SUMMON" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::SUMMON(suffix.to_owned(), None, None)
                 } else if args.len() == 1 {
                     Command::SUMMON(args[0].to_owned(), Some(suffix.to_owned()), None)
@@ -944,7 +944,7 @@ impl Command {
         } else if let "USERS" = cmd {
             match suffix {
                 Some(suffix) => {
-                    if args.len() != 0 { return Err(invalid_input()) }
+                    if !args.is_empty() { return Err(invalid_input()) }
                     Command::USERS(Some(suffix.to_owned()))
                 },
                 None => {
@@ -955,7 +955,7 @@ impl Command {
         } else if let "WALLOPS" = cmd {
             match suffix {
                 Some(suffix) => {
-                    if args.len() != 0 { return Err(invalid_input()) }
+                    if !args.is_empty() { return Err(invalid_input()) }
                     Command::WALLOPS(suffix.to_owned())
                 },
                 None => {
@@ -1039,7 +1039,7 @@ impl Command {
         } else if let "NICKSERV" = cmd {
             match suffix {
                 Some(suffix) => {
-                    if args.len() != 0 { return Err(invalid_input()) }
+                    if !args.is_empty() { return Err(invalid_input()) }
                     Command::NICKSERV(suffix.to_owned())
                 },
                 None => {
@@ -1050,7 +1050,7 @@ impl Command {
         } else if let "CHANSERV" = cmd {
             match suffix {
                 Some(suffix) => {
-                    if args.len() != 0 { return Err(invalid_input()) }
+                    if !args.is_empty() { return Err(invalid_input()) }
                     Command::CHANSERV(suffix.to_owned())
                 },
                 None => {
@@ -1061,7 +1061,7 @@ impl Command {
         } else if let "OPERSERV" = cmd {
             match suffix {
                 Some(suffix) => {
-                    if args.len() != 0 { return Err(invalid_input()) }
+                    if !args.is_empty() { return Err(invalid_input()) }
                     Command::OPERSERV(suffix.to_owned())
                 },
                 None => {
@@ -1072,7 +1072,7 @@ impl Command {
         } else if let "BOTSERV" = cmd {
             match suffix {
                 Some(suffix) => {
-                    if args.len() != 0 { return Err(invalid_input()) }
+                    if !args.is_empty() { return Err(invalid_input()) }
                     Command::BOTSERV(suffix.to_owned())
                 },
                 None => {
@@ -1083,7 +1083,7 @@ impl Command {
         } else if let "HOSTSERV" = cmd {
             match suffix {
                 Some(suffix) => {
-                    if args.len() != 0 { return Err(invalid_input()) }
+                    if !args.is_empty() { return Err(invalid_input()) }
                     Command::HOSTSERV(suffix.to_owned())
                 },
                 None => {
@@ -1094,7 +1094,7 @@ impl Command {
         } else if let "MEMOSERV" = cmd {
             match suffix {
                 Some(suffix) => {
-                    if args.len() != 0 { return Err(invalid_input()) }
+                    if !args.is_empty() { return Err(invalid_input()) }
                     Command::MEMOSERV(suffix.to_owned())
                 },
                 None => {
@@ -1145,7 +1145,7 @@ impl Command {
             }
         } else if let "AUTHENTICATE" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::AUTHENTICATE(suffix.to_owned())
                 } else {
                     return Err(invalid_input())
@@ -1158,7 +1158,7 @@ impl Command {
             }
         } else if let "ACCOUNT" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::ACCOUNT(suffix.to_owned())
                 } else {
                     return Err(invalid_input())
@@ -1206,7 +1206,7 @@ impl Command {
             }
         } else if let "BATCH" = cmd {
             match suffix {
-                Some(suffix) => if args.len() == 0 {
+                Some(suffix) => if args.is_empty() {
                     Command::BATCH(suffix.to_owned(), None, None)
                 } else if args.len() == 1 {
                     Command::BATCH(args[0].to_owned(), Some(
@@ -1288,15 +1288,15 @@ pub enum CapSubCommand {
 impl CapSubCommand {
     /// Gets the string that corresponds to this subcommand.
     pub fn to_str(&self) -> &str {
-        match self {
-            &CapSubCommand::LS    => "LS",
-            &CapSubCommand::LIST  => "LIST",
-            &CapSubCommand::REQ   => "REQ",
-            &CapSubCommand::ACK   => "ACK",
-            &CapSubCommand::NAK   => "NAK",
-            &CapSubCommand::END   => "END",
-            &CapSubCommand::NEW   => "NEW",
-            &CapSubCommand::DEL   => "DEL",
+        match *self {
+            CapSubCommand::LS    => "LS",
+            CapSubCommand::LIST  => "LIST",
+            CapSubCommand::REQ   => "REQ",
+            CapSubCommand::ACK   => "ACK",
+            CapSubCommand::NAK   => "NAK",
+            CapSubCommand::END   => "END",
+            CapSubCommand::NEW   => "NEW",
+            CapSubCommand::DEL   => "DEL",
         }
     }
 }
@@ -1335,11 +1335,11 @@ pub enum MetadataSubCommand {
 impl MetadataSubCommand {
     /// Gets the string that corresponds to this subcommand.
     pub fn to_str(&self) -> &str {
-        match self {
-            &MetadataSubCommand::GET   => "GET",
-            &MetadataSubCommand::LIST  => "LIST",
-            &MetadataSubCommand::SET   => "SET",
-            &MetadataSubCommand::CLEAR => "CLEAR",
+        match *self {
+            MetadataSubCommand::GET   => "GET",
+            MetadataSubCommand::LIST  => "LIST",
+            MetadataSubCommand::SET   => "SET",
+            MetadataSubCommand::CLEAR => "CLEAR",
         }
     }
 }
@@ -1371,10 +1371,10 @@ pub enum BatchSubCommand {
 impl BatchSubCommand {
     /// Gets the string that corresponds to this subcommand.
     pub fn to_str(&self) -> &str {
-        match self {
-            &BatchSubCommand::NETSPLIT      => "NETSPLIT",
-            &BatchSubCommand::NETJOIN       => "NETJOIN",
-            &BatchSubCommand::CUSTOM(ref s) => &s,
+        match *self {
+            BatchSubCommand::NETSPLIT      => "NETSPLIT",
+            BatchSubCommand::NETJOIN       => "NETJOIN",
+            BatchSubCommand::CUSTOM(ref s) => &s,
         }
     }
 }

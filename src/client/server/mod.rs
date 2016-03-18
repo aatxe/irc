@@ -96,7 +96,7 @@ impl ServerState {
     }
 
     fn last_ping_data(&self) -> Option<Timespec> {
-        self.last_ping_data.lock().unwrap().clone()
+        *self.last_ping_data.lock().unwrap()
     }
 
     fn send_impl(&self, msg: Message) {
@@ -108,12 +108,12 @@ impl ServerState {
 
     #[cfg(feature = "encode")]
     fn write<M: Into<Message>>(&self, msg: M) -> Result<()> {
-        self.conn.send(&msg.into().into_string(), self.config.encoding())
+        self.conn.send(&msg.into().to_string(), self.config.encoding())
     }
 
     #[cfg(not(feature = "encode"))]
     fn write<M: Into<Message>>(&self, msg: M) -> Result<()> {
-        self.conn.send(&msg.into().into_string())
+        self.conn.send(&msg.into().to_string())
     }
 }
 
@@ -269,79 +269,31 @@ impl IrcServer {
     fn handle_message(&self, msg: &Message) -> Result<()> {
         match msg.command {
             PING(ref data, _) => try!(self.send_pong(&data)),
-            JOIN(ref chan, _, _) => if cfg!(not(feature = "nochanlists")) {
-                if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
-                    if let Some(src) = msg.source_nickname() {
-                        vec.push(User::new(src))
-                    }
-                }
-            },
-            PART(ref chan, _) => if cfg!(not(feature = "nochanlists")) {
-                if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
-                    if let Some(src) = msg.source_nickname() {
-                        if let Some(n) = vec.iter().position(|x| x.get_nickname() == src) {
-                            vec.swap_remove(n);
-                        }
-                    }
-                }
-            },
-            MODE(ref chan, ref mode, Some(ref user)) => if cfg!(not(feature = "nochanlists")) {
-                if let Some(vec) = self.chanlists().lock().unwrap().get_mut(chan) {
-                    if let Some(n) = vec.iter().position(|x| x.get_nickname() == user) {
-                        vec[n].update_access_level(&mode)
-                    }
-                }
-            },
-            PRIVMSG(ref target, ref body) => if body.starts_with("\u{001}") {
+            JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
+            PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
+            MODE(ref chan, ref mode, Some(ref user)) => self.handle_mode(chan, mode, user),
+            PRIVMSG(ref target, ref body) => if body.starts_with('\u{001}') {
                 let tokens: Vec<_> = {
-                    let end = if body.ends_with("\u{001}") {
+                    let end = if body.ends_with('\u{001}') {
                         body.len() - 1
                     } else {
                         body.len()
                     };
-                    body[1..end].split(" ").collect()
+                    body[1..end].split(' ').collect()
                 };
-                if target.starts_with("#") {
+                if target.starts_with('#') {
                     try!(self.handle_ctcp(&target, tokens))
                 } else if let Some(user) = msg.source_nickname() {
                     try!(self.handle_ctcp(user, tokens))
                 }
             },
             Command::Response(Response::RPL_NAMREPLY, ref args, ref suffix) => {
-                if cfg!(not(feature = "nochanlists")) {
-                    if let Some(users) = suffix.clone() {
-                        if args.len() == 3 {
-                            let ref chan = args[2];
-                            for user in users.split(" ") {
-                                let mut chanlists = self.state.chanlists.lock().unwrap();
-                                chanlists.entry(chan.clone()).or_insert(Vec::new())
-                                         .push(User::new(user))
-                            }
-                        }
-                    }
-                }
+                self.handle_namreply(args, suffix)
             },
             Command::Response(Response::RPL_ENDOFMOTD, _, _) |
             Command::Response(Response::ERR_NOMOTD, _, _) => {
-                if self.config().nick_password() != "" {
-                    let mut index = self.state.alt_nick_index.write().unwrap();
-                    if self.config().should_ghost() && *index != 0 {
-                        for seq in self.config().ghost_sequence().iter() {
-                            try!(self.send(NICKSERV(format!(
-                                "{} {} {}", seq, self.config().nickname(),
-                                self.config().nick_password()
-                            ))));
-                        }
-                        *index = 0;
-                        try!(self.send(NICK(self.config().nickname().to_owned())))
-                    }
-                    try!(self.send(NICKSERV(
-                        format!("IDENTIFY {}", self.config().nick_password())
-                    )))
-                }
-                if self.config().umodes() != "" {
-                    try!(self.send_mode(self.current_nickname(), self.config().umodes(), ""))
-                }
+                try!(self.send_nick_password());
+                try!(self.send_umodes());
                 for chan in self.config().channels().into_iter() {
                     try!(self.send_join(chan))
                 }
@@ -360,6 +312,88 @@ impl IrcServer {
             _ => ()
         }
         Ok(())
+    }
+
+    fn send_nick_password(&self) -> Result<()> {
+        if self.config().nick_password().is_empty() {
+            Ok(())
+        } else {
+            let mut index = self.state.alt_nick_index.write().unwrap();
+            if self.config().should_ghost() && *index != 0 {
+                for seq in &self.config().ghost_sequence() {
+                    try!(self.send(NICKSERV(format!(
+                        "{} {} {}", seq, self.config().nickname(),
+                        self.config().nick_password()
+                    ))));
+                }
+                *index = 0;
+                try!(self.send(NICK(self.config().nickname().to_owned())))
+            }
+            self.send(NICKSERV(format!("IDENTIFY {}", self.config().nick_password())))
+        }
+    }
+
+    fn send_umodes(&self) -> Result<()> {
+        if self.config().umodes().is_empty() {
+            Ok(())
+        } else {
+            self.send_mode(self.current_nickname(), self.config().umodes(), "")
+        }
+    }
+
+    #[cfg(feature = "nochanlists")]
+    fn handle_join(&self, _: &str, _: &str) {}
+
+    #[cfg(not(feature = "nochanlists"))]
+    fn handle_join(&self, src: &str, chan: &str) {
+        if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
+            if !src.is_empty() {
+                vec.push(User::new(src))
+            }
+        }
+    }
+
+    #[cfg(feature = "nochanlists")]
+    fn handle_part(&self, src: &str, chan: &str) {}
+
+    #[cfg(not(feature = "nochanlists"))]
+    fn handle_part(&self, src: &str, chan: &str) {
+        if let Some(vec) = self.chanlists().lock().unwrap().get_mut(&chan.to_owned()) {
+            if !src.is_empty() {
+                if let Some(n) = vec.iter().position(|x| x.get_nickname() == src) {
+                    vec.swap_remove(n);
+                }
+            }
+        }
+    }
+
+    #[cfg(feature = "nochanlists")]
+    fn handle_mode(&self, chan: &str, mode: &str, user: &str) {}
+
+    #[cfg(not(feature = "nochanlists"))]
+    fn handle_mode(&self, chan: &str, mode: &str, user: &str) {
+        if let Some(vec) = self.chanlists().lock().unwrap().get_mut(chan) {
+            if let Some(n) = vec.iter().position(|x| x.get_nickname() == user) {
+                vec[n].update_access_level(&mode)
+            }
+        }
+    }
+
+    #[cfg(feature = "nochanlists")]
+    fn handle_namreply(&self, _: &[String], _: &Option<String>) {}
+
+    #[cfg(not(feature = "nochanlists"))]
+    fn handle_namreply(&self, args: &[String], suffix: &Option<String>) {
+        if let Some(ref users) = *suffix {
+            if args.len() == 3 {
+                let chan = &args[2];
+                for user in users.split(' ') {
+                    let mut chanlists = self.state.chanlists.lock().unwrap();
+                    chanlists.entry(chan.clone()).or_insert_with(Vec::new)
+                             .push(User::new(user))
+                }
+            }
+        }
     }
 
     /// Handles CTCP requests if the CTCP feature is enabled.
@@ -487,7 +521,7 @@ mod test {
         let server = IrcServer::from_connection(test_config(), MockConnection::new(exp));
         let mut messages = String::new();
         for message in server.iter() {
-            messages.push_str(&message.unwrap().into_string());
+            messages.push_str(&message.unwrap().to_string());
         }
         assert_eq!(&messages[..], exp);
     }

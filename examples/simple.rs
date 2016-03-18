@@ -15,7 +15,7 @@ fn main() {
     server.identify().unwrap();
     for message in server.iter() {
         let message = message.unwrap(); // We'll just panic if there's an error.
-        print!("{}", message.into_string());
+        print!("{}", message.to_string());
         match message.command {
             Command::PRIVMSG(ref target, ref msg) => if msg.contains("pickles") {
                 server.send_privmsg(target, "Hi!").unwrap();

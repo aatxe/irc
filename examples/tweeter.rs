@@ -17,7 +17,7 @@ fn main() {
     let server2 = server.clone();
     // Let's set up a loop that just prints the messages.
     spawn(move || {
-        server2.iter().map(|m| print!("{}", m.unwrap().into_string())).count();
+        server2.iter().map(|m| print!("{}", m.unwrap().to_string())).count();
     });
     loop {
         server.send_privmsg("#vana", "TWEET TWEET").unwrap();

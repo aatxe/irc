@@ -16,7 +16,7 @@ fn main() {
     let server = server.clone();
     let _ = spawn(move || {
         for msg in server.iter() {
-            print!("{}", msg.unwrap().into_string());
+            print!("{}", msg.unwrap().to_string());
         }
     }).join(); // You might not want to join here for actual multi-threading.
 }
