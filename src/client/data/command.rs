@@ -1,5 +1,5 @@
 //! Enumeration of all available client commands.
-use std::io::{Error, ErrorKind, Result};
+use std::io::Result;
 use std::result::Result as StdResult;
 use std::str::FromStr;
 use client::data::Response;
@@ -427,45 +427,53 @@ impl Command {
     pub fn new(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> Result<Command> {
         Ok(if let "PASS" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if !args.is_empty() { return Err(invalid_input()) }
+                Some(suffix) => if !args.is_empty() {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::PASS(suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                None => if args.len() != 1 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::PASS(args[0].to_owned())
                 }
             }
         } else if let "NICK" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if !args.is_empty() { return Err(invalid_input()) }
+                Some(suffix) => if !args.is_empty() {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::NICK(suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                None => if args.len() != 1 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::NICK(args[0].to_owned())
                 }
             }
         } else if let "USER" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 2 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::USER(args[0].to_owned(), args[1].to_owned(), suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 3 { return Err(invalid_input()) }
+                None => if args.len() != 3 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::USER(args[0].to_owned(), args[1].to_owned(), args[2].to_owned())
                 }
             }
         } else if let "OPER" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 1 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::OPER(args[0].to_owned(), suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                None => if args.len() != 2 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::OPER(args[0].to_owned(), args[1].to_owned())
                 }
             }
@@ -476,43 +484,50 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::MODE(args[0].to_owned(), suffix.to_owned(), None)
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 3 {
                     Command::MODE(args[0].to_owned(), args[1].to_owned(), Some(args[2].to_owned()))
                 } else if args.len() == 2 {
                     Command::MODE(args[0].to_owned(), args[1].to_owned(), None)
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "SERVICE" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 5 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 5 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::SERVICE(args[0].to_owned(), args[1].to_owned(), args[2].to_owned(),
                                      args[3].to_owned(), args[4].to_owned(), suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 6 { return Err(invalid_input()) }
+                None => if args.len() != 6 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::SERVICE(args[0].to_owned(), args[1].to_owned(), args[2].to_owned(),
                                      args[3].to_owned(), args[4].to_owned(), args[5].to_owned())
                 }
             }
         } else if let "QUIT" = cmd {
-            if !args.is_empty() { return Err(invalid_input()) }
-            match suffix {
-                Some(suffix) => Command::QUIT(Some(suffix.to_owned())),
-                None => Command::QUIT(None)
+            if !args.is_empty() {
+                raw(cmd, args, suffix)
+            } else {
+                match suffix {
+                    Some(suffix) => Command::QUIT(Some(suffix.to_owned())),
+                    None => Command::QUIT(None)
+                }
             }
         } else if let "SQUIT" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 1 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::SQUIT(args[0].to_owned(), suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                None => if args.len() != 2 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::SQUIT(args[0].to_owned(), args[1].to_owned())
                 }
             }
@@ -525,7 +540,7 @@ impl Command {
                 } else if args.len() == 2 {
                     Command::JOIN(args[0].to_owned(), Some(args[1].to_owned()), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 1 {
                     Command::JOIN(args[0].to_owned(), None, None)
@@ -535,7 +550,7 @@ impl Command {
                     Command::JOIN(args[0].to_owned(), Some(args[1].to_owned()),
                                   Some(args[2].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "PART" = cmd {
@@ -545,14 +560,14 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::PART(args[0].to_owned(), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 1 {
                     Command::PART(args[0].to_owned(), None)
                 } else if args.len() == 2 {
                     Command::PART(args[0].to_owned(), Some(args[1].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "TOPIC" = cmd {
@@ -562,14 +577,14 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::TOPIC(args[0].to_owned(), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 1 {
                     Command::TOPIC(args[0].to_owned(), None)
                 } else if args.len() == 2 {
                     Command::TOPIC(args[0].to_owned(), Some(args[1].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "NAMES" = cmd {
@@ -579,7 +594,7 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::NAMES(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.is_empty() {
                     Command::NAMES(None, None)
@@ -588,7 +603,7 @@ impl Command {
                 } else if args.len() == 2 {
                     Command::NAMES(Some(args[0].to_owned()), Some(args[1].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "LIST" = cmd {
@@ -598,7 +613,7 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::LIST(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.is_empty() {
                     Command::LIST(None, None)
@@ -607,52 +622,61 @@ impl Command {
                 } else if args.len() == 2 {
                     Command::LIST(Some(args[0].to_owned()), Some(args[1].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "INVITE" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 1 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::INVITE(args[0].to_owned(), suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                None => if args.len() != 2 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::INVITE(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "KICK" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 2 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::KICK(args[0].to_owned(), args[1].to_owned(), Some(suffix.to_owned()))
                 },
-                None => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                None => if args.len() != 2 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::KICK(args[0].to_owned(), args[1].to_owned(), None)
                 },
             }
         } else if let "PRIVMSG" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 1 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::PRIVMSG(args[0].to_owned(), suffix.to_owned())
                 },
-                None => return Err(invalid_input())
+                None => raw(cmd, args, suffix)
             }
         } else if let "NOTICE" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 1 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::NOTICE(args[0].to_owned(), suffix.to_owned())
                 },
-                None => return Err(invalid_input())
+                None => raw(cmd, args, suffix)
             }
         } else if let "MOTD" = cmd {
-            if !args.is_empty() { return Err(invalid_input()) }
-            match suffix {
-                Some(suffix) => Command::MOTD(Some(suffix.to_owned())),
-                None => Command::MOTD(None)
+            if !args.is_empty() {
+                raw(cmd, args, suffix)
+            } else {
+                match suffix {
+                    Some(suffix) => Command::MOTD(Some(suffix.to_owned())),
+                    None => Command::MOTD(None)
+                }
             }
         } else if let "LUSERS" = cmd {
             match suffix {
@@ -661,7 +685,7 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::LUSERS(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.is_empty() {
                     Command::LUSERS(None, None)
@@ -670,14 +694,17 @@ impl Command {
                 } else if args.len() == 2 {
                     Command::LUSERS(Some(args[0].to_owned()), Some(args[1].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "VERSION" = cmd {
-            if !args.is_empty() { return Err(invalid_input()) }
-            match suffix {
-                Some(suffix) => Command::VERSION(Some(suffix.to_owned())),
-                None => Command::VERSION(None)
+            if !args.is_empty() {
+                raw(cmd, args, suffix)
+            } else {
+                match suffix {
+                    Some(suffix) => Command::VERSION(Some(suffix.to_owned())),
+                    None => Command::VERSION(None)
+                }
             }
         } else if let "STATS" = cmd {
             match suffix {
@@ -686,7 +713,7 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::STATS(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.is_empty() {
                     Command::STATS(None, None)
@@ -695,7 +722,7 @@ impl Command {
                 } else if args.len() == 2 {
                     Command::STATS(Some(args[0].to_owned()), Some(args[1].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "LINKS" = cmd {
@@ -705,48 +732,62 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::LINKS(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.is_empty() {
                     Command::LINKS(None, None)
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "TIME" = cmd {
-            if !args.is_empty() { return Err(invalid_input()) }
-            match suffix {
-                Some(suffix) => Command::TIME(Some(suffix.to_owned())),
-                None => Command::TIME(None)
+            if !args.is_empty() {
+                raw(cmd, args, suffix)
+            } else {
+                match suffix {
+                    Some(suffix) => Command::TIME(Some(suffix.to_owned())),
+                    None => Command::TIME(None)
+                }
             }
         } else if let "CONNECT" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 2 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::CONNECT(args[0].to_owned(), args[1].to_owned(), Some(suffix.to_owned()))
                 },
-                None => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                None => if args.len() != 2 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::CONNECT(args[0].to_owned(), args[1].to_owned(), None)
                 }
             }
         } else if let "TRACE" = cmd {
-            if !args.is_empty() { return Err(invalid_input()) }
-            match suffix {
-                Some(suffix) => Command::TRACE(Some(suffix.to_owned())),
-                None => Command::TRACE(None)
+            if !args.is_empty() {
+                raw(cmd, args, suffix)
+            } else {
+                match suffix {
+                    Some(suffix) => Command::TRACE(Some(suffix.to_owned())),
+                    None => Command::TRACE(None)
+                }
             }
         } else if let "ADMIN" = cmd {
-            if !args.is_empty() { return Err(invalid_input()) }
-            match suffix {
-                Some(suffix) => Command::ADMIN(Some(suffix.to_owned())),
-                None => Command::ADMIN(None)
+            if !args.is_empty() {
+                raw(cmd, args, suffix)
+            } else {
+                match suffix {
+                    Some(suffix) => Command::ADMIN(Some(suffix.to_owned())),
+                    None => Command::ADMIN(None)
+                }
             }
         } else if let "INFO" = cmd {
-            if !args.is_empty() { return Err(invalid_input()) }
-            match suffix {
-                Some(suffix) => Command::INFO(Some(suffix.to_owned())),
-                None => Command::INFO(None)
+            if !args.is_empty() {
+                raw(cmd, args, suffix)
+            } else {
+                match suffix {
+                    Some(suffix) => Command::INFO(Some(suffix.to_owned())),
+                    None => Command::INFO(None)
+                }
             }
         } else if let "SERVLIST" = cmd {
             match suffix {
@@ -755,7 +796,7 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::SERVLIST(Some(args[0].to_owned()), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.is_empty() {
                     Command::SERVLIST(None, None)
@@ -764,17 +805,19 @@ impl Command {
                 } else if args.len() == 2 {
                     Command::SERVLIST(Some(args[0].to_owned()), Some(args[1].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "SQUERY" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 1 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::SQUERY(args[0].to_owned(), suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                None => if args.len() != 2 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::SQUERY(args[0].to_owned(), args[1].to_owned())
                 }
             }
@@ -785,7 +828,7 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::WHO(Some(args[0].to_owned()), Some(&suffix[..] == "o"))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.is_empty() {
                     Command::WHO(None, None)
@@ -794,7 +837,7 @@ impl Command {
                 } else if args.len() == 2 {
                     Command::WHO(Some(args[0].to_owned()), Some(&args[1][..] == "o"))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "WHOIS" = cmd {
@@ -804,14 +847,14 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::WHOIS(Some(args[0].to_owned()), suffix.to_owned())
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 1 {
                     Command::WHOIS(None, args[0].to_owned())
                 } else if args.len() == 2 {
                     Command::WHOIS(Some(args[0].to_owned()), args[1].to_owned())
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "WHOWAS" = cmd {
@@ -824,7 +867,7 @@ impl Command {
                     Command::WHOWAS(args[0].to_owned(), Some(args[1].to_owned()),
                                     Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 1 {
                     Command::WHOWAS(args[0].to_owned(), None, None)
@@ -834,17 +877,19 @@ impl Command {
                     Command::WHOWAS(args[0].to_owned(), Some(args[1].to_owned()),
                                     Some(args[2].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "KILL" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 1 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::KILL(args[0].to_owned(), suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                None => if args.len() != 2 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::KILL(args[0].to_owned(), args[1].to_owned())
                 }
             }
@@ -855,14 +900,14 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::PING(args[0].to_owned(), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 1 {
                     Command::PING(args[0].to_owned(), None)
                 } else if args.len() == 2 {
                     Command::PING(args[0].to_owned(), Some(args[1].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "PONG" = cmd {
@@ -872,14 +917,14 @@ impl Command {
                 } else if args.len() == 1 {
                     Command::PONG(args[0].to_owned(), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 1 {
                     Command::PONG(args[0].to_owned(), None)
                 } else if args.len() == 2 {
                     Command::PONG(args[0].to_owned(), Some(args[1].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "ERROR" = cmd {
@@ -887,36 +932,36 @@ impl Command {
                 Some(suffix) => if args.is_empty() {
                     Command::ERROR(suffix.to_owned())
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
-                None => return Err(invalid_input())
+                None => raw(cmd, args, suffix)
             }
         } else if let "AWAY" = cmd {
             match suffix {
                 Some(suffix) => if args.is_empty() {
                     Command::AWAY(Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
-                None => return Err(invalid_input())
+                None => raw(cmd, args, suffix)
             }
         } else if let "REHASH" = cmd {
             if args.is_empty() {
                 Command::REHASH
             } else {
-                return Err(invalid_input())
+                raw(cmd, args, suffix)
             }
         } else if let "DIE" = cmd {
             if args.is_empty() {
                 Command::DIE
             } else {
-                return Err(invalid_input())
+                raw(cmd, args, suffix)
             }
         } else if let "RESTART" = cmd {
             if args.is_empty() {
                 Command::RESTART
             } else {
-                return Err(invalid_input())
+                raw(cmd, args, suffix)
             }
         } else if let "SUMMON" = cmd {
             match suffix {
@@ -928,7 +973,7 @@ impl Command {
                     Command::SUMMON(args[0].to_owned(), Some(args[1].to_owned()),
                                     Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 1 {
                     Command::SUMMON(args[0].to_owned(), None, None)
@@ -938,28 +983,32 @@ impl Command {
                     Command::SUMMON(args[0].to_owned(), Some(args[1].to_owned()),
                                     Some(args[2].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "USERS" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if !args.is_empty() { return Err(invalid_input()) }
+                Some(suffix) => if !args.is_empty() {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::USERS(Some(suffix.to_owned()))
                 },
-                None => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                None => if args.len() != 1 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::USERS(Some(args[0].to_owned()))
                 }
             }
         } else if let "WALLOPS" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if !args.is_empty() { return Err(invalid_input()) }
+                Some(suffix) => if !args.is_empty() {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::WALLOPS(suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                None => if args.len() != 1 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::WALLOPS(args[0].to_owned())
                 }
             }
@@ -967,22 +1016,24 @@ impl Command {
             if suffix.is_none() {
                 Command::USERHOST(args.into_iter().map(|s| s.to_owned()).collect())
             } else {
-                return Err(invalid_input())
+                raw(cmd, args, suffix)
             }
         } else if let "ISON" = cmd {
             if suffix.is_none() {
                 Command::USERHOST(args.into_iter().map(|s| s.to_owned()).collect())
             } else {
-                return Err(invalid_input())
+                raw(cmd, args, suffix)
             }
         } else if let "SAJOIN" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 1 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::SAJOIN(args[0].to_owned(), suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                None => if args.len() != 2 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::SAJOIN(args[0].to_owned(), args[1].to_owned())
                 }
             }
@@ -993,112 +1044,130 @@ impl Command {
                 } else if args.len() == 2 {
                     Command::SAMODE(args[0].to_owned(), args[1].to_owned(), Some(suffix.to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 2 {
                     Command::SAMODE(args[0].to_owned(), args[1].to_owned(), None)
                 } else if args.len() == 3 {
                     Command::SAMODE(args[0].to_owned(), args[1].to_owned(), Some(args[2].to_owned()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "SANICK" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 1 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::SANICK(args[0].to_owned(), suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                None => if args.len() != 2 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::SANICK(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "SAPART" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 1 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::SAPART(args[0].to_owned(), suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                None => if args.len() != 2 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::SAPART(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "SAQUIT" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                Some(suffix) => if args.len() != 1 {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::SAQUIT(args[0].to_owned(), suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 2 { return Err(invalid_input()) }
+                None => if args.len() != 2 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::SAQUIT(args[0].to_owned(), args[1].to_owned())
                 }
             }
         } else if let "NICKSERV" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if !args.is_empty() { return Err(invalid_input()) }
+                Some(suffix) => if !args.is_empty() {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::NICKSERV(suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                None => if args.len() != 1 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::NICKSERV(args[0].to_owned())
                 }
             }
         } else if let "CHANSERV" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if !args.is_empty() { return Err(invalid_input()) }
+                Some(suffix) => if !args.is_empty() {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::CHANSERV(suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                None => if args.len() != 1 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::CHANSERV(args[0].to_owned())
                 }
             }
         } else if let "OPERSERV" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if !args.is_empty() { return Err(invalid_input()) }
+                Some(suffix) => if !args.is_empty() {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::OPERSERV(suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                None => if args.len() != 1 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::OPERSERV(args[0].to_owned())
                 }
             }
         } else if let "BOTSERV" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if !args.is_empty() { return Err(invalid_input()) }
+                Some(suffix) => if !args.is_empty() {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::BOTSERV(suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                None => if args.len() != 1 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::BOTSERV(args[0].to_owned())
                 }
             }
         } else if let "HOSTSERV" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if !args.is_empty() { return Err(invalid_input()) }
+                Some(suffix) => if !args.is_empty() {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::HOSTSERV(suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                None => if args.len() != 1 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::HOSTSERV(args[0].to_owned())
                 }
             }
         } else if let "MEMOSERV" = cmd {
             match suffix {
-                Some(suffix) => {
-                    if !args.is_empty() { return Err(invalid_input()) }
+                Some(suffix) => if !args.is_empty() {
+                    raw(cmd, args, Some(suffix))
+                } else {
                     Command::MEMOSERV(suffix.to_owned())
                 },
-                None => {
-                    if args.len() != 1 { return Err(invalid_input()) }
+                None => if args.len() != 1 {
+                    raw(cmd, args, suffix)
+                } else {
                     Command::MEMOSERV(args[0].to_owned())
                 }
             }
@@ -1110,7 +1179,7 @@ impl Command {
                         None => Command::CAP(None, cmd, None, None),
                     }
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             } else if args.len() == 2 {
                 if let Ok(cmd) = args[0].parse() {
@@ -1126,7 +1195,7 @@ impl Command {
                         None => Command::CAP(Some(args[0].to_owned()), cmd, None, None),
                     }
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             } else if args.len() == 3 {
                 if let Ok(cmd) = args[1].parse() {
@@ -1138,22 +1207,22 @@ impl Command {
                                              None),
                     }
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             } else {
-                return Err(invalid_input())
+                raw(cmd, args, suffix)
             }
         } else if let "AUTHENTICATE" = cmd {
             match suffix {
                 Some(suffix) => if args.is_empty() {
                     Command::AUTHENTICATE(suffix.to_owned())
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 1 {
                     Command::AUTHENTICATE(args[0].to_owned())
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "ACCOUNT" = cmd {
@@ -1161,21 +1230,21 @@ impl Command {
                 Some(suffix) => if args.is_empty() {
                     Command::ACCOUNT(suffix.to_owned())
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 1 {
                     Command::ACCOUNT(args[0].to_owned())
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "METADATA" = cmd {
             if args.len() == 2 {
                 match suffix {
-                    Some(_) => return Err(invalid_input()),
+                    Some(_) => raw(cmd, args, suffix),
                     None => match args[1].parse() {
                         Ok(c) => Command::METADATA(args[0].to_owned(), Some(c), None, None),
-                        Err(_) => return Err(invalid_input()),
+                        Err(_) => raw(cmd, args, suffix),
                     },
                 }
             } else if args.len() > 2 {
@@ -1192,17 +1261,17 @@ impl Command {
                             suffix.map(|s| s.to_owned())
                         )
                     } else {
-                        return Err(invalid_input())
+                        raw(cmd, args, suffix)
                     },
                 }
             } else {
-                return Err(invalid_input())
+                raw(cmd, args, suffix)
             }
         } else if let "MONITOR" = cmd {
             if args.len() == 1 {
                 Command::MONITOR(args[0].to_owned(), suffix.map(|s| s.to_owned()))
             } else {
-                return Err(invalid_input())
+                raw(cmd, args, suffix)
             }
         } else if let "BATCH" = cmd {
             match suffix {
@@ -1221,7 +1290,7 @@ impl Command {
                         ).collect()
                     ))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 1 {
                     Command::BATCH(args[0].to_owned(), None, None)
@@ -1234,7 +1303,7 @@ impl Command {
                         args[1].parse().unwrap()
                     ), Some(args.iter().skip(2).map(|&s| s.to_owned()).collect()))
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let "CHGHOST" = cmd {
@@ -1242,12 +1311,12 @@ impl Command {
                 Some(suffix) => if args.len() == 1 {
                     Command::CHGHOST(args[0].to_owned(), suffix.to_owned())
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, Some(suffix))
                 },
                 None => if args.len() == 2 {
                     Command::CHGHOST(args[0].to_owned(), args[1].to_owned())
                 } else {
-                    return Err(invalid_input())
+                    raw(cmd, args, suffix)
                 }
             }
         } else if let Ok(resp) = cmd.parse() {
@@ -1256,12 +1325,17 @@ impl Command {
                 suffix.map(|s| s.to_owned())
             )
         } else {
-            Command::Raw(
-                cmd.to_owned(), args.into_iter().map(|s| s.to_owned()).collect(),
-                suffix.map(|s| s.to_owned())
-            )
+            raw(cmd, args, suffix)
         })
     }
+}
+
+/// Makes a raw message from the specified command, arguments, and suffix.
+fn raw(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> Command {
+    Command::Raw(
+        cmd.to_owned(), args.into_iter().map(|s| s.to_owned()).collect(),
+        suffix.map(|s| s.to_owned())
+    )
 }
 
 /// A list of all of the subcommands for the capabilities extension.
@@ -1388,9 +1462,4 @@ impl FromStr for BatchSubCommand {
             _          => Ok(BatchSubCommand::CUSTOM(s.to_owned())),
         }
     }
-}
-
-/// Produces an invalid_input IoError.
-fn invalid_input() -> Error {
-    Error::new(ErrorKind::InvalidInput, "Failed to parse malformed message as command.")
 }
