@@ -399,7 +399,7 @@ impl IrcServer {
     /// Handles CTCP requests if the CTCP feature is enabled.
     #[cfg(feature = "ctcp")]
     fn handle_ctcp(&self, resp: &str, tokens: Vec<&str>) -> Result<()> {
-        if (tokens.len() == 0) { return Ok(()) }
+        if tokens.len() == 0 { return Ok(()) }
         match tokens[0] {
             "FINGER" => self.send_ctcp_internal(resp, &format!(
                 "FINGER :{} ({})", self.config().real_name(), self.config().username()
