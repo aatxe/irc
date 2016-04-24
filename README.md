@@ -65,7 +65,7 @@ fail for obvious reasons). That being said, here's an example of a complete conf
   "options": {
     "key": "value",
     "note": "anything you want can be in here!",
-    "and": "you can use it to build your own additional configuration options.",
+    "and": "you can use it to build your own additional configuration options."
   }
 }
 
