@@ -128,7 +128,7 @@ impl Display for Message {
 
 /// A message tag as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
 #[derive(Clone, PartialEq, Debug)]
-pub struct Tag(String, Option<String>);
+pub struct Tag(pub String, pub Option<String>);
 
 #[cfg(test)]
 mod test {
