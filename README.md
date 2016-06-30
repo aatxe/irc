@@ -19,10 +19,17 @@ documentation. You'll also be able to find a small template to get a feel for th
 ```rust
 extern crate irc;
 
+use std::default::Default;
 use irc::client::prelude::*;
 
 fn main() {
-    let server = IrcServer::new("config.json").unwrap();
+    let cfg = Config {
+        nickname: Some(format!("irc-rs")),
+        server: Some(format!("irc.example.com")),
+        channels: Some(vec![format!("#test")])
+        .. Default::default()
+    };
+    let server = IrcServer::from_config(cfg).unwrap();
     server.identify().unwrap();
     for message in server.iter() {
         // Do message processing.
@@ -34,6 +41,24 @@ It may not seem like much, but all it takes to get started with an IRC connectio
 above. In just a few lines, you can be connected to a server and procesisng IRC messages as you
 wish. The library is built with flexibility in mind. If you need to work on multiple threads,
 simply clone the server and have at it. We'll take care of the rest.
+
+You'll probably find that programmatic configuration is a bit of a chore, and you'll often want to
+be able to change the configuration between runs of the program (for example, to change the server
+that you're connecting to). Fortunately, runtime configuration loading is straightforward.
+
+```rust
+extern crate irc;
+
+use irc::client::prelude::*;
+
+fn main() {
+    let server = IrcServer::new("config.json").unwrap();
+    server.identify().unwrap();
+    for message in server.iter() {
+        // Do message processing.
+    }
+}
+```
 
 ## Configuration ##
 
