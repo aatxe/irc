@@ -36,6 +36,8 @@ pub struct Config {
     pub encoding: Option<String>,
     /// A list of channels to join on connection.
     pub channels: Option<Vec<String>>,
+    /// A mapping of channel names to keys for join-on-connect.
+    pub channel_keys: Option<HashMap<String, String>>,
     /// User modes to set on connect. Example: "+RB-x"
     pub umodes: Option<String>,
     /// The text that'll be sent in response to CTCP USERINFO requests.
@@ -149,6 +151,12 @@ impl Config {
         self.channels.as_ref().map_or(vec![], |v| v.iter().map(|s| &s[..]).collect())
     }
 
+
+    /// Gets the key for the specified channel if it exists in the configuration.
+    pub fn channel_key(&self, chan: &str) -> Option<&str> {
+        self.channel_keys.as_ref().and_then(|m| m.get(&chan.to_owned()).map(|s| &s[..]))
+    }
+
     /// Gets the user modes to set on connect specified in the configuration.
     /// This defaults to an empty string when not specified.
     pub fn umodes(&self) -> &str {
@@ -217,6 +225,7 @@ mod test {
             use_ssl: Some(false),
             encoding: Some(format!("UTF-8")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
+            channel_keys: None,
             user_info: None,
             ping_time: None,
             ping_timeout: None,
@@ -243,6 +252,7 @@ mod test {
             use_ssl: Some(false),
             encoding: Some(format!("UTF-8")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
+            channel_keys: None,
             user_info: None,
             ping_time: None,
             ping_timeout: None,

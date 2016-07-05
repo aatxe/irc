@@ -346,7 +346,10 @@ impl IrcServer {
                 try!(self.send_nick_password());
                 try!(self.send_umodes());
                 for chan in self.config().channels().into_iter() {
-                    try!(self.send_join(chan))
+                    match self.config().channel_key(chan) {
+                        Some(key) => try!(self.send_join_with_keys(chan, key)),
+                        None => try!(self.send_join(chan))
+                    }
                 }
             },
             Command::Response(Response::ERR_NICKNAMEINUSE, _, _) |
@@ -538,6 +541,7 @@ impl<'a> Iterator for ServerIterator<'a> {
 #[cfg(test)]
 mod test {
     use super::{IrcServer, Server};
+    use std::collections::HashMap;
     use std::default::Default;
     use client::conn::MockConnection;
     use client::data::Config;
@@ -602,6 +606,25 @@ mod test {
         }
         assert_eq!(&get_server_value(server)[..], "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
                    JOIN #test2\r\n");
+    }
+
+    #[test]
+    fn handle_end_motd_with_chan_keys() {
+        let value = ":irc.test.net 376 test :End of /MOTD command\r\n";
+        let server = IrcServer::from_connection(Config {
+            nickname: Some(format!("test")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            channel_keys: {
+                let mut map = HashMap::new();
+                map.insert(format!("#test2"), format!("password"));
+                Some(map)
+            },
+            .. Default::default()
+        }, MockConnection::new(value));
+        for message in server.iter() {
+            println!("{:?}", message);
+        }
+        assert_eq!(&get_server_value(server)[..], "JOIN #test\r\nJOIN #test2 password\r\n");
     }
 
     #[test]

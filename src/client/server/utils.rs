@@ -71,6 +71,11 @@ pub trait ServerExt: Server {
         self.send(JOIN(chanlist.to_owned(), None, None))
     }
 
+    /// Joins the specified channel or chanlist using the specified key or keylist.
+    fn send_join_with_keys(&self, chanlist: &str, keylist: &str) -> Result<()> where Self: Sized {
+        self.send(JOIN(chanlist.to_owned(), Some(keylist.to_owned()), None))
+    }
+
     /// Attempts to oper up using the specified username and password.
     fn send_oper(&self, username: &str, password: &str) -> Result<()> where Self: Sized {
         self.send(OPER(username.to_owned(), password.to_owned()))
