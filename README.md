@@ -82,7 +82,10 @@ fail for obvious reasons). That being said, here's an example of a complete conf
   "password": "",
   "use_ssl": true,
   "encoding": "UTF-8",
-  "channels": ["#rust", "#haskell"],
+  "channels": ["#rust", "#haskell", "#fake"],
+  "channel_keys": {
+    "#fake": "password"
+  },
   "umodes": "+RB-x",
   "user_info": "I'm a test user for the Rust IRC crate.",
   "ping_time": 180,
