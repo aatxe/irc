@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -42,11 +43,11 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a class='mod' href=''>convert</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-22655' class='srclink' href='https://doc.rust-lang.org/nightly/core/convert/index.html?gotosrc=22655' title='goto source code'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>bitflags</a>::<wbr><a href='../index.html'>__core</a>::<wbr><a class='mod' href=''>convert</a></span><span class='out-of-band'><span class='since' title='Stable since Rust version 1.0.0'>1.0.0</span><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-23151' class='srclink' href='https://doc.rust-lang.org/nightly/core/convert/index.html?gotosrc=23151' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Traits for conversions between types.</p>
 
 <p>The traits in this module provide a general way to talk about conversions
@@ -56,45 +57,73 @@ from one type to another. They follow the standard Rust conventions of
 <p>Like many traits, these are often used as bounds for generic functions, to
 support arguments of multiple types.</p>
 
+<ul>
+<li>Impl the <code>As*</code> traits for reference-to-reference conversions</li>
+<li>Impl the <code>Into</code> trait when you want to consume the value in the conversion</li>
+<li>The <code>From</code> trait is the most flexible, useful for value <em>and</em> reference conversions</li>
+<li>The <code>TryFrom</code> and <code>TryInto</code> traits behave like <code>From</code> and <code>Into</code>, but allow for the
+conversion to fail</li>
+</ul>
+
+<p>As a library author, you should prefer implementing <code>From&lt;T&gt;</code> or <code>TryFrom&lt;T&gt;</code> rather than
+<code>Into&lt;U&gt;</code> or <code>TryInto&lt;U&gt;</code>, as <code>From</code> and <code>TryFrom</code> provide greater flexibility and offer
+equivalent <code>Into</code> or <code>TryInto</code> implementations for free, thanks to a blanket implementation
+in the standard library.</p>
+
+<h1 id='generic-impl' class='section-header'><a href='#generic-impl'>Generic impl</a></h1>
+<ul>
+<li><code>AsRef</code> and <code>AsMut</code> auto-dereference if the inner type is a reference</li>
+<li><code>From&lt;U&gt; for T</code> implies <code>Into&lt;T&gt; for U</code></li>
+<li><code>TryFrom&lt;U&gt; for T</code> implies <code>TryInto&lt;T&gt; for U</code></li>
+<li><code>From</code> and <code>Into</code> are reflexive, which means that all types can <code>into()</code>
+themselves and <code>from()</code> themselves</li>
+</ul>
+
 <p>See each trait for usage examples.</p>
 </div><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='trait' href='trait.AsMut.html'
-                               title='bitflags::__core::convert::AsMut'>AsMut</a></td>
-                        <td class='docblock short'>
-                             <p>A cheap, mutable reference-to-mutable reference conversion.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='trait' href='trait.AsRef.html'
-                               title='bitflags::__core::convert::AsRef'>AsRef</a></td>
-                        <td class='docblock short'>
-                             <p>A cheap, reference-to-reference conversion.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='trait' href='trait.From.html'
-                               title='bitflags::__core::convert::From'>From</a></td>
-                        <td class='docblock short'>
-                             <p>Construct <code>Self</code> via a conversion.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='trait' href='trait.Into.html'
-                               title='bitflags::__core::convert::Into'>Into</a></td>
-                        <td class='docblock short'>
-                             <p>A conversion that consumes <code>self</code>, which may or may not be expensive.</p>
-
-                        </td>
-                    </tr>
-                </table></section>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.AsMut.html'
+                                  title='bitflags::__core::convert::AsMut'>AsMut</a></td>
+                           <td class='docblock short'>
+                                <p>A cheap, mutable reference-to-mutable reference conversion.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.AsRef.html'
+                                  title='bitflags::__core::convert::AsRef'>AsRef</a></td>
+                           <td class='docblock short'>
+                                <p>A cheap, reference-to-reference conversion.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.From.html'
+                                  title='bitflags::__core::convert::From'>From</a></td>
+                           <td class='docblock short'>
+                                <p>Construct <code>Self</code> via a conversion.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Into.html'
+                                  title='bitflags::__core::convert::Into'>Into</a></td>
+                           <td class='docblock short'>
+                                <p>A conversion that consumes <code>self</code>, which may or may not be expensive.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='trait' href='trait.TryFrom.html'
+                                  title='bitflags::__core::convert::TryFrom'>TryFrom</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>Attempt to construct <code>Self</code> via a conversion.</p>
+                           </td>
+                       </tr>
+                       <tr class='unstable module-item'>
+                           <td><a class='trait' href='trait.TryInto.html'
+                                  title='bitflags::__core::convert::TryInto'>TryInto</a></td>
+                           <td class='docblock short'>
+                               [<em class='stab unstable'>Unstable</em>] <p>An attempted conversion that consumes <code>self</code>, which may or may not be expensive.</p>
+                           </td>
+                       </tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -117,6 +146,8 @@ support arguments of multiple types.</p>
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -137,7 +168,7 @@ support arguments of multiple types.</p>
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

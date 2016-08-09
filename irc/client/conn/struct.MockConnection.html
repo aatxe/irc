@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -43,24 +44,30 @@
 
     <section id='main' class="content struct">
 <h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>client</a>::<wbr><a href='index.html'>conn</a>::<wbr><a class='struct' href=''>MockConnection</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-121' class='srclink' href='../../../src/irc/client/conn.rs.html#170-173' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-121' class='srclink' href='../../../src/irc/src/client/conn.rs.html#170-173' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct MockConnection {
     // some fields omitted
 }</pre><div class='docblock'><p>A mock connection for testing purposes.</p>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../irc/client/conn/struct.MockConnection.html' title='irc::client::conn::MockConnection'>MockConnection</a></code></h3><div class='impl-items'><h4 id='method.empty' class='method'><code>fn <a href='#method.empty' class='fnname'>empty</a>() -&gt; <a class='struct' href='../../../irc/client/conn/struct.MockConnection.html' title='irc::client::conn::MockConnection'>MockConnection</a></code></h4>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../../../irc/client/conn/struct.MockConnection.html' title='irc::client::conn::MockConnection'>MockConnection</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-124' class='srclink' href='../../../src/irc/src/client/conn.rs.html#175-193' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.empty' class='method'><code>fn <a href='#method.empty' class='fnname'>empty</a>() -&gt; <a class='struct' href='../../../irc/client/conn/struct.MockConnection.html' title='irc::client::conn::MockConnection'>MockConnection</a></code></h4>
 <div class='docblock'><p>Creates a new mock connection with an empty read buffer.</p>
 </div><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(input: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='struct' href='../../../irc/client/conn/struct.MockConnection.html' title='irc::client::conn::MockConnection'>MockConnection</a></code></h4>
 <div class='docblock'><p>Creates a new mock connection with the specified string in the read buffer.</p>
 </div><h4 id='method.from_byte_vec' class='method'><code>fn <a href='#method.from_byte_vec' class='fnname'>from_byte_vec</a>(input: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;) -&gt; <a class='struct' href='../../../irc/client/conn/struct.MockConnection.html' title='irc::client::conn::MockConnection'>MockConnection</a></code></h4>
 <div class='docblock'><p>Creates a new mock connection with the specified bytes in the read buffer.</p>
-</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='../../../irc/client/conn/trait.Connection.html' title='irc::client::conn::Connection'>Connection</a> for <a class='struct' href='../../../irc/client/conn/struct.MockConnection.html' title='irc::client::conn::MockConnection'>MockConnection</a></code></h3><div class='impl-items'><h4 id='method.send' class='method'><code>fn <a href='../../../irc/client/conn/trait.Connection.html#method.send' class='fnname'>send</a>(&amp;self, msg: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, encoding: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
-<h4 id='method.recv' class='method'><code>fn <a href='../../../irc/client/conn/trait.Connection.html#method.recv' class='fnname'>recv</a>(&amp;self, encoding: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</code></h4>
-<h4 id='method.written' class='method'><code>fn <a href='../../../irc/client/conn/trait.Connection.html#method.written' class='fnname'>written</a>(&amp;self, encoding: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</code></h4>
-<h4 id='method.reconnect' class='method'><code>fn <a href='../../../irc/client/conn/trait.Connection.html#method.reconnect' class='fnname'>reconnect</a>(&amp;self) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
-</div></section>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='../../../irc/client/conn/trait.Connection.html' title='irc::client::conn::Connection'>Connection</a> for <a class='struct' href='../../../irc/client/conn/struct.MockConnection.html' title='irc::client::conn::MockConnection'>MockConnection</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-130' class='srclink' href='../../../src/irc/src/client/conn.rs.html#195-231' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.send' class='method'><code>fn <a href='../../../irc/client/conn/trait.Connection.html#tymethod.send' class='fnname'>send</a>(&amp;self, msg: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, encoding: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Sends a message over this connection.</p>
+</div><h4 id='method.recv' class='method'><code>fn <a href='../../../irc/client/conn/trait.Connection.html#tymethod.recv' class='fnname'>recv</a>(&amp;self, encoding: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</code></h4>
+<div class='docblock'><p>Receives a single line from this connection.</p>
+</div><h4 id='method.written' class='method'><code>fn <a href='../../../irc/client/conn/trait.Connection.html#tymethod.written' class='fnname'>written</a>(&amp;self, encoding: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</code></h4>
+<div class='docblock'><p>Gets the full record of all sent messages if the Connection records this. This is intended for use in writing tests. <a href="../../../irc/client/conn/trait.Connection.html#tymethod.written">Read more</a></p>
+</div><h4 id='method.reconnect' class='method'><code>fn <a href='../../../irc/client/conn/trait.Connection.html#tymethod.reconnect' class='fnname'>reconnect</a>(&amp;self) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Re-establishes this connection, disconnecting from the existing case if necessary.</p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -83,6 +90,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -103,7 +112,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

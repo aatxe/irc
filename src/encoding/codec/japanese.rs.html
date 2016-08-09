@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-88ac128001ac3a9a/encoding-0.2.32/src/codec/japanese.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.32/src/codec/japanese.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>japanese.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -1433,7 +1434,7 @@
 
 <span class='kw'>impl</span> <span class='ident'>RawEncoder</span> <span class='kw'>for</span> <span class='ident'>EUCJPEncoder</span> {
     <span class='kw'>fn</span> <span class='ident'>from_self</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawEncoder</span><span class='op'>&gt;</span> { <span class='ident'>EUCJPEncoder</span>::<span class='ident'>new</span>() }
-    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>true</span> }
+    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolvalue'>true</span> }
 
     <span class='kw'>fn</span> <span class='ident'>raw_feed</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ByteWriter</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span>) {
         <span class='ident'>output</span>.<span class='ident'>writer_hint</span>(<span class='ident'>input</span>.<span class='ident'>len</span>());
@@ -1484,7 +1485,7 @@
 
 <span class='kw'>impl</span> <span class='ident'>RawDecoder</span> <span class='kw'>for</span> <span class='ident'>EUCJP0212Decoder</span> {
     <span class='kw'>fn</span> <span class='ident'>from_self</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawDecoder</span><span class='op'>&gt;</span> { <span class='ident'>EUCJP0212Decoder</span>::<span class='ident'>new</span>() }
-    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>true</span> }
+    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolvalue'>true</span> }
 
     <span class='kw'>fn</span> <span class='ident'>raw_feed</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StringWriter</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span>) {
         <span class='kw'>let</span> (<span class='ident'>st</span>, <span class='ident'>processed</span>, <span class='ident'>err</span>) <span class='op'>=</span> <span class='ident'>eucjp</span>::<span class='ident'>raw_feed</span>(<span class='self'>self</span>.<span class='ident'>st</span>, <span class='ident'>input</span>, <span class='ident'>output</span>, <span class='kw-2'>&amp;</span>());
@@ -1529,17 +1530,17 @@
 <span class='ident'>initial</span>:
     <span class='comment'>// euc-jp lead = 0x00</span>
     <span class='ident'>state</span> <span class='ident'>S0</span>(<span class='ident'>ctx</span>: <span class='ident'>Context</span>) {
-        <span class='ident'>case</span> <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0x00</span>...<span class='number'>0x7f</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
+        <span class='ident'>case</span> <span class='ident'>b</span> @ <span class='number'>0x00</span>...<span class='number'>0x7f</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
         <span class='ident'>case</span> <span class='number'>0x8e</span> <span class='op'>=&gt;</span> <span class='ident'>S1</span>(<span class='ident'>ctx</span>);
         <span class='ident'>case</span> <span class='number'>0x8f</span> <span class='op'>=&gt;</span> <span class='ident'>S2</span>(<span class='ident'>ctx</span>);
-        <span class='ident'>case</span> <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0xa1</span>...<span class='number'>0xfe</span> <span class='op'>=&gt;</span> <span class='ident'>S3</span>(<span class='ident'>ctx</span>, <span class='ident'>b</span>);
+        <span class='ident'>case</span> <span class='ident'>b</span> @ <span class='number'>0xa1</span>...<span class='number'>0xfe</span> <span class='op'>=&gt;</span> <span class='ident'>S3</span>(<span class='ident'>ctx</span>, <span class='ident'>b</span>);
         <span class='ident'>case</span> _ <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>err</span>(<span class='string'>&quot;invalid sequence&quot;</span>);
     }
 
 <span class='ident'>transient</span>:
     <span class='comment'>// euc-jp lead = 0x8e</span>
     <span class='ident'>state</span> <span class='ident'>S1</span>(<span class='ident'>ctx</span>: <span class='ident'>Context</span>) {
-        <span class='ident'>case</span> <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0xa1</span>...<span class='number'>0xdf</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='number'>0xff61</span> <span class='op'>+</span> <span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span> <span class='op'>-</span> <span class='number'>0xa1</span>);
+        <span class='ident'>case</span> <span class='ident'>b</span> @ <span class='number'>0xa1</span>...<span class='number'>0xdf</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='number'>0xff61</span> <span class='op'>+</span> <span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span> <span class='op'>-</span> <span class='number'>0xa1</span>);
         <span class='ident'>case</span> <span class='number'>0xa1</span>...<span class='number'>0xfe</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>err</span>(<span class='string'>&quot;invalid sequence&quot;</span>);
         <span class='ident'>case</span> _ <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>backup_and_err</span>(<span class='number'>1</span>, <span class='string'>&quot;invalid sequence&quot;</span>);
     }
@@ -1547,14 +1548,14 @@
     <span class='comment'>// euc-jp lead = 0x8f</span>
     <span class='comment'>// JIS X 0201 half-width katakana</span>
     <span class='ident'>state</span> <span class='ident'>S2</span>(<span class='ident'>ctx</span>: <span class='ident'>Context</span>) {
-        <span class='ident'>case</span> <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0xa1</span>...<span class='number'>0xfe</span> <span class='op'>=&gt;</span> <span class='ident'>S4</span>(<span class='ident'>ctx</span>, <span class='ident'>b</span>);
+        <span class='ident'>case</span> <span class='ident'>b</span> @ <span class='number'>0xa1</span>...<span class='number'>0xfe</span> <span class='op'>=&gt;</span> <span class='ident'>S4</span>(<span class='ident'>ctx</span>, <span class='ident'>b</span>);
         <span class='ident'>case</span> _ <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>backup_and_err</span>(<span class='number'>1</span>, <span class='string'>&quot;invalid sequence&quot;</span>);
     }
 
     <span class='comment'>// euc-jp lead != 0x00, euc-jp jis0212 flag = unset</span>
     <span class='comment'>// JIS X 0208 two-byte sequence</span>
     <span class='ident'>state</span> <span class='ident'>S3</span>(<span class='ident'>ctx</span>: <span class='ident'>Context</span>, <span class='ident'>lead</span>: <span class='ident'>u8</span>) {
-        <span class='ident'>case</span> <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0xa1</span>...<span class='number'>0xfe</span> <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='ident'>map_two_0208_bytes</span>(<span class='ident'>lead</span>, <span class='ident'>b</span>) {
+        <span class='ident'>case</span> <span class='ident'>b</span> @ <span class='number'>0xa1</span>...<span class='number'>0xfe</span> <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='ident'>map_two_0208_bytes</span>(<span class='ident'>lead</span>, <span class='ident'>b</span>) {
             <span class='comment'>// do NOT backup, we only backup for out-of-range trails.</span>
             <span class='number'>0xffff</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>err</span>(<span class='string'>&quot;invalid sequence&quot;</span>),
             <span class='ident'>ch</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u32</span>)
@@ -1565,7 +1566,7 @@
     <span class='comment'>// euc-jp lead != 0x00, euc-jp jis0212 flag = set</span>
     <span class='comment'>// JIS X 0212 three-byte sequence</span>
     <span class='ident'>state</span> <span class='ident'>S4</span>(<span class='ident'>ctx</span>: <span class='ident'>Context</span>, <span class='ident'>lead</span>: <span class='ident'>u8</span>) {
-        <span class='ident'>case</span> <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0xa1</span>...<span class='number'>0xfe</span> <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='ident'>map_two_0212_bytes</span>(<span class='ident'>lead</span>, <span class='ident'>b</span>) {
+        <span class='ident'>case</span> <span class='ident'>b</span> @ <span class='number'>0xa1</span>...<span class='number'>0xfe</span> <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='ident'>map_two_0212_bytes</span>(<span class='ident'>lead</span>, <span class='ident'>b</span>) {
             <span class='comment'>// do NOT backup, we only backup for out-of-range trails.</span>
             <span class='number'>0xffff</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>err</span>(<span class='string'>&quot;invalid sequence&quot;</span>),
             <span class='ident'>ch</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='ident'>ch</span> <span class='kw'>as</span> <span class='ident'>u32</span>)
@@ -1577,7 +1578,7 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>eucjp_tests</span> {
     <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>test</span>;
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>EUCJPEncoding</span>;
+    <span class='kw'>use</span> <span class='kw'>super</span>::<span class='ident'>EUCJPEncoding</span>;
     <span class='kw'>use</span> <span class='ident'>testutils</span>;
     <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
 
@@ -1853,7 +1854,7 @@
 
 <span class='kw'>impl</span> <span class='ident'>RawEncoder</span> <span class='kw'>for</span> <span class='ident'>Windows31JEncoder</span> {
     <span class='kw'>fn</span> <span class='ident'>from_self</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawEncoder</span><span class='op'>&gt;</span> { <span class='ident'>Windows31JEncoder</span>::<span class='ident'>new</span>() }
-    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>true</span> }
+    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolvalue'>true</span> }
 
     <span class='kw'>fn</span> <span class='ident'>raw_feed</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ByteWriter</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span>) {
         <span class='ident'>output</span>.<span class='ident'>writer_hint</span>(<span class='ident'>input</span>.<span class='ident'>len</span>());
@@ -1906,7 +1907,7 @@
 
 <span class='kw'>impl</span> <span class='ident'>RawDecoder</span> <span class='kw'>for</span> <span class='ident'>Windows31JDecoder</span> {
     <span class='kw'>fn</span> <span class='ident'>from_self</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawDecoder</span><span class='op'>&gt;</span> { <span class='ident'>Windows31JDecoder</span>::<span class='ident'>new</span>() }
-    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>true</span> }
+    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolvalue'>true</span> }
 
     <span class='kw'>fn</span> <span class='ident'>raw_feed</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StringWriter</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span>) {
         <span class='kw'>let</span> (<span class='ident'>st</span>, <span class='ident'>processed</span>, <span class='ident'>err</span>) <span class='op'>=</span> <span class='ident'>windows31j</span>::<span class='ident'>raw_feed</span>(<span class='self'>self</span>.<span class='ident'>st</span>, <span class='ident'>input</span>, <span class='ident'>output</span>, <span class='kw-2'>&amp;</span>());
@@ -1945,9 +1946,9 @@
 <span class='ident'>initial</span>:
     <span class='comment'>// shift_jis lead = 0x00</span>
     <span class='ident'>state</span> <span class='ident'>S0</span>(<span class='ident'>ctx</span>: <span class='ident'>Context</span>) {
-        <span class='ident'>case</span> <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0x00</span>...<span class='number'>0x80</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
-        <span class='ident'>case</span> <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0xa1</span>...<span class='number'>0xdf</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='number'>0xff61</span> <span class='op'>+</span> <span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span> <span class='op'>-</span> <span class='number'>0xa1</span>);
-        <span class='ident'>case</span> <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0x81</span>...<span class='number'>0x9f</span>, <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0xe0</span>...<span class='number'>0xfc</span> <span class='op'>=&gt;</span> <span class='ident'>S1</span>(<span class='ident'>ctx</span>, <span class='ident'>b</span>);
+        <span class='ident'>case</span> <span class='ident'>b</span> @ <span class='number'>0x00</span>...<span class='number'>0x80</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
+        <span class='ident'>case</span> <span class='ident'>b</span> @ <span class='number'>0xa1</span>...<span class='number'>0xdf</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='number'>0xff61</span> <span class='op'>+</span> <span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span> <span class='op'>-</span> <span class='number'>0xa1</span>);
+        <span class='ident'>case</span> <span class='ident'>b</span> @ <span class='number'>0x81</span>...<span class='number'>0x9f</span>, <span class='ident'>b</span> @ <span class='number'>0xe0</span>...<span class='number'>0xfc</span> <span class='op'>=&gt;</span> <span class='ident'>S1</span>(<span class='ident'>ctx</span>, <span class='ident'>b</span>);
         <span class='ident'>case</span> _ <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>err</span>(<span class='string'>&quot;invalid sequence&quot;</span>);
     }
 
@@ -1964,7 +1965,7 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>windows31j_tests</span> {
     <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>test</span>;
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>Windows31JEncoding</span>;
+    <span class='kw'>use</span> <span class='kw'>super</span>::<span class='ident'>Windows31JEncoding</span>;
     <span class='kw'>use</span> <span class='ident'>testutils</span>;
     <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
 
@@ -2184,7 +2185,7 @@
 
 <span class='kw'>impl</span> <span class='ident'>RawEncoder</span> <span class='kw'>for</span> <span class='ident'>ISO2022JPEncoder</span> {
     <span class='kw'>fn</span> <span class='ident'>from_self</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawEncoder</span><span class='op'>&gt;</span> { <span class='ident'>ISO2022JPEncoder</span>::<span class='ident'>new</span>() }
-    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>true</span> }
+    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolvalue'>true</span> }
 
     <span class='kw'>fn</span> <span class='ident'>raw_feed</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ByteWriter</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span>) {
         <span class='ident'>output</span>.<span class='ident'>writer_hint</span>(<span class='ident'>input</span>.<span class='ident'>len</span>());
@@ -2250,7 +2251,7 @@
 
 <span class='kw'>impl</span> <span class='ident'>RawDecoder</span> <span class='kw'>for</span> <span class='ident'>ISO2022JPDecoder</span> {
     <span class='kw'>fn</span> <span class='ident'>from_self</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawDecoder</span><span class='op'>&gt;</span> { <span class='ident'>ISO2022JPDecoder</span>::<span class='ident'>new</span>() }
-    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>false</span> }
+    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolvalue'>false</span> }
 
     <span class='kw'>fn</span> <span class='ident'>raw_feed</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StringWriter</span>) <span class='op'>-&gt;</span> (<span class='ident'>usize</span>, <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>CodecError</span><span class='op'>&gt;</span>) {
         <span class='kw'>let</span> (<span class='ident'>st</span>, <span class='ident'>processed</span>, <span class='ident'>err</span>) <span class='op'>=</span> <span class='ident'>iso2022jp</span>::<span class='ident'>raw_feed</span>(<span class='self'>self</span>.<span class='ident'>st</span>, <span class='ident'>input</span>, <span class='ident'>output</span>, <span class='kw-2'>&amp;</span>());
@@ -2296,7 +2297,7 @@
     <span class='comment'>// iso-2022-jp state = ASCII, iso-2022-jp jis0212 flag = unset, iso-2022-jp lead = 0x00</span>
     <span class='ident'>state</span> <span class='ident'>ASCII</span>(<span class='ident'>ctx</span>: <span class='ident'>Context</span>) {
         <span class='ident'>case</span> <span class='number'>0x1b</span> <span class='op'>=&gt;</span> <span class='ident'>EscapeStart</span>(<span class='ident'>ctx</span>);
-        <span class='ident'>case</span> <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0x00</span>...<span class='number'>0x7f</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span>), <span class='ident'>ASCII</span>(<span class='ident'>ctx</span>);
+        <span class='ident'>case</span> <span class='ident'>b</span> @ <span class='number'>0x00</span>...<span class='number'>0x7f</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span>), <span class='ident'>ASCII</span>(<span class='ident'>ctx</span>);
         <span class='ident'>case</span> _ <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>err</span>(<span class='string'>&quot;invalid sequence&quot;</span>), <span class='ident'>ASCII</span>(<span class='ident'>ctx</span>);
         <span class='kw'>final</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>reset</span>();
     }
@@ -2321,7 +2322,7 @@
     <span class='comment'>// iso-2022-jp state = Katakana</span>
     <span class='ident'>state</span> <span class='ident'>Katakana</span>(<span class='ident'>ctx</span>: <span class='ident'>Context</span>) {
         <span class='ident'>case</span> <span class='number'>0x1b</span> <span class='op'>=&gt;</span> <span class='ident'>EscapeStart</span>(<span class='ident'>ctx</span>);
-        <span class='ident'>case</span> <span class='ident'>b</span> <span class='kw-2'>@</span> <span class='number'>0x21</span>...<span class='number'>0x5f</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='number'>0xff61</span> <span class='op'>+</span> <span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span> <span class='op'>-</span> <span class='number'>0x21</span>), <span class='ident'>Katakana</span>(<span class='ident'>ctx</span>);
+        <span class='ident'>case</span> <span class='ident'>b</span> @ <span class='number'>0x21</span>...<span class='number'>0x5f</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>emit</span>(<span class='number'>0xff61</span> <span class='op'>+</span> <span class='ident'>b</span> <span class='kw'>as</span> <span class='ident'>u32</span> <span class='op'>-</span> <span class='number'>0x21</span>), <span class='ident'>Katakana</span>(<span class='ident'>ctx</span>);
         <span class='ident'>case</span> _ <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>err</span>(<span class='string'>&quot;invalid sequence&quot;</span>), <span class='ident'>Katakana</span>(<span class='ident'>ctx</span>);
         <span class='kw'>final</span> <span class='op'>=&gt;</span> <span class='ident'>ctx</span>.<span class='ident'>reset</span>();
     }
@@ -2388,7 +2389,7 @@
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>iso2022jp_tests</span> {
     <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>test</span>;
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>ISO2022JPEncoding</span>;
+    <span class='kw'>use</span> <span class='kw'>super</span>::<span class='ident'>ISO2022JPEncoding</span>;
     <span class='kw'>use</span> <span class='ident'>testutils</span>;
     <span class='kw'>use</span> <span class='ident'>types</span>::<span class='op'>*</span>;
 
@@ -2752,6 +2753,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -2772,7 +2775,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

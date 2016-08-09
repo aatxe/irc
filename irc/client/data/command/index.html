@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../../main.css">
+    
 
     
     
@@ -43,53 +44,45 @@
 
     <section id='main' class="content mod">
 <h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>irc</a>::<wbr><a href='../../index.html'>client</a>::<wbr><a href='../index.html'>data</a>::<wbr><a class='mod' href=''>command</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-293' class='srclink' href='../../../../src/irc/client/data/command.rs.html#1-1396' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-293' class='srclink' href='../../../../src/irc/src/client/data/command.rs.html#1-1465' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Enumeration of all available client commands.</p>
 </div><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='enum' href='enum.BatchSubCommand.html'
-                               title='irc::client::data::command::BatchSubCommand'>BatchSubCommand</a></td>
-                        <td class='docblock short'>
-                             <p><a href="http://ircv3.net/specs/extensions/batch-3.2.html">batch extension</a>.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='enum' href='enum.CapSubCommand.html'
-                               title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></td>
-                        <td class='docblock short'>
-                             <p>A list of all of the subcommands for the capabilities extension.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='enum' href='enum.Command.html'
-                               title='irc::client::data::command::Command'>Command</a></td>
-                        <td class='docblock short'>
-                             <p>List of all client commands as defined in <a href="http://tools.ietf.org/html/rfc2812">RFC 2812</a>. This
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.BatchSubCommand.html'
+                                  title='irc::client::data::command::BatchSubCommand'>BatchSubCommand</a></td>
+                           <td class='docblock short'>
+                                <p><a href="http://ircv3.net/specs/extensions/batch-3.2.html">batch extension</a>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.CapSubCommand.html'
+                                  title='irc::client::data::command::CapSubCommand'>CapSubCommand</a></td>
+                           <td class='docblock short'>
+                                <p>A list of all of the subcommands for the capabilities extension.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.Command.html'
+                                  title='irc::client::data::command::Command'>Command</a></td>
+                           <td class='docblock short'>
+                                <p>List of all client commands as defined in <a href="http://tools.ietf.org/html/rfc2812">RFC 2812</a>. This
 also includes commands from the
 <a href="https://tools.ietf.org/html/draft-mitchell-irc-capabilities-01">capabilities extension</a>.
 Additionally, this includes some common additional commands from popular IRCds.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='enum' href='enum.MetadataSubCommand.html'
-                               title='irc::client::data::command::MetadataSubCommand'>MetadataSubCommand</a></td>
-                        <td class='docblock short'>
-                             <p>A list of all the subcommands for the
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.MetadataSubCommand.html'
+                                  title='irc::client::data::command::MetadataSubCommand'>MetadataSubCommand</a></td>
+                           <td class='docblock short'>
+                                <p>A list of all the subcommands for the
 <a href="http://ircv3.net/specs/core/metadata-3.2.html">metadata extension</a>.</p>
-
-                        </td>
-                    </tr>
-                </table></section>
+                           </td>
+                       </tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -112,6 +105,8 @@ Additionally, this includes some common additional commands from popular IRCds.<
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -132,7 +127,7 @@ Additionally, this includes some common additional commands from popular IRCds.<
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content enum">
 <h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>encoding</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='enum' href=''>EncoderTrap</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-225' class='srclink' href='../../src/encoding/types.rs.html#344-362' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-225' class='srclink' href='../../src/encoding/types.rs.html#344-362' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum EncoderTrap {
     Strict,
     Replace,
@@ -54,24 +55,29 @@
     NcrEscape,
     Call(<a class='type' href='../../encoding/types/type.EncoderTrapFunc.html' title='encoding::types::EncoderTrapFunc'>EncoderTrapFunc</a>),
 }</pre><h2 class='variants'>Variants</h2>
-<table><tr><td id='variant.Strict'><code>Strict</code></td><td><div class='docblock'><p>Immediately fails on errors.
+<table class='variants_table'><tr><td id='variant.Strict'><code>Strict</code></td><td><div class='docblock'><p>Immediately fails on errors.
 Corresponds to WHATWG &quot;fatal&quot; error algorithm.</p>
-</div></td></tr><tr><td id='variant.Replace'><code>Replace</code></td><td><div class='docblock'><p>Replaces an error with <code>?</code> in given encoding.
+</div></td><td></td></tr><tr><td id='variant.Replace'><code>Replace</code></td><td><div class='docblock'><p>Replaces an error with <code>?</code> in given encoding.
 Note that this fails when <code>?</code> cannot be represented in given encoding.
 Corresponds to WHATWG &quot;URL&quot; error algorithms.</p>
-</div></td></tr><tr><td id='variant.Ignore'><code>Ignore</code></td><td><div class='docblock'><p>Silently ignores an error, effectively replacing it with an empty sequence.</p>
-</div></td></tr><tr><td id='variant.NcrEscape'><code>NcrEscape</code></td><td><div class='docblock'><p>Replaces an error with XML numeric character references (e.g. <code>&amp;#1234;</code>).
+</div></td><td></td></tr><tr><td id='variant.Ignore'><code>Ignore</code></td><td><div class='docblock'><p>Silently ignores an error, effectively replacing it with an empty sequence.</p>
+</div></td><td></td></tr><tr><td id='variant.NcrEscape'><code>NcrEscape</code></td><td><div class='docblock'><p>Replaces an error with XML numeric character references (e.g. <code>&amp;#1234;</code>).
 The encoder trap fails when NCRs cannot be represented in given encoding.
 Corresponds to WHATWG &quot;<form>&quot; error algorithms.</p>
-</div></td></tr><tr><td id='variant.Call'><code>Call</code></td><td><div class='docblock'><p>Calls given function to handle encoder errors.
+</div></td><td></td></tr><tr><td id='variant.Call'><code>Call</code></td><td><div class='docblock'><p>Calls given function to handle encoder errors.
 The function is given the current encoder, input and output writer,
 and should return true only when it is fine to keep going.</p>
-</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></h3><div class='impl-items'><h4 id='method.trap' class='method'><code>fn <a href='#method.trap' class='fnname'>trap</a>(&amp;self, encoder: &amp;mut <a class='trait' href='../../encoding/types/trait.RawEncoder.html' title='encoding::types::RawEncoder'>RawEncoder</a>, input: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, output: &amp;mut <a class='trait' href='../../encoding/types/trait.ByteWriter.html' title='encoding::types::ByteWriter'>ByteWriter</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div></td><td></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-233' class='srclink' href='../../src/encoding/types.rs.html#364-395' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.trap' class='method'><code>fn <a href='#method.trap' class='fnname'>trap</a>(&amp;self, encoder: &amp;mut <a class='trait' href='../../encoding/types/trait.RawEncoder.html' title='encoding::types::RawEncoder'>RawEncoder</a>, input: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, output: &amp;mut <a class='trait' href='../../encoding/types/trait.ByteWriter.html' title='encoding::types::ByteWriter'>ByteWriter</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
 <div class='docblock'><p>Handles an encoder error. May write to the output writer.
 Returns true only when it is fine to keep going.</p>
-</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></h4>
-<h4 id='method.clone_from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
-</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></h3><div class='impl-items'></div></section>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-253' class='srclink' href='../../src/encoding/types.rs.html#397-407' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></h4>
+<div class='docblock'><p>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></p>
+</div><h4 id='method.clone_from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></h4>
+<div class='docblock'><p>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></p>
+</div></div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../../encoding/types/enum.EncoderTrap.html' title='encoding::types::EncoderTrap'>EncoderTrap</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-232' class='srclink' href='../../src/encoding/types.rs.html#343' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -94,6 +100,8 @@ Returns true only when it is fine to keep going.</p>
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -114,7 +122,7 @@ Returns true only when it is fine to keep going.</p>
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

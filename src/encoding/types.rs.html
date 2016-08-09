@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-88ac128001ac3a9a/encoding-0.2.32/src/types.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.32/src/types.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>types.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -694,7 +695,7 @@
 
     <span class='doccomment'>/// Returns true if this encoding is compatible to ASCII,</span>
     <span class='doccomment'>/// i.e. U+0000 through U+007F always map to bytes 00 through 7F and nothing else.</span>
-    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>false</span> }
+    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolvalue'>false</span> }
 
     <span class='doccomment'>/// Feeds given portion of string to the encoder,</span>
     <span class='doccomment'>/// pushes the an encoded byte sequence at the end of the given output,</span>
@@ -718,7 +719,7 @@
 
     <span class='doccomment'>/// Returns true if this encoding is compatible to ASCII,</span>
     <span class='doccomment'>/// i.e. bytes 00 through 7F always map to U+0000 through U+007F and nothing else.</span>
-    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolval'>false</span> }
+    <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='boolvalue'>false</span> }
 
     <span class='doccomment'>/// Feeds given portion of byte sequence to the encoder,</span>
     <span class='doccomment'>/// pushes the a decoded string at the end of the given output,</span>
@@ -878,9 +879,9 @@
     <span class='doccomment'>/// Returns true only when it is fine to keep going.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>trap</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>decoder</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>RawDecoder</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u8</span>], <span class='ident'>output</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>StringWriter</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
-            <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>     <span class='op'>=&gt;</span> <span class='boolval'>false</span>,
-            <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>    <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_char</span>(<span class='string'>&#39;\u{fffd}&#39;</span>); <span class='boolval'>true</span> },
-            <span class='ident'>DecoderTrap</span>::<span class='ident'>Ignore</span>     <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
+            <span class='ident'>DecoderTrap</span>::<span class='ident'>Strict</span>     <span class='op'>=&gt;</span> <span class='boolvalue'>false</span>,
+            <span class='ident'>DecoderTrap</span>::<span class='ident'>Replace</span>    <span class='op'>=&gt;</span> { <span class='ident'>output</span>.<span class='ident'>write_char</span>(<span class='string'>&#39;\u{fffd}&#39;</span>); <span class='boolvalue'>true</span> },
+            <span class='ident'>DecoderTrap</span>::<span class='ident'>Ignore</span>     <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
             <span class='ident'>DecoderTrap</span>::<span class='ident'>Call</span>(<span class='ident'>func</span>) <span class='op'>=&gt;</span> <span class='ident'>func</span>(<span class='ident'>decoder</span>, <span class='ident'>input</span>, <span class='ident'>output</span>),
         }
     }
@@ -932,13 +933,13 @@
                     <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;{} cannot reencode a replacement string&quot;</span>, <span class='ident'>trapname</span>);
                 }
             }
-            <span class='boolval'>true</span>
+            <span class='boolvalue'>true</span>
         }
 
         <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
-            <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>     <span class='op'>=&gt;</span> <span class='boolval'>false</span>,
+            <span class='ident'>EncoderTrap</span>::<span class='ident'>Strict</span>     <span class='op'>=&gt;</span> <span class='boolvalue'>false</span>,
             <span class='ident'>EncoderTrap</span>::<span class='ident'>Replace</span>    <span class='op'>=&gt;</span> <span class='ident'>reencode</span>(<span class='ident'>encoder</span>, <span class='string'>&quot;?&quot;</span>, <span class='ident'>output</span>, <span class='string'>&quot;Replace&quot;</span>),
-            <span class='ident'>EncoderTrap</span>::<span class='ident'>Ignore</span>     <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
+            <span class='ident'>EncoderTrap</span>::<span class='ident'>Ignore</span>     <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
             <span class='ident'>EncoderTrap</span>::<span class='ident'>NcrEscape</span>  <span class='op'>=&gt;</span> {
                 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>escapes</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
                 <span class='kw'>for</span> <span class='ident'>ch</span> <span class='kw'>in</span> <span class='ident'>input</span>.<span class='ident'>chars</span>() {
@@ -982,8 +983,8 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>tests</span> {
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='op'>*</span>;
-    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>EncoderTrap</span>::<span class='ident'>NcrEscape</span>;
+    <span class='kw'>use</span> <span class='kw'>super</span>::<span class='op'>*</span>;
+    <span class='kw'>use</span> <span class='kw'>super</span>::<span class='ident'>EncoderTrap</span>::<span class='ident'>NcrEscape</span>;
     <span class='kw'>use</span> <span class='ident'>util</span>::<span class='ident'>StrCharIndex</span>;
     <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>convert</span>::<span class='ident'>Into</span>;
 
@@ -996,7 +997,7 @@
             <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>MyEncoder</span> { <span class='ident'>flag</span>: <span class='self'>self</span>.<span class='ident'>flag</span>,
                                  <span class='ident'>prohibit</span>: <span class='self'>self</span>.<span class='ident'>prohibit</span>,
                                  <span class='ident'>prepend</span>: <span class='self'>self</span>.<span class='ident'>prepend</span>,
-                                 <span class='ident'>toggle</span>: <span class='boolval'>false</span> })
+                                 <span class='ident'>toggle</span>: <span class='boolvalue'>false</span> })
         }
         <span class='kw'>fn</span> <span class='ident'>is_ascii_compatible</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='self'>self</span>.<span class='ident'>flag</span> }
         <span class='kw'>fn</span> <span class='ident'>raw_feed</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>,
@@ -1027,7 +1028,7 @@
             <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>MyEncoder</span> { <span class='ident'>flag</span>: <span class='self'>self</span>.<span class='ident'>flag</span>,
                                  <span class='ident'>prohibit</span>: <span class='self'>self</span>.<span class='ident'>prohibit</span>,
                                  <span class='ident'>prepend</span>: <span class='self'>self</span>.<span class='ident'>prepend</span>,
-                                 <span class='ident'>toggle</span>: <span class='boolval'>false</span> })
+                                 <span class='ident'>toggle</span>: <span class='boolvalue'>false</span> })
         }
         <span class='kw'>fn</span> <span class='ident'>raw_decoder</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>RawDecoder</span><span class='op'>&gt;</span> { <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;not supported&quot;</span>) }
     }
@@ -1035,9 +1036,9 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_reencoding_trap_with_ascii_compatible_encoding</span>() {
         <span class='kw'>static</span> <span class='ident'>COMPAT</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>MyEncoding</span> <span class='op'>=</span>
-            <span class='kw-2'>&amp;</span><span class='ident'>MyEncoding</span> { <span class='ident'>flag</span>: <span class='boolval'>true</span>, <span class='ident'>prohibit</span>: <span class='string'>&#39;\u{80}&#39;</span>, <span class='ident'>prepend</span>: <span class='string'>&quot;&quot;</span> };
+            <span class='kw-2'>&amp;</span><span class='ident'>MyEncoding</span> { <span class='ident'>flag</span>: <span class='boolvalue'>true</span>, <span class='ident'>prohibit</span>: <span class='string'>&#39;\u{80}&#39;</span>, <span class='ident'>prepend</span>: <span class='string'>&quot;&quot;</span> };
         <span class='kw'>static</span> <span class='ident'>INCOMPAT</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>MyEncoding</span> <span class='op'>=</span>
-            <span class='kw-2'>&amp;</span><span class='ident'>MyEncoding</span> { <span class='ident'>flag</span>: <span class='boolval'>false</span>, <span class='ident'>prohibit</span>: <span class='string'>&#39;\u{80}&#39;</span>, <span class='ident'>prepend</span>: <span class='string'>&quot;&quot;</span> };
+            <span class='kw-2'>&amp;</span><span class='ident'>MyEncoding</span> { <span class='ident'>flag</span>: <span class='boolvalue'>false</span>, <span class='ident'>prohibit</span>: <span class='string'>&#39;\u{80}&#39;</span>, <span class='ident'>prepend</span>: <span class='string'>&quot;&quot;</span> };
 
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>COMPAT</span>.<span class='ident'>encode</span>(<span class='string'>&quot;Hello\u{203d} I&#39;m fine.&quot;</span>, <span class='ident'>NcrEscape</span>),
                    <span class='prelude-val'>Ok</span>(<span class='string'>b&quot;Hello&amp;#8253; I&#39;m fine.&quot;</span>.<span class='ident'>to_vec</span>()));
@@ -1048,9 +1049,9 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_reencoding_trap_with_ascii_incompatible_encoding</span>() {
         <span class='kw'>static</span> <span class='ident'>COMPAT</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>MyEncoding</span> <span class='op'>=</span>
-            <span class='kw-2'>&amp;</span><span class='ident'>MyEncoding</span> { <span class='ident'>flag</span>: <span class='boolval'>true</span>, <span class='ident'>prohibit</span>: <span class='string'>&#39;\u{80}&#39;</span>, <span class='ident'>prepend</span>: <span class='string'>&quot;*&quot;</span> };
+            <span class='kw-2'>&amp;</span><span class='ident'>MyEncoding</span> { <span class='ident'>flag</span>: <span class='boolvalue'>true</span>, <span class='ident'>prohibit</span>: <span class='string'>&#39;\u{80}&#39;</span>, <span class='ident'>prepend</span>: <span class='string'>&quot;*&quot;</span> };
         <span class='kw'>static</span> <span class='ident'>INCOMPAT</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>MyEncoding</span> <span class='op'>=</span>
-            <span class='kw-2'>&amp;</span><span class='ident'>MyEncoding</span> { <span class='ident'>flag</span>: <span class='boolval'>false</span>, <span class='ident'>prohibit</span>: <span class='string'>&#39;\u{80}&#39;</span>, <span class='ident'>prepend</span>: <span class='string'>&quot;*&quot;</span> };
+            <span class='kw-2'>&amp;</span><span class='ident'>MyEncoding</span> { <span class='ident'>flag</span>: <span class='boolvalue'>false</span>, <span class='ident'>prohibit</span>: <span class='string'>&#39;\u{80}&#39;</span>, <span class='ident'>prepend</span>: <span class='string'>&quot;*&quot;</span> };
 
         <span class='comment'>// this should behave incorrectly as the encoding broke the assumption.</span>
         <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>COMPAT</span>.<span class='ident'>encode</span>(<span class='string'>&quot;Hello\u{203d} I&#39;m fine.&quot;</span>, <span class='ident'>NcrEscape</span>),
@@ -1062,7 +1063,7 @@
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
     <span class='attribute'>#[<span class='ident'>should_panic</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>test_reencoding_trap_can_fail</span>() {
-        <span class='kw'>static</span> <span class='ident'>FAIL</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>MyEncoding</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>MyEncoding</span> { <span class='ident'>flag</span>: <span class='boolval'>false</span>, <span class='ident'>prohibit</span>: <span class='string'>&#39;&amp;&#39;</span>, <span class='ident'>prepend</span>: <span class='string'>&quot;&quot;</span> };
+        <span class='kw'>static</span> <span class='ident'>FAIL</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>MyEncoding</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>MyEncoding</span> { <span class='ident'>flag</span>: <span class='boolvalue'>false</span>, <span class='ident'>prohibit</span>: <span class='string'>&#39;&amp;&#39;</span>, <span class='ident'>prepend</span>: <span class='string'>&quot;&quot;</span> };
 
         <span class='comment'>// this should fail as this contrived encoding does not support `&amp;` at all</span>
         <span class='kw'>let</span> _ <span class='op'>=</span> <span class='ident'>FAIL</span>.<span class='ident'>encode</span>(<span class='string'>&quot;Hello\u{203d} I&#39;m fine.&quot;</span>, <span class='ident'>NcrEscape</span>);
@@ -1092,6 +1093,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -1112,7 +1115,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

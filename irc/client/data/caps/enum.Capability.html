@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content enum">
 <h1 class='fqn'><span class='in-band'>Enum <a href='../../../index.html'>irc</a>::<wbr><a href='../../index.html'>client</a>::<wbr><a href='../index.html'>data</a>::<wbr><a href='index.html'>caps</a>::<wbr><a class='enum' href=''>Capability</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-230' class='srclink' href='../../../../src/irc/client/data/caps.rs.html#6-41' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-230' class='srclink' href='../../../../src/irc/src/client/data/caps.rs.html#6-41' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum Capability {
     MultiPrefix,
     Sasl,
@@ -68,28 +69,35 @@
 }</pre><div class='docblock'><p>List of all supported IRCv3 capability extensions from the
 <a href="http://ircv3.net/irc/">IRCv3 specifications</a>.</p>
 </div><h2 class='variants'>Variants</h2>
-<table><tr><td id='variant.MultiPrefix'><code>MultiPrefix</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/multi-prefix-3.1.html">multi-prefix</a></p>
-</div></td></tr><tr><td id='variant.Sasl'><code>Sasl</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/sasl-3.1.html">sasl</a></p>
-</div></td></tr><tr><td id='variant.AccountNotify'><code>AccountNotify</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/account-notify-3.1.html">account-notify</a></p>
-</div></td></tr><tr><td id='variant.AwayNotify'><code>AwayNotify</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/away-notify-3.1.html">away-notify</a></p>
-</div></td></tr><tr><td id='variant.ExtendedJoin'><code>ExtendedJoin</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/extended-join-3.1.html">extended-join</a></p>
-</div></td></tr><tr><td id='variant.Metadata'><code>Metadata</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/core/metadata-3.2.html">metadata</a></p>
-</div></td></tr><tr><td id='variant.MetadataNotify'><code>MetadataNotify</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/core/metadata-3.2.html">metadata-notify</a></p>
-</div></td></tr><tr><td id='variant.Monitor'><code>Monitor</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/core/monitor-3.2.html">monitor</a></p>
-</div></td></tr><tr><td id='variant.AccountTag'><code>AccountTag</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/account-tag-3.2.html">account-tag</a></p>
-</div></td></tr><tr><td id='variant.Batch'><code>Batch</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/batch-3.2.html">batch</a></p>
-</div></td></tr><tr><td id='variant.CapNotify'><code>CapNotify</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/cap-notify-3.2.html">cap-notify</a></p>
-</div></td></tr><tr><td id='variant.ChgHost'><code>ChgHost</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/chghost-3.2.html">chghost</a></p>
-</div></td></tr><tr><td id='variant.EchoMessage'><code>EchoMessage</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/echo-message-3.2.html">echo-message</a></p>
-</div></td></tr><tr><td id='variant.InviteNotify'><code>InviteNotify</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/invite-notify-3.2.html">invite-notify</a></p>
-</div></td></tr><tr><td id='variant.ServerTime'><code>ServerTime</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/server-time-3.2.html">server-time</a></p>
-</div></td></tr><tr><td id='variant.UserhostInNames'><code>UserhostInNames</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/userhost-in-names-3.2.html">userhost-in-names</a></p>
-</div></td></tr><tr><td id='variant.Custom'><code>Custom</code></td><td><div class='docblock'><p>Custom IRCv3 capability extensions</p>
-</div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a></code></h3><div class='impl-items'><h4 id='method.as_ref' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html#method.as_ref' class='fnname'>as_ref</a>(&amp;self) -&gt; &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
-</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
-<h4 id='method.ne' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
-</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
-</div></section>
+<table class='variants_table'><tr><td id='variant.MultiPrefix'><code>MultiPrefix</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/multi-prefix-3.1.html">multi-prefix</a></p>
+</div></td><td></td></tr><tr><td id='variant.Sasl'><code>Sasl</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/sasl-3.1.html">sasl</a></p>
+</div></td><td></td></tr><tr><td id='variant.AccountNotify'><code>AccountNotify</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/account-notify-3.1.html">account-notify</a></p>
+</div></td><td></td></tr><tr><td id='variant.AwayNotify'><code>AwayNotify</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/away-notify-3.1.html">away-notify</a></p>
+</div></td><td></td></tr><tr><td id='variant.ExtendedJoin'><code>ExtendedJoin</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/extended-join-3.1.html">extended-join</a></p>
+</div></td><td></td></tr><tr><td id='variant.Metadata'><code>Metadata</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/core/metadata-3.2.html">metadata</a></p>
+</div></td><td></td></tr><tr><td id='variant.MetadataNotify'><code>MetadataNotify</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/core/metadata-3.2.html">metadata-notify</a></p>
+</div></td><td></td></tr><tr><td id='variant.Monitor'><code>Monitor</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/core/monitor-3.2.html">monitor</a></p>
+</div></td><td></td></tr><tr><td id='variant.AccountTag'><code>AccountTag</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/account-tag-3.2.html">account-tag</a></p>
+</div></td><td></td></tr><tr><td id='variant.Batch'><code>Batch</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/batch-3.2.html">batch</a></p>
+</div></td><td></td></tr><tr><td id='variant.CapNotify'><code>CapNotify</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/cap-notify-3.2.html">cap-notify</a></p>
+</div></td><td></td></tr><tr><td id='variant.ChgHost'><code>ChgHost</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/chghost-3.2.html">chghost</a></p>
+</div></td><td></td></tr><tr><td id='variant.EchoMessage'><code>EchoMessage</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/echo-message-3.2.html">echo-message</a></p>
+</div></td><td></td></tr><tr><td id='variant.InviteNotify'><code>InviteNotify</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/invite-notify-3.2.html">invite-notify</a></p>
+</div></td><td></td></tr><tr><td id='variant.ServerTime'><code>ServerTime</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/server-time-3.2.html">server-time</a></p>
+</div></td><td></td></tr><tr><td id='variant.UserhostInNames'><code>UserhostInNames</code></td><td><div class='docblock'><p><a href="http://ircv3.net/specs/extensions/userhost-in-names-3.2.html">userhost-in-names</a></p>
+</div></td><td></td></tr><tr><td id='variant.Custom'><code>Custom</code></td><td><div class='docblock'><p>Custom IRCv3 capability extensions</p>
+</div></td><td></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-289' class='srclink' href='../../../../src/irc/src/client/data/caps.rs.html#51-73' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.as_ref' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html#tymethod.as_ref' class='fnname'>as_ref</a>(&amp;self) -&gt; &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<div class='docblock'><p>Performs the conversion.</p>
+</div></div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-249' class='srclink' href='../../../../src/irc/src/client/data/caps.rs.html#5' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>This method tests for <code>self</code> and <code>other</code> values to be equal, and is used by <code>==</code>. <a href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq">Read more</a></p>
+</div><h4 id='method.ne' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>This method tests for <code>!=</code>.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-264' class='srclink' href='../../../../src/irc/src/client/data/caps.rs.html#5' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+<div class='docblock'><p>Formats the value using the given formatter.</p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -112,6 +120,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -132,7 +142,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

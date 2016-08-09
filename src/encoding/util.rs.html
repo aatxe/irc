@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-88ac128001ac3a9a/encoding-0.2.32/src/util.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/Aaron/.multirust/toolchains/stable/cargo/registry/src/github.com-1ecc6299db9ec823/encoding-0.2.32/src/util.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>util.rs.html -- source</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -536,31 +537,31 @@
             }
 
             <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>internal</span> {
-                <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>Data</span><span class='op'>&gt;</span> <span class='op'>=</span> ::<span class='ident'>util</span>::<span class='ident'>StatefulDecoderHelper</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>super</span>::<span class='ident'>State</span>, <span class='ident'>Data</span><span class='op'>&gt;</span>;
+                <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>Data</span><span class='op'>&gt;</span> <span class='op'>=</span> ::<span class='ident'>util</span>::<span class='ident'>StatefulDecoderHelper</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='kw'>super</span>::<span class='ident'>State</span>, <span class='ident'>Data</span><span class='op'>&gt;</span>;
 
                 $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>item</span>)<span class='op'>*</span>
             }
 
             <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>start</span> {
-                <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>internal</span>::<span class='op'>*</span>;
+                <span class='kw'>use</span> <span class='kw'>super</span>::<span class='ident'>internal</span>::<span class='op'>*</span>;
 
                 <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-                <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inist</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inictx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>super</span>::<span class='ident'>State</span> {
+                <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inist</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inictx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='kw'>super</span>::<span class='ident'>State</span> {
                     <span class='comment'>// prohibits all kind of recursions, including self-recursions</span>
-                    <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_imports</span>)]</span> <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>transient</span>::<span class='op'>*</span>;
+                    <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_imports</span>)]</span> <span class='kw'>use</span> <span class='kw'>super</span>::<span class='ident'>transient</span>::<span class='op'>*</span>;
                     <span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inictx</span>.<span class='ident'>read</span>() {
-                        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>super</span>::<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inist</span>,
+                        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>super</span>::<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inist</span>,
                         <span class='prelude-val'>Some</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='ident'>c</span> { $($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inilhs</span>)<span class='op'>|</span><span class='op'>+</span> <span class='op'>=&gt;</span> { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inirhs</span>);<span class='op'>+</span> })<span class='op'>+</span> },
                     }
                 }
 
                 $(
                     <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-                    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckst</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckctx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckarg</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckty</span>)<span class='op'>*</span>) <span class='op'>-&gt;</span> <span class='ident'>super</span>::<span class='ident'>State</span> {
+                    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckst</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckctx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckarg</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckty</span>)<span class='op'>*</span>) <span class='op'>-&gt;</span> <span class='kw'>super</span>::<span class='ident'>State</span> {
                         <span class='comment'>// prohibits all kind of recursions, including self-recursions</span>
-                        <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_imports</span>)]</span> <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>transient</span>::<span class='op'>*</span>;
+                        <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_imports</span>)]</span> <span class='kw'>use</span> <span class='kw'>super</span>::<span class='ident'>transient</span>::<span class='op'>*</span>;
                         <span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckctx</span>.<span class='ident'>read</span>() {
-                            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>super</span>::<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckst</span>(() $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckarg</span>)<span class='op'>*</span>),
+                            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>super</span>::<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckst</span>(() $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckarg</span>)<span class='op'>*</span>),
                             <span class='prelude-val'>Some</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='ident'>c</span> { $($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>cklhs</span>)<span class='op'>|</span><span class='op'>+</span> <span class='op'>=&gt;</span> { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckrhs</span>);<span class='op'>+</span> })<span class='op'>+</span> },
                         }
                     }
@@ -568,27 +569,27 @@
             }
 
             <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>transient</span> {
-                <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>internal</span>::<span class='op'>*</span>;
+                <span class='kw'>use</span> <span class='kw'>super</span>::<span class='ident'>internal</span>::<span class='op'>*</span>;
 
                 <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
                 <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-                <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inist</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(_: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>super</span>::<span class='ident'>State</span> {
-                    <span class='ident'>super</span>::<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inist</span> <span class='comment'>// do not recurse further</span>
+                <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inist</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(_: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='kw'>super</span>::<span class='ident'>State</span> {
+                    <span class='kw'>super</span>::<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inist</span> <span class='comment'>// do not recurse further</span>
                 }
 
                 $(
                     <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
                     <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-                    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckst</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(_: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckarg</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckty</span>)<span class='op'>*</span>) <span class='op'>-&gt;</span> <span class='ident'>super</span>::<span class='ident'>State</span> {
-                        <span class='ident'>super</span>::<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckst</span>(() $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckarg</span>)<span class='op'>*</span>) <span class='comment'>// do not recurse further</span>
+                    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckst</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(_: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckarg</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckty</span>)<span class='op'>*</span>) <span class='op'>-&gt;</span> <span class='kw'>super</span>::<span class='ident'>State</span> {
+                        <span class='kw'>super</span>::<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckst</span>(() $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ckarg</span>)<span class='op'>*</span>) <span class='comment'>// do not recurse further</span>
                     }
                 )<span class='op'>*</span>
 
                 $(
                     <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-                    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>st</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ctx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty</span>)<span class='op'>*</span>) <span class='op'>-&gt;</span> <span class='ident'>super</span>::<span class='ident'>State</span> {
+                    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>st</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ctx</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Context</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ty</span>)<span class='op'>*</span>) <span class='op'>-&gt;</span> <span class='kw'>super</span>::<span class='ident'>State</span> {
                         <span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>inictx</span>.<span class='ident'>read</span>() {
-                            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>super</span>::<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>st</span>(() $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>)<span class='op'>*</span>),
+                            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>super</span>::<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>st</span>(() $(, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>)<span class='op'>*</span>),
                             <span class='prelude-val'>Some</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='ident'>c</span> { $($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>lhs</span>)<span class='op'>|</span><span class='op'>+</span> <span class='op'>=&gt;</span> { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rhs</span>);<span class='op'>+</span> })<span class='op'>+</span> },
                         }
                     }
@@ -710,6 +711,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -730,7 +733,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

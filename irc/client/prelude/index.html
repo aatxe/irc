@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content mod">
 <h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>client</a>::<wbr><a class='mod' href=''>prelude</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-3350' class='srclink' href='../../../src/irc/client/mod.rs.html#7-13' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-3534' class='srclink' href='../../../src/irc/src/client/mod.rs.html#7-13' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>A client-side IRC prelude, re-exporting all the necessary basics.</p>
 </div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
 <table><tr><td><code>pub use client::server::{<a class='struct' href='../../../irc/client/server/struct.IrcServer.html' title='irc::client::server::IrcServer'>IrcServer</a>, <a class='trait' href='../../../irc/client/server/trait.Server.html' title='irc::client::server::Server'>Server</a>};</code></td></tr><tr><td><code>pub use client::server::utils::<a class='trait' href='../../../irc/client/server/utils/trait.ServerExt.html' title='irc::client::server::utils::ServerExt'>ServerExt</a>;</code></td></tr><tr><td><code>pub use client::data::{<a class='enum' href='../../../irc/client/data/caps/enum.Capability.html' title='irc::client::data::caps::Capability'>Capability</a>, <a class='enum' href='../../../irc/client/data/command/enum.Command.html' title='irc::client::data::command::Command'>Command</a>, <a class='struct' href='../../../irc/client/data/config/struct.Config.html' title='irc::client::data::config::Config'>Config</a>, <a class='struct' href='../../../irc/client/data/message/struct.Message.html' title='irc::client::data::message::Message'>Message</a>, <a class='enum' href='../../../irc/client/data/caps/enum.NegotiationVersion.html' title='irc::client::data::caps::NegotiationVersion'>NegotiationVersion</a>, <a class='enum' href='../../../irc/client/data/response/enum.Response.html' title='irc::client::data::response::Response'>Response</a>};</code></td></tr><tr><td><code>pub use client::data::kinds::{<a class='trait' href='../../../irc/client/data/kinds/trait.IrcRead.html' title='irc::client::data::kinds::IrcRead'>IrcRead</a>, <a class='trait' href='../../../irc/client/data/kinds/trait.IrcWrite.html' title='irc::client::data::kinds::IrcWrite'>IrcWrite</a>};</code></td></tr></table></section>
@@ -72,6 +73,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -92,7 +95,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

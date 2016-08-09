@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -43,10 +44,10 @@
 
     <section id='main' class="content trait">
 <h1 class='fqn'><span class='in-band'>Trait <a href='../../index.html'>irc</a>::<wbr><a href='../index.html'>client</a>::<wbr><a href='index.html'>conn</a>::<wbr><a class='trait' href=''>Connection</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-24' class='srclink' href='../../../src/irc/client/conn.rs.html#16-45' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-24' class='srclink' href='../../../src/irc/src/client/conn.rs.html#16-45' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait Connection {
     fn <a href='#tymethod.send' class='fnname'>send</a>(&amp;self, msg: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, encoding: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;;
     fn <a href='#tymethod.recv' class='fnname'>recv</a>(&amp;self, encoding: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;;
@@ -64,11 +65,11 @@ This is intended for use in writing tests.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl <a class='trait' href='../../../irc/client/conn/trait.Connection.html' title='irc::client::conn::Connection'>Connection</a> for <a class='struct' href='../../../irc/client/conn/struct.NetConnection.html' title='irc::client::conn::NetConnection'>NetConnection</a></code></li>
-<li><code>impl <a class='trait' href='../../../irc/client/conn/trait.Connection.html' title='irc::client::conn::Connection'>Connection</a> for <a class='struct' href='../../../irc/client/conn/struct.MockConnection.html' title='irc::client::conn::MockConnection'>MockConnection</a></code></li>
+    <li><code>impl Connection for <a class='struct' href='../../../irc/client/conn/struct.NetConnection.html' title='irc::client::conn::NetConnection'>NetConnection</a></code></li>
+<li><code>impl Connection for <a class='struct' href='../../../irc/client/conn/struct.MockConnection.html' title='irc::client::conn::MockConnection'>MockConnection</a></code></li>
 </ul><script type="text/javascript" async
-                              src="../../../implementors/irc/client/conn/trait.Connection.js">
-                      </script></section>
+                         src="../../../implementors/irc/client/conn/trait.Connection.js">
+                 </script></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -91,6 +92,8 @@ This is intended for use in writing tests.</p>
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -111,7 +114,7 @@ This is intended for use in writing tests.</p>
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

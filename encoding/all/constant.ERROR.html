@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -43,34 +44,11 @@
 
     <section id='main' class="content constant">
 <h1 class='fqn'><span class='in-band'><a href='../index.html'>encoding</a>::<wbr><a href='index.html'>all</a>::<wbr><a class='constant' href=''>ERROR</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-2407' class='srclink' href='../../src/encoding/all.rs.html#16' title='goto source code'>[src]</a></span></h1>
-<pre class='rust const'>pub const ERROR: &amp;'static <a class='struct' href='../../encoding/codec/error/struct.ErrorEncoding.html' title='encoding::codec::error::ErrorEncoding'>ErrorEncoding</a><code> = </code><code>&$($module)::+::$val;
-    );
-);
-
-macro_rules! singlebyte(
-    ($(#[$attr:meta])* var=$var:ident, mod=$($module:ident)::+, name=$name:expr) => (
-        singlebyte!($(#[$attr])* var=$var, mod=$($module)::+, name=$name, whatwg=None);
-    );
-    ($(#[$attr:meta])* var=$var:ident, mod=$($module:ident)::+, name|whatwg=$name:expr) => (
-        singlebyte!($(#[$attr])* var=$var, mod=$($module)::+, name=$name, whatwg=Some($name));
-    );
-    ($(#[$attr:meta])* var=$var:ident, mod=$($module:ident)::+,
-                       name=$name:expr, whatwg=$whatwg:expr) => (
-        $(#[$attr])* pub const $var: &'static codec::singlebyte::SingleByteEncoding =
-            &codec::singlebyte::SingleByteEncoding {
-                name: $name,
-                whatwg_name: $whatwg,
-                index_forward: $($module)::+::forward,
-                index_backward: $($module)::+::backward,
-            };
-    )
-);
-
-unique!(var=ERROR, mod=codec::error, val=ErrorEncoding</code></pre></section>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-2380' class='srclink' href='../../src/encoding/all.rs.html#16' title='goto source code'>[src]</a></span></h1>
+<pre class='rust const'>pub const ERROR: &amp;'static <a class='struct' href='../../encoding/codec/error/struct.ErrorEncoding.html' title='encoding::codec::error::ErrorEncoding'>ErrorEncoding</a><code> = </code><code>&amp;codec::error::ErrorEncoding</code></pre></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -93,6 +71,8 @@ unique!(var=ERROR, mod=codec::error, val=ErrorEncoding</code></pre></section>
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -113,7 +93,7 @@ unique!(var=ERROR, mod=codec::error, val=ErrorEncoding</code></pre></section>
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

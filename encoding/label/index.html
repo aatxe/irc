@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -43,34 +44,30 @@
 
     <section id='main' class="content mod">
 <h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>encoding</a>::<wbr><a class='mod' href=''>label</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-2457' class='srclink' href='../../src/encoding/label.rs.html#5-355' title='goto source code'>[src]</a></span></h1>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-2430' class='srclink' href='../../src/encoding/label.rs.html#5-355' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>An interface for retrieving an encoding (or a set of encodings) from a string/numeric label.</p>
 </div><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='fn' href='fn.encoding_from_whatwg_label.html'
-                               title='encoding::label::encoding_from_whatwg_label'>encoding_from_whatwg_label</a></td>
-                        <td class='docblock short'>
-                             <p>Returns an encoding from given label, defined in the WHATWG Encoding standard, if any.
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.encoding_from_whatwg_label.html'
+                                  title='encoding::label::encoding_from_whatwg_label'>encoding_from_whatwg_label</a></td>
+                           <td class='docblock short'>
+                                <p>Returns an encoding from given label, defined in the WHATWG Encoding standard, if any.
 Implements &quot;get an encoding&quot; algorithm: <a href="http://encoding.spec.whatwg.org/#concept-encoding-get">http://encoding.spec.whatwg.org/#concept-encoding-get</a></p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='fn' href='fn.encoding_from_windows_code_page.html'
-                               title='encoding::label::encoding_from_windows_code_page'>encoding_from_windows_code_page</a></td>
-                        <td class='docblock short'>
-                             <p>Returns an encoding from Windows code page number.
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.encoding_from_windows_code_page.html'
+                                  title='encoding::label::encoding_from_windows_code_page'>encoding_from_windows_code_page</a></td>
+                           <td class='docblock short'>
+                                <p>Returns an encoding from Windows code page number.
 <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756%28v=vs.85%29.aspx">http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756%28v=vs.85%29.aspx</a>
 Sometimes it can return a <em>superset</em> of the requested encoding, e.g. for several CJK encodings.</p>
-
-                        </td>
-                    </tr>
-                </table></section>
+                           </td>
+                       </tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -93,6 +90,8 @@ Sometimes it can return a <em>superset</em> of the requested encoding, e.g. for 
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -113,7 +112,7 @@ Sometimes it can return a <em>superset</em> of the requested encoding, e.g. for 
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
