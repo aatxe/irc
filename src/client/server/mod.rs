@@ -345,11 +345,17 @@ impl IrcServer {
             Command::Response(Response::ERR_NOMOTD, _, _) => {
                 try!(self.send_nick_password());
                 try!(self.send_umodes());
-                for chan in self.config().channels().into_iter() {
+
+                let config_chans = self.config().channels();
+                for chan in config_chans.iter() {
                     match self.config().channel_key(chan) {
                         Some(key) => try!(self.send_join_with_keys(chan, key)),
                         None => try!(self.send_join(chan))
                     }
+                }
+                let joined_chans = self.state.chanlists.lock().unwrap();
+                for chan in joined_chans.keys().filter(|x| !config_chans.contains(&x.as_str())) {
+                    try!(self.send_join(chan))
                 }
             },
             Command::Response(Response::ERR_NICKNAMEINUSE, _, _) |
