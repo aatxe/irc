@@ -38,7 +38,7 @@ pub struct IrcServer {
     /// The internal, thread-safe server state.
     state: Arc<ServerState>,
     /// A thread-local count of reconnection attempts used for synchronization.
-    reconnect_count: Cell<u32>,
+    reconnect_count: Mutex<Cell<u32>>,
 }
 
 /// Thread-safe internal state for an IRC server connection.
@@ -164,7 +164,7 @@ impl Clone for IrcServer {
     fn clone(&self) -> IrcServer {
         IrcServer {
             state: self.state.clone(),
-            reconnect_count: self.reconnect_count.clone()
+            reconnect_count: Mutex::new(self.reconnect_count.lock().unwrap().clone())
         }
     }
 }
@@ -278,7 +278,7 @@ impl IrcServer {
                 }
             }
         });
-        IrcServer { state: state, reconnect_count: Cell::new(0) }
+        IrcServer { state: state, reconnect_count: Mutex::new(Cell::new(0)) }
     }
 
     /// Gets a reference to the IRC server's connection.
@@ -289,13 +289,13 @@ impl IrcServer {
     /// Reconnects to the IRC server, disconnecting if necessary.
     pub fn reconnect(&self) -> Result<()> {
         let mut reconnect_count = self.state.reconnect_count.lock().unwrap();
-        let res = if self.reconnect_count.get() == *reconnect_count {
+        let res = if self.reconnect_count.lock().unwrap().get() == *reconnect_count {
             *reconnect_count += 1;
             self.state.reconnect()
         } else {
             Ok(())
         };
-        self.reconnect_count.set(*reconnect_count);
+        self.reconnect_count.lock().unwrap().set(*reconnect_count);
         res
     }
 
