@@ -3,7 +3,7 @@ use std::io::Result;
 use std::borrow::ToOwned;
 use client::data::{Capability, NegotiationVersion};
 use client::data::Command::{AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
-use client::data::Command::{OPER, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
+use client::data::Command::{OPER, PART, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
 use client::data::command::CapSubCommand::{END, LS, REQ};
 #[cfg(feature = "ctcp")] use time::get_time;
 use client::server::Server;
@@ -74,6 +74,11 @@ pub trait ServerExt: Server {
     /// Joins the specified channel or chanlist using the specified key or keylist.
     fn send_join_with_keys(&self, chanlist: &str, keylist: &str) -> Result<()> where Self: Sized {
         self.send(JOIN(chanlist.to_owned(), Some(keylist.to_owned()), None))
+    }
+
+    /// Parts the specified channel or chanlist.
+    fn send_part(&self, chanlist: &str) -> Result<()> where Self: Sized {
+        self.send(PART(chanlist.to_owned(), None))
     }
 
     /// Attempts to oper up using the specified username and password.
@@ -266,6 +271,13 @@ mod test {
         let server = IrcServer::from_connection(test_config(), MockConnection::empty());
         server.send_join("#test,#test2,#test3").unwrap();
         assert_eq!(&get_server_value(server)[..], "JOIN #test,#test2,#test3\r\n");
+    }
+
+    #[test]
+    fn send_part() {
+        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        server.send_part("#test").unwrap();
+        assert_eq!(&get_server_value(server)[..], "PART #test\r\n");
     }
 
     #[test]
