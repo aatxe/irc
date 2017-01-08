@@ -26,7 +26,7 @@ fn main() {
     let cfg = Config {
         nickname: Some(format!("irc-rs")),
         server: Some(format!("irc.example.com")),
-        channels: Some(vec![format!("#test")])
+        channels: Some(vec![format!("#test")]),
         .. Default::default()
     };
     let server = IrcServer::from_config(cfg).unwrap();
