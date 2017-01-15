@@ -17,8 +17,9 @@ ctcp = []
 nochanlists = []
 
 [dependencies]
-rustc-serialize = "0.3.0"
-time = "0.1.0"
-encoding = "0.2.0"
-tokio-core = "0.1.3"
-tokio-service = "0.1.0"
+rustc-serialize = "0.3"
+time = "0.1"
+encoding = "0.2"
+tokio-core = "0.1"
+tokio-service = "0.1"
+tokio-tls = "0.1"
