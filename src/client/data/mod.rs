@@ -1,10 +1,10 @@
 //! Data related to IRC functionality.
 
-pub use client::data::caps::{Capability, NegotiationVersion};
-pub use client::data::command::Command;
+pub use proto::caps::{Capability, NegotiationVersion};
+pub use proto::command::Command;
 pub use client::data::config::Config;
-pub use client::data::message::Message;
-pub use client::data::response::Response;
+pub use proto::message::Message;
+pub use proto::response::Response;
 pub use client::data::user::{AccessLevel, User};
 
 pub mod kinds {
@@ -20,9 +20,5 @@ pub mod kinds {
     impl<T> IrcRead for T where T: BufRead + Sized + Send + 'static {}
 }
 
-pub mod caps;
-pub mod command;
 pub mod config;
-pub mod message;
-pub mod response;
 pub mod user;

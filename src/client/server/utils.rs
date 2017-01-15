@@ -4,7 +4,7 @@ use std::borrow::ToOwned;
 use client::data::{Capability, NegotiationVersion};
 use client::data::Command::{AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
 use client::data::Command::{OPER, PART, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
-use client::data::command::CapSubCommand::{END, LS, REQ};
+use proto::command::CapSubCommand::{END, LS, REQ};
 #[cfg(feature = "ctcp")] use time::get_time;
 use client::server::Server;
 
