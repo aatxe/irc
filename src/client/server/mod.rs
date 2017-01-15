@@ -130,14 +130,8 @@ impl ServerState {
         self.action_taken();
     }
 
-    #[cfg(feature = "encode")]
     fn write<M: Into<Message>>(&self, msg: M) -> Result<()> {
         self.conn.send(&msg.into().to_string(), self.config.encoding())
-    }
-
-    #[cfg(not(feature = "encode"))]
-    fn write<M: Into<Message>>(&self, msg: M) -> Result<()> {
-        self.conn.send(&msg.into().to_string())
     }
 }
 
@@ -505,15 +499,8 @@ impl<'a> ServerIterator<'a> {
     }
 
     /// Gets the next line from the connection.
-    #[cfg(feature = "encode")]
     fn get_next_line(&self) -> Result<String> {
         self.server.conn().recv(self.server.config().encoding())
-    }
-
-    /// Gets the next line from the connection.
-    #[cfg(not(feature = "encode"))]
-    fn get_next_line(&self) -> Result<String> {
-        self.server.conn().recv()
     }
 }
 

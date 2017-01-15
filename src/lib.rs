@@ -3,9 +3,8 @@
 #![warn(missing_docs)]
 
 extern crate time;
-#[cfg(feature = "encode")] extern crate encoding;
+extern crate encoding;
 extern crate rustc_serialize;
-#[cfg(feature = "ssl")] extern crate openssl;
 
 pub mod client;
 pub mod server;

@@ -1,44 +1,22 @@
 //! Thread-safe connections on IrcStreams.
-#[cfg(feature = "ssl")] use std::error::Error as StdError;
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter, Cursor, Result};
-#[cfg(feature = "ssl")] use std::io::Error;
-#[cfg(feature = "ssl")] use std::io::ErrorKind;
 use std::net::TcpStream;
-#[cfg(feature = "ssl")] use std::result::Result as StdResult;
 use std::sync::Mutex;
-#[cfg(feature = "encode")] use encoding::DecoderTrap;
-#[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
-#[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslMethod, SslStream};
-#[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
+use encoding::DecoderTrap;
+use encoding::label::encoding_from_whatwg_label;
 
 /// A connection.
 pub trait Connection {
     /// Sends a message over this connection.
-    #[cfg(feature = "encode")]
     fn send(&self, msg: &str, encoding: &str) -> Result<()>;
 
-    /// Sends a message over this connection.
-    #[cfg(not(feature = "encode"))]
-    fn send(&self, msg: &str) -> Result<()>;
-
     /// Receives a single line from this connection.
-    #[cfg(feature = "encoding")]
     fn recv(&self, encoding: &str) -> Result<String>;
 
-    /// Receives a single line from this connection.
-    #[cfg(not(feature = "encoding"))]
-    fn recv(&self) -> Result<String>;
-
     /// Gets the full record of all sent messages if the Connection records this.
     /// This is intended for use in writing tests.
-    #[cfg(feature = "encoding")]
     fn written(&self, encoding: &str) -> Option<String>;
-
-    /// Gets the full record of all sent messages if the Connection records this.
-    /// This is intended for use in writing tests.
-    #[cfg(not(feature = "encoding"))]
-    fn written(&self) -> Option<String>;
 
     /// Re-establishes this connection, disconnecting from the existing case if necessary.
     fn reconnect(&self) -> Result<()>;
@@ -88,70 +66,28 @@ impl NetConnection {
         Ok(NetConnection::new(host, port, reader, writer))
     }
 
-    /// Connects over SSL to the specified server and returns a reader-writer pair.
-    #[cfg(feature = "ssl")]
-    fn connect_ssl_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
-        let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[..]));
-        let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Tlsv1)));
-        let ssl_socket = try!(ssl_to_io(SslStream::connect_generic(&ssl, socket)));
-        Ok((BufReader::new(NetStream::Ssl(try!(ssl_socket.try_clone()))),
-            BufWriter::new(NetStream::Ssl(ssl_socket))))
-    }
-
     /// Panics because SSL support is not compiled in.
-    #[cfg(not(feature = "ssl"))]
     fn connect_ssl_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
         panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
     }
 }
 
-/// Converts a Result<T, SslError> into an Result<T>.
-#[cfg(feature = "ssl")]
-fn ssl_to_io<T>(res: StdResult<T, SslError>) -> Result<T> {
-    match res {
-        Ok(x) => Ok(x),
-        Err(e) => Err(Error::new(ErrorKind::Other,
-            &format!("An SSL error occurred. ({})", e.description())[..]
-        )),
-    }
-}
-
 impl Connection for NetConnection {
-    #[cfg(feature = "encode")]
     fn send(&self, msg: &str, encoding: &str) -> Result<()> {
         imp::send(&self.writer, msg, encoding)
     }
 
-    #[cfg(not(feature = "encode"))]
-    fn send(&self, msg: &str) -> Result<()> {
-        imp::send(&self.writer, msg)
-    }
-
-    #[cfg(feature = "encoding")]
     fn recv(&self, encoding: &str) -> Result<String> {
         imp::recv(&self.reader, encoding)
     }
 
-    #[cfg(not(feature = "encoding"))]
-    fn recv(&self) -> Result<String> {
-        imp::recv(&self.reader)
-    }
-
-    #[cfg(feature = "encoding")]
     fn written(&self, _: &str) -> Option<String> {
-        None
-    }
-
-    #[cfg(not(feature = "encoding"))]
-    fn written(&self) -> Option<String> {
         None
     }
 
     fn reconnect(&self) -> Result<()> {
         let use_ssl = match *self.reader.lock().unwrap().get_ref() {
             NetStream::Unsecured(_) =>  false,
-            #[cfg(feature = "ssl")]
-            NetStream::Ssl(_) => true,
         };
         let host = self.host.lock().unwrap();
         let port = self.port.lock().unwrap();
@@ -193,36 +129,18 @@ impl MockConnection {
 }
 
 impl Connection for MockConnection {
-    #[cfg(feature = "encode")]
     fn send(&self, msg: &str, encoding: &str) -> Result<()> {
         imp::send(&self.writer, msg, encoding)
     }
 
-    #[cfg(not(feature = "encode"))]
-    fn send(&self, msg: &str) -> Result<()> {
-        imp::send(&self.writer, msg)
-    }
-
-    #[cfg(feature = "encoding")]
     fn recv(&self, encoding: &str) -> Result<String> {
         imp::recv(&self.reader, encoding)
     }
 
-    #[cfg(not(feature = "encoding"))]
-    fn recv(&self) -> Result<String> {
-        imp::recv(&self.reader)
-    }
-
-    #[cfg(feature = "encoding")]
     fn written(&self, encoding: &str) -> Option<String> {
         encoding_from_whatwg_label(encoding).and_then(|enc|
             enc.decode(&self.writer.lock().unwrap(), DecoderTrap::Replace).ok()
         )
-    }
-
-    #[cfg(not(feature = "encoding"))]
-    fn written(&self) -> Option<String> {
-        String::from_utf8(self.writer.lock().unwrap().clone()).ok()
     }
 
     fn reconnect(&self) -> Result<()> {
@@ -231,16 +149,14 @@ impl Connection for MockConnection {
 }
 
 mod imp {
-    use std::io::prelude::*;
     use std::io::Result;
     use std::io::Error;
     use std::io::ErrorKind;
     use std::sync::Mutex;
-    #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
-    #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
+    use encoding::{DecoderTrap, EncoderTrap};
+    use encoding::label::encoding_from_whatwg_label;
     use client::data::kinds::{IrcRead, IrcWrite};
 
-    #[cfg(feature = "encode")]
     pub fn send<T: IrcWrite>(writer: &Mutex<T>, msg: &str, encoding: &str) -> Result<()> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
@@ -259,14 +175,6 @@ mod imp {
         writer.flush()
     }
 
-    #[cfg(not(feature = "encode"))]
-    pub fn send<T: IrcWrite>(writer: &Mutex<T>, msg: &str) -> Result<()> {
-        let mut writer = writer.lock().unwrap();
-        try!(writer.write_all(msg.as_bytes()));
-        writer.flush()
-    }
-
-    #[cfg(feature = "encoding")]
     pub fn recv<T: IrcRead>(reader: &Mutex<T>, encoding: &str) -> Result<String> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
@@ -286,26 +194,12 @@ mod imp {
         )
     }
 
-    #[cfg(not(feature = "encoding"))]
-    pub fn recv<T: IrcRead>(reader: &Mutex<T>) -> Result<String> {
-        let mut ret = String::new();
-        try!(reader.lock().unwrap().read_line(&mut ret));
-        if ret.is_empty() {
-            Err(Error::new(ErrorKind::Other, "EOF"))
-        } else {
-            Ok(ret)
-        }
-    }
 }
 
 /// An abstraction over different networked streams.
 pub enum NetStream {
     /// An unsecured TcpStream.
     Unsecured(TcpStream),
-    /// An SSL-secured TcpStream.
-    /// This is only available when compiled with SSL support.
-    #[cfg(feature = "ssl")]
-    Ssl(SslStream<TcpStream>),
 }
 
 impl Read for NetStream {
@@ -322,16 +216,12 @@ impl Write for NetStream {
     fn write(&mut self, buf: &[u8]) -> Result<usize> {
         match *self {
             NetStream::Unsecured(ref mut stream) => stream.write(buf),
-            #[cfg(feature = "ssl")]
-            NetStream::Ssl(ref mut stream) => stream.write(buf),
         }
     }
 
     fn flush(&mut self) -> Result<()> {
         match *self {
             NetStream::Unsecured(ref mut stream) => stream.flush(),
-            #[cfg(feature = "ssl")]
-            NetStream::Ssl(ref mut stream) => stream.flush(),
         }
     }
 }
