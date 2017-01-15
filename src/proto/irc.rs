@@ -6,25 +6,18 @@ use proto::message::Message;
 use tokio_core::io::{Codec, EasyBuf};
 
 /// An IRC codec built around an inner codec.
-pub struct IrcCodec<C: Codec> {
-    inner: C,
+pub struct IrcCodec {
+    inner: LineCodec,
 }
 
-impl IrcCodec<LineCodec> {
+impl IrcCodec {
     /// Creates a new instance of IrcCodec wrapping a LineCodec with the specifiec encoding.
-    pub fn new(label: &str) -> io::Result<IrcCodec<LineCodec>> {
-        LineCodec::new(label).map(|codec| IrcCodec::from_codec(codec))
+    pub fn new(label: &str) -> io::Result<IrcCodec> {
+        LineCodec::new(label).map(|codec| IrcCodec { inner: codec })
     }
 }
 
-impl<C> IrcCodec<C> where C: Codec<In = String, Out = String> {
-    /// Creates a new instance of IrcCodec from the specified inner codec.
-    pub fn from_codec(codec: C) -> IrcCodec<C> {
-        IrcCodec { inner: codec }
-    }
-}
-
-impl<C> Codec for IrcCodec<C> where C: Codec<In = String, Out = String> {
+impl Codec for IrcCodec {
     type In = Message;
     type Out = Message;
 
