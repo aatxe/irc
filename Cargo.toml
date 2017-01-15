@@ -20,6 +20,7 @@ nochanlists = []
 rustc-serialize = "0.3"
 time = "0.1"
 encoding = "0.2"
+native-tls = "0.1"
 tokio-core = "0.1"
 tokio-service = "0.1"
 tokio-tls = "0.1"
