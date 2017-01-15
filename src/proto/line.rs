@@ -1,16 +1,29 @@
-//! Implementation of line-based codec for Tokio.
+//! Implementation of line-delimiting codec for Tokio.
 
 use std::io;
 use std::io::prelude::*;
-use encoding::{DecoderTrap, EncoderTrap, Encoding};
+use encoding::{DecoderTrap, EncoderTrap, EncodingRef};
+use encoding::label::encoding_from_whatwg_label;
 use tokio_core::io::{Codec, EasyBuf};
 
 /// A line-based codec parameterized by an encoding.
-pub struct LineCodec<E: Encoding> {
-    encoding: E,
+pub struct LineCodec {
+    encoding: EncodingRef,
 }
 
-impl<E> Codec for LineCodec<E> where E: Encoding {
+impl LineCodec {
+    /// Creates a new instance of LineCodec from the specified encoding.
+    pub fn new(label: &str) -> io::Result<LineCodec> {
+        encoding_from_whatwg_label(label).map(|enc| LineCodec { encoding: enc }).ok_or(
+            io::Error::new(
+                io::ErrorKind::InvalidInput,
+                &format!("Attempted to use unknown codec {}.", label)[..]
+            )
+        )
+    }
+}
+
+impl Codec for LineCodec {
     type In = String;
     type Out = String;
 
