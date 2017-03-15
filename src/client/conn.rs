@@ -231,12 +231,11 @@ impl Connection for MockConnection {
 }
 
 mod imp {
-    use std::io::prelude::*;
     use std::io::Result;
     use std::io::Error;
     use std::io::ErrorKind;
     use std::sync::Mutex;
-    #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap, Encoding};
+    #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap};
     #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
     use client::data::kinds::{IrcRead, IrcWrite};
 
