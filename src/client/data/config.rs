@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{Error, ErrorKind, Result};
-use std::net::SocketAddr;
+use std::net::{SocketAddr, ToSocketAddrs};
 use std::path::Path;
 use rustc_serialize::json::{decode, encode};
 
@@ -131,7 +131,7 @@ impl Config {
     /// Gets the server and port as a `SocketAddr`.
     /// This panics when server is not specified or the address is malformed.
     pub fn socket_addr(&self) -> SocketAddr {
-        format!("{}:{}", self.server(), self.port()).parse().unwrap()
+        format!("{}:{}", self.server(), self.port()).to_socket_addrs().unwrap().next().unwrap()
     }
 
     /// Gets the server password specified in the configuration.
