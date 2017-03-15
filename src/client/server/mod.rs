@@ -463,7 +463,9 @@ impl IrcServer {
                 try!(self.send_ctcp_internal(resp, "SOURCE https://github.com/aatxe/irc"));
                 self.send_ctcp_internal(resp, "SOURCE")
             },
-            "PING" => self.send_ctcp_internal(resp, &format!("PING {}", tokens[1])),
+            "PING" if tokens.len() > 1 => {
+                self.send_ctcp_internal(resp, &format!("PING {}", tokens[1]))
+            },
             "TIME" => self.send_ctcp_internal(resp, &format!(
                 "TIME :{}", now().rfc822z()
             )),
@@ -687,7 +689,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(message = "All specified nicknames were in use.")]
+    #[should_panic(expected = "All specified nicknames were in use or disallowed.")]
     fn ran_out_of_nicknames() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
@@ -846,5 +848,16 @@ mod test {
         }
         assert_eq!(&get_server_value(server)[..], "NOTICE test :\u{001}USERINFO :Testing.\u{001}\
                    \r\n");
+    }
+
+    #[test]
+    #[cfg(feature = "ctcp")]
+    fn ctcp_ping_no_timestamp() {
+        let value = ":test!test@test PRIVMSG test :\u{001}PING\u{001}\r\n";
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
+        for message in server.iter() {
+            println!("{:?}", message);
+        }
+        assert_eq!(&get_server_value(server)[..], "");
     }
 }
