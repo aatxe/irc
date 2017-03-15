@@ -702,7 +702,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(message = "All specified nicknames were in use.")]
+    #[should_panic(expected = "All specified nicknames were in use or disallowed.")]
     fn ran_out_of_nicknames() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
