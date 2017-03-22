@@ -42,6 +42,10 @@ pub struct Config {
     pub umodes: Option<String>,
     /// The text that'll be sent in response to CTCP USERINFO requests.
     pub user_info: Option<String>,
+    /// The text that'll be sent in response to CTCP VERSION requests.
+    pub version: Option<String>,
+    /// The text that'll be sent in response to CTCP SOURCE requests.
+    pub source: Option<String>,
     /// The amount of inactivity in seconds before the client will ping the server.
     pub ping_time: Option<u32>,
     /// The amount of time in seconds for a client to reconnect due to no ping response.
@@ -169,6 +173,18 @@ impl Config {
         self.user_info.as_ref().map_or("", |s| &s[..])
     }
 
+    /// Gets the string to be sent in response to CTCP VERSION requests.
+    /// This defaults to `irc:git:Rust` when not specified.
+    pub fn version(&self) -> &str {
+        self.version.as_ref().map_or("irc:git:Rust", |s| &s[..])
+    }
+
+    /// Gets the string to be sent in response to CTCP SOURCE requests.
+    /// This defaults to `https://github.com/aatxe/irc` when not specified.
+    pub fn source(&self) -> &str {
+        self.source.as_ref().map_or("https://github.com/aatxe/irc", |s| &s[..])
+    }
+
     /// Gets the amount of time in seconds since last activity necessary for the client to ping the
     /// server.
     /// This defaults to 180 seconds when not specified.
@@ -227,6 +243,8 @@ mod test {
             channels: Some(vec![format!("#test"), format!("#test2")]),
             channel_keys: None,
             user_info: None,
+            version: None,
+            source: None,
             ping_time: None,
             ping_timeout: None,
             should_ghost: None,
@@ -254,6 +272,8 @@ mod test {
             channels: Some(vec![format!("#test"), format!("#test2")]),
             channel_keys: None,
             user_info: None,
+            version: None,
+            source: None,
             ping_time: None,
             ping_timeout: None,
             should_ghost: None,
