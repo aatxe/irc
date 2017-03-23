@@ -88,6 +88,8 @@ fail for obvious reasons). That being said, here's an example of a complete conf
   },
   "umodes": "+RB-x",
   "user_info": "I'm a test user for the Rust IRC crate.",
+  "version": "irc:git:Rust",
+  "source": "https://github.com/aatxe/irc",
   "ping_time": 180,
   "ping_timeout": 10,
   "options": {

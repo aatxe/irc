@@ -464,9 +464,11 @@ impl IrcServer {
             "FINGER" => self.send_ctcp_internal(resp, &format!(
                 "FINGER :{} ({})", self.config().real_name(), self.config().username()
             )),
-            "VERSION" => self.send_ctcp_internal(resp, "VERSION irc:git:Rust"),
+            "VERSION" => {
+                self.send_ctcp_internal(resp, &format!("VERSION {}", self.config().version()))
+            },
             "SOURCE" => {
-                try!(self.send_ctcp_internal(resp, "SOURCE https://github.com/aatxe/irc"));
+                try!(self.send_ctcp_internal(resp, &format!("SOURCE {}", self.config().source())));
                 self.send_ctcp_internal(resp, "SOURCE")
             },
             "PING" if tokens.len() > 1 => {
