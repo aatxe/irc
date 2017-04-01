@@ -92,7 +92,7 @@ impl NetConnection {
     #[cfg(feature = "ssl")]
     fn connect_ssl_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
         let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[..]));
-        let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Tlsv1)));
+        let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Sslv23)));
         let ssl_socket = try!(ssl_to_io(SslStream::connect_generic(&ssl, socket)));
         Ok((BufReader::new(NetStream::Ssl(try!(ssl_socket.try_clone()))),
             BufWriter::new(NetStream::Ssl(ssl_socket))))
