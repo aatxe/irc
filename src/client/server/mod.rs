@@ -322,6 +322,7 @@ impl IrcServer {
             PONG(ref pingdata, None) => self.state.check_pong(&pingdata),
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
+            NICK(ref new_nick) => self.handle_nick_change(msg.source_nickname().unwrap_or(""), new_nick),
             MODE(ref chan, ref mode, Some(ref user)) => self.handle_mode(chan, mode, user),
             PRIVMSG(ref target, ref body) => if body.starts_with('\u{001}') {
                 let tokens: Vec<_> = {
@@ -426,6 +427,23 @@ impl IrcServer {
             }
         }
     }
+    #[cfg(feature = "nochanlists")]
+    fn handle_nick_change(&self, _: &str, _: &str) {}
+
+    #[cfg(not(feature = "nochanlists"))]
+    fn handle_nick_change(&self, old_nick: &str, new_nick: &str) {
+        if old_nick.is_empty() || new_nick.is_empty() { return; }
+        let mut chanlists = self.chanlists().lock().unwrap();
+        for channel in chanlists.clone().keys() {
+            if let Some(vec) = chanlists.get_mut(&channel.to_owned()) {
+                for p in vec.iter().position(|x| x.get_nickname() == old_nick) {
+                    let new_entry = User::new(new_nick);
+                    vec[p] = new_entry;
+                }
+            }
+        }
+    }
+    
 
     #[cfg(feature = "nochanlists")]
     fn handle_mode(&self, chan: &str, mode: &str, user: &str) {}
