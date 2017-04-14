@@ -1,16 +1,17 @@
 //! Thread-safe connections on IrcStreams.
 #[cfg(feature = "ssl")] use std::error::Error as StdError;
 use std::io::prelude::*;
-use std::io::{BufReader, BufWriter, Cursor, Result};
+use std::io::{Cursor, Result};
 #[cfg(feature = "ssl")] use std::io::Error;
 #[cfg(feature = "ssl")] use std::io::ErrorKind;
 use std::net::TcpStream;
 #[cfg(feature = "ssl")] use std::result::Result as StdResult;
 use std::sync::Mutex;
+use bufstream::BufStream;
 #[cfg(feature = "encode")] use encoding::DecoderTrap;
 #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
-#[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslMethod, SslStream};
-#[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
+#[cfg(feature = "ssl")] use openssl::ssl::{SslConnectorBuilder, SslMethod, SslStream};
+#[cfg(feature = "ssl")] use openssl::ssl::HandshakeError;
 
 /// A connection.
 pub trait Connection {
@@ -44,70 +45,63 @@ pub trait Connection {
     fn reconnect(&self) -> Result<()>;
 }
 
-
-/// Useful internal type definitions.
-type NetReader = BufReader<NetStream>;
-type NetWriter = BufWriter<NetStream>;
-type NetReadWritePair = (NetReader, NetWriter);
+type NetBufStream = BufStream<NetStream>;
 
 /// A thread-safe connection over a buffered NetStream.
 pub struct NetConnection {
     host: Mutex<String>,
     port: Mutex<u16>,
-    reader: Mutex<NetReader>,
-    writer: Mutex<NetWriter>,
+    stream: Mutex<NetBufStream>,
 }
 
 impl NetConnection {
-    fn new(host: &str, port: u16, reader: NetReader, writer: NetWriter) -> NetConnection {
+    fn new(host: &str, port: u16, stream: NetBufStream) -> NetConnection {
         NetConnection {
             host: Mutex::new(host.to_owned()),
             port: Mutex::new(port),
-            reader: Mutex::new(reader),
-            writer: Mutex::new(writer),
+            stream: Mutex::new(stream),
         }
     }
 
     /// Creates a thread-safe TCP connection to the specified server.
     pub fn connect(host: &str, port: u16) -> Result<NetConnection> {
-        let (reader, writer) = try!(NetConnection::connect_internal(host, port));
-        Ok(NetConnection::new(host, port, reader, writer))
+        let stream = try!(NetConnection::connect_internal(host, port));
+        Ok(NetConnection::new(host, port, stream))
     }
 
     /// connects to the specified server and returns a reader-writer pair.
-    fn connect_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
-        let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[..]));
-        Ok((BufReader::new(NetStream::Unsecured(try!(socket.try_clone()))),
-            BufWriter::new(NetStream::Unsecured(socket))))
+    fn connect_internal(host: &str, port: u16) -> Result<NetBufStream> {
+        let socket = try!(TcpStream::connect((host, port)));
+        Ok(BufStream::new(NetStream::Unsecured(socket)))
     }
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
     /// If the library is compiled without SSL support, this method panics.
     pub fn connect_ssl(host: &str, port: u16) -> Result<NetConnection> {
-        let (reader, writer) = try!(NetConnection::connect_ssl_internal(host, port));
-        Ok(NetConnection::new(host, port, reader, writer))
+        let stream = try!(NetConnection::connect_ssl_internal(host, port));
+        Ok(NetConnection::new(host, port, stream))
     }
 
     /// Connects over SSL to the specified server and returns a reader-writer pair.
     #[cfg(feature = "ssl")]
-    fn connect_ssl_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
-        let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[..]));
-        let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Sslv23)));
-        let ssl_socket = try!(ssl_to_io(SslStream::connect_generic(&ssl, socket)));
-        Ok((BufReader::new(NetStream::Ssl(try!(ssl_socket.try_clone()))),
-            BufWriter::new(NetStream::Ssl(ssl_socket))))
+    fn connect_ssl_internal(host: &str, port: u16) -> Result<NetBufStream> {
+        let domain = format!("{}:{}", host, port);
+        let socket = try!(TcpStream::connect((host, port)));
+        let connector = try!(ssl_to_io(SslConnectorBuilder::new(SslMethod::tls()).map(|c| c.build()).map_err(Into::into)));
+        let stream = try!(ssl_to_io(connector.connect(&domain, socket)));
+        Ok(BufStream::new(NetStream::Ssl(stream)))
     }
 
     /// Panics because SSL support is not compiled in.
     #[cfg(not(feature = "ssl"))]
-    fn connect_ssl_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
+    fn connect_ssl_internal(host: &str, port: u16) -> Result<NetStream> {
         panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
     }
 }
 
 /// Converts a Result<T, SslError> into an Result<T>.
 #[cfg(feature = "ssl")]
-fn ssl_to_io<T>(res: StdResult<T, SslError>) -> Result<T> {
+fn ssl_to_io<T>(res: StdResult<T, HandshakeError<TcpStream>>) -> Result<T> {
     match res {
         Ok(x) => Ok(x),
         Err(e) => Err(Error::new(ErrorKind::Other,
@@ -119,22 +113,22 @@ fn ssl_to_io<T>(res: StdResult<T, SslError>) -> Result<T> {
 impl Connection for NetConnection {
     #[cfg(feature = "encode")]
     fn send(&self, msg: &str, encoding: &str) -> Result<()> {
-        imp::send(&self.writer, msg, encoding)
+        imp::send(&self.stream, msg, encoding)
     }
 
     #[cfg(not(feature = "encode"))]
     fn send(&self, msg: &str) -> Result<()> {
-        imp::send(&self.writer, msg)
+        imp::send(&self.stream, msg)
     }
 
     #[cfg(feature = "encoding")]
     fn recv(&self, encoding: &str) -> Result<String> {
-        imp::recv(&self.reader, encoding)
+        imp::recv(&self.stream, encoding)
     }
 
     #[cfg(not(feature = "encoding"))]
     fn recv(&self) -> Result<String> {
-        imp::recv(&self.reader)
+        imp::recv(&self.stream)
     }
 
     #[cfg(feature = "encoding")]
@@ -148,20 +142,19 @@ impl Connection for NetConnection {
     }
 
     fn reconnect(&self) -> Result<()> {
-        let use_ssl = match *self.reader.lock().unwrap().get_ref() {
+        let use_ssl = match *self.stream.lock().unwrap().get_ref() {
             NetStream::Unsecured(_) =>  false,
             #[cfg(feature = "ssl")]
             NetStream::Ssl(_) => true,
         };
         let host = self.host.lock().unwrap();
         let port = self.port.lock().unwrap();
-        let (reader, writer) = if use_ssl {
+        let stream = if use_ssl {
             try!(NetConnection::connect_ssl_internal(&host, *port))
         } else {
             try!(NetConnection::connect_internal(&host, *port))
         };
-        *self.reader.lock().unwrap() = reader;
-        *self.writer.lock().unwrap() = writer;
+        *self.stream.lock().unwrap() = stream;
         Ok(())
     }
 }
