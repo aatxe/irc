@@ -130,14 +130,27 @@ impl ServerState {
         self.action_taken();
     }
 
+    /// Sanitizes the input string by cutting up to (and including) the first occurence of a line
+    /// terminiating phrase (`\r\n`, `\r`, or `\n`).
+    fn sanitize(data: &str) -> &str {
+        // n.b. ordering matters here to prefer "\r\n" over "\r"
+        if let Some((pos, len)) = ["\r\n", "\r", "\n"].iter().flat_map(|needle| {
+            data.find(needle).map(|pos| (pos, needle.len()))
+        }).min_by_key(|&(pos, _)| pos) {
+            data.split_at(pos + len).0
+        } else {
+            data
+        }
+    }
+
     #[cfg(feature = "encode")]
     fn write<M: Into<Message>>(&self, msg: M) -> Result<()> {
-        self.conn.send(&msg.into().to_string(), self.config.encoding())
+        self.conn.send(ServerState::sanitize(&msg.into().to_string()), self.config.encoding())
     }
 
     #[cfg(not(feature = "encode"))]
     fn write<M: Into<Message>>(&self, msg: M) -> Result<()> {
-        self.conn.send(&msg.into().to_string())
+        self.conn.send(ServerState::sanitize(&msg.into().to_string()))
     }
 }
 
@@ -737,6 +750,13 @@ mod test {
         let server = IrcServer::from_connection(test_config(), MockConnection::empty());
         assert!(server.send(PRIVMSG(format!("#test"), format!("Hi there!"))).is_ok());
         assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\r\n");
+    }
+
+    #[test]
+    fn send_no_newline_injection() {
+        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        assert!(server.send(PRIVMSG(format!("#test"), format!("Hi there!\nJOIN #bad"))).is_ok());
+        assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\n");
     }
 
     #[test]
