@@ -38,7 +38,7 @@ fn main() {
 ```
 
 It may not seem like much, but all it takes to get started with an IRC connection is the stub
-above. In just a few lines, you can be connected to a server and procesisng IRC messages as you
+above. In just a few lines, you can be connected to a server and processing IRC messages as you
 wish. The library is built with flexibility in mind. If you need to work on multiple threads,
 simply clone the server and have at it. We'll take care of the rest.
 
