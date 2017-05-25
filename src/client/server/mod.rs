@@ -27,6 +27,9 @@ pub trait Server {
     /// Gets an iterator over received messages.
     fn iter<'a>(&'a self) -> Box<Iterator<Item = Result<Message>> + 'a>;
 
+    /// Gets a list of currently joined channels. This will be none if tracking is not supported altogether.
+    fn list_channels(&self) -> Option<Vec<String>>;
+
     /// Gets a list of Users in the specified channel. This will be none if the channel is not
     /// being tracked, or if tracking is not supported altogether. For best results, be sure to
     /// request `multi-prefix` support from the server.
@@ -197,10 +200,19 @@ impl<'a> Server for ServerState {
     }
 
     #[cfg(not(feature = "nochanlists"))]
+    fn list_channels(&self) -> Option<Vec<String>> {
+        Some(self.chanlists.lock().unwrap().keys().map(|k| k.to_owned()).collect())
+    }
+
+    #[cfg(feature = "nochanlists")]
+    fn list_channels(&self) -> Option<Vec<String>> {
+        None
+    }
+
+    #[cfg(not(feature = "nochanlists"))]
     fn list_users(&self, chan: &str) -> Option<Vec<User>> {
         self.chanlists.lock().unwrap().get(&chan.to_owned()).cloned()
     }
-
 
     #[cfg(feature = "nochanlists")]
     fn list_users(&self, _: &str) -> Option<Vec<User>> {
@@ -214,6 +226,8 @@ impl Server for IrcServer {
     }
 
     fn send<M: Into<Message>>(&self, msg: M) -> Result<()> where Self: Sized {
+        let msg = msg.into();
+        try!(self.handle_sent_message(&msg));
         self.state.send(msg)
     }
 
@@ -222,10 +236,19 @@ impl Server for IrcServer {
     }
 
     #[cfg(not(feature = "nochanlists"))]
+    fn list_channels(&self) -> Option<Vec<String>> {
+        Some(self.state.chanlists.lock().unwrap().keys().map(|k| k.to_owned()).collect())
+    }
+
+    #[cfg(feature = "nochanlists")]
+    fn list_channels(&self) -> Option<Vec<String>> {
+        None
+    }
+
+    #[cfg(not(feature = "nochanlists"))]
     fn list_users(&self, chan: &str) -> Option<Vec<User>> {
         self.state.chanlists.lock().unwrap().get(&chan.to_owned()).cloned()
     }
-
 
     #[cfg(feature = "nochanlists")]
     fn list_users(&self, _: &str) -> Option<Vec<User>> {
@@ -327,7 +350,18 @@ impl IrcServer {
         &self.state.chanlists
     }
 
-    /// Handles messages internally for basic client functionality.
+    /// Handles sent messages internally for basic client functionality.
+    fn handle_sent_message(&self, msg: &Message) -> Result<()> {
+        match msg.command {
+            PART(ref chan, _) => {
+                let _ = self.state.chanlists.lock().unwrap().remove(chan);
+            },
+            _ => ()
+        }
+        Ok(())
+    }
+
+    /// Handles received messages internally for basic client functionality.
     fn handle_message(&self, msg: &Message) -> Result<()> {
         match msg.command {
             PING(ref data, _) => try!(self.send_pong(&data)),
@@ -440,6 +474,7 @@ impl IrcServer {
             }
         }
     }
+
     #[cfg(feature = "nochanlists")]
     fn handle_nick_change(&self, _: &str, _: &str) {}
 
@@ -456,7 +491,6 @@ impl IrcServer {
             }
         }
     }
-    
 
     #[cfg(feature = "nochanlists")]
     fn handle_mode(&self, chan: &str, mode: &str, user: &str) {}
@@ -587,7 +621,7 @@ mod test {
     use client::conn::MockConnection;
     use client::data::Config;
     #[cfg(not(feature = "nochanlists"))] use client::data::User;
-    use client::data::command::Command::PRIVMSG;
+    use client::data::command::Command::{PART, PRIVMSG};
 
     pub fn test_config() -> Config {
         Config {
@@ -757,6 +791,29 @@ mod test {
         let server = IrcServer::from_connection(test_config(), MockConnection::empty());
         assert!(server.send(PRIVMSG(format!("#test"), format!("Hi there!\nJOIN #bad"))).is_ok());
         assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\n");
+    }
+
+    #[test]
+    #[cfg(not(feature = "nochanlists"))]
+    fn channel_tracking_names() {
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
+        for message in server.iter() {
+            println!("{:?}", message);
+        }
+        assert_eq!(server.list_channels().unwrap(), vec!["#test".to_owned()])
+    }
+
+    #[test]
+    #[cfg(not(feature = "nochanlists"))]
+    fn channel_tracking_names_part() {
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
+        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
+        for message in server.iter() {
+            println!("{:?}", message);
+        }
+        assert!(server.send(PART(format!("#test"), None)).is_ok());
+        assert!(server.list_channels().unwrap().is_empty())
     }
 
     #[test]
