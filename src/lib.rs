@@ -2,11 +2,13 @@
 
 #![warn(missing_docs)]
 
+extern crate bytes;
 extern crate encoding;
 extern crate futures;
 extern crate native_tls;
 extern crate rustc_serialize;
 extern crate time;
+extern crate tokio_io;
 extern crate tokio_core;
 extern crate tokio_service;
 extern crate tokio_tls;

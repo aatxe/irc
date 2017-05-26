@@ -1,10 +1,10 @@
 //! Implementation of line-delimiting codec for Tokio.
 
 use std::io;
-use std::io::prelude::*;
+use bytes::{BufMut, BytesMut};
 use encoding::{DecoderTrap, EncoderTrap, EncodingRef};
 use encoding::label::encoding_from_whatwg_label;
-use tokio_core::io::{Codec, EasyBuf};
+use tokio_io::codec::{Decoder, Encoder};
 
 /// A line-based codec parameterized by an encoding.
 pub struct LineCodec {
@@ -23,17 +23,17 @@ impl LineCodec {
     }
 }
 
-impl Codec for LineCodec {
-    type In = String;
-    type Out = String;
+impl Decoder for LineCodec {
+    type Item = String;
+    type Error = io::Error;
 
-    fn decode(&mut self, buf: &mut EasyBuf) -> io::Result<Option<String>> {
-        if let Some(n) = buf.as_ref().iter().position(|b| *b == b'\n') {
+    fn decode(&mut self, src: &mut BytesMut) -> io::Result<Option<String>> {
+        if let Some(n) = src.as_ref().iter().position(|b| *b == b'\n') {
             // Remove the next frame from the buffer.
-            let line = buf.drain_to(n);
+            let line = src.split_to(n + 1);
 
             // Remove the new-line from the buffer.
-            buf.drain_to(1);
+            src.split_to(1);
 
             // Decode the line using the codec's encoding.
             match self.encoding.decode(line.as_ref(), DecoderTrap::Replace) {
@@ -47,8 +47,13 @@ impl Codec for LineCodec {
             Ok(None)
         }
     }
+}
 
-    fn encode(&mut self, msg: String, buf: &mut Vec<u8>) -> io::Result<()> {
+impl Encoder for LineCodec {
+    type Item = String;
+    type Error = io::Error;
+
+    fn encode(&mut self, msg: String, dst: &mut BytesMut) -> io::Result<()> {
         // Encode the message using the codec's encoding.
         let data = try!(self.encoding.encode(&msg, EncoderTrap::Replace).map_err(|data| {
             io::Error::new(
@@ -58,9 +63,8 @@ impl Codec for LineCodec {
         }));
 
         // Write the encoded message to the output buffer.
-        try!(buf.write_all(&data));
+        dst.put(&data);
 
-        // Flush the output buffer.
-        buf.flush()
+        Ok(())
     }
 }
