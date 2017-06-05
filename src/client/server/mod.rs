@@ -10,7 +10,7 @@ use std::thread::{spawn, sleep};
 use std::time::Duration as StdDuration;
 use client::conn::{Connection, NetConnection};
 use client::data::{Command, Config, Message, Response, User};
-use client::data::Command::{JOIN, NICK, NICKSERV, PART, PING, PONG, PRIVMSG, MODE};
+use client::data::Command::{JOIN, NICK, NICKSERV, PART, PING, PONG, PRIVMSG, MODE, QUIT};
 use client::server::utils::ServerExt;
 use time::{Duration, Timespec, Tm, now};
 
@@ -369,6 +369,7 @@ impl IrcServer {
             PONG(ref pingdata, None) => self.state.check_pong(&pingdata),
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
+            QUIT(_) => self.handle_quit(msg.source_nickname().unwrap_or("")),
             NICK(ref new_nick) => self.handle_nick_change(msg.source_nickname().unwrap_or(""), new_nick),
             MODE(ref chan, ref mode, Some(ref user)) => self.handle_mode(chan, mode, user),
             PRIVMSG(ref target, ref body) => if body.starts_with('\u{001}') {
@@ -470,6 +471,22 @@ impl IrcServer {
             if !src.is_empty() {
                 if let Some(n) = vec.iter().position(|x| x.get_nickname() == src) {
                     vec.swap_remove(n);
+                }
+            }
+        }
+    }
+
+    #[cfg(feature = "nochanlists")]
+    fn handle_quit(&self, _: &str) {}
+
+    #[cfg(not(feature = "nochanlists"))]
+    fn handle_quit(&self, src: &str) {
+        if src.is_empty() { return; }
+        let mut chanlists = self.chanlists().lock().unwrap();
+        for channel in chanlists.clone().keys() {
+            if let Some(vec) = chanlists.get_mut(&channel.to_owned()) {
+                if let Some(p) = vec.iter().position(|x| x.get_nickname() == src) {
+                    vec.swap_remove(p);
                 }
             }
         }
