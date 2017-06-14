@@ -18,8 +18,14 @@ encode = ["encoding"]
 ssl = ["openssl"]
 nochanlists = []
 
-[dependencies.rustc-serialize]
-version = "0.3"
+[dependencies.serde]
+version = "1.0.8"
+
+[dependencies.serde_json]
+version = "1.0.2"
+
+[dependencies.serde_derive]
+version = "1.0.8"
 
 [dependencies.time]
 version = "0.1"

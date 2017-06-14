@@ -1,14 +1,14 @@
-//! JSON configuration files using libserialize.
+//! JSON configuration files using serde
 use std::borrow::ToOwned;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{Error, ErrorKind, Result};
 use std::path::Path;
-use rustc_serialize::json::{decode, encode};
+use serde_json;
 
 /// Configuration data.
-#[derive(Clone, RustcDecodable, RustcEncodable, Default, PartialEq, Debug)]
+#[derive(Clone, Deserialize, Serialize, Default, PartialEq, Debug)]
 pub struct Config {
     /// A list of the owners of the client by nickname (for bots).
     pub owners: Option<Vec<String>>,
@@ -66,7 +66,7 @@ impl Config {
         let mut file = try!(File::open(path));
         let mut data = String::new();
         try!(file.read_to_string(&mut data));
-        decode(&data[..]).map_err(|_|
+        serde_json::from_str(&data[..]).map_err(|_|
             Error::new(ErrorKind::InvalidInput, "Failed to decode configuration file.")
         )
     }
@@ -74,7 +74,7 @@ impl Config {
     /// Saves a JSON configuration to the desired path.
     pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let mut file = try!(File::create(path));
-        file.write_all(try!(encode(self).map_err(|_|
+        file.write_all(try!(serde_json::to_string(self).map_err(|_|
             Error::new(ErrorKind::InvalidInput, "Failed to encode configuration file.")
         )).as_bytes())
     }

@@ -4,7 +4,9 @@
 
 extern crate time;
 #[cfg(feature = "encode")] extern crate encoding;
-extern crate rustc_serialize;
+extern crate serde;
+#[macro_use] extern crate serde_derive;
+extern crate serde_json;
 #[cfg(feature = "ssl")] extern crate openssl;
 
 pub mod client;
