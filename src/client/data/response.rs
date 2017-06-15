@@ -77,6 +77,8 @@ make_response! {
     RPL_NOTOPIC         = 331,
     /// `332 <channel> :<topic>`
     RPL_TOPIC           = 332,
+    /// `333 <channel> <nick>!<user>@<host> <unix timestamp>`
+    RPL_TOPICWHOTIME    = 333,
     /// `341 <channel> <nick>`
     RPL_INVITING        = 341,
     /// `342 <user> :Summoning user to IRC`
