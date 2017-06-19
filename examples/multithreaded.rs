@@ -8,7 +8,7 @@ fn main() {
     let config = Config {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.fyrechat.net".to_owned()),
-        channels: Some(vec!["#vana".to_owned()]),
+        channels: Some(vec!["#irc-crate".to_owned()]),
         ..Default::default()
     };
     let server = IrcServer::from_config(config).unwrap();

@@ -9,7 +9,7 @@ fn main() {
     let config = Config {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.fyrechat.net".to_owned()),
-        channels: Some(vec!["#vana".to_owned()]),
+        channels: Some(vec!["#irc-crate".to_owned()]),
         ..Default::default()
     };
     let server = IrcServer::from_config(config).unwrap();
@@ -20,7 +20,7 @@ fn main() {
         server2.iter().map(|m| print!("{}", m.unwrap())).count();
     });
     loop {
-        server.send_privmsg("#vana", "TWEET TWEET").unwrap();
+        server.send_privmsg("#irc-crate", "TWEET TWEET").unwrap();
         sleep(Duration::new(10, 0));
     }
 }
