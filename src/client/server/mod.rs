@@ -23,7 +23,9 @@ pub trait Server {
     fn config(&self) -> &Config;
 
     /// Sends a Command to this Server.
-    fn send<M: Into<Message>>(&self, message: M) -> Result<()> where Self: Sized;
+    fn send<M: Into<Message>>(&self, message: M) -> Result<()>
+    where
+        Self: Sized;
 
     /// Gets an iterator over received messages.
     fn iter<'a>(&'a self) -> Box<Iterator<Item = Result<Message>> + 'a>;
@@ -66,7 +68,10 @@ struct ServerState {
 }
 
 impl ServerState {
-    fn new<C>(conn: C, config: Config) -> ServerState where C: Connection + Send + Sync + 'static {
+    fn new<C>(conn: C, config: Config) -> ServerState
+    where
+        C: Connection + Send + Sync + 'static,
+    {
         ServerState {
             conn: Box::new(conn),
             config: config,
@@ -135,9 +140,11 @@ impl ServerState {
     /// terminiating phrase (`\r\n`, `\r`, or `\n`).
     fn sanitize(data: &str) -> &str {
         // n.b. ordering matters here to prefer "\r\n" over "\r"
-        if let Some((pos, len)) = ["\r\n", "\r", "\n"].iter().flat_map(|needle| {
-            data.find(needle).map(|pos| (pos, needle.len()))
-        }).min_by_key(|&(pos, _)| pos) {
+        if let Some((pos, len)) = ["\r\n", "\r", "\n"]
+            .iter()
+            .flat_map(|needle| data.find(needle).map(|pos| (pos, needle.len())))
+            .min_by_key(|&(pos, _)| pos)
+        {
             data.split_at(pos + len).0
         } else {
             data
@@ -146,12 +153,17 @@ impl ServerState {
 
     #[cfg(feature = "encode")]
     fn write<M: Into<Message>>(&self, msg: M) -> Result<()> {
-        self.conn.send(ServerState::sanitize(&msg.into().to_string()), self.config.encoding())
+        self.conn.send(
+            ServerState::sanitize(&msg.into().to_string()),
+            self.config.encoding(),
+        )
     }
 
     #[cfg(not(feature = "encode"))]
     fn write<M: Into<Message>>(&self, msg: M) -> Result<()> {
-        self.conn.send(ServerState::sanitize(&msg.into().to_string()))
+        self.conn.send(
+            ServerState::sanitize(&msg.into().to_string()),
+        )
     }
 }
 
@@ -178,7 +190,7 @@ impl Clone for IrcServer {
     fn clone(&self) -> IrcServer {
         IrcServer {
             state: self.state.clone(),
-            reconnect_count: self.reconnect_count.clone()
+            reconnect_count: self.reconnect_count.clone(),
         }
     }
 }
@@ -188,7 +200,10 @@ impl<'a> Server for ServerState {
         &self.config
     }
 
-    fn send<M: Into<Message>>(&self, msg: M) -> Result<()> where Self: Sized {
+    fn send<M: Into<Message>>(&self, msg: M) -> Result<()>
+    where
+        Self: Sized,
+    {
         self.send_impl(msg.into());
         Ok(())
     }
@@ -199,7 +214,14 @@ impl<'a> Server for ServerState {
 
     #[cfg(not(feature = "nochanlists"))]
     fn list_channels(&self) -> Option<Vec<String>> {
-        Some(self.chanlists.lock().unwrap().keys().map(|k| k.to_owned()).collect())
+        Some(
+            self.chanlists
+                .lock()
+                .unwrap()
+                .keys()
+                .map(|k| k.to_owned())
+                .collect(),
+        )
     }
 
     #[cfg(feature = "nochanlists")]
@@ -209,7 +231,11 @@ impl<'a> Server for ServerState {
 
     #[cfg(not(feature = "nochanlists"))]
     fn list_users(&self, chan: &str) -> Option<Vec<User>> {
-        self.chanlists.lock().unwrap().get(&chan.to_owned()).cloned()
+        self.chanlists
+            .lock()
+            .unwrap()
+            .get(&chan.to_owned())
+            .cloned()
     }
 
     #[cfg(feature = "nochanlists")]
@@ -223,7 +249,10 @@ impl Server for IrcServer {
         &self.state.config
     }
 
-    fn send<M: Into<Message>>(&self, msg: M) -> Result<()> where Self: Sized {
+    fn send<M: Into<Message>>(&self, msg: M) -> Result<()>
+    where
+        Self: Sized,
+    {
         let msg = msg.into();
         try!(self.handle_sent_message(&msg));
         self.state.send(msg)
@@ -235,7 +264,15 @@ impl Server for IrcServer {
 
     #[cfg(not(feature = "nochanlists"))]
     fn list_channels(&self) -> Option<Vec<String>> {
-        Some(self.state.chanlists.lock().unwrap().keys().map(|k| k.to_owned()).collect())
+        Some(
+            self.state
+                .chanlists
+                .lock()
+                .unwrap()
+                .keys()
+                .map(|k| k.to_owned())
+                .collect(),
+        )
     }
 
     #[cfg(feature = "nochanlists")]
@@ -245,7 +282,12 @@ impl Server for IrcServer {
 
     #[cfg(not(feature = "nochanlists"))]
     fn list_users(&self, chan: &str) -> Option<Vec<User>> {
-        self.state.chanlists.lock().unwrap().get(&chan.to_owned()).cloned()
+        self.state
+            .chanlists
+            .lock()
+            .unwrap()
+            .get(&chan.to_owned())
+            .cloned()
     }
 
     #[cfg(feature = "nochanlists")]
@@ -257,7 +299,9 @@ impl Server for IrcServer {
 impl IrcServer {
     /// Creates an IRC server from the specified configuration, and any arbitrary sync connection.
     pub fn from_connection<C>(config: Config, conn: C) -> IrcServer
-    where C: Connection + Send + Sync + 'static {
+    where
+        C: Connection + Send + Sync + 'static,
+    {
         let state = Arc::new(ServerState::new(conn, config));
         let ping_time = (state.config.ping_time() as i64) * 1000;
         let ping_timeout = (state.config.ping_timeout() as i64) * 1000;
@@ -277,7 +321,8 @@ impl IrcServer {
                 }
             };
             let now_timespec = now().to_timespec();
-            let sleep_dur_ping_time = ping_time - (now_timespec - ping_idle_timespec).num_milliseconds();
+            let sleep_dur_ping_time = ping_time -
+                (now_timespec - ping_idle_timespec).num_milliseconds();
             let sleep_dur_ping_timeout = if let Some(time) = strong.last_ping_data() {
                 ping_timeout - (now_timespec - time).num_milliseconds()
             } else {
@@ -312,7 +357,10 @@ impl IrcServer {
                 }
             }
         });
-        IrcServer { state: state, reconnect_count: Cell::new(0) }
+        IrcServer {
+            state: state,
+            reconnect_count: Cell::new(0),
+        }
     }
 
     /// Gets a reference to the IRC server's connection.
@@ -339,7 +387,7 @@ impl IrcServer {
         let index = self.state.alt_nick_index.read().unwrap();
         match *index {
             0 => self.config().nickname(),
-            i => alt_nicks[i - 1]
+            i => alt_nicks[i - 1],
         }
     }
 
@@ -353,8 +401,8 @@ impl IrcServer {
         match msg.command {
             PART(ref chan, _) => {
                 let _ = self.state.chanlists.lock().unwrap().remove(chan);
-            },
-            _ => ()
+            }
+            _ => (),
         }
         Ok(())
     }
@@ -363,30 +411,35 @@ impl IrcServer {
     fn handle_message(&self, msg: &Message) -> Result<()> {
         match msg.command {
             PING(ref data, _) => try!(self.send_pong(data)),
-            PONG(ref pingdata, None) | PONG(_, Some(ref pingdata)) => self.state.check_pong(pingdata),
+            PONG(ref pingdata, None) |
+            PONG(_, Some(ref pingdata)) => self.state.check_pong(pingdata),
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
             QUIT(_) => self.handle_quit(msg.source_nickname().unwrap_or("")),
-            NICK(ref new_nick) => self.handle_nick_change(msg.source_nickname().unwrap_or(""), new_nick),
+            NICK(ref new_nick) => {
+                self.handle_nick_change(msg.source_nickname().unwrap_or(""), new_nick)
+            }
             MODE(ref chan, ref mode, Some(ref user)) => self.handle_mode(chan, mode, user),
-            PRIVMSG(ref target, ref body) => if body.starts_with('\u{001}') {
-                let tokens: Vec<_> = {
-                    let end = if body.ends_with('\u{001}') {
-                        body.len() - 1
-                    } else {
-                        body.len()
+            PRIVMSG(ref target, ref body) => {
+                if body.starts_with('\u{001}') {
+                    let tokens: Vec<_> = {
+                        let end = if body.ends_with('\u{001}') {
+                            body.len() - 1
+                        } else {
+                            body.len()
+                        };
+                        body[1..end].split(' ').collect()
                     };
-                    body[1..end].split(' ').collect()
-                };
-                if target.starts_with('#') {
-                    try!(self.handle_ctcp(target, tokens))
-                } else if let Some(user) = msg.source_nickname() {
-                    try!(self.handle_ctcp(user, tokens))
+                    if target.starts_with('#') {
+                        try!(self.handle_ctcp(target, tokens))
+                    } else if let Some(user) = msg.source_nickname() {
+                        try!(self.handle_ctcp(user, tokens))
+                    }
                 }
-            },
+            }
             Command::Response(Response::RPL_NAMREPLY, ref args, ref suffix) => {
                 self.handle_namreply(args, suffix)
-            },
+            }
             Command::Response(Response::RPL_ENDOFMOTD, _, _) |
             Command::Response(Response::ERR_NOMOTD, _, _) => {
                 try!(self.send_nick_password());
@@ -396,14 +449,17 @@ impl IrcServer {
                 for chan in &config_chans {
                     match self.config().channel_key(chan) {
                         Some(key) => try!(self.send_join_with_keys(chan, key)),
-                        None => try!(self.send_join(chan))
+                        None => try!(self.send_join(chan)),
                     }
                 }
                 let joined_chans = self.state.chanlists.lock().unwrap();
-                for chan in joined_chans.keys().filter(|x| !config_chans.contains(&x.as_str())) {
+                for chan in joined_chans.keys().filter(
+                    |x| !config_chans.contains(&x.as_str()),
+                )
+                {
                     try!(self.send_join(chan))
                 }
-            },
+            }
             Command::Response(Response::ERR_NICKNAMEINUSE, _, _) |
             Command::Response(Response::ERR_ERRONEOUSNICKNAME, _, _) => {
                 let alt_nicks = self.config().alternate_nicknames();
@@ -414,8 +470,8 @@ impl IrcServer {
                     try!(self.send(NICK(alt_nicks[*index].to_owned())));
                     *index += 1;
                 }
-            },
-            _ => ()
+            }
+            _ => (),
         }
         Ok(())
     }
@@ -428,14 +484,18 @@ impl IrcServer {
             if self.config().should_ghost() && *index != 0 {
                 for seq in &self.config().ghost_sequence() {
                     try!(self.send(NICKSERV(format!(
-                        "{} {} {}", seq, self.config().nickname(),
+                        "{} {} {}",
+                        seq,
+                        self.config().nickname(),
                         self.config().nick_password()
                     ))));
                 }
                 *index = 0;
                 try!(self.send(NICK(self.config().nickname().to_owned())))
             }
-            self.send(NICKSERV(format!("IDENTIFY {}", self.config().nick_password())))
+            self.send(NICKSERV(
+                format!("IDENTIFY {}", self.config().nick_password()),
+            ))
         }
     }
 
@@ -478,7 +538,9 @@ impl IrcServer {
 
     #[cfg(not(feature = "nochanlists"))]
     fn handle_quit(&self, src: &str) {
-        if src.is_empty() { return; }
+        if src.is_empty() {
+            return;
+        }
         let mut chanlists = self.chanlists().lock().unwrap();
         for channel in chanlists.clone().keys() {
             if let Some(vec) = chanlists.get_mut(&channel.to_owned()) {
@@ -494,7 +556,9 @@ impl IrcServer {
 
     #[cfg(not(feature = "nochanlists"))]
     fn handle_nick_change(&self, old_nick: &str, new_nick: &str) {
-        if old_nick.is_empty() || new_nick.is_empty() { return; }
+        if old_nick.is_empty() || new_nick.is_empty() {
+            return;
+        }
         let mut chanlists = self.chanlists().lock().unwrap();
         for channel in chanlists.clone().keys() {
             if let Some(vec) = chanlists.get_mut(&channel.to_owned()) {
@@ -528,8 +592,10 @@ impl IrcServer {
                 let chan = &args[2];
                 for user in users.split(' ') {
                     let mut chanlists = self.state.chanlists.lock().unwrap();
-                    chanlists.entry(chan.clone()).or_insert_with(Vec::new)
-                             .push(User::new(user))
+                    chanlists
+                        .entry(chan.clone())
+                        .or_insert_with(Vec::new)
+                        .push(User::new(user))
                 }
             }
         }
@@ -538,28 +604,38 @@ impl IrcServer {
     /// Handles CTCP requests if the CTCP feature is enabled.
     #[cfg(feature = "ctcp")]
     fn handle_ctcp(&self, resp: &str, tokens: Vec<&str>) -> Result<()> {
-        if tokens.is_empty() { return Ok(()) }
+        if tokens.is_empty() {
+            return Ok(());
+        }
         match tokens[0] {
-            "FINGER" => self.send_ctcp_internal(resp, &format!(
-                "FINGER :{} ({})", self.config().real_name(), self.config().username()
-            )),
+            "FINGER" => {
+                self.send_ctcp_internal(
+                    resp,
+                    &format!(
+                        "FINGER :{} ({})",
+                        self.config().real_name(),
+                        self.config().username()
+                    ),
+                )
+            }
             "VERSION" => {
                 self.send_ctcp_internal(resp, &format!("VERSION {}", self.config().version()))
-            },
+            }
             "SOURCE" => {
-                try!(self.send_ctcp_internal(resp, &format!("SOURCE {}", self.config().source())));
+                try!(self.send_ctcp_internal(
+                    resp,
+                    &format!("SOURCE {}", self.config().source()),
+                ));
                 self.send_ctcp_internal(resp, "SOURCE")
-            },
+            }
             "PING" if tokens.len() > 1 => {
                 self.send_ctcp_internal(resp, &format!("PING {}", tokens[1]))
-            },
-            "TIME" => self.send_ctcp_internal(resp, &format!(
-                "TIME :{}", now().rfc822z()
-            )),
-            "USERINFO" => self.send_ctcp_internal(resp, &format!(
-                "USERINFO :{}", self.config().user_info()
-            )),
-            _ => Ok(())
+            }
+            "TIME" => self.send_ctcp_internal(resp, &format!("TIME :{}", now().rfc822z())),
+            "USERINFO" => {
+                self.send_ctcp_internal(resp, &format!("USERINFO :{}", self.config().user_info()))
+            }
+            _ => Ok(()),
         }
     }
 
@@ -578,7 +654,7 @@ impl IrcServer {
 
 /// An `Iterator` over an `IrcServer`'s incoming `Messages`.
 pub struct ServerIterator<'a> {
-    server: &'a IrcServer
+    server: &'a IrcServer,
 }
 
 impl<'a> ServerIterator<'a> {
@@ -605,19 +681,24 @@ impl<'a> Iterator for ServerIterator<'a> {
     fn next(&mut self) -> Option<Result<Message>> {
         loop {
             match self.get_next_line() {
-                Ok(msg) => match msg.parse() {
-                    Ok(res) => {
-                        match self.server.handle_message(&res) {
-                            Ok(()) => (),
-                            Err(err) => return Some(Err(err))
+                Ok(msg) => {
+                    match msg.parse() {
+                        Ok(res) => {
+                            match self.server.handle_message(&res) {
+                                Ok(()) => (),
+                                Err(err) => return Some(Err(err)),
+                            }
+                            self.server.state.action_taken();
+                            return Some(Ok(res));
                         }
-                        self.server.state.action_taken();
-                        return Some(Ok(res))
-                    },
-                    Err(_) => return Some(Err(Error::new(ErrorKind::InvalidInput,
-                        &format!("Failed to parse message. (Message: {})", msg)[..]
-                    )))
-                },
+                        Err(_) => {
+                            return Some(Err(Error::new(
+                                ErrorKind::InvalidInput,
+                                &format!("Failed to parse message. (Message: {})", msg)[..],
+                            )))
+                        }
+                    }
+                }
                 Err(ref err) if err.description() == "EOF" => return None,
                 Err(_) => {
                     let _ = self.server.reconnect().and_then(|_| self.server.identify());
@@ -634,7 +715,8 @@ mod test {
     use std::default::Default;
     use client::conn::MockConnection;
     use client::data::Config;
-    #[cfg(not(feature = "nochanlists"))] use client::data::User;
+    #[cfg(not(feature = "nochanlists"))]
+    use client::data::User;
     use client::data::command::Command::{PART, PRIVMSG};
 
     pub fn test_config() -> Config {
@@ -645,7 +727,7 @@ mod test {
             server: Some(format!("irc.test.net")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             user_info: Some(format!("Testing.")),
-            .. Default::default()
+            ..Default::default()
         }
     }
 
@@ -678,98 +760,129 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..],
-        "PONG :irc.test.net\r\nJOIN #test\r\nJOIN #test2\r\n");
+        assert_eq!(
+            &get_server_value(server)[..],
+            "PONG :irc.test.net\r\nJOIN #test\r\nJOIN #test2\r\n"
+        );
     }
 
     #[test]
     fn handle_end_motd_with_nick_password() {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-        let server = IrcServer::from_connection(Config {
-            nick_password: Some(format!("password")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
-            .. Default::default()
-        }, MockConnection::new(value));
+        let server = IrcServer::from_connection(
+            Config {
+                nick_password: Some(format!("password")),
+                channels: Some(vec![format!("#test"), format!("#test2")]),
+                ..Default::default()
+            },
+            MockConnection::new(value),
+        );
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..], "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
-                   JOIN #test2\r\n");
+        assert_eq!(
+            &get_server_value(server)[..],
+            "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
+                   JOIN #test2\r\n"
+        );
     }
 
     #[test]
     fn handle_end_motd_with_chan_keys() {
         let value = ":irc.test.net 376 test :End of /MOTD command\r\n";
-        let server = IrcServer::from_connection(Config {
-            nickname: Some(format!("test")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
-            channel_keys: {
-                let mut map = HashMap::new();
-                map.insert(format!("#test2"), format!("password"));
-                Some(map)
+        let server = IrcServer::from_connection(
+            Config {
+                nickname: Some(format!("test")),
+                channels: Some(vec![format!("#test"), format!("#test2")]),
+                channel_keys: {
+                    let mut map = HashMap::new();
+                    map.insert(format!("#test2"), format!("password"));
+                    Some(map)
+                },
+                ..Default::default()
             },
-            .. Default::default()
-        }, MockConnection::new(value));
+            MockConnection::new(value),
+        );
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..], "JOIN #test\r\nJOIN #test2 password\r\n");
+        assert_eq!(
+            &get_server_value(server)[..],
+            "JOIN #test\r\nJOIN #test2 password\r\n"
+        );
     }
 
     #[test]
     fn handle_end_motd_with_ghost() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
-        let server = IrcServer::from_connection(Config {
-            nickname: Some(format!("test")),
-            alt_nicks: Some(vec![format!("test2")]),
-            nick_password: Some(format!("password")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
-            should_ghost: Some(true),
-            .. Default::default()
-        }, MockConnection::new(value));
+        let server = IrcServer::from_connection(
+            Config {
+                nickname: Some(format!("test")),
+                alt_nicks: Some(vec![format!("test2")]),
+                nick_password: Some(format!("password")),
+                channels: Some(vec![format!("#test"), format!("#test2")]),
+                should_ghost: Some(true),
+                ..Default::default()
+            },
+            MockConnection::new(value),
+        );
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..], "NICK :test2\r\nNICKSERV GHOST test password\r\n\
-                   NICK :test\r\nNICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n");
+        assert_eq!(
+            &get_server_value(server)[..],
+            "NICK :test2\r\nNICKSERV GHOST test password\r\n\
+                   NICK :test\r\nNICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n"
+        );
     }
 
     #[test]
     fn handle_end_motd_with_ghost_seq() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
-        let server = IrcServer::from_connection(Config {
-            nickname: Some(format!("test")),
-            alt_nicks: Some(vec![format!("test2")]),
-            nick_password: Some(format!("password")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
-            should_ghost: Some(true),
-            ghost_sequence: Some(vec![format!("RECOVER"), format!("RELEASE")]),
-            .. Default::default()
-        }, MockConnection::new(value));
+        let server = IrcServer::from_connection(
+            Config {
+                nickname: Some(format!("test")),
+                alt_nicks: Some(vec![format!("test2")]),
+                nick_password: Some(format!("password")),
+                channels: Some(vec![format!("#test"), format!("#test2")]),
+                should_ghost: Some(true),
+                ghost_sequence: Some(vec![format!("RECOVER"), format!("RELEASE")]),
+                ..Default::default()
+            },
+            MockConnection::new(value),
+        );
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..], "NICK :test2\r\nNICKSERV RECOVER test password\
+        assert_eq!(
+            &get_server_value(server)[..],
+            "NICK :test2\r\nNICKSERV RECOVER test password\
                    \r\nNICKSERV RELEASE test password\r\nNICK :test\r\nNICKSERV IDENTIFY password\
-                   \r\nJOIN #test\r\nJOIN #test2\r\n");
+                   \r\nJOIN #test\r\nJOIN #test2\r\n"
+        );
     }
 
     #[test]
     fn handle_end_motd_with_umodes() {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-        let server = IrcServer::from_connection(Config {
-            nickname: Some(format!("test")),
-            umodes: Some(format!("+B")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
-            .. Default::default()
-        }, MockConnection::new(value));
+        let server = IrcServer::from_connection(
+            Config {
+                nickname: Some(format!("test")),
+                umodes: Some(format!("+B")),
+                channels: Some(vec![format!("#test"), format!("#test2")]),
+                ..Default::default()
+            },
+            MockConnection::new(value),
+        );
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..],
-        "MODE test +B\r\nJOIN #test\r\nJOIN #test2\r\n");
+        assert_eq!(
+            &get_server_value(server)[..],
+            "MODE test +B\r\nJOIN #test\r\nJOIN #test2\r\n"
+        );
     }
 
     #[test]
@@ -796,14 +909,25 @@ mod test {
     #[test]
     fn send() {
         let server = IrcServer::from_connection(test_config(), MockConnection::empty());
-        assert!(server.send(PRIVMSG(format!("#test"), format!("Hi there!"))).is_ok());
-        assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\r\n");
+        assert!(
+            server
+                .send(PRIVMSG(format!("#test"), format!("Hi there!")))
+                .is_ok()
+        );
+        assert_eq!(
+            &get_server_value(server)[..],
+            "PRIVMSG #test :Hi there!\r\n"
+        );
     }
 
     #[test]
     fn send_no_newline_injection() {
         let server = IrcServer::from_connection(test_config(), MockConnection::empty());
-        assert!(server.send(PRIVMSG(format!("#test"), format!("Hi there!\nJOIN #bad"))).is_ok());
+        assert!(
+            server
+                .send(PRIVMSG(format!("#test"), format!("Hi there!\nJOIN #bad")))
+                .is_ok()
+        );
         assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\n");
     }
 
@@ -838,8 +962,10 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(server.list_users("#test").unwrap(),
-        vec![User::new("test"), User::new("~owner"), User::new("&admin")])
+        assert_eq!(
+            server.list_users("#test").unwrap(),
+            vec![User::new("test"), User::new("~owner"), User::new("&admin")]
+        )
     }
 
     #[test]
@@ -851,8 +977,15 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(server.list_users("#test").unwrap(),
-        vec![User::new("test"), User::new("~owner"), User::new("&admin"), User::new("test2")])
+        assert_eq!(
+            server.list_users("#test").unwrap(),
+            vec![
+                User::new("test"),
+                User::new("~owner"),
+                User::new("&admin"),
+                User::new("test2"),
+            ]
+        )
     }
 
     #[test]
@@ -864,8 +997,10 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(server.list_users("#test").unwrap(),
-        vec![User::new("test"), User::new("&admin")])
+        assert_eq!(
+            server.list_users("#test").unwrap(),
+            vec![User::new("test"), User::new("&admin")]
+        )
     }
 
     #[test]
@@ -877,12 +1012,16 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(server.list_users("#test").unwrap(),
-        vec![User::new("@test"), User::new("~owner"), User::new("&admin")]);
+        assert_eq!(
+            server.list_users("#test").unwrap(),
+            vec![User::new("@test"), User::new("~owner"), User::new("&admin")]
+        );
         let mut exp = User::new("@test");
         exp.update_access_level("+v");
-        assert_eq!(server.list_users("#test").unwrap()[0].highest_access_level(),
-                   exp.highest_access_level());
+        assert_eq!(
+            server.list_users("#test").unwrap()[0].highest_access_level(),
+            exp.highest_access_level()
+        );
         // The following tests if the maintained user contains the same entries as what is expected
         // but ignores the ordering of these entries.
         let mut levels = server.list_users("#test").unwrap()[0].access_levels();
@@ -909,8 +1048,11 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..], "NOTICE test :\u{001}FINGER :test (test)\u{001}\
-                   \r\n");
+        assert_eq!(
+            &get_server_value(server)[..],
+            "NOTICE test :\u{001}FINGER :test (test)\u{001}\
+                   \r\n"
+        );
     }
 
     #[test]
@@ -921,8 +1063,11 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..], "NOTICE test :\u{001}VERSION irc:git:Rust\u{001}\
-                   \r\n");
+        assert_eq!(
+            &get_server_value(server)[..],
+            "NOTICE test :\u{001}VERSION irc:git:Rust\u{001}\
+                   \r\n"
+        );
     }
 
     #[test]
@@ -933,9 +1078,11 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..],
-        "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n\
-         NOTICE test :\u{001}SOURCE\u{001}\r\n");
+        assert_eq!(
+            &get_server_value(server)[..],
+            "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n\
+         NOTICE test :\u{001}SOURCE\u{001}\r\n"
+        );
     }
 
     #[test]
@@ -946,7 +1093,10 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..], "NOTICE test :\u{001}PING test\u{001}\r\n");
+        assert_eq!(
+            &get_server_value(server)[..],
+            "NOTICE test :\u{001}PING test\u{001}\r\n"
+        );
     }
 
     #[test]
@@ -970,8 +1120,11 @@ mod test {
         for message in server.iter() {
             println!("{:?}", message);
         }
-        assert_eq!(&get_server_value(server)[..], "NOTICE test :\u{001}USERINFO :Testing.\u{001}\
-                   \r\n");
+        assert_eq!(
+            &get_server_value(server)[..],
+            "NOTICE test :\u{001}USERINFO :Testing.\u{001}\
+                   \r\n"
+        );
     }
 
     #[test]

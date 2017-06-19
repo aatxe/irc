@@ -66,22 +66,33 @@ impl Config {
         let mut file = try!(File::open(path));
         let mut data = String::new();
         try!(file.read_to_string(&mut data));
-        serde_json::from_str(&data[..]).map_err(|_|
-            Error::new(ErrorKind::InvalidInput, "Failed to decode configuration file.")
-        )
+        serde_json::from_str(&data[..]).map_err(|_| {
+            Error::new(
+                ErrorKind::InvalidInput,
+                "Failed to decode configuration file.",
+            )
+        })
     }
 
     /// Saves a JSON configuration to the desired path.
     pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let mut file = try!(File::create(path));
-        file.write_all(try!(serde_json::to_string(self).map_err(|_|
-            Error::new(ErrorKind::InvalidInput, "Failed to encode configuration file.")
-        )).as_bytes())
+        file.write_all(
+            try!(serde_json::to_string(self).map_err(|_| {
+                Error::new(
+                    ErrorKind::InvalidInput,
+                    "Failed to encode configuration file.",
+                )
+            })).as_bytes(),
+        )
     }
 
     /// Determines whether or not the nickname provided is the owner of the bot.
     pub fn is_owner(&self, nickname: &str) -> bool {
-        self.owners.as_ref().map(|o| o.contains(&nickname.to_owned())).unwrap()
+        self.owners
+            .as_ref()
+            .map(|o| o.contains(&nickname.to_owned()))
+            .unwrap()
     }
 
     /// Gets the nickname specified in the configuration.
@@ -99,7 +110,9 @@ impl Config {
     /// Gets the alternate nicknames specified in the configuration.
     /// This defaults to an empty vector when not specified.
     pub fn alternate_nicknames(&self) -> Vec<&str> {
-        self.alt_nicks.as_ref().map_or(vec![], |v| v.iter().map(|s| &s[..]).collect())
+        self.alt_nicks.as_ref().map_or(vec![], |v| {
+            v.iter().map(|s| &s[..]).collect()
+        })
     }
 
 
@@ -152,13 +165,17 @@ impl Config {
     /// Gets the channels to join upon connection.
     /// This defaults to an empty vector if it's not specified.
     pub fn channels(&self) -> Vec<&str> {
-        self.channels.as_ref().map_or(vec![], |v| v.iter().map(|s| &s[..]).collect())
+        self.channels.as_ref().map_or(vec![], |v| {
+            v.iter().map(|s| &s[..]).collect()
+        })
     }
 
 
     /// Gets the key for the specified channel if it exists in the configuration.
     pub fn channel_key(&self, chan: &str) -> Option<&str> {
-        self.channel_keys.as_ref().and_then(|m| m.get(&chan.to_owned()).map(|s| &s[..]))
+        self.channel_keys.as_ref().and_then(|m| {
+            m.get(&chan.to_owned()).map(|s| &s[..])
+        })
     }
 
     /// Gets the user modes to set on connect specified in the configuration.
@@ -182,7 +199,10 @@ impl Config {
     /// Gets the string to be sent in response to CTCP SOURCE requests.
     /// This defaults to `https://github.com/aatxe/irc` when not specified.
     pub fn source(&self) -> &str {
-        self.source.as_ref().map_or("https://github.com/aatxe/irc", |s| &s[..])
+        self.source.as_ref().map_or(
+            "https://github.com/aatxe/irc",
+            |s| &s[..],
+        )
     }
 
     /// Gets the amount of time in seconds since last activity necessary for the client to ping the
@@ -207,14 +227,19 @@ impl Config {
     /// Gets the NickServ command sequence to recover a nickname.
     /// This defaults to `["GHOST"]` when not specified.
     pub fn ghost_sequence(&self) -> Vec<&str> {
-        self.ghost_sequence.as_ref().map_or(vec!["GHOST"], |v| v.iter().map(|s| &s[..]).collect())
+        self.ghost_sequence.as_ref().map_or(vec!["GHOST"], |v| {
+            v.iter().map(|s| &s[..]).collect()
+        })
     }
 
     /// Looks up the specified string in the options map.
     /// This uses indexing, and thus panics when the string is not present.
     /// This will also panic if used and there are no options.
     pub fn get_option(&self, option: &str) -> &str {
-        self.options.as_ref().map(|o| &o[&option.to_owned()][..]).unwrap()
+        self.options
+            .as_ref()
+            .map(|o| &o[&option.to_owned()][..])
+            .unwrap()
     }
 }
 
@@ -288,7 +313,7 @@ mod test {
     fn is_owner() {
         let cfg = Config {
             owners: Some(vec![format!("test"), format!("test2")]),
-            .. Default::default()
+            ..Default::default()
         };
         assert!(cfg.is_owner("test"));
         assert!(cfg.is_owner("test2"));
@@ -303,7 +328,7 @@ mod test {
                 map.insert(format!("testing"), format!("test"));
                 Some(map)
             },
-            .. Default::default()
+            ..Default::default()
         };
         assert_eq!(cfg.get_option("testing"), "test");
     }

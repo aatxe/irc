@@ -369,7 +369,7 @@ impl FromStr for Response {
         if let Ok(rc) = s.parse() {
             match Response::from_u16(rc) {
                 Some(r) => Ok(r),
-                None => Err("Failed to parse due to unknown response code.")
+                None => Err("Failed to parse due to unknown response code."),
             }
         } else {
             Err("Failed to parse response code.")

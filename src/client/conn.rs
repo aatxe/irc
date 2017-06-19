@@ -1,16 +1,24 @@
 //! Thread-safe connections on `IrcStreams`.
-#[cfg(feature = "ssl")] use std::error::Error as StdError;
+#[cfg(feature = "ssl")]
+use std::error::Error as StdError;
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter, Cursor, Result};
-#[cfg(feature = "ssl")] use std::io::Error;
-#[cfg(feature = "ssl")] use std::io::ErrorKind;
+#[cfg(feature = "ssl")]
+use std::io::Error;
+#[cfg(feature = "ssl")]
+use std::io::ErrorKind;
 use std::net::TcpStream;
-#[cfg(feature = "ssl")] use std::result::Result as StdResult;
+#[cfg(feature = "ssl")]
+use std::result::Result as StdResult;
 use std::sync::Mutex;
-#[cfg(feature = "encode")] use encoding::DecoderTrap;
-#[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
-#[cfg(feature = "ssl")] use openssl::ssl::{SslContext, SslMethod, SslStream};
-#[cfg(feature = "ssl")] use openssl::ssl::error::SslError;
+#[cfg(feature = "encode")]
+use encoding::DecoderTrap;
+#[cfg(feature = "encode")]
+use encoding::label::encoding_from_whatwg_label;
+#[cfg(feature = "ssl")]
+use openssl::ssl::{SslContext, SslMethod, SslStream};
+#[cfg(feature = "ssl")]
+use openssl::ssl::error::SslError;
 
 /// A connection.
 pub trait Connection {
@@ -77,8 +85,12 @@ impl NetConnection {
     /// connects to the specified server and returns a reader-writer pair.
     fn connect_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
         let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[..]));
-        Ok((BufReader::new(NetStream::Unsecured(try!(socket.try_clone()))),
-            BufWriter::new(NetStream::Unsecured(socket))))
+        Ok((
+            BufReader::new(
+                NetStream::Unsecured(try!(socket.try_clone())),
+            ),
+            BufWriter::new(NetStream::Unsecured(socket)),
+        ))
     }
 
     /// Creates a thread-safe TCP connection to the specified server over SSL.
@@ -94,14 +106,20 @@ impl NetConnection {
         let socket = try!(TcpStream::connect(&format!("{}:{}", host, port)[..]));
         let ssl = try!(ssl_to_io(SslContext::new(SslMethod::Sslv23)));
         let ssl_socket = try!(ssl_to_io(SslStream::connect_generic(&ssl, socket)));
-        Ok((BufReader::new(NetStream::Ssl(try!(ssl_socket.try_clone()))),
-            BufWriter::new(NetStream::Ssl(ssl_socket))))
+        Ok((
+            BufReader::new(NetStream::Ssl(try!(ssl_socket.try_clone()))),
+            BufWriter::new(NetStream::Ssl(ssl_socket)),
+        ))
     }
 
     /// Panics because SSL support is not compiled in.
     #[cfg(not(feature = "ssl"))]
     fn connect_ssl_internal(host: &str, port: u16) -> Result<NetReadWritePair> {
-        panic!("Cannot connect to {}:{} over SSL without compiling with SSL support.", host, port)
+        panic!(
+            "Cannot connect to {}:{} over SSL without compiling with SSL support.",
+            host,
+            port
+        )
     }
 }
 
@@ -110,8 +128,9 @@ impl NetConnection {
 fn ssl_to_io<T>(res: StdResult<T, SslError>) -> Result<T> {
     match res {
         Ok(x) => Ok(x),
-        Err(e) => Err(Error::new(ErrorKind::Other,
-            &format!("An SSL error occurred. ({})", e.description())[..]
+        Err(e) => Err(Error::new(
+            ErrorKind::Other,
+            &format!("An SSL error occurred. ({})", e.description())[..],
         )),
     }
 }
@@ -149,7 +168,7 @@ impl Connection for NetConnection {
 
     fn reconnect(&self) -> Result<()> {
         let use_ssl = match *self.reader.lock().unwrap().get_ref() {
-            NetStream::Unsecured(_) =>  false,
+            NetStream::Unsecured(_) => false,
             #[cfg(feature = "ssl")]
             NetStream::Ssl(_) => true,
         };
@@ -215,9 +234,10 @@ impl Connection for MockConnection {
 
     #[cfg(feature = "encoding")]
     fn written(&self, encoding: &str) -> Option<String> {
-        encoding_from_whatwg_label(encoding).and_then(|enc|
-            enc.decode(&self.writer.lock().unwrap(), DecoderTrap::Replace).ok()
-        )
+        encoding_from_whatwg_label(encoding).and_then(|enc| {
+            enc.decode(&self.writer.lock().unwrap(), DecoderTrap::Replace)
+                .ok()
+        })
     }
 
     #[cfg(not(feature = "encoding"))]
@@ -235,23 +255,36 @@ mod imp {
     use std::io::Error;
     use std::io::ErrorKind;
     use std::sync::Mutex;
-    #[cfg(feature = "encode")] use encoding::{DecoderTrap, EncoderTrap};
-    #[cfg(feature = "encode")] use encoding::label::encoding_from_whatwg_label;
+    #[cfg(feature = "encode")]
+    use encoding::{DecoderTrap, EncoderTrap};
+    #[cfg(feature = "encode")]
+    use encoding::label::encoding_from_whatwg_label;
     use client::data::kinds::{IrcRead, IrcWrite};
 
     #[cfg(feature = "encode")]
     pub fn send<T: IrcWrite>(writer: &Mutex<T>, msg: &str, encoding: &str) -> Result<()> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
-            None => return Err(Error::new(
-                ErrorKind::InvalidInput, &format!("Failed to find encoder. ({})", encoding)[..]
-            ))
+            None => {
+                return Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    &format!("Failed to find encoder. ({})", encoding)[..],
+                ))
+            }
         };
         let data = match encoding.encode(msg, EncoderTrap::Replace) {
             Ok(data) => data,
-            Err(data) => return Err(Error::new(ErrorKind::InvalidInput,
-                &format!("Failed to encode {} as {}.", data, encoding.name())[..]
-            ))
+            Err(data) => {
+                return Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    &format!(
+                        "Failed to encode {} as {}.",
+                        data,
+                        encoding.name()
+                    )
+                        [..],
+                ))
+            }
         };
         let mut writer = writer.lock().unwrap();
         try!(writer.write_all(&data));
@@ -269,20 +302,31 @@ mod imp {
     pub fn recv<T: IrcRead>(reader: &Mutex<T>, encoding: &str) -> Result<String> {
         let encoding = match encoding_from_whatwg_label(encoding) {
             Some(enc) => enc,
-            None => return Err(Error::new(
-                ErrorKind::InvalidInput, &format!("Failed to find decoder. ({})", encoding)[..]
-            ))
-        };
-        let mut buf = Vec::new();
-        reader.lock().unwrap().read_until(b'\n', &mut buf).and_then(|_|
-            match encoding.decode(&buf, DecoderTrap::Replace) {
-                _ if buf.is_empty() => Err(Error::new(ErrorKind::Other, "EOF")),
-                Ok(data) => Ok(data),
-                Err(data) => Err(Error::new(ErrorKind::InvalidInput,
-                    &format!("Failed to decode {} as {}.", data, encoding.name())[..]
+            None => {
+                return Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    &format!("Failed to find decoder. ({})", encoding)[..],
                 ))
             }
-        )
+        };
+        let mut buf = Vec::new();
+        reader
+            .lock()
+            .unwrap()
+            .read_until(b'\n', &mut buf)
+            .and_then(|_| match encoding.decode(&buf, DecoderTrap::Replace) {
+                _ if buf.is_empty() => Err(Error::new(ErrorKind::Other, "EOF")),
+                Ok(data) => Ok(data),
+                Err(data) => Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    &format!(
+                        "Failed to decode {} as {}.",
+                        data,
+                        encoding.name()
+                    )
+                        [..],
+                )),
+            })
     }
 
     #[cfg(not(feature = "encoding"))]
@@ -376,7 +420,13 @@ mod test {
     #[cfg(feature = "encode")]
     fn send_utf8() {
         let conn = MockConnection::empty();
-        assert!(send_to(&conn, PRIVMSG("test".to_owned(), "€ŠšŽžŒœŸ".to_owned()), "UTF-8").is_ok());
+        assert!(
+            send_to(
+                &conn,
+                PRIVMSG("test".to_owned(), "€ŠšŽžŒœŸ".to_owned()),
+                "UTF-8",
+            ).is_ok()
+        );
         let data = conn.written("UTF-8").unwrap();
         assert_eq!(&data[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
@@ -395,7 +445,13 @@ mod test {
     #[cfg(feature = "encode")]
     fn send_iso885915() {
         let conn = MockConnection::empty();
-        assert!(send_to(&conn, PRIVMSG("test".to_owned(), "€ŠšŽžŒœŸ".to_owned()), "l9").is_ok());
+        assert!(
+            send_to(
+                &conn,
+                PRIVMSG("test".to_owned(), "€ŠšŽžŒœŸ".to_owned()),
+                "l9",
+            ).is_ok()
+        );
         let data = conn.written("l9").unwrap();
         assert_eq!(&data[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
     }
@@ -421,7 +477,10 @@ mod test {
     #[cfg(feature = "encode")]
     fn recv_utf8() {
         let conn = MockConnection::new("PRIVMSG test :Testing!\r\n");
-        assert_eq!(&conn.recv("UTF-8").unwrap()[..], "PRIVMSG test :Testing!\r\n");
+        assert_eq!(
+            &conn.recv("UTF-8").unwrap()[..],
+            "PRIVMSG test :Testing!\r\n"
+        );
     }
 
     #[test]
@@ -435,6 +494,9 @@ mod test {
             vec.extend("\r\n".as_bytes());
             vec.into_iter().collect::<Vec<_>>()
         });
-        assert_eq!(&conn.recv("l9").unwrap()[..], "PRIVMSG test :€ŠšŽžŒœŸ\r\n");
+        assert_eq!(
+            &conn.recv("l9").unwrap()[..],
+            "PRIVMSG test :€ŠšŽžŒœŸ\r\n"
+        );
     }
 }

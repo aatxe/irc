@@ -10,7 +10,7 @@ fn main() {
         channels: Some(vec!["#vana".to_owned()]),
         port: Some(6697),
         use_ssl: Some(true),
-        .. Default::default()
+        ..Default::default()
     };
     let server = IrcServer::from_config(config).unwrap();
     server.identify().unwrap();
@@ -18,9 +18,11 @@ fn main() {
         let message = message.unwrap(); // We'll just panic if there's an error.
         print!("{}", message);
         match message.command {
-            Command::PRIVMSG(ref target, ref msg) => if msg.contains("pickles") {
-                server.send_privmsg(target, "Hi!").unwrap();
-            },
+            Command::PRIVMSG(ref target, ref msg) => {
+                if msg.contains("pickles") {
+                    server.send_privmsg(target, "Hi!").unwrap();
+                }
+            }
             _ => (),
         }
     }

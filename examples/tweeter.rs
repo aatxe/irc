@@ -10,7 +10,7 @@ fn main() {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.fyrechat.net".to_owned()),
         channels: Some(vec!["#vana".to_owned()]),
-        .. Default::default()
+        ..Default::default()
     };
     let server = IrcServer::from_config(config).unwrap();
     server.identify().unwrap();

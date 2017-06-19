@@ -25,9 +25,9 @@ impl User {
         let ranks: Vec<_> = AccessLevelIterator::new(string).collect();
         let mut state = &string[ranks.len()..];
         let nickname = state.find('!').map_or(state, |i| &state[..i]).to_owned();
-        state = state.find('!').map_or("", |i| &state[i+1..]);
+        state = state.find('!').map_or("", |i| &state[i + 1..]);
         let username = state.find('@').map(|i| state[..i].to_owned());
-        let hostname = state.find('@').map(|i| state[i+1..].to_owned());
+        let hostname = state.find('@').map(|i| state[i + 1..].to_owned());
         User {
             nickname: nickname,
             username: username,
@@ -89,8 +89,8 @@ impl User {
             "-h" => self.sub_access_level(AccessLevel::HalfOp),
             "+v" => self.add_access_level(AccessLevel::Voice),
             "-v" => self.sub_access_level(AccessLevel::Voice),
-            _    => {},
-       }
+            _ => {}
+        }
     }
 
     /// Adds an access level to the list, and updates the highest level if necessary.
@@ -123,7 +123,7 @@ impl User {
 impl PartialEq for User {
     fn eq(&self, other: &User) -> bool {
         self.nickname == other.nickname && self.username == other.username &&
-        self.hostname == other.hostname
+            self.hostname == other.hostname
     }
 }
 
@@ -146,7 +146,9 @@ pub enum AccessLevel {
 
 impl PartialOrd for AccessLevel {
     fn partial_cmp(&self, other: &AccessLevel) -> Option<Ordering> {
-        if self == other { return Some(Equal) }
+        if self == other {
+            return Some(Equal);
+        }
         match *self {
             AccessLevel::Owner => Some(Greater),
             AccessLevel::Admin => {
@@ -155,28 +157,28 @@ impl PartialOrd for AccessLevel {
                 } else {
                     Some(Greater)
                 }
-            },
+            }
             AccessLevel::Oper => {
                 if other == &AccessLevel::Owner || other == &AccessLevel::Admin {
                     Some(Less)
                 } else {
                     Some(Greater)
                 }
-            },
+            }
             AccessLevel::HalfOp => {
                 if other == &AccessLevel::Voice || other == &AccessLevel::Member {
                     Some(Greater)
                 } else {
                     Some(Less)
                 }
-            },
+            }
             AccessLevel::Voice => {
                 if other == &AccessLevel::Member {
                     Some(Greater)
                 } else {
                     Some(Less)
                 }
-            },
+            }
             AccessLevel::Member => Some(Less),
         }
     }
@@ -192,7 +194,7 @@ impl FromStr for AccessLevel {
             Some('%') => Ok(AccessLevel::HalfOp),
             Some('+') => Ok(AccessLevel::Voice),
             None => Err("No access level in an empty string."),
-             _  => Err("Failed to parse access level."),
+            _ => Err("Failed to parse access level."),
         }
     }
 }
@@ -258,7 +260,7 @@ mod test {
             username: None,
             hostname: None,
             highest_access_level: Owner,
-            access_levels: vec![Owner, Admin, Voice, Member]
+            access_levels: vec![Owner, Admin, Voice, Member],
         };
         assert_eq!(user, exp);
         assert_eq!(user.highest_access_level, exp.highest_access_level);
@@ -324,7 +326,10 @@ mod test {
     fn derank_user_in_full() {
         let mut user = User::new("~&@%+user");
         assert_eq!(user.highest_access_level, Owner);
-        assert_eq!(user.access_levels, vec![Owner, Admin, Oper, HalfOp, Voice, Member]);
+        assert_eq!(
+            user.access_levels,
+            vec![Owner, Admin, Oper, HalfOp, Voice, Member]
+        );
         user.update_access_level("-h");
         assert_eq!(user.highest_access_level, Owner);
         assert_eq!(user.access_levels, vec![Owner, Admin, Oper, Member, Voice]);
