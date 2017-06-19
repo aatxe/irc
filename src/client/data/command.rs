@@ -175,7 +175,7 @@ pub enum Command {
     Raw(String, Vec<String>, Option<String>),
 }
 
-fn stringify(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> String {
+fn stringify(cmd: &str, args: &[&str], suffix: Option<&str>) -> String {
     let args = args.join(" ");
     let sp = if args.is_empty() { "" } else { " " };
     match suffix {
@@ -188,236 +188,236 @@ fn stringify(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> String {
 impl<'a> From<&'a Command> for String {
     fn from(cmd: &'a Command) -> String {
         match *cmd {
-            Command::PASS(ref p) => stringify("PASS", vec![], Some(p)),
-            Command::NICK(ref n) => stringify("NICK", vec![], Some(n)),
+            Command::PASS(ref p) => stringify("PASS", &[], Some(p)),
+            Command::NICK(ref n) => stringify("NICK", &[], Some(n)),
             Command::USER(ref u, ref m, ref r) =>
-                stringify("USER", vec![u, m, "*"], Some(r)),
+                stringify("USER", &[u, m, "*"], Some(r)),
             Command::OPER(ref u, ref p) =>
-                stringify("OPER", vec![u], Some(p)),
+                stringify("OPER", &[u], Some(p)),
             Command::MODE(ref t, ref m, Some(ref p)) =>
-                stringify("MODE", vec![t, m, p], None),
+                stringify("MODE", &[t, m, p], None),
             Command::MODE(ref t, ref m, None) =>
-                stringify("MODE", vec![t, m], None),
+                stringify("MODE", &[t, m], None),
             Command::SERVICE(ref n, ref r, ref d, ref t, ref re, ref i) =>
-                stringify("SERVICE", vec![n, r, d, t, re], Some(i)),
-            Command::QUIT(Some(ref m)) => stringify("QUIT", vec![], Some(m)),
-            Command::QUIT(None) => stringify("QUIT", vec![], None),
+                stringify("SERVICE", &[n, r, d, t, re], Some(i)),
+            Command::QUIT(Some(ref m)) => stringify("QUIT", &[], Some(m)),
+            Command::QUIT(None) => stringify("QUIT", &[], None),
             Command::SQUIT(ref s, ref c) =>
-                stringify("SQUIT", vec![s], Some(c)),
+                stringify("SQUIT", &[s], Some(c)),
             Command::JOIN(ref c, Some(ref k), Some(ref n)) =>
-                stringify("JOIN", vec![c, k], Some(n)),
+                stringify("JOIN", &[c, k], Some(n)),
             Command::JOIN(ref c, Some(ref k), None) =>
-                stringify("JOIN", vec![c, k], None),
+                stringify("JOIN", &[c, k], None),
             Command::JOIN(ref c, None, Some(ref n)) =>
-                stringify("JOIN", vec![c], Some(n)),
+                stringify("JOIN", &[c], Some(n)),
             Command::JOIN(ref c, None, None) =>
-                stringify("JOIN", vec![c], None),
+                stringify("JOIN", &[c], None),
             Command::PART(ref c, Some(ref m)) =>
-                stringify("PART", vec![c], Some(m)),
+                stringify("PART", &[c], Some(m)),
             Command::PART(ref c, None) =>
-                stringify("PART", vec![c], None),
+                stringify("PART", &[c], None),
             Command::TOPIC(ref c, Some(ref t)) =>
-                stringify("TOPIC", vec![c], Some(t)),
+                stringify("TOPIC", &[c], Some(t)),
             Command::TOPIC(ref c, None) =>
-                stringify("TOPIC", vec![c], None),
+                stringify("TOPIC", &[c], None),
             Command::NAMES(Some(ref c), Some(ref t)) =>
-                stringify("NAMES", vec![c], Some(t)),
+                stringify("NAMES", &[c], Some(t)),
             Command::NAMES(Some(ref c), None) =>
-                stringify("NAMES", vec![c], None),
-            Command::NAMES(None, _) => stringify("NAMES", vec![], None),
+                stringify("NAMES", &[c], None),
+            Command::NAMES(None, _) => stringify("NAMES", &[], None),
             Command::LIST(Some(ref c), Some(ref t)) =>
-                stringify("LIST", vec![c], Some(t)),
+                stringify("LIST", &[c], Some(t)),
             Command::LIST(Some(ref c), None) =>
-                stringify("LIST", vec![c], None),
-            Command::LIST(None, _) => stringify("LIST", vec![], None),
+                stringify("LIST", &[c], None),
+            Command::LIST(None, _) => stringify("LIST", &[], None),
             Command::INVITE(ref n, ref c) =>
-                stringify("INVITE", vec![n, c], None),
+                stringify("INVITE", &[n, c], None),
             Command::KICK(ref c, ref n, Some(ref r)) =>
-                stringify("KICK", vec![c, n], Some(r)),
+                stringify("KICK", &[c, n], Some(r)),
             Command::KICK(ref c, ref n, None) =>
-                stringify("KICK", vec![c, n], None),
+                stringify("KICK", &[c, n], None),
             Command::PRIVMSG(ref t, ref m) =>
-                stringify("PRIVMSG", vec![t], Some(m)),
+                stringify("PRIVMSG", &[t], Some(m)),
             Command::NOTICE(ref t, ref m) =>
-                stringify("NOTICE", vec![t], Some(m)),
-            Command::MOTD(Some(ref t)) => stringify("MOTD", vec![], Some(t)),
-            Command::MOTD(None) => stringify("MOTD", vec![], None),
+                stringify("NOTICE", &[t], Some(m)),
+            Command::MOTD(Some(ref t)) => stringify("MOTD", &[], Some(t)),
+            Command::MOTD(None) => stringify("MOTD", &[], None),
             Command::LUSERS(Some(ref m), Some(ref t)) =>
-                stringify("LUSERS", vec![m], Some(t)),
+                stringify("LUSERS", &[m], Some(t)),
             Command::LUSERS(Some(ref m), None) =>
-                stringify("LUSERS", vec![m], None),
-            Command::LUSERS(None, _) => stringify("LUSERS", vec![], None),
+                stringify("LUSERS", &[m], None),
+            Command::LUSERS(None, _) => stringify("LUSERS", &[], None),
             Command::VERSION(Some(ref t)) =>
-                stringify("VERSION", vec![], Some(t)),
-            Command::VERSION(None) => stringify("VERSION", vec![], None),
+                stringify("VERSION", &[], Some(t)),
+            Command::VERSION(None) => stringify("VERSION", &[], None),
             Command::STATS(Some(ref q), Some(ref t)) =>
-                stringify("STATS", vec![q], Some(t)),
+                stringify("STATS", &[q], Some(t)),
             Command::STATS(Some(ref q), None) =>
-                stringify("STATS", vec![q], None),
-            Command::STATS(None, _) => stringify("STATS", vec![], None),
+                stringify("STATS", &[q], None),
+            Command::STATS(None, _) => stringify("STATS", &[], None),
             Command::LINKS(Some(ref r), Some(ref s)) =>
-                stringify("LINKS", vec![r], Some(s)),
+                stringify("LINKS", &[r], Some(s)),
             Command::LINKS(None, Some(ref s)) =>
-                stringify("LINKS", vec![], Some(s)),
-            Command::LINKS(_, None) => stringify("LINKS", vec![], None),
-            Command::TIME(Some(ref t)) => stringify("TIME", vec![], Some(t)),
-            Command::TIME(None) => stringify("TIME", vec![], None),
+                stringify("LINKS", &[], Some(s)),
+            Command::LINKS(_, None) => stringify("LINKS", &[], None),
+            Command::TIME(Some(ref t)) => stringify("TIME", &[], Some(t)),
+            Command::TIME(None) => stringify("TIME", &[], None),
             Command::CONNECT(ref t, ref p, Some(ref r)) =>
-                stringify("CONNECT", vec![t, p], Some(r)),
+                stringify("CONNECT", &[t, p], Some(r)),
             Command::CONNECT(ref t, ref p, None) =>
-                stringify("CONNECT", vec![t, p], None),
-            Command::TRACE(Some(ref t)) => stringify("TRACE", vec![], Some(t)),
-            Command::TRACE(None) => stringify("TRACE", vec![], None),
-            Command::ADMIN(Some(ref t)) => stringify("ADMIN", vec![], Some(t)),
-            Command::ADMIN(None) => stringify("ADMIN", vec![], None),
-            Command::INFO(Some(ref t)) => stringify("INFO", vec![], Some(t)),
-            Command::INFO(None) => stringify("INFO", vec![], None),
+                stringify("CONNECT", &[t, p], None),
+            Command::TRACE(Some(ref t)) => stringify("TRACE", &[], Some(t)),
+            Command::TRACE(None) => stringify("TRACE", &[], None),
+            Command::ADMIN(Some(ref t)) => stringify("ADMIN", &[], Some(t)),
+            Command::ADMIN(None) => stringify("ADMIN", &[], None),
+            Command::INFO(Some(ref t)) => stringify("INFO", &[], Some(t)),
+            Command::INFO(None) => stringify("INFO", &[], None),
             Command::SERVLIST(Some(ref m), Some(ref t)) =>
-                stringify("SERVLIST", vec![m], Some(t)),
+                stringify("SERVLIST", &[m], Some(t)),
             Command::SERVLIST(Some(ref m), None) =>
-                stringify("SERVLIST", vec![m], None),
+                stringify("SERVLIST", &[m], None),
             Command::SERVLIST(None, _) =>
-                stringify("SERVLIST", vec![], None),
+                stringify("SERVLIST", &[], None),
             Command::SQUERY(ref s, ref t) =>
-                stringify("SQUERY", vec![s, t], None),
+                stringify("SQUERY", &[s, t], None),
             Command::WHO(Some(ref s), Some(true)) =>
-                stringify("WHO", vec![s, "o"], None),
+                stringify("WHO", &[s, "o"], None),
             Command::WHO(Some(ref s), _) =>
-                stringify("WHO", vec![s], None),
-            Command::WHO(None, _) => stringify("WHO", vec![], None),
+                stringify("WHO", &[s], None),
+            Command::WHO(None, _) => stringify("WHO", &[], None),
             Command::WHOIS(Some(ref t), ref m) =>
-                stringify("WHOIS", vec![t, m], None),
+                stringify("WHOIS", &[t, m], None),
             Command::WHOIS(None, ref m) =>
-                stringify("WHOIS", vec![m], None),
+                stringify("WHOIS", &[m], None),
             Command::WHOWAS(ref n, Some(ref c), Some(ref t)) =>
-                stringify("WHOWAS", vec![n, c], Some(t)),
+                stringify("WHOWAS", &[n, c], Some(t)),
             Command::WHOWAS(ref n, Some(ref c), None) =>
-                stringify("WHOWAS", vec![n, c], None),
+                stringify("WHOWAS", &[n, c], None),
             Command::WHOWAS(ref n, None, _) =>
-                stringify("WHOWAS", vec![n], None),
+                stringify("WHOWAS", &[n], None),
             Command::KILL(ref n, ref c) =>
-                stringify("KILL", vec![n], Some(c)),
+                stringify("KILL", &[n], Some(c)),
             Command::PING(ref s, Some(ref t)) =>
-                stringify("PING", vec![s], Some(t)),
-            Command::PING(ref s, None) => stringify("PING", vec![], Some(s)),
+                stringify("PING", &[s], Some(t)),
+            Command::PING(ref s, None) => stringify("PING", &[], Some(s)),
             Command::PONG(ref s, Some(ref t)) =>
-                stringify("PONG", vec![s], Some(t)),
-            Command::PONG(ref s, None) => stringify("PONG", vec![], Some(s)),
-            Command::ERROR(ref m) => stringify("ERROR", vec![], Some(m)),
-            Command::AWAY(Some(ref m)) => stringify("AWAY", vec![], Some(m)),
-            Command::AWAY(None) => stringify("AWAY", vec![], None),
-            Command::REHASH => stringify("REHASH", vec![], None),
-            Command::DIE => stringify("DIE", vec![], None),
-            Command::RESTART => stringify("RESTART", vec![], None),
+                stringify("PONG", &[s], Some(t)),
+            Command::PONG(ref s, None) => stringify("PONG", &[], Some(s)),
+            Command::ERROR(ref m) => stringify("ERROR", &[], Some(m)),
+            Command::AWAY(Some(ref m)) => stringify("AWAY", &[], Some(m)),
+            Command::AWAY(None) => stringify("AWAY", &[], None),
+            Command::REHASH => stringify("REHASH", &[], None),
+            Command::DIE => stringify("DIE", &[], None),
+            Command::RESTART => stringify("RESTART", &[], None),
             Command::SUMMON(ref u, Some(ref t), Some(ref c)) =>
-                stringify("SUMMON", vec![u, t], Some(c)),
+                stringify("SUMMON", &[u, t], Some(c)),
             Command::SUMMON(ref u, Some(ref t), None) =>
-                stringify("SUMMON", vec![u, t], None),
+                stringify("SUMMON", &[u, t], None),
             Command::SUMMON(ref u, None, _) =>
-                stringify("SUMMON", vec![u], None),
-            Command::USERS(Some(ref t)) => stringify("USERS", vec![], Some(t)),
-            Command::USERS(None) => stringify("USERS", vec![], None),
-            Command::WALLOPS(ref t) => stringify("WALLOPS", vec![], Some(t)),
-            Command::USERHOST(ref u) => stringify("USERHOST", u.iter().map(|s| &s[..]).collect(), None),
-            Command::ISON(ref u) => stringify("ISON", u.iter().map(|s| &s[..]).collect(), None),
+                stringify("SUMMON", &[u], None),
+            Command::USERS(Some(ref t)) => stringify("USERS", &[], Some(t)),
+            Command::USERS(None) => stringify("USERS", &[], None),
+            Command::WALLOPS(ref t) => stringify("WALLOPS", &[], Some(t)),
+            Command::USERHOST(ref u) => stringify("USERHOST", &u.iter().map(|s| &s[..]).collect::<Vec<_>>(), None),
+            Command::ISON(ref u) => stringify("ISON", &u.iter().map(|s| &s[..]).collect::<Vec<_>>(), None),
 
             Command::SAJOIN(ref n, ref c) =>
-                stringify("SAJOIN", vec![n, c], None),
+                stringify("SAJOIN", &[n, c], None),
             Command::SAMODE(ref t, ref m, Some(ref p)) =>
-                stringify("SAMODE", vec![t, m, p], None),
+                stringify("SAMODE", &[t, m, p], None),
             Command::SAMODE(ref t, ref m, None) =>
-                stringify("SAMODE", vec![t, m], None),
+                stringify("SAMODE", &[t, m], None),
             Command::SANICK(ref o, ref n) =>
-                stringify("SANICK", vec![o, n], None),
+                stringify("SANICK", &[o, n], None),
             Command::SAPART(ref c, ref r) =>
-                stringify("SAPART", vec![c], Some(r)),
+                stringify("SAPART", &[c], Some(r)),
             Command::SAQUIT(ref c, ref r) =>
-                stringify("SAQUIT", vec![c], Some(r)),
+                stringify("SAQUIT", &[c], Some(r)),
 
             Command::NICKSERV(ref m) =>
-                stringify("NICKSERV", vec![m], None),
+                stringify("NICKSERV", &[m], None),
             Command::CHANSERV(ref m) =>
-                stringify("CHANSERV", vec![m], None),
+                stringify("CHANSERV", &[m], None),
             Command::OPERSERV(ref m) =>
-                stringify("OPERSERV", vec![m], None),
+                stringify("OPERSERV", &[m], None),
             Command::BOTSERV(ref m) =>
-                stringify("BOTSERV", vec![m], None),
+                stringify("BOTSERV", &[m], None),
             Command::HOSTSERV(ref m) =>
-                stringify("HOSTSERV", vec![m], None),
+                stringify("HOSTSERV", &[m], None),
             Command::MEMOSERV(ref m) =>
-                stringify("MEMOSERV", vec![m], None),
+                stringify("MEMOSERV", &[m], None),
 
             Command::CAP(None, ref s, None, Some(ref p)) =>
-                stringify("CAP", vec![s.to_str()], Some(p)),
+                stringify("CAP", &[s.to_str()], Some(p)),
             Command::CAP(None, ref s, None, None) =>
-                stringify("CAP", vec![s.to_str()], None),
+                stringify("CAP", &[s.to_str()], None),
             Command::CAP(Some(ref k), ref s, None,  Some(ref p)) =>
-                stringify("CAP", vec![k, s.to_str()], Some(p)),
+                stringify("CAP", &[k, s.to_str()], Some(p)),
             Command::CAP(Some(ref k), ref s, None,  None) =>
-                stringify("CAP", vec![k, s.to_str()], None),
+                stringify("CAP", &[k, s.to_str()], None),
             Command::CAP(None, ref s, Some(ref c), Some(ref p)) =>
-                stringify("CAP", vec![s.to_str(), c], Some(p)),
+                stringify("CAP", &[s.to_str(), c], Some(p)),
             Command::CAP(None, ref s, Some(ref c), None) =>
-                stringify("CAP", vec![s.to_str(), c], None),
+                stringify("CAP", &[s.to_str(), c], None),
             Command::CAP(Some(ref k), ref s, Some(ref c), Some(ref p)) =>
-                stringify("CAP", vec![k, s.to_str(), c], Some(p)),
+                stringify("CAP", &[k, s.to_str(), c], Some(p)),
             Command::CAP(Some(ref k), ref s, Some(ref c), None) =>
-                stringify("CAP", vec![k, s.to_str(), c], None),
+                stringify("CAP", &[k, s.to_str(), c], None),
 
             Command::AUTHENTICATE(ref d) =>
-                stringify("AUTHENTICATE", vec![d], None),
+                stringify("AUTHENTICATE", &[d], None),
             Command::ACCOUNT(ref a) =>
-                stringify("ACCOUNT", vec![a], None),
+                stringify("ACCOUNT", &[a], None),
 
             Command::METADATA(ref t, Some(ref c), None, Some(ref p)) =>
-                stringify("METADATA", vec![&t[..], c.to_str()], Some(p)),
+                stringify("METADATA", &[&t[..], c.to_str()], Some(p)),
             Command::METADATA(ref t, Some(ref c), None, None) =>
-                stringify("METADATA", vec![&t[..], c.to_str()], None),
+                stringify("METADATA", &[&t[..], c.to_str()], None),
 
             Command::METADATA(ref t, Some(ref c), Some(ref a), Some(ref p)) => stringify(
                 "METADATA",
-                vec![t, &c.to_str().to_owned()].iter().map(|s| &s[..])
-                                               .chain(a.iter().map(|s| &s[..])).collect(),
+                &vec![t, &c.to_str().to_owned()].iter().map(|s| &s[..])
+                                               .chain(a.iter().map(|s| &s[..])).collect::<Vec<_>>(),
                 Some(p)),
             Command::METADATA(ref t, Some(ref c), Some(ref a), None) =>
                 stringify("METADATA",
-                vec![t, &c.to_str().to_owned()].iter().map(|s| &s[..])
-                                               .chain(a.iter().map(|s| &s[..])).collect(),
+                &vec![t, &c.to_str().to_owned()].iter().map(|s| &s[..])
+                                               .chain(a.iter().map(|s| &s[..])).collect::<Vec<_>>(),
                 None),
             Command::METADATA(ref t, None, None, Some(ref p)) =>
-                stringify("METADATA", vec![t], Some(p)),
+                stringify("METADATA", &[t], Some(p)),
             Command::METADATA(ref t, None, None, None) =>
-                stringify("METADATA", vec![t], None),
+                stringify("METADATA", &[t], None),
             Command::METADATA(ref t, None, Some(ref a), Some(ref p)) =>
-                stringify("METADATA", vec![t].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect(), Some(p)),
+                stringify("METADATA", &vec![t].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect::<Vec<_>>(), Some(p)),
             Command::METADATA(ref t, None, Some(ref a), None) =>
-                stringify("METADATA", vec![t].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect(), None),
+                stringify("METADATA", &vec![t].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect::<Vec<_>>(), None),
             Command::MONITOR(ref c, Some(ref t)) =>
-                stringify("MONITOR", vec![c, t], None),
+                stringify("MONITOR", &[c, t], None),
             Command::MONITOR(ref c, None) =>
-                stringify("MONITOR", vec![c], None),
+                stringify("MONITOR", &[c], None),
             Command::BATCH(ref t, Some(ref c), Some(ref a)) => stringify(
-                "BATCH", vec![t, &c.to_str().to_owned()].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect(),
+                "BATCH", &vec![t, &c.to_str().to_owned()].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect::<Vec<_>>(),
                 None
             ),
             Command::BATCH(ref t, Some(ref c), None) =>
-                stringify("BATCH", vec![t, c.to_str()], None),
+                stringify("BATCH", &[t, c.to_str()], None),
             Command::BATCH(ref t, None, Some(ref a)) =>
                 stringify("BATCH",
-                                    vec![t].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect(), None),
+                          &vec![t].iter().map(|s| &s[..]).chain(a.iter().map(|s| &s[..])).collect::<Vec<_>>(), None),
             Command::BATCH(ref t, None, None) =>
-                stringify("BATCH", vec![t], None),
+                stringify("BATCH", &[t], None),
             Command::CHGHOST(ref u, ref h) =>
-                stringify("CHGHOST", vec![u, h], None),
+                stringify("CHGHOST", &[u, h], None),
 
             Command::Response(ref resp, ref a, Some(ref s)) =>
-                stringify(&format!("{}", *resp as u16), a.iter().map(|s| &s[..]).collect(), Some(s)),
+                stringify(&format!("{}", *resp as u16), &a.iter().map(|s| &s[..]).collect::<Vec<_>>(), Some(s)),
             Command::Response(ref resp, ref a, None) =>
-                stringify(&format!("{}", *resp as u16), a.iter().map(|s| &s[..]).collect(), None),
+                stringify(&format!("{}", *resp as u16), &a.iter().map(|s| &s[..]).collect::<Vec<_>>(), None),
             Command::Raw(ref c, ref a, Some(ref s)) =>
-                stringify(c, a.iter().map(|s| &s[..]).collect(), Some(s)),
+                stringify(c, &a.iter().map(|s| &s[..]).collect::<Vec<_>>(), Some(s)),
             Command::Raw(ref c, ref a, None) =>
-                stringify(c, a.iter().map(|s| &s[..]).collect(), None),
+                stringify(c, &a.iter().map(|s| &s[..]).collect::<Vec<_>>(), None),
         }
     }
 }
@@ -1448,7 +1448,7 @@ impl BatchSubCommand {
         match *self {
             BatchSubCommand::NETSPLIT      => "NETSPLIT",
             BatchSubCommand::NETJOIN       => "NETJOIN",
-            BatchSubCommand::CUSTOM(ref s) => &s,
+            BatchSubCommand::CUSTOM(ref s) => s,
         }
     }
 }

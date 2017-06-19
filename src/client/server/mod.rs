@@ -6,6 +6,7 @@ use std::error::Error as StdError;
 use std::io::{Error, ErrorKind, Result};
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::{spawn, sleep};
 use std::time::Duration as StdDuration;
 use client::conn::{Connection, NetConnection};
@@ -61,7 +62,7 @@ struct ServerState {
     /// A thread-safe store for the last ping data.
     last_ping_data: Mutex<Option<Timespec>>,
     /// A thread-safe check of pong reply.
-    waiting_pong_reply: Mutex<bool>,
+    waiting_pong_reply: AtomicBool,
 }
 
 impl ServerState {
@@ -74,15 +75,14 @@ impl ServerState {
             reconnect_count: Mutex::new(0),
             last_action_time: Mutex::new(now()),
             last_ping_data: Mutex::new(None),
-            waiting_pong_reply: Mutex::new(false),
+            waiting_pong_reply: AtomicBool::new(false),
         }
     }
 
     fn reconnect(&self) -> Result<()> {
         let mut ping_data = self.last_ping_data.lock().unwrap();
         *ping_data = None;
-        let mut waiting_pong_reply = self.waiting_pong_reply.lock().unwrap();
-        *waiting_pong_reply = false;
+        self.waiting_pong_reply.store(false, Ordering::SeqCst);
         self.conn.reconnect()
     }
 
@@ -103,8 +103,7 @@ impl ServerState {
     fn update_ping_data(&self, data: Timespec) {
         let mut ping_data = self.last_ping_data.lock().unwrap();
         *ping_data = Some(data);
-        let mut waiting_pong_reply = self.waiting_pong_reply.lock().unwrap();
-        *waiting_pong_reply = true;
+        self.waiting_pong_reply.store(true, Ordering::SeqCst);
     }
 
     fn last_ping_data(&self) -> Option<Timespec> {
@@ -112,7 +111,7 @@ impl ServerState {
     }
 
     fn waiting_pong_reply(&self) -> bool {
-        *self.waiting_pong_reply.lock().unwrap()
+        self.waiting_pong_reply.load(Ordering::SeqCst)
     }
 
     fn check_pong(&self, data: &str) {
@@ -120,8 +119,7 @@ impl ServerState {
             let fmt = format!("{}", time.sec);
             if fmt == data {
                 // found matching pong reply
-                let mut waiting_reply = self.waiting_pong_reply.lock().unwrap();
-                *waiting_reply = false;
+                self.waiting_pong_reply.store(false, Ordering::SeqCst);
             }
         }
     }
@@ -364,9 +362,8 @@ impl IrcServer {
     /// Handles received messages internally for basic client functionality.
     fn handle_message(&self, msg: &Message) -> Result<()> {
         match msg.command {
-            PING(ref data, _) => try!(self.send_pong(&data)),
-            PONG(_, Some(ref pingdata)) => self.state.check_pong(&pingdata),
-            PONG(ref pingdata, None) => self.state.check_pong(&pingdata),
+            PING(ref data, _) => try!(self.send_pong(data)),
+            PONG(ref pingdata, None) | PONG(_, Some(ref pingdata)) => self.state.check_pong(pingdata),
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
             QUIT(_) => self.handle_quit(msg.source_nickname().unwrap_or("")),
@@ -382,7 +379,7 @@ impl IrcServer {
                     body[1..end].split(' ').collect()
                 };
                 if target.starts_with('#') {
-                    try!(self.handle_ctcp(&target, tokens))
+                    try!(self.handle_ctcp(target, tokens))
                 } else if let Some(user) = msg.source_nickname() {
                     try!(self.handle_ctcp(user, tokens))
                 }
@@ -396,7 +393,7 @@ impl IrcServer {
                 try!(self.send_umodes());
 
                 let config_chans = self.config().channels();
-                for chan in config_chans.iter() {
+                for chan in &config_chans {
                     match self.config().channel_key(chan) {
                         Some(key) => try!(self.send_join_with_keys(chan, key)),
                         None => try!(self.send_join(chan))
@@ -501,9 +498,9 @@ impl IrcServer {
         let mut chanlists = self.chanlists().lock().unwrap();
         for channel in chanlists.clone().keys() {
             if let Some(vec) = chanlists.get_mut(&channel.to_owned()) {
-                for p in vec.iter().position(|x| x.get_nickname() == old_nick) {
+                if let Some(n) = vec.iter().position(|x| x.get_nickname() == old_nick) {
                     let new_entry = User::new(new_nick);
-                    vec[p] = new_entry;
+                    vec[n] = new_entry;
                 }
             }
         }
@@ -516,7 +513,7 @@ impl IrcServer {
     fn handle_mode(&self, chan: &str, mode: &str, user: &str) {
         if let Some(vec) = self.chanlists().lock().unwrap().get_mut(chan) {
             if let Some(n) = vec.iter().position(|x| x.get_nickname() == user) {
-                vec[n].update_access_level(&mode)
+                vec[n].update_access_level(mode)
             }
         }
     }
@@ -541,7 +538,7 @@ impl IrcServer {
     /// Handles CTCP requests if the CTCP feature is enabled.
     #[cfg(feature = "ctcp")]
     fn handle_ctcp(&self, resp: &str, tokens: Vec<&str>) -> Result<()> {
-        if tokens.len() == 0 { return Ok(()) }
+        if tokens.is_empty() { return Ok(()) }
         match tokens[0] {
             "FINGER" => self.send_ctcp_internal(resp, &format!(
                 "FINGER :{} ({})", self.config().real_name(), self.config().username()
@@ -579,7 +576,7 @@ impl IrcServer {
     }
 }
 
-/// An Iterator over an IrcServer's incoming Messages.
+/// An `Iterator` over an `IrcServer`'s incoming `Messages`.
 pub struct ServerIterator<'a> {
     server: &'a IrcServer
 }

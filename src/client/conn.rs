@@ -1,4 +1,4 @@
-//! Thread-safe connections on IrcStreams.
+//! Thread-safe connections on `IrcStreams`.
 #[cfg(feature = "ssl")] use std::error::Error as StdError;
 use std::io::prelude::*;
 use std::io::{BufReader, BufWriter, Cursor, Result};
@@ -50,7 +50,7 @@ type NetReader = BufReader<NetStream>;
 type NetWriter = BufWriter<NetStream>;
 type NetReadWritePair = (NetReader, NetWriter);
 
-/// A thread-safe connection over a buffered NetStream.
+/// A thread-safe connection over a buffered `NetStream`.
 pub struct NetConnection {
     host: Mutex<String>,
     port: Mutex<u16>,
@@ -105,7 +105,7 @@ impl NetConnection {
     }
 }
 
-/// Converts a Result<T, SslError> into an Result<T>.
+/// Converts a `Result<T, SslError>` into an `io::Result<T>`.
 #[cfg(feature = "ssl")]
 fn ssl_to_io<T>(res: StdResult<T, SslError>) -> Result<T> {
     match res {

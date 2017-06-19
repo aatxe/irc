@@ -39,7 +39,7 @@ impl User {
             },
             highest_access_level: {
                 let mut max = AccessLevel::Member;
-                for rank in ranks.into_iter() {
+                for rank in ranks {
                     if rank > max {
                         max = rank
                     }

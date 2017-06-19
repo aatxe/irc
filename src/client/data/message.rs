@@ -41,7 +41,7 @@ impl Message {
             match (s.find('!'), s.find('@'), s.find('.')) {
                 (Some(i), _, _) => Some(&s[..i]), // <nick> '!' <user> [ '@' <host> ]
                 (None, Some(i), _) => Some(&s[..i]), // <nick> '@' <host>
-                (None, None, None) => Some(&s), // <nick>
+                (None, None, None) => Some(s), // <nick>
                 _ => None // <servername>
             }
         )
@@ -53,7 +53,7 @@ impl Message {
         let mut ret = String::new();
         if let Some(ref prefix) = self.prefix {
             ret.push(':');
-            ret.push_str(&prefix);
+            ret.push_str(prefix);
             ret.push(' ');
         }
         let cmd: String = From::from(&self.command);
