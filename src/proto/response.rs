@@ -28,15 +28,15 @@ macro_rules! make_response {
 make_response! {
     // Expected replies
     /// `001 Welcome to the Internet Relay Network <nick>!<user>@<host>`
-    RPL_WELCOME         = 001,
+    RPL_WELCOME         =   1,
     /// `002 Your host is <servername>, running version <ver>`
-    RPL_YOURHOST        = 002,
+    RPL_YOURHOST        =   2,
     /// `003 This server was created <date>`
-    RPL_CREATED         = 003,
+    RPL_CREATED         =   3,
     /// `004 <servername> <version> <available user modes> available channel modes>`
-    RPL_MYINFO          = 004,
+    RPL_MYINFO          =   4,
     /// `005 Try server <server name>, port <port number>`
-    RPL_BOUNCE          = 005,
+    RPL_BOUNCE          =   5,
     /// `302 :*1<reply> *( " " <reply> )`
     RPL_USERHOST        = 302,
     /// `303 :*1<nick> *( " " <nick> )`
@@ -77,6 +77,8 @@ make_response! {
     RPL_NOTOPIC         = 331,
     /// `332 <channel> :<topic>`
     RPL_TOPIC           = 332,
+    /// `333 <channel> <nick>!<user>@<host> <unix timestamp>`
+    RPL_TOPICWHOTIME    = 333,
     /// `341 <channel> <nick>`
     RPL_INVITING        = 341,
     /// `342 <user> :Summoning user to IRC`
@@ -367,7 +369,7 @@ impl FromStr for Response {
         if let Ok(rc) = s.parse() {
             match Response::from_u16(rc) {
                 Some(r) => Ok(r),
-                None => Err("Failed to parse due to unknown response code.")
+                None => Err("Failed to parse due to unknown response code."),
             }
         } else {
             Err("Failed to parse response code.")

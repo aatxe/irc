@@ -1,4 +1,4 @@
-# irc [![Build Status](https://travis-ci.org/aatxe/irc.svg?branch=master)](https://travis-ci.org/aatxe/irc) [![Crates.io](https://img.shields.io/crates/v/irc.svg)](https://crates.io/crates/irc) #
+# irc [![Build Status](https://travis-ci.org/aatxe/irc.svg?branch=master)](https://travis-ci.org/aatxe/irc) [![Crates.io](https://img.shields.io/crates/v/irc.svg)](https://crates.io/crates/irc) [![Built with Spacemacs](https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg)](http://spacemacs.org) #
 A robust, thread-safe IRC library in Rust. The client portion is compliant with
 [RFC 2812](http://tools.ietf.org/html/rfc2812), [IRCv3.1](http://ircv3.net/irc/3.1.html),
 [IRCv3.2](http://ircv3.net/irc/3.2.html), and includes some additional, common features. It also
@@ -38,7 +38,7 @@ fn main() {
 ```
 
 It may not seem like much, but all it takes to get started with an IRC connection is the stub
-above. In just a few lines, you can be connected to a server and procesisng IRC messages as you
+above. In just a few lines, you can be connected to a server and processing IRC messages as you
 wish. The library is built with flexibility in mind. If you need to work on multiple threads,
 simply clone the server and have at it. We'll take care of the rest.
 
@@ -88,6 +88,8 @@ fail for obvious reasons). That being said, here's an example of a complete conf
   },
   "umodes": "+RB-x",
   "user_info": "I'm a test user for the Rust IRC crate.",
+  "version": "irc:git:Rust",
+  "source": "https://github.com/aatxe/irc",
   "ping_time": 180,
   "ping_timeout": 10,
   "options": {

@@ -1,7 +1,7 @@
 //! Messages to and from the server.
 use std::borrow::ToOwned;
 use std::fmt::{Display, Formatter, Result as FmtResult};
-use std::io::{Result as IoResult};
+use std::io::Result as IoResult;
 use std::str::FromStr;
 use client::data::Command;
 
@@ -18,14 +18,23 @@ pub struct Message {
 
 impl Message {
     /// Creates a new Message.
-    pub fn new(prefix: Option<&str>, command: &str, args: Vec<&str>, suffix: Option<&str>)
-        -> IoResult<Message> {
+    pub fn new(
+        prefix: Option<&str>,
+        command: &str,
+        args: Vec<&str>,
+        suffix: Option<&str>,
+    ) -> IoResult<Message> {
         Message::with_tags(None, prefix, command, args, suffix)
     }
 
     /// Creates a new Message optionally including IRCv3.2 message tags.
-    pub fn with_tags(tags: Option<Vec<Tag>>, prefix: Option<&str>, command: &str,
-                     args: Vec<&str>, suffix: Option<&str>) -> IoResult<Message> {
+    pub fn with_tags(
+        tags: Option<Vec<Tag>>,
+        prefix: Option<&str>,
+        command: &str,
+        args: Vec<&str>,
+        suffix: Option<&str>,
+    ) -> IoResult<Message> {
         Ok(Message {
             tags: tags,
             prefix: prefix.map(|s| s.to_owned()),
@@ -37,14 +46,16 @@ impl Message {
     pub fn source_nickname(&self) -> Option<&str> {
         // <prefix> ::= <servername> | <nick> [ '!' <user> ] [ '@' <host> ]
         // <servername> ::= <host>
-        self.prefix.as_ref().and_then(|s|
-            match (s.find('!'), s.find('@'), s.find('.')) {
-                (Some(i), _, _) => Some(&s[..i]), // <nick> '!' <user> [ '@' <host> ]
-                (None, Some(i), _) => Some(&s[..i]), // <nick> '@' <host>
-                (None, None, None) => Some(&s), // <nick>
-                _ => None // <servername>
-            }
-        )
+        self.prefix.as_ref().and_then(|s| match (
+            s.find('!'),
+            s.find('@'),
+            s.find('.'),
+        ) {
+            (Some(i), _, _) => Some(&s[..i]), // <nick> '!' <user> [ '@' <host> ]
+            (None, Some(i), _) => Some(&s[..i]), // <nick> '@' <host>
+            (None, None, None) => Some(s), // <nick>
+            _ => None, // <servername>
+        })
     }
 
     /// Converts a Message into a String according to the IRC protocol.
@@ -53,7 +64,7 @@ impl Message {
         let mut ret = String::new();
         if let Some(ref prefix) = self.prefix {
             ret.push(':');
-            ret.push_str(&prefix);
+            ret.push_str(prefix);
             ret.push(' ');
         }
         let cmd: String = From::from(&self.command);
@@ -65,7 +76,11 @@ impl Message {
 
 impl From<Command> for Message {
     fn from(cmd: Command) -> Message {
-        Message { tags: None, prefix: None, command: cmd }
+        Message {
+            tags: None,
+            prefix: None,
+            command: cmd,
+        }
     }
 }
 
@@ -73,44 +88,52 @@ impl FromStr for Message {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Message, &'static str> {
         let mut state = s;
-        if s.is_empty() { return Err("Cannot parse an empty string as a message.") }
+        if s.is_empty() {
+            return Err("Cannot parse an empty string as a message.");
+        }
         let tags = if state.starts_with('@') {
             let tags = state.find(' ').map(|i| &state[1..i]);
-            state = state.find(' ').map_or("", |i| &state[i+1..]);
-            tags.map(|ts| ts.split(';').filter(|s| !s.is_empty()).map(|s: &str| {
-                let mut iter = s.splitn(2, '=');
-                let (fst, snd) = (iter.next(), iter.next());
-                Tag(fst.unwrap_or("").to_owned(), snd.map(|s| s.to_owned()))
-            }).collect::<Vec<_>>())
+            state = state.find(' ').map_or("", |i| &state[i + 1..]);
+            tags.map(|ts| {
+                ts.split(';')
+                    .filter(|s| !s.is_empty())
+                    .map(|s: &str| {
+                        let mut iter = s.splitn(2, '=');
+                        let (fst, snd) = (iter.next(), iter.next());
+                        Tag(fst.unwrap_or("").to_owned(), snd.map(|s| s.to_owned()))
+                    })
+                    .collect::<Vec<_>>()
+            })
         } else {
             None
         };
         let prefix = if state.starts_with(':') {
             let prefix = state.find(' ').map(|i| &state[1..i]);
-            state = state.find(' ').map_or("", |i| &state[i+1..]);
+            state = state.find(' ').map_or("", |i| &state[i + 1..]);
             prefix
         } else {
             None
         };
         let suffix = if state.contains(" :") {
-            let suffix = state.find(" :").map(|i| &state[i+2..state.len()-2]);
-            state = state.find(" :").map_or("", |i| &state[..i+1]);
+            let suffix = state.find(" :").map(|i| &state[i + 2..state.len() - 2]);
+            state = state.find(" :").map_or("", |i| &state[..i + 1]);
             suffix
         } else {
             None
         };
         let command = match state.find(' ').map(|i| &state[..i]) {
             Some(cmd) => {
-                state = state.find(' ').map_or("", |i| &state[i+1..]);
+                state = state.find(' ').map_or("", |i| &state[i + 1..]);
                 cmd
             }
-            _ => return Err("Cannot parse a message without a command.")
+            _ => return Err("Cannot parse a message without a command."),
         };
-        if suffix.is_none() { state = &state[..state.len() - 2] }
+        if suffix.is_none() {
+            state = &state[..state.len() - 2]
+        }
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
-        Message::with_tags(
-            tags, prefix, command, args, suffix
-        ).map_err(|_| "Invalid input for Command.")
+        Message::with_tags(tags, prefix, command, args, suffix)
+            .map_err(|_| "Invalid input for Command.")
     }
 }
 
@@ -142,42 +165,69 @@ mod test {
             prefix: None,
             command: PRIVMSG(format!("test"), format!("Testing!")),
         };
-        assert_eq!(Message::new(None, "PRIVMSG", vec!["test"], Some("Testing!")).unwrap(), message)
+        assert_eq!(
+            Message::new(None, "PRIVMSG", vec!["test"], Some("Testing!")).unwrap(),
+            message
+        )
     }
 
     #[test]
     fn source_nickname() {
-        assert_eq!(Message::new(
-            None, "PING", vec![], Some("data")
-        ).unwrap().source_nickname(), None);
+        assert_eq!(
+            Message::new(None, "PING", vec![], Some("data"))
+                .unwrap()
+                .source_nickname(),
+            None
+        );
 
-        assert_eq!(Message::new(
-            Some("irc.test.net"), "PING", vec![], Some("data")
-        ).unwrap().source_nickname(), None);
+        assert_eq!(
+            Message::new(Some("irc.test.net"), "PING", vec![], Some("data"))
+                .unwrap()
+                .source_nickname(),
+            None
+        );
 
-        assert_eq!(Message::new(
-            Some("test!test@test"), "PING", vec![], Some("data")
-        ).unwrap().source_nickname(), Some("test"));
+        assert_eq!(
+            Message::new(Some("test!test@test"), "PING", vec![], Some("data"))
+                .unwrap()
+                .source_nickname(),
+            Some("test")
+        );
 
-        assert_eq!(Message::new(
-            Some("test@test"), "PING", vec![], Some("data")
-        ).unwrap().source_nickname(), Some("test"));
+        assert_eq!(
+            Message::new(Some("test@test"), "PING", vec![], Some("data"))
+                .unwrap()
+                .source_nickname(),
+            Some("test")
+        );
 
-        assert_eq!(Message::new(
-            Some("test!test@irc.test.com"), "PING", vec![], Some("data")
-        ).unwrap().source_nickname(), Some("test"));
+        assert_eq!(
+            Message::new(Some("test!test@irc.test.com"), "PING", vec![], Some("data"))
+                .unwrap()
+                .source_nickname(),
+            Some("test")
+        );
 
-        assert_eq!(Message::new(
-            Some("test!test@127.0.0.1"), "PING", vec![], Some("data")
-        ).unwrap().source_nickname(), Some("test"));
+        assert_eq!(
+            Message::new(Some("test!test@127.0.0.1"), "PING", vec![], Some("data"))
+                .unwrap()
+                .source_nickname(),
+            Some("test")
+        );
 
-        assert_eq!(Message::new(
-            Some("test@test.com"), "PING", vec![], Some("data")
-        ).unwrap().source_nickname(), Some("test"));
+        assert_eq!(
+            Message::new(Some("test@test.com"), "PING", vec![], Some("data"))
+                .unwrap()
+                .source_nickname(),
+            Some("test")
+        );
 
-        assert_eq!(Message::new(
-            Some("test"), "PING", vec![], Some("data")
-        ).unwrap().source_nickname(), Some("test"));
+        assert_eq!(
+            Message::new(Some("test"), "PING", vec![], Some("data"))
+                .unwrap()
+                .source_nickname(),
+            Some("test")
+        );
     }
 
     #[test]
@@ -193,7 +243,10 @@ mod test {
             prefix: Some(format!("test!test@test")),
             command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
-        assert_eq!(&message.to_string()[..], ":test!test@test PRIVMSG test :Still testing!\r\n");
+        assert_eq!(
+            &message.to_string()[..],
+            ":test!test@test PRIVMSG test :Still testing!\r\n"
+        );
     }
 
     #[test]
@@ -209,16 +262,25 @@ mod test {
             prefix: Some(format!("test!test@test")),
             command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
-        assert_eq!(":test!test@test PRIVMSG test :Still testing!\r\n".parse(), Ok(message));
+        assert_eq!(
+            ":test!test@test PRIVMSG test :Still testing!\r\n".parse(),
+            Ok(message)
+        );
         let message = Message {
-            tags: Some(vec![Tag(format!("aaa"), Some(format!("bbb"))),
-                            Tag(format!("ccc"), None),
-                            Tag(format!("example.com/ddd"), Some(format!("eee")))]),
+            tags: Some(vec![
+                Tag(format!("aaa"), Some(format!("bbb"))),
+                Tag(format!("ccc"), None),
+                Tag(format!("example.com/ddd"), Some(format!("eee"))),
+            ]),
             prefix: Some(format!("test!test@test")),
             command: PRIVMSG(format!("test"), format!("Testing with tags!")),
         };
-        assert_eq!("@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
-                    tags!\r\n".parse(), Ok(message))
+        assert_eq!(
+            "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
+                    tags!\r\n"
+                .parse(),
+            Ok(message)
+        )
     }
 
     #[test]
@@ -247,7 +309,9 @@ mod test {
             tags: None,
             prefix: Some(format!("test!test@test")),
             command: Raw(
-                format!("COMMAND"), vec![format!("ARG:test")], Some(format!("Testing!"))
+                format!("COMMAND"),
+                vec![format!("ARG:test")],
+                Some(format!("Testing!")),
             ),
         };
         let msg: Message = ":test!test@test COMMAND ARG:test :Testing!\r\n".into();
