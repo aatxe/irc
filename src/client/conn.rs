@@ -250,38 +250,11 @@ mod test {
     use client::data::Message;
     use client::data::Command::PRIVMSG;
 
-    #[cfg(feature = "encode")]
     fn send_to<C: Connection, M: Into<Message>>(conn: &C, msg: M, encoding: &str) -> Result<()> {
         conn.send(&msg.into().to_string(), encoding)
     }
 
-    #[cfg(not(feature = "encode"))]
-    fn send_to<C: Connection, M: Into<Message>>(conn: &C, msg: M) -> Result<()> {
-        conn.send(&msg.into().to_string())
-    }
-
-
     #[test]
-    #[cfg(not(feature = "encode"))]
-    fn send() {
-        let conn = MockConnection::empty();
-        assert!(send_to(&conn, PRIVMSG("test".to_owned(), "Testing!".to_owned())).is_ok());
-        let data = conn.written().unwrap();
-        assert_eq!(&data[..], "PRIVMSG test :Testing!\r\n");
-    }
-
-    #[test]
-    #[cfg(not(feature = "encode"))]
-    fn send_str() {
-        let exp = "PRIVMSG test :Testing!\r\n";
-        let conn = MockConnection::empty();
-        assert!(send_to(&conn, exp).is_ok());
-        let data = conn.written().unwrap();
-        assert_eq!(&data[..], exp);
-    }
-
-    #[test]
-    #[cfg(feature = "encode")]
     fn send_utf8() {
         let conn = MockConnection::empty();
         assert!(
@@ -296,7 +269,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "encode")]
     fn send_utf8_str() {
         let exp = "PRIVMSG test :€ŠšŽžŒœŸ\r\n";
         let conn = MockConnection::empty();
@@ -306,7 +278,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "encode")]
     fn send_iso885915() {
         let conn = MockConnection::empty();
         assert!(
@@ -321,7 +292,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "encode")]
     fn send_iso885915_str() {
         let exp = "PRIVMSG test :€ŠšŽžŒœŸ\r\n";
         let conn = MockConnection::empty();
@@ -331,14 +301,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(not(feature = "encode"))]
-    fn recv() {
-        let conn = MockConnection::new("PRIVMSG test :Testing!\r\n");
-        assert_eq!(&conn.recv().unwrap()[..], "PRIVMSG test :Testing!\r\n");
-    }
-
-    #[test]
-    #[cfg(feature = "encode")]
     fn recv_utf8() {
         let conn = MockConnection::new("PRIVMSG test :Testing!\r\n");
         assert_eq!(
@@ -348,7 +310,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "encode")]
     fn recv_iso885915() {
         let data = [0xA4, 0xA6, 0xA8, 0xB4, 0xB8, 0xBC, 0xBD, 0xBE];
         let conn = MockConnection::from_byte_vec({

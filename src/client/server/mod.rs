@@ -702,7 +702,7 @@ mod test {
     use client::data::Config;
     #[cfg(not(feature = "nochanlists"))]
     use client::data::User;
-    use client::data::command::Command::{PART, PRIVMSG};
+    use proto::command::Command::{PART, PRIVMSG};
 
     pub fn test_config() -> Config {
         Config {
@@ -716,14 +716,8 @@ mod test {
         }
     }
 
-    #[cfg(feature = "encode")]
     pub fn get_server_value(server: IrcServer) -> String {
         server.conn().written(server.config().encoding()).unwrap()
-    }
-
-    #[cfg(not(feature = "encode"))]
-    pub fn get_server_value(server: IrcServer) -> String {
-        server.conn().written().unwrap()
     }
 
     #[test]
