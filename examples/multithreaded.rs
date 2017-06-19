@@ -14,7 +14,16 @@ fn main() {
     let server = IrcServer::from_config(config).unwrap();
     server.identify().unwrap();
     let server = server.clone();
-    let _ = spawn(move || for msg in server.iter() {
-        print!("{}", msg.unwrap());
+    let _ = spawn(move || for message in server.iter() {
+        let message = message.unwrap(); // We'll just panic if there's an error.
+        print!("{}", message);
+        match message.command {
+            Command::PRIVMSG(ref target, ref msg) => {
+                if msg.contains("pickles") {
+                    server.send_privmsg(target, "Hi!").unwrap();
+                }
+            }
+            _ => (),
+        }
     }).join(); // You might not want to join here for actual multi-threading.
 }
