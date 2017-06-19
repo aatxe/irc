@@ -107,7 +107,7 @@ impl NetConnection {
 
     /// Panics because SSL support is not compiled in.
     #[cfg(not(feature = "ssl"))]
-    fn connect_ssl_internal(host: &str, port: u16) -> Result<NetStream> {
+    fn connect_ssl_internal(host: &str, port: u16) -> Result<NetBufStream> {
         panic!(
             "Cannot connect to {}:{} over SSL without compiling with SSL support.",
             host,
