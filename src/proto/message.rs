@@ -1,8 +1,9 @@
 //! Messages to and from the server.
 use std::borrow::ToOwned;
 use std::fmt::{Display, Formatter, Result as FmtResult};
-use std::io::Result as IoResult;
 use std::str::FromStr;
+use error;
+use error::{Error, ErrorKind};
 use client::data::Command;
 
 /// IRC Message data.
@@ -23,7 +24,7 @@ impl Message {
         command: &str,
         args: Vec<&str>,
         suffix: Option<&str>,
-    ) -> IoResult<Message> {
+    ) -> error::Result<Message> {
         Message::with_tags(None, prefix, command, args, suffix)
     }
 
@@ -34,7 +35,7 @@ impl Message {
         command: &str,
         args: Vec<&str>,
         suffix: Option<&str>,
-    ) -> IoResult<Message> {
+    ) -> error::Result<Message> {
         Ok(Message {
             tags: tags,
             prefix: prefix.map(|s| s.to_owned()),
@@ -85,11 +86,12 @@ impl From<Command> for Message {
 }
 
 impl FromStr for Message {
-    type Err = &'static str;
-    fn from_str(s: &str) -> Result<Message, &'static str> {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Message, Self::Err> {
         let mut state = s;
         if s.is_empty() {
-            return Err("Cannot parse an empty string as a message.");
+            return Err(ErrorKind::ParseEmpty.into());
         }
         let tags = if state.starts_with('@') {
             let tags = state.find(' ').map(|i| &state[1..i]);
@@ -126,14 +128,14 @@ impl FromStr for Message {
                 state = state.find(' ').map_or("", |i| &state[i + 1..]);
                 cmd
             }
-            _ => return Err("Cannot parse a message without a command."),
+            _ => return Err(ErrorKind::InvalidCommand.into()),
         };
         if suffix.is_none() {
             state = &state[..state.len() - 2]
         }
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
         Message::with_tags(tags, prefix, command, args, suffix)
-            .map_err(|_| "Invalid input for Command.")
+            .map_err(|_| ErrorKind::InvalidCommand.into())
     }
 }
 
@@ -256,15 +258,15 @@ mod test {
             prefix: None,
             command: PRIVMSG(format!("test"), format!("Testing!")),
         };
-        assert_eq!("PRIVMSG test :Testing!\r\n".parse(), Ok(message));
+        assert_eq!("PRIVMSG test :Testing!\r\n".parse::<Message>().unwrap(), message);
         let message = Message {
             tags: None,
             prefix: Some(format!("test!test@test")),
             command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
         assert_eq!(
-            ":test!test@test PRIVMSG test :Still testing!\r\n".parse(),
-            Ok(message)
+            ":test!test@test PRIVMSG test :Still testing!\r\n".parse::<Message>().unwrap(),
+            message
         );
         let message = Message {
             tags: Some(vec![
@@ -278,8 +280,8 @@ mod test {
         assert_eq!(
             "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
                     tags!\r\n"
-                .parse(),
-            Ok(message)
+                .parse::<Message>().unwrap(),
+            message
         )
     }
 

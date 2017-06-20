@@ -3,10 +3,11 @@ use std::borrow::ToOwned;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::{Error, ErrorKind, Result};
+use std::io::{Error, ErrorKind};
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::path::Path;
 use serde_json;
+use error::Result;
 
 /// Configuration data.
 #[derive(Clone, Deserialize, Serialize, Default, PartialEq, Debug)]
@@ -71,7 +72,7 @@ impl Config {
             Error::new(
                 ErrorKind::InvalidInput,
                 "Failed to decode configuration file.",
-            )
+            ).into()
         })
     }
 
@@ -85,7 +86,7 @@ impl Config {
                     "Failed to encode configuration file.",
                 )
             })).as_bytes(),
-        )
+        ).map_err(|e| e.into())
     }
 
     /// Determines whether or not the nickname provided is the owner of the bot.

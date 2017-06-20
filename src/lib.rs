@@ -4,7 +4,10 @@
 
 extern crate bufstream;
 extern crate bytes;
+#[macro_use]
+extern crate error_chain;
 extern crate encoding;
+#[macro_use]
 extern crate futures;
 extern crate native_tls;
 extern crate serde;
@@ -18,5 +21,6 @@ extern crate tokio_service;
 extern crate tokio_tls;
 
 pub mod client;
+pub mod error;
 pub mod proto;
 pub mod server;

@@ -1,7 +1,6 @@
 //! Enumeration of all available client commands.
-use std::io::Result;
-use std::result::Result as StdResult;
 use std::str::FromStr;
+use error;
 use client::data::Response;
 
 /// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This
@@ -434,7 +433,7 @@ impl<'a> From<&'a Command> for String {
 
 impl Command {
     /// Constructs a new Command.
-    pub fn new(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> Result<Command> {
+    pub fn new(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> error::Result<Command> {
         Ok(if let "PASS" = cmd {
             match suffix {
                 Some(suffix) => {
@@ -1659,8 +1658,8 @@ impl CapSubCommand {
 }
 
 impl FromStr for CapSubCommand {
-    type Err = &'static str;
-    fn from_str(s: &str) -> StdResult<CapSubCommand, &'static str> {
+    type Err = error::Error;
+    fn from_str(s: &str) -> error::Result<CapSubCommand> {
         match s {
             "LS" => Ok(CapSubCommand::LS),
             "LIST" => Ok(CapSubCommand::LIST),
@@ -1670,7 +1669,7 @@ impl FromStr for CapSubCommand {
             "END" => Ok(CapSubCommand::END),
             "NEW" => Ok(CapSubCommand::NEW),
             "DEL" => Ok(CapSubCommand::DEL),
-            _ => Err("Failed to parse CAP subcommand."),
+            _ => Err(error::ErrorKind::SubCommandParsingFailed.into()),
         }
     }
 }
@@ -1702,14 +1701,14 @@ impl MetadataSubCommand {
 }
 
 impl FromStr for MetadataSubCommand {
-    type Err = &'static str;
-    fn from_str(s: &str) -> StdResult<MetadataSubCommand, &'static str> {
+    type Err = error::Error;
+    fn from_str(s: &str) -> error::Result<MetadataSubCommand> {
         match s {
             "GET" => Ok(MetadataSubCommand::GET),
             "LIST" => Ok(MetadataSubCommand::LIST),
             "SET" => Ok(MetadataSubCommand::SET),
             "CLEAR" => Ok(MetadataSubCommand::CLEAR),
-            _ => Err("Failed to parse METADATA subcommand."),
+            _ => Err(error::ErrorKind::SubCommandParsingFailed.into()),
         }
     }
 }
@@ -1737,8 +1736,8 @@ impl BatchSubCommand {
 }
 
 impl FromStr for BatchSubCommand {
-    type Err = &'static str;
-    fn from_str(s: &str) -> StdResult<BatchSubCommand, &'static str> {
+    type Err = error::Error;
+    fn from_str(s: &str) -> error::Result<BatchSubCommand> {
         match s {
             "NETSPLIT" => Ok(BatchSubCommand::NETSPLIT),
             "NETJOIN" => Ok(BatchSubCommand::NETJOIN),

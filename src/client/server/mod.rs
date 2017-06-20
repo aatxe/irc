@@ -3,12 +3,13 @@ use std::borrow::ToOwned;
 use std::cell::Cell;
 use std::collections::HashMap;
 use std::error::Error as StdError;
-use std::io::{Error, ErrorKind, Result};
+use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::{spawn, sleep};
 use std::time::Duration as StdDuration;
+use error::Result;
 use client::conn::{Connection, NetConnection};
 use client::data::{Command, Config, Message, Response, User};
 use client::data::Command::{JOIN, NICK, NICKSERV, PART, PING, PONG, PRIVMSG, MODE, QUIT};
@@ -680,7 +681,7 @@ impl<'a> Iterator for ServerIterator<'a> {
                             return Some(Err(Error::new(
                                 ErrorKind::InvalidInput,
                                 &format!("Failed to parse message. (Message: {})", msg)[..],
-                            )))
+                            ).into()))
                         }
                     }
                 }

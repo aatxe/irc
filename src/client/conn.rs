@@ -1,8 +1,10 @@
 //! Thread-safe connections on `IrcStreams`.
+use std::io;
 use std::io::prelude::*;
-use std::io::{Cursor, Result};
+use std::io::Cursor;
 use std::net::TcpStream;
 use std::sync::Mutex;
+use error::Result;
 use bufstream::BufStream;
 use encoding::DecoderTrap;
 use encoding::label::encoding_from_whatwg_label;
@@ -50,7 +52,7 @@ impl NetConnection {
 
     /// connects to the specified server and returns a reader-writer pair.
     fn connect_internal(host: &str, port: u16) -> Result<NetBufStream> {
-        let socket = try!(TcpStream::connect((host, port)));
+        let socket = try!(TcpStream::connect((host, port)).into());
         Ok(BufStream::new(NetStream::Unsecured(socket)))
     }
 
@@ -144,12 +146,11 @@ impl Connection for MockConnection {
 }
 
 mod imp {
-    use std::io::Result;
-    use std::io::Error;
-    use std::io::ErrorKind;
+    use std::io::{Error, ErrorKind};
     use std::sync::Mutex;
     use encoding::{DecoderTrap, EncoderTrap};
     use encoding::label::encoding_from_whatwg_label;
+    use error::Result;
     use client::data::kinds::{IrcRead, IrcWrite};
 
     pub fn send<T: IrcWrite>(writer: &Mutex<T>, msg: &str, encoding: &str) -> Result<()> {
@@ -159,7 +160,7 @@ mod imp {
                 return Err(Error::new(
                     ErrorKind::InvalidInput,
                     &format!("Failed to find encoder. ({})", encoding)[..],
-                ))
+                ).into())
             }
         };
         let data = match encoding.encode(msg, EncoderTrap::Replace) {
@@ -173,12 +174,12 @@ mod imp {
                         encoding.name()
                     )
                         [..],
-                ))
+                ).into())
             }
         };
         let mut writer = writer.lock().unwrap();
         try!(writer.write_all(&data));
-        writer.flush()
+        writer.flush().map_err(|e| e.into())
     }
 
     pub fn recv<T: IrcRead>(reader: &Mutex<T>, encoding: &str) -> Result<String> {
@@ -188,7 +189,7 @@ mod imp {
                 return Err(Error::new(
                     ErrorKind::InvalidInput,
                     &format!("Failed to find decoder. ({})", encoding)[..],
-                ))
+                ).into())
             }
         };
         let mut buf = Vec::new();
@@ -209,6 +210,7 @@ mod imp {
                         [..],
                 )),
             })
+            .map_err(|e| e.into())
     }
 
 }
@@ -220,7 +222,7 @@ pub enum NetStream {
 }
 
 impl Read for NetStream {
-    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         match *self {
             NetStream::Unsecured(ref mut stream) => stream.read(buf),
             #[cfg(feature = "ssl")]
@@ -230,13 +232,13 @@ impl Read for NetStream {
 }
 
 impl Write for NetStream {
-    fn write(&mut self, buf: &[u8]) -> Result<usize> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         match *self {
             NetStream::Unsecured(ref mut stream) => stream.write(buf),
         }
     }
 
-    fn flush(&mut self) -> Result<()> {
+    fn flush(&mut self) -> io::Result<()> {
         match *self {
             NetStream::Unsecured(ref mut stream) => stream.flush(),
         }
@@ -246,7 +248,7 @@ impl Write for NetStream {
 #[cfg(test)]
 mod test {
     use super::{Connection, MockConnection};
-    use std::io::Result;
+    use error::Result;
     use client::data::Message;
     use client::data::Command::PRIVMSG;
 

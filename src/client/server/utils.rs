@@ -1,11 +1,11 @@
 //! Utilities and shortcuts for working with IRC servers.
-use std::io::Result;
 use std::borrow::ToOwned;
+use error::Result;
 use client::data::{Capability, NegotiationVersion};
 use client::data::Command::{AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
 use client::data::Command::{OPER, PART, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
-use proto::command::CapSubCommand::{END, LS, REQ};
 use client::server::Server;
+use proto::command::CapSubCommand::{END, LS, REQ};
 use time;
 
 /// Extensions for Server capabilities that make it easier to work directly with the protocol.

@@ -19,6 +19,7 @@ nochanlists = []
 [dependencies]
 bufstream = "0.1"
 bytes = "0.4"
+error-chain = "0.10"
 encoding = "0.2"
 futures = "0.1"
 native-tls = "0.1"
