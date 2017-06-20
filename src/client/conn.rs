@@ -23,7 +23,6 @@ pub trait Connection {
     fn reconnect(&self) -> Result<()>;
 }
 
-
 /// Useful internal type definitions.
 type NetBufStream = BufStream<NetStream>;
 
@@ -33,6 +32,7 @@ pub struct NetConnection {
     port: Mutex<u16>,
     stream: Mutex<NetBufStream>,
 }
+
 impl NetConnection {
     fn new(host: &str, port: u16, stream: NetBufStream) -> NetConnection {
         NetConnection {

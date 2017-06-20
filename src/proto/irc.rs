@@ -12,7 +12,7 @@ pub struct IrcCodec {
 }
 
 impl IrcCodec {
-    /// Creates a new instance of IrcCodec wrapping a LineCodec with the specifiec encoding.
+    /// Creates a new instance of IrcCodec wrapping a LineCodec with the specific encoding.
     pub fn new(label: &str) -> io::Result<IrcCodec> {
         LineCodec::new(label).map(|codec| IrcCodec { inner: codec })
     }
