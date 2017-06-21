@@ -15,9 +15,9 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 extern crate time;
-extern crate tokio_io;
 extern crate tokio_core;
-extern crate tokio_service;
+extern crate tokio_io;
+extern crate tokio_mockstream;
 extern crate tokio_tls;
 
 pub mod client;
