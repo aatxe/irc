@@ -6,6 +6,9 @@ error_chain! {
     foreign_links {
         Io(::std::io::Error);
         Tls(::native_tls::Error);
+        Recv(::std::sync::mpsc::RecvError);
+        SendMessage(::futures::sync::mpsc::SendError<::proto::Message>);
+        OneShotCancelled(::futures::sync::oneshot::Canceled);
     }
 
     errors {
@@ -25,6 +28,12 @@ error_chain! {
         SubCommandParsingFailed {
             description("Failed to parse an IRC subcommand.")
             display("Failed to parse an IRC subcommand.")
+        }
+
+        /// An error occurred on one of the internal channels of the `IrcServer`.
+        ChannelError {
+            description("An error occured on one of the IrcServer's internal channels.")
+            display("An error occured on one of the IrcServer's internal channels.")
         }
     }
 }
