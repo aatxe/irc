@@ -62,6 +62,12 @@ pub struct Config {
     pub ghost_sequence: Option<Vec<String>>,
     /// A map of additional options to be stored in config.
     pub options: Option<HashMap<String, String>>,
+    /// Whether or not to use a fake connection for testing purposes. You probably will never want
+    /// to enable this, but it is used in unit testing for the `irc` crate.
+    pub use_mock_connection: Option<bool>,
+    /// The initial value used by the fake connection for testing. You probably will never need to
+    /// set this, but it is used in unit testing for the `irc` crate.
+    pub mock_initial_value: Option<String>,
 }
 
 impl Config {
@@ -123,13 +129,13 @@ impl Config {
     /// Gets the username specified in the configuration.
     /// This defaults to the user's nickname when not specified.
     pub fn username(&self) -> &str {
-        self.username.as_ref().map_or(self.nickname(), |s| &s[..])
+        self.username.as_ref().map_or(self.nickname(), |s| &s)
     }
 
     /// Gets the real name specified in the configuration.
     /// This defaults to the user's nickname when not specified.
     pub fn real_name(&self) -> &str {
-        self.realname.as_ref().map_or(self.nickname(), |s| &s[..])
+        self.realname.as_ref().map_or(self.nickname(), |s| &s)
     }
 
     /// Gets the address of the server specified in the configuration.
@@ -161,7 +167,7 @@ impl Config {
     /// Gets the server password specified in the configuration.
     /// This defaults to a blank string when not specified.
     pub fn password(&self) -> &str {
-        self.password.as_ref().map_or("", |s| &s[..])
+        self.password.as_ref().map_or("", |s| &s)
     }
 
     /// Gets whether or not to use SSL with this connection.
@@ -173,7 +179,7 @@ impl Config {
     /// Gets the encoding to use for this connection. This requires the encode feature to work.
     /// This defaults to UTF-8 when not specified.
     pub fn encoding(&self) -> &str {
-        self.encoding.as_ref().map_or("UTF-8", |s| &s[..])
+        self.encoding.as_ref().map_or("UTF-8", |s| &s)
     }
 
     /// Gets the channels to join upon connection.
@@ -207,7 +213,7 @@ impl Config {
     /// Gets the string to be sent in response to CTCP VERSION requests.
     /// This defaults to `irc:git:Rust` when not specified.
     pub fn version(&self) -> &str {
-        self.version.as_ref().map_or("irc:git:Rust", |s| &s[..])
+        self.version.as_ref().map_or("irc:git:Rust", |s| &s)
     }
 
     /// Gets the string to be sent in response to CTCP SOURCE requests.
@@ -255,6 +261,19 @@ impl Config {
             .map(|o| &o[&option.to_owned()][..])
             .unwrap()
     }
+
+    /// Gets whether or not to use a mock connection for testing.
+    /// This defaults to false when not specified.
+    pub fn use_mock_connection(&self) -> bool {
+        self.use_mock_connection.as_ref().cloned().unwrap_or(false)
+    }
+
+    /// Gets the initial value for the mock connection.
+    /// This defaults to false when not specified.
+    /// This has no effect if `use_mock_connection` is not `true`.
+    pub fn mock_initial_value(&self) -> &str {
+        self.mock_initial_value.as_ref().map_or("", |s| &s)
+    }
 }
 
 #[cfg(test)]
@@ -289,6 +308,8 @@ mod test {
             should_ghost: None,
             ghost_sequence: None,
             options: Some(HashMap::new()),
+            use_mock_connection: None,
+            mock_initial_value: None,
         };
         assert_eq!(Config::load(Path::new("client_config.json")).unwrap(), cfg);
     }
@@ -318,6 +339,8 @@ mod test {
             should_ghost: None,
             ghost_sequence: None,
             options: Some(HashMap::new()),
+            use_mock_connection: None,
+            mock_initial_value: None,
         };
         assert_eq!(Config::load("client_config.json").unwrap(), cfg);
     }
