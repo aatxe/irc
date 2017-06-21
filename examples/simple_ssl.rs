@@ -14,16 +14,20 @@ fn main() {
     };
     let server = IrcServer::from_config(config).unwrap();
     server.identify().unwrap();
-    server.stream().for_each(|message| {
-        print!("{}", message);
-        match message.command {
-            Command::PRIVMSG(ref target, ref msg) => {
-                if msg.contains("pickles") {
-                    server.send_privmsg(target, "Hi!").unwrap();
+    server
+        .stream()
+        .for_each(|message| {
+            print!("{}", message);
+            match message.command {
+                Command::PRIVMSG(ref target, ref msg) => {
+                    if msg.contains("pickles") {
+                        server.send_privmsg(target, "Hi!").unwrap();
+                    }
                 }
+                _ => (),
             }
-            _ => (),
-        }
-        Ok(())
-    }).wait().unwrap()
+            Ok(())
+        })
+        .wait()
+        .unwrap()
 }

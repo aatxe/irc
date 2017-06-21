@@ -23,9 +23,9 @@ impl Decoder for IrcCodec {
     type Error = error::Error;
 
     fn decode(&mut self, src: &mut BytesMut) -> error::Result<Option<Message>> {
-        self.inner.decode(src).and_then(|res| res.map_or(Ok(None), |msg| {
-            msg.parse::<Message>().map(|msg| Some(msg))
-        }))
+        self.inner.decode(src).and_then(|res| {
+            res.map_or(Ok(None), |msg| msg.parse::<Message>().map(|msg| Some(msg)))
+        })
     }
 }
 

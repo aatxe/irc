@@ -1,37 +1,45 @@
+//! A module providing IRC connections for use by `IrcServer`s.
 use std::fmt;
-use std::thread;
-use std::thread::JoinHandle;
 use error;
 use client::data::Config;
 use client::transport::IrcTransport;
 use proto::{IrcCodec, Message};
-use futures::future;
 use futures::{Async, Poll, Future, Sink, StartSend, Stream};
-use futures::stream::SplitStream;
-use futures::sync::mpsc;
-use futures::sync::oneshot;
-use futures::sync::mpsc::UnboundedSender;
 use native_tls::TlsConnector;
-use tokio_core::reactor::{Core, Handle};
+use tokio_core::reactor::Handle;
 use tokio_core::net::{TcpStream, TcpStreamNew};
 use tokio_io::AsyncRead;
 use tokio_tls::{TlsConnectorExt, TlsStream};
 
+/// An IRC connection used internally by `IrcServer`.
 pub enum Connection {
+    #[doc(hidden)]
     Unsecured(IrcTransport<TcpStream>),
+    #[doc(hidden)]
     Secured(IrcTransport<TlsStream<TcpStream>>),
 }
 
 impl fmt::Debug for Connection {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "IrcConnection")
+        write!(
+            f,
+            "{}",
+            match *self {
+                Connection::Unsecured(_) => "Connection::Unsecured(...)",
+                Connection::Secured(_) => "Connection::Secured(...)",
+            }
+        )
     }
 }
 
-type TlsFuture = Box<Future<Error=error::Error, Item=TlsStream<TcpStream>> + Send>;
+/// A convenient type alias representing the TlsStream future.
+type TlsFuture = Box<Future<Error = error::Error, Item = TlsStream<TcpStream>> + Send>;
 
+/// A future representing an eventual `Connection`.
 pub enum ConnectionFuture<'a> {
+    #[doc(hidden)]
     Unsecured(&'a Config, TcpStreamNew),
+    #[doc(hidden)]
     Secured(&'a Config, TlsFuture),
 }
 
@@ -58,19 +66,28 @@ impl<'a> Future for ConnectionFuture<'a> {
 }
 
 impl Connection {
+    /// Creates a new `Connection` using the specified `Config` and `Handle`.
     pub fn new<'a>(config: &'a Config, handle: &Handle) -> error::Result<ConnectionFuture<'a>> {
         if config.use_ssl() {
             let domain = format!("{}:{}", config.server(), config.port());
             let connector = TlsConnector::builder()?.build()?;
-            let stream = TcpStream::connect(&config.socket_addr(), handle).map_err(|e| {
-                let res: error::Error = e.into();
-                res
-            }).and_then(move |socket| {
-                connector.connect_async(&domain, socket).map_err(|e| e.into())
-            }).boxed();
+            let stream = TcpStream::connect(&config.socket_addr(), handle)
+                .map_err(|e| {
+                    let res: error::Error = e.into();
+                    res
+                })
+                .and_then(move |socket| {
+                    connector.connect_async(&domain, socket).map_err(
+                        |e| e.into(),
+                    )
+                })
+                .boxed();
             Ok(ConnectionFuture::Secured(config, stream))
         } else {
-            Ok(ConnectionFuture::Unsecured(config, TcpStream::connect(&config.socket_addr(), handle)))
+            Ok(ConnectionFuture::Unsecured(
+                config,
+                TcpStream::connect(&config.socket_addr(), handle),
+            ))
         }
     }
 }

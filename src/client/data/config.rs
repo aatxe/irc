@@ -52,11 +52,13 @@ pub struct Config {
     pub ping_time: Option<u32>,
     /// The amount of time in seconds for a client to reconnect due to no ping response.
     pub ping_timeout: Option<u32>,
-    /// Whether the client should use NickServ GHOST to reclaim its primary nickname if it is in use.
-    /// This has no effect if `nick_password` is not set.
+    /// Whether the client should use NickServ GHOST to reclaim its primary nickname if it is in
+    /// use. This has no effect if `nick_password` is not set.
     pub should_ghost: Option<bool>,
-    /// The command(s) that should be sent to NickServ to recover a nickname. The nickname and password will be appended in that order after the command.
-    /// E.g. `["RECOVER", "RELEASE"]` means `RECOVER nick pass` and `RELEASE nick pass` will be sent in that order.
+    /// The command(s) that should be sent to NickServ to recover a nickname. The nickname and
+    /// password will be appended in that order after the command.
+    /// E.g. `["RECOVER", "RELEASE"]` means `RECOVER nick pass` and `RELEASE nick pass` will be sent
+    /// in that order.
     pub ghost_sequence: Option<Vec<String>>,
     /// A map of additional options to be stored in config.
     pub options: Option<HashMap<String, String>>,
@@ -149,7 +151,11 @@ impl Config {
     /// Gets the server and port as a `SocketAddr`.
     /// This panics when server is not specified or the address is malformed.
     pub fn socket_addr(&self) -> SocketAddr {
-        format!("{}:{}", self.server(), self.port()).to_socket_addrs().unwrap().next().unwrap()
+        format!("{}:{}", self.server(), self.port())
+            .to_socket_addrs()
+            .unwrap()
+            .next()
+            .unwrap()
     }
 
     /// Gets the server password specified in the configuration.

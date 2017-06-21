@@ -258,14 +258,19 @@ mod test {
             prefix: None,
             command: PRIVMSG(format!("test"), format!("Testing!")),
         };
-        assert_eq!("PRIVMSG test :Testing!\r\n".parse::<Message>().unwrap(), message);
+        assert_eq!(
+            "PRIVMSG test :Testing!\r\n".parse::<Message>().unwrap(),
+            message
+        );
         let message = Message {
             tags: None,
             prefix: Some(format!("test!test@test")),
             command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
         assert_eq!(
-            ":test!test@test PRIVMSG test :Still testing!\r\n".parse::<Message>().unwrap(),
+            ":test!test@test PRIVMSG test :Still testing!\r\n"
+                .parse::<Message>()
+                .unwrap(),
             message
         );
         let message = Message {
@@ -280,7 +285,8 @@ mod test {
         assert_eq!(
             "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
                     tags!\r\n"
-                .parse::<Message>().unwrap(),
+                .parse::<Message>()
+                .unwrap(),
             message
         )
     }

@@ -15,12 +15,14 @@ pub struct LineCodec {
 impl LineCodec {
     /// Creates a new instance of LineCodec from the specified encoding.
     pub fn new(label: &str) -> error::Result<LineCodec> {
-        encoding_from_whatwg_label(label).map(|enc| LineCodec { encoding: enc }).ok_or(
-            io::Error::new(
-                io::ErrorKind::InvalidInput,
-                &format!("Attempted to use unknown codec {}.", label)[..]
-            ).into()
-        )
+        encoding_from_whatwg_label(label)
+            .map(|enc| LineCodec { encoding: enc })
+            .ok_or(
+                io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    &format!("Attempted to use unknown codec {}.", label)[..],
+                ).into(),
+            )
     }
 }
 
@@ -36,10 +38,12 @@ impl Decoder for LineCodec {
             // Decode the line using the codec's encoding.
             match self.encoding.decode(line.as_ref(), DecoderTrap::Replace) {
                 Ok(data) => Ok(Some(data)),
-                Err(data) => Err(io::Error::new(
-                    io::ErrorKind::InvalidInput,
-                    &format!("Failed to decode {} as {}.", data, self.encoding.name())[..]
-                ).into())
+                Err(data) => Err(
+                    io::Error::new(
+                        io::ErrorKind::InvalidInput,
+                        &format!("Failed to decode {} as {}.", data, self.encoding.name())[..],
+                    ).into(),
+                ),
             }
         } else {
             Ok(None)
@@ -53,12 +57,14 @@ impl Encoder for LineCodec {
 
     fn encode(&mut self, msg: String, dst: &mut BytesMut) -> error::Result<()> {
         // Encode the message using the codec's encoding.
-        let data: error::Result<Vec<u8>> = self.encoding.encode(&msg, EncoderTrap::Replace).map_err(|data| {
-            io::Error::new(
-                io::ErrorKind::InvalidInput,
-                &format!("Failed to encode {} as {}.", data, self.encoding.name())[..]
-            ).into()
-        });
+        let data: error::Result<Vec<u8>> = self.encoding
+            .encode(&msg, EncoderTrap::Replace)
+            .map_err(|data| {
+                io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    &format!("Failed to encode {} as {}.", data, self.encoding.name())[..],
+                ).into()
+            });
 
         // Write the encoded message to the output buffer.
         dst.put(&data?);

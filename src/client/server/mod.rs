@@ -1,23 +1,21 @@
 //! Interface for working with IRC Servers.
-use std::cell::Cell;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 use error;
 use client::conn::Connection;
 use client::data::{Command, Config, Message, Response, User};
-use client::data::Command::{JOIN, NICK, NICKSERV, PART, PING, PONG, PRIVMSG, MODE, QUIT};
+use client::data::Command::{JOIN, NICK, NICKSERV, PART, PRIVMSG, MODE, QUIT};
 use client::server::utils::ServerExt;
-use futures::{Async, Poll, Future, Sink, StartSend, Stream};
+use futures::{Async, Poll, Future, Sink, Stream};
 use futures::future;
-use futures::stream::{BoxStream, SplitStream};
+use futures::stream::SplitStream;
 use futures::sync::mpsc;
 use futures::sync::oneshot;
 use futures::sync::mpsc::UnboundedSender;
 use time;
-use tokio_core::reactor::{Core, Handle};
+use tokio_core::reactor::Core;
 
 pub mod utils;
 
@@ -34,7 +32,8 @@ pub trait Server {
     /// Gets a stream of incoming messages from the Server.
     fn stream(&self) -> ServerStream;
 
-    /// Gets a list of currently joined channels. This will be none if tracking is not supported altogether.
+    /// Gets a list of currently joined channels. This will be none if tracking is not supported
+    /// altogether (such as when the `nochanlists` feature is enabled).
     fn list_channels(&self) -> Option<Vec<String>>;
 
     /// Gets a list of Users in the specified channel. This will be none if the channel is not
@@ -43,6 +42,8 @@ pub trait Server {
     fn list_users(&self, channel: &str) -> Option<Vec<User>>;
 }
 
+/// A stream of `Messages` from the `IrcServer`. Interaction with this stream relies on the
+/// `futures` API.
 pub struct ServerStream {
     state: Arc<ServerState>,
     stream: SplitStream<Connection>,
@@ -86,8 +87,11 @@ impl<'a> Server for ServerState {
     where
         Self: Sized,
     {
+        let msg = &msg.into();
+        try!(self.handle_sent_message(&msg));
         Ok((&self.outgoing).send(
-            ServerState::sanitize(&msg.into().to_string()).into(),
+            ServerState::sanitize(&msg.to_string())
+                .into(),
         )?)
     }
 
@@ -128,8 +132,11 @@ impl<'a> Server for ServerState {
 }
 
 impl ServerState {
-    fn new(incoming: SplitStream<Connection>, outgoing: UnboundedSender<Message>, config: Config) -> ServerState
-    {
+    fn new(
+        incoming: SplitStream<Connection>,
+        outgoing: UnboundedSender<Message>,
+        config: Config,
+    ) -> ServerState {
         ServerState {
             config: config,
             chanlists: Mutex::new(HashMap::new()),
@@ -140,7 +147,8 @@ impl ServerState {
     }
 
     /// Sanitizes the input string by cutting up to (and including) the first occurence of a line
-    /// terminiating phrase (`\r\n`, `\r`, or `\n`).
+    /// terminiating phrase (`\r\n`, `\r`, or `\n`). This is used in sending messages back to
+    /// prevent the injection of additional commands.
     fn sanitize(data: &str) -> &str {
         // n.b. ordering matters here to prefer "\r\n" over "\r"
         if let Some((pos, len)) = ["\r\n", "\r", "\n"]
@@ -162,6 +170,17 @@ impl ServerState {
             0 => self.config().nickname(),
             i => alt_nicks[i - 1],
         }
+    }
+
+    /// Handles sent messages internally for basic client functionality.
+    fn handle_sent_message(&self, msg: &Message) -> error::Result<()> {
+        match msg.command {
+            PART(ref chan, _) => {
+                let _ = self.chanlists.lock().unwrap().remove(chan);
+            }
+            _ => (),
+        }
+        Ok(())
     }
 
     /// Handles received messages internally for basic client functionality.
@@ -225,7 +244,7 @@ impl ServerState {
                     *index += 1;
                 }
             }
-            _ => ()
+            _ => (),
         }
         Ok(())
     }
@@ -355,7 +374,6 @@ impl ServerState {
         }
     }
 
-    /// Handles CTCP requests if the CTCP feature is enabled.
     #[cfg(feature = "ctcp")]
     fn handle_ctcp(&self, resp: &str, tokens: Vec<&str>) -> error::Result<()> {
         if tokens.is_empty() {
@@ -393,13 +411,11 @@ impl ServerState {
         }
     }
 
-    /// Sends a CTCP-escaped message.
     #[cfg(feature = "ctcp")]
     fn send_ctcp_internal(&self, target: &str, msg: &str) -> error::Result<()> {
         self.send_notice(target, &format!("\u{001}{}\u{001}", msg))
     }
 
-    /// Handles CTCP requests if the CTCP feature is enabled.
     #[cfg(not(feature = "ctcp"))]
     fn handle_ctcp(&self, _: &str, _: Vec<&str>) -> Result<()> {
         Ok(())
@@ -422,8 +438,6 @@ impl Server for IrcServer {
     where
         Self: Sized,
     {
-        let msg = msg.into();
-        try!(self.handle_sent_message(&msg));
         self.state.send(msg)
     }
 
@@ -488,7 +502,10 @@ impl IrcServer {
 
             // Setting up internal processing stuffs.
             let handle = reactor.handle();
-            let (sink, stream) = reactor.run(Connection::new(&cfg, &handle).unwrap()).unwrap().split();
+            let (sink, stream) = reactor
+                .run(Connection::new(&cfg, &handle).unwrap())
+                .unwrap()
+                .split();
 
             let outgoing_future = sink.send_all(rx_outgoing.map_err(|_| {
                 let res: error::Error = error::ErrorKind::ChannelError.into();
@@ -496,12 +513,7 @@ impl IrcServer {
             }));
             handle.spawn(outgoing_future.map(|_| ()).map_err(|_| ()));
 
-            // let incoming_future = tx_incoming.sink_map_err(|e| {
-            //     let res: error::Error = e.into();
-            //     res
-            // }).send_all(stream);
-            // // let incoming_future = stream.forward(tx_incoming);
-            // handle.spawn(incoming_future.map(|_| ()).map_err(|_| ()));
+            // Send the stream half back to the original thread.
             tx_incoming.send(stream).unwrap();
 
             reactor.run(future::empty::<(), ()>()).unwrap();
@@ -511,18 +523,6 @@ impl IrcServer {
             state: Arc::new(ServerState::new(rx_incoming.wait()?, tx_outgoing, config)),
         })
     }
-
-    /// Handles sent messages internally for basic client functionality.
-    fn handle_sent_message(&self, msg: &Message) -> error::Result<()> {
-        match msg.command {
-            PART(ref chan, _) => {
-                let _ = self.state.chanlists.lock().unwrap().remove(chan);
-            }
-            _ => (),
-        }
-        Ok(())
-    }
-
 }
 
 #[cfg(test)]
