@@ -12,4 +12,5 @@ pub mod prelude {
     pub use client::server::utils::ServerExt;
     pub use client::data::{Capability, Command, Config, Message, NegotiationVersion, Response};
     pub use client::data::kinds::{IrcRead, IrcWrite};
+    pub use futures::{Future, Stream};
 }
