@@ -33,9 +33,6 @@ impl Decoder for LineCodec {
             // Remove the next frame from the buffer.
             let line = src.split_to(n + 1);
 
-            // Remove the new-line from the buffer.
-            src.split_to(1);
-
             // Decode the line using the codec's encoding.
             match self.encoding.decode(line.as_ref(), DecoderTrap::Replace) {
                 Ok(data) => Ok(Some(data)),

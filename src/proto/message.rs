@@ -39,7 +39,7 @@ impl Message {
         Ok(Message {
             tags: tags,
             prefix: prefix.map(|s| s.to_owned()),
-            command: try!(Command::new(command, args, suffix)),
+            command: Command::new(command, args, suffix)?,
         })
     }
 
