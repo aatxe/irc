@@ -6,6 +6,7 @@ use client::data::Command::{AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, MODE, N
 use client::data::Command::{OPER, PART, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
 use client::server::Server;
 use proto::command::CapSubCommand::{END, LS, REQ};
+#[cfg(feature = "ctcp")]
 use time;
 
 /// Extensions for Server capabilities that make it easier to work directly with the protocol.

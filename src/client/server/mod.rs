@@ -14,6 +14,7 @@ use futures::stream::SplitStream;
 use futures::sync::mpsc;
 use futures::sync::oneshot;
 use futures::sync::mpsc::UnboundedSender;
+#[cfg(feature = "ctcp")]
 use time;
 use tokio_core::reactor::Core;
 
@@ -417,7 +418,7 @@ impl ServerState {
     }
 
     #[cfg(not(feature = "ctcp"))]
-    fn handle_ctcp(&self, _: &str, _: Vec<&str>) -> Result<()> {
+    fn handle_ctcp(&self, _: &str, _: Vec<&str>) -> error::Result<()> {
         Ok(())
     }
 }
