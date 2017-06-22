@@ -1,4 +1,4 @@
-//! A simple, thread-safe IRC client library.
+//! A simple, thread-safe, and async-friendly IRC client library.
 
 pub mod conn;
 pub mod data;

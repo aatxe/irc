@@ -1,4 +1,4 @@
-//! A simple, thread-safe IRC library.
+//! A simple, thread-safe, and async-friendly IRC library.
 
 #![warn(missing_docs)]
 
