@@ -6,7 +6,6 @@ description = "A simple, thread-safe, and async-friendly IRC client library."
 authors = ["Aaron Weiss <aaronweiss74@gmail.com>"]
 license = "MPL-2.0"
 keywords = ["irc", "client", "thread-safe", "async", "tokio"]
-documentation = "http://aatxe.github.io/irc/irc/"
 repository = "https://github.com/aatxe/irc"
 readme = "README.md"
 
