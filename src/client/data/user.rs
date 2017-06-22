@@ -3,6 +3,7 @@ use std::borrow::ToOwned;
 use std::cmp::Ordering;
 use std::cmp::Ordering::{Less, Equal, Greater};
 use std::str::FromStr;
+
 use proto::{Mode, ChannelMode};
 
 /// IRC User data.
@@ -226,8 +227,8 @@ impl Iterator for AccessLevelIterator {
 mod test {
     use super::{AccessLevel, User};
     use super::AccessLevel::*;
-    use proto::Mode::*;
     use proto::ChannelMode as M;
+    use proto::Mode::*;
 
     #[test]
     fn parse_access_level() {

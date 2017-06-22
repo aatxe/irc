@@ -2,12 +2,14 @@
 use std::io;
 use std::sync::{Arc, RwLock, RwLockReadGuard};
 use std::time::Instant;
-use error;
-use client::data::Config;
-use proto::{Command, IrcCodec, Message};
+
 use futures::{Async, Poll, Sink, StartSend, Stream};
 use tokio_io::{AsyncRead, AsyncWrite};
 use tokio_io::codec::Framed;
+
+use error;
+use client::data::Config;
+use proto::{Command, IrcCodec, Message};
 
 /// An IRC transport that handles automatically replying to PINGs.
 pub struct IrcTransport<T>

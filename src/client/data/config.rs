@@ -6,7 +6,9 @@ use std::io::prelude::*;
 use std::io::{Error, ErrorKind};
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::path::Path;
+
 use serde_json;
+
 use error::Result;
 
 /// Configuration data.
@@ -285,10 +287,11 @@ impl Config {
 
 #[cfg(test)]
 mod test {
-    use super::Config;
     use std::collections::HashMap;
     use std::default::Default;
     use std::path::Path;
+
+    use super::Config;
 
     #[test]
     fn load() {

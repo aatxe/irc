@@ -1,6 +1,7 @@
 //! Enumeration of all available client commands.
 use std::ascii::AsciiExt;
 use std::str::FromStr;
+
 use error;
 use proto::{ChannelMode, Mode, Response, UserMode};
 

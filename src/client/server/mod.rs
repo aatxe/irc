@@ -4,13 +4,7 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
 use std::thread;
-use error;
-use client::conn::Connection;
-use client::data::{Config, User};
-use client::server::utils::ServerExt;
-use client::transport::LogView;
-use proto::{ChannelMode, Command, Message, Mode, Response};
-use proto::Command::{JOIN, NICK, NICKSERV, PART, PRIVMSG, ChannelMODE, QUIT};
+
 use futures::{Async, Poll, Future, Sink, Stream};
 use futures::stream::SplitStream;
 use futures::sync::mpsc;
@@ -19,6 +13,14 @@ use futures::sync::mpsc::UnboundedSender;
 #[cfg(feature = "ctcp")]
 use time;
 use tokio_core::reactor::Core;
+
+use error;
+use client::conn::Connection;
+use client::data::{Config, User};
+use client::server::utils::ServerExt;
+use client::transport::LogView;
+use proto::{ChannelMode, Command, Message, Mode, Response};
+use proto::Command::{JOIN, NICK, NICKSERV, PART, PRIVMSG, ChannelMODE, QUIT};
 
 pub mod utils;
 
@@ -555,17 +557,19 @@ impl IrcServer {
 
 #[cfg(test)]
 mod test {
-    use super::{IrcServer, Server};
-    use std::thread;
-    use std::time::Duration;
     use std::collections::HashMap;
     use std::default::Default;
+    use std::thread;
+    use std::time::Duration;
+
+    use futures::{Future, Stream};
+
+    use super::{IrcServer, Server};
     use client::data::Config;
     #[cfg(not(feature = "nochanlists"))]
     use client::data::User;
     use proto::{ChannelMode, Mode};
     use proto::command::Command::{PART, PRIVMSG};
-    use futures::{Future, Stream};
 
     pub fn test_config() -> Config {
         Config {

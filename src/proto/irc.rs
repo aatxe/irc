@@ -1,8 +1,9 @@
 //! Implementation of IRC codec for Tokio.
 
-use error;
 use bytes::BytesMut;
 use tokio_io::codec::{Decoder, Encoder};
+
+use error;
 use proto::line::LineCodec;
 use proto::message::Message;
 

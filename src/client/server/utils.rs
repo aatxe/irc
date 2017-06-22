@@ -1,13 +1,15 @@
 //! Utilities and shortcuts for working with IRC servers.
 use std::borrow::ToOwned;
+
+#[cfg(feature = "ctcp")]
+use time;
+
 use error::Result;
 use proto::{Capability, Command, Mode, NegotiationVersion};
+use proto::command::CapSubCommand::{END, LS, REQ};
 use proto::command::Command::*;
 use proto::mode::ModeType;
 use client::server::Server;
-use proto::command::CapSubCommand::{END, LS, REQ};
-#[cfg(feature = "ctcp")]
-use time;
 
 /// Extensions for Server capabilities that make it easier to work directly with the protocol.
 pub trait ServerExt: Server {

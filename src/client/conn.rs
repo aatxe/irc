@@ -2,10 +2,7 @@
 use std::fs::File;
 use std::{fmt, io};
 use std::io::Read;
-use error;
-use client::data::Config;
-use client::transport::{IrcTransport, LogView, Logged};
-use proto::{IrcCodec, Message};
+
 use encoding::EncoderTrap;
 use encoding::label::encoding_from_whatwg_label;
 use futures::{Async, Poll, Future, Sink, StartSend, Stream};
@@ -15,6 +12,11 @@ use tokio_core::net::{TcpStream, TcpStreamNew};
 use tokio_io::AsyncRead;
 use tokio_mockstream::MockStream;
 use tokio_tls::{TlsConnectorExt, TlsStream};
+
+use error;
+use client::data::Config;
+use client::transport::{IrcTransport, LogView, Logged};
+use proto::{IrcCodec, Message};
 
 /// An IRC connection used internally by `IrcServer`.
 pub enum Connection {

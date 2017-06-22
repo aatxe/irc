@@ -1,11 +1,13 @@
 //! Implementation of line-delimiting codec for Tokio.
 
 use std::io;
-use error;
+
 use bytes::{BufMut, BytesMut};
 use encoding::{DecoderTrap, EncoderTrap, EncodingRef};
 use encoding::label::encoding_from_whatwg_label;
 use tokio_io::codec::{Decoder, Encoder};
+
+use error;
 
 /// A line-based codec parameterized by an encoding.
 pub struct LineCodec {

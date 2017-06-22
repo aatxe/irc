@@ -2,6 +2,7 @@
 use std::borrow::ToOwned;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
+
 use error;
 use error::{Error, ErrorKind};
 use proto::Command;
