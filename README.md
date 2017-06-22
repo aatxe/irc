@@ -104,5 +104,4 @@ for obvious reasons). That being said, here's an example of a complete configura
 ```
 
 ## Contributing ##
-Contributions to this library would be immensely appreciated. It should be noted that as this is a
-public domain project, any contributions will thus be released into the public domain as well.
+Contributions to this library would be immensely appreciated. Prior to version 0.12.0, this library was public domain. As of 0.12.0, this library is offered under the Mozilla Public License 2.0 whose text can be found in `LICENSE.md`.
