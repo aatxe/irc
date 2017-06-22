@@ -1,4 +1,5 @@
 //! Interface for working with IRC Servers.
+#[cfg(feature = "ctcp")]
 use std::ascii::AsciiExt;
 use std::collections::HashMap;
 use std::path::Path;
@@ -946,8 +947,7 @@ mod test {
         }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
-            "NOTICE test :\u{001}FINGER :test (test)\u{001}\
-                   \r\n"
+            "NOTICE test :\u{001}FINGER :test (test)\u{001}\r\n"
         );
     }
 
@@ -965,8 +965,10 @@ mod test {
         }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
-            "NOTICE test :\u{001}VERSION irc:git:Rust\u{001}\
-                   \r\n"
+            &format!(
+                "NOTICE test :\u{001}VERSION {}\u{001}\r\n",
+                ::VERSION_STR,
+            )
         );
     }
 
