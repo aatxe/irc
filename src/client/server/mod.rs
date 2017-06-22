@@ -9,8 +9,8 @@ use client::conn::Connection;
 use client::data::{Config, User};
 use client::server::utils::ServerExt;
 use client::transport::LogView;
-use proto::{Command, Message, Response};
-use proto::Command::{JOIN, NICK, NICKSERV, PART, PRIVMSG, MODE, QUIT};
+use proto::{ChannelMode, Command, Message, Mode, Response};
+use proto::Command::{JOIN, NICK, NICKSERV, PART, PRIVMSG, ChannelMODE, QUIT};
 use futures::{Async, Poll, Future, Sink, Stream};
 use futures::stream::SplitStream;
 use futures::sync::mpsc;
@@ -206,7 +206,7 @@ impl ServerState {
             NICK(ref new_nick) => {
                 self.handle_nick_change(msg.source_nickname().unwrap_or(""), new_nick)
             }
-            MODE(ref chan, ref mode, Some(ref user)) => self.handle_mode(chan, mode, user),
+            ChannelMODE(ref chan, ref modes) => self.handle_mode(chan, modes),
             PRIVMSG(ref target, ref body) => {
                 if body.starts_with('\u{001}') {
                     let tokens: Vec<_> = {
@@ -290,7 +290,7 @@ impl ServerState {
         if self.config().umodes().is_empty() {
             Ok(())
         } else {
-            self.send_mode(self.current_nickname(), self.config().umodes(), "")
+            self.send_mode(self.current_nickname(), &Mode::as_user_modes(self.config().umodes())?)
         }
     }
 
@@ -358,13 +358,20 @@ impl ServerState {
     }
 
     #[cfg(feature = "nochanlists")]
-    fn handle_mode(&self, chan: &str, mode: &str, user: &str) {}
+    fn handle_mode(&self, _: &str, _: &[Mode<ChannelMODE>]) {}
 
     #[cfg(not(feature = "nochanlists"))]
-    fn handle_mode(&self, chan: &str, mode: &str, user: &str) {
-        if let Some(vec) = self.chanlists.lock().unwrap().get_mut(chan) {
-            if let Some(n) = vec.iter().position(|x| x.get_nickname() == user) {
-                vec[n].update_access_level(mode)
+    fn handle_mode(&self, chan: &str, modes: &[Mode<ChannelMode>]) {
+        for mode in modes {
+            match mode {
+                &Mode::Plus(_, Some(ref user)) | &Mode::Minus(_, Some(ref user)) => {
+                    if let Some(vec) = self.chanlists.lock().unwrap().get_mut(chan) {
+                        if let Some(n) = vec.iter().position(|x| x.get_nickname() == user) {
+                            vec[n].update_access_level(mode)
+                        }
+                    }
+                }
+                _ => (),
             }
         }
     }
@@ -556,6 +563,7 @@ mod test {
     use client::data::Config;
     #[cfg(not(feature = "nochanlists"))]
     use client::data::User;
+    use proto::{ChannelMode, Mode};
     use proto::command::Command::{PART, PRIVMSG};
     use futures::{Future, Stream};
 
@@ -893,7 +901,7 @@ mod test {
             vec![User::new("@test"), User::new("~owner"), User::new("&admin")]
         );
         let mut exp = User::new("@test");
-        exp.update_access_level("+v");
+        exp.update_access_level(&Mode::Plus(ChannelMode::Voice, None));
         assert_eq!(
             server.list_users("#test").unwrap()[0].highest_access_level(),
             exp.highest_access_level()

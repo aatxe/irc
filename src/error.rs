@@ -30,6 +30,11 @@ error_chain! {
             display("Failed to parse an IRC subcommand.")
         }
 
+        ModeParsingFailed {
+            description("Failed to parse a mode correctly.")
+            display("Failed to parse a mode correctly.")
+        }
+
         /// An error occurred on one of the internal channels of the `IrcServer`.
         ChannelError {
             description("An error occured on one of the IrcServer's internal channels.")

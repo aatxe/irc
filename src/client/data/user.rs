@@ -3,6 +3,7 @@ use std::borrow::ToOwned;
 use std::cmp::Ordering;
 use std::cmp::Ordering::{Less, Equal, Greater};
 use std::str::FromStr;
+use proto::{Mode, ChannelMode};
 
 /// IRC User data.
 #[derive(Clone, Debug)]
@@ -77,18 +78,18 @@ impl User {
     }
 
     /// Updates the user's access level.
-    pub fn update_access_level(&mut self, mode: &str) {
+    pub fn update_access_level(&mut self, mode: &Mode<ChannelMode>) {
         match mode {
-            "+q" => self.add_access_level(AccessLevel::Owner),
-            "-q" => self.sub_access_level(AccessLevel::Owner),
-            "+a" => self.add_access_level(AccessLevel::Admin),
-            "-a" => self.sub_access_level(AccessLevel::Admin),
-            "+o" => self.add_access_level(AccessLevel::Oper),
-            "-o" => self.sub_access_level(AccessLevel::Oper),
-            "+h" => self.add_access_level(AccessLevel::HalfOp),
-            "-h" => self.sub_access_level(AccessLevel::HalfOp),
-            "+v" => self.add_access_level(AccessLevel::Voice),
-            "-v" => self.sub_access_level(AccessLevel::Voice),
+            &Mode::Plus(ChannelMode::Founder, _) => self.add_access_level(AccessLevel::Owner),
+            &Mode::Minus(ChannelMode::Founder, _) => self.sub_access_level(AccessLevel::Owner),
+            &Mode::Plus(ChannelMode::Admin, _) => self.add_access_level(AccessLevel::Admin),
+            &Mode::Minus(ChannelMode::Admin, _) => self.sub_access_level(AccessLevel::Admin),
+            &Mode::Plus(ChannelMode::Oper, _) => self.add_access_level(AccessLevel::Oper),
+            &Mode::Minus(ChannelMode::Oper, _) => self.sub_access_level(AccessLevel::Oper),
+            &Mode::Plus(ChannelMode::Halfop, _) => self.add_access_level(AccessLevel::HalfOp),
+            &Mode::Minus(ChannelMode::Halfop, _) => self.sub_access_level(AccessLevel::HalfOp),
+            &Mode::Plus(ChannelMode::Voice, _) => self.add_access_level(AccessLevel::Voice),
+            &Mode::Minus(ChannelMode::Voice, _) => self.sub_access_level(AccessLevel::Voice),
             _ => {}
         }
     }
@@ -225,6 +226,8 @@ impl Iterator for AccessLevelIterator {
 mod test {
     use super::{AccessLevel, User};
     use super::AccessLevel::*;
+    use proto::Mode::*;
+    use proto::ChannelMode as M;
 
     #[test]
     fn parse_access_level() {
@@ -300,25 +303,25 @@ mod test {
     fn update_user_rank() {
         let mut user = User::new("user");
         assert_eq!(user.highest_access_level, Member);
-        user.update_access_level("+q");
+        user.update_access_level(&Plus(M::Founder, None));
         assert_eq!(user.highest_access_level, Owner);
-        user.update_access_level("-q");
+        user.update_access_level(&Minus(M::Founder, None));
         assert_eq!(user.highest_access_level, Member);
-        user.update_access_level("+a");
+        user.update_access_level(&Plus(M::Admin, None));
         assert_eq!(user.highest_access_level, Admin);
-        user.update_access_level("-a");
+        user.update_access_level(&Minus(M::Admin, None));
         assert_eq!(user.highest_access_level, Member);
-        user.update_access_level("+o");
+        user.update_access_level(&Plus(M::Oper, None));
         assert_eq!(user.highest_access_level, Oper);
-        user.update_access_level("-o");
+        user.update_access_level(&Minus(M::Oper, None));
         assert_eq!(user.highest_access_level, Member);
-        user.update_access_level("+h");
+        user.update_access_level(&Plus(M::Halfop, None));
         assert_eq!(user.highest_access_level, HalfOp);
-        user.update_access_level("-h");
+        user.update_access_level(&Minus(M::Halfop, None));
         assert_eq!(user.highest_access_level, Member);
-        user.update_access_level("+v");
+        user.update_access_level(&Plus(M::Voice, None));
         assert_eq!(user.highest_access_level, Voice);
-        user.update_access_level("-v");
+        user.update_access_level(&Minus(M::Voice, None));
         assert_eq!(user.highest_access_level, Member);
     }
 
@@ -330,19 +333,19 @@ mod test {
             user.access_levels,
             vec![Owner, Admin, Oper, HalfOp, Voice, Member]
         );
-        user.update_access_level("-h");
+        user.update_access_level(&Minus(M::Halfop, None));
         assert_eq!(user.highest_access_level, Owner);
         assert_eq!(user.access_levels, vec![Owner, Admin, Oper, Member, Voice]);
-        user.update_access_level("-q");
+        user.update_access_level(&Minus(M::Founder, None));
         assert_eq!(user.highest_access_level, Admin);
         assert_eq!(user.access_levels, vec![Voice, Admin, Oper, Member]);
-        user.update_access_level("-a");
+        user.update_access_level(&Minus(M::Admin, None));
         assert_eq!(user.highest_access_level, Oper);
         assert_eq!(user.access_levels, vec![Voice, Member, Oper]);
-        user.update_access_level("-o");
+        user.update_access_level(&Minus(M::Oper, None));
         assert_eq!(user.highest_access_level, Voice);
         assert_eq!(user.access_levels, vec![Voice, Member]);
-        user.update_access_level("-v");
+        user.update_access_level(&Minus(M::Voice, None));
         assert_eq!(user.highest_access_level, Member);
         assert_eq!(user.access_levels, vec![Member]);
     }

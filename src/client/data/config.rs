@@ -42,7 +42,7 @@ pub struct Config {
     pub channels: Option<Vec<String>>,
     /// A mapping of channel names to keys for join-on-connect.
     pub channel_keys: Option<HashMap<String, String>>,
-    /// User modes to set on connect. Example: "+RB-x"
+    /// User modes to set on connect. Example: "+RB -x"
     pub umodes: Option<String>,
     /// The text that'll be sent in response to CTCP USERINFO requests.
     pub user_info: Option<String>,

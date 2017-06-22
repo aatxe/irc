@@ -1,5 +1,6 @@
 //! Enumeration of all available client commands.
 use std::ascii::AsciiExt;
+use std::fmt;
 use std::str::FromStr;
 use error;
 use proto::Response;
@@ -20,8 +21,7 @@ pub enum Command {
     /// OPER name :password
     OPER(String, String),
     /// MODE nickname modes
-    /// MODE channel modes [modeparams]
-    MODE(String, String, Option<String>),
+    UserMODE(String, Vec<Mode<UserMode>>),
     /// SERVICE nickname reserved distribution type reserved :info
     SERVICE(String, String, String, String, String, String),
     /// QUIT :comment
@@ -34,8 +34,8 @@ pub enum Command {
     JOIN(String, Option<String>, Option<String>),
     /// PART chanlist :[comment]
     PART(String, Option<String>),
-    // MODE is already defined.
-    // MODE(String, String, Option<String>),
+    /// MODE channel [modes [modeparams]]
+    ChannelMODE(String, Vec<Mode<ChannelMode>>),
     /// TOPIC channel :[topic]
     TOPIC(String, Option<String>),
     /// NAMES [chanlist :[target]]
@@ -191,8 +191,13 @@ impl<'a> From<&'a Command> for String {
             Command::NICK(ref n) => stringify("NICK", &[], Some(n)),
             Command::USER(ref u, ref m, ref r) => stringify("USER", &[u, m, "*"], Some(r)),
             Command::OPER(ref u, ref p) => stringify("OPER", &[u], Some(p)),
-            Command::MODE(ref t, ref m, Some(ref p)) => stringify("MODE", &[t, m, p], None),
-            Command::MODE(ref t, ref m, None) => stringify("MODE", &[t, m], None),
+            Command::UserMODE(ref u, ref m) => {
+                format!("MODE {}{}", u, m.iter().fold(String::new(), |mut acc, mode| {
+                    acc.push_str(" ");
+                    acc.push_str(&mode.to_string());
+                    acc
+                }))
+            }
             Command::SERVICE(ref n, ref r, ref d, ref t, ref re, ref i) => {
                 stringify("SERVICE", &[n, r, d, t, re], Some(i))
             }
@@ -205,6 +210,13 @@ impl<'a> From<&'a Command> for String {
             Command::JOIN(ref c, None, None) => stringify("JOIN", &[c], None),
             Command::PART(ref c, Some(ref m)) => stringify("PART", &[c], Some(m)),
             Command::PART(ref c, None) => stringify("PART", &[c], None),
+            Command::ChannelMODE(ref u, ref m) => {
+                format!("MODE {}{}", u, m.iter().fold(String::new(), |mut acc, mode| {
+                    acc.push_str(" ");
+                    acc.push_str(&mode.to_string());
+                    acc
+                }))
+            }
             Command::TOPIC(ref c, Some(ref t)) => stringify("TOPIC", &[c], Some(t)),
             Command::TOPIC(ref c, None) => stringify("TOPIC", &[c], None),
             Command::NAMES(Some(ref c), Some(ref t)) => stringify("NAMES", &[c], Some(t)),
@@ -505,32 +517,14 @@ impl Command {
             }
         } else if cmd.eq_ignore_ascii_case("MODE") {
             match suffix {
-                Some(suffix) => {
-                    if args.len() == 2 {
-                        Command::MODE(
-                            args[0].to_owned(),
-                            args[1].to_owned(),
-                            Some(suffix.to_owned()),
-                        )
-                    } else if args.len() == 1 {
-                        Command::MODE(args[0].to_owned(), suffix.to_owned(), None)
-                    } else {
-                        raw(cmd, args, Some(suffix))
-                    }
-                }
-                None => {
-                    if args.len() == 3 {
-                        Command::MODE(
-                            args[0].to_owned(),
-                            args[1].to_owned(),
-                            Some(args[2].to_owned()),
-                        )
-                    } else if args.len() == 2 {
-                        Command::MODE(args[0].to_owned(), args[1].to_owned(), None)
-                    } else {
-                        raw(cmd, args, suffix)
-                    }
-                }
+                Some(suffix) => raw(cmd, args, Some(suffix)),
+                None => if args[0].is_channel_name() {
+                    let arg = args[1..].join(" ");
+                    Command::ChannelMODE(args[0].to_owned(), Mode::as_channel_modes(&arg)?)
+                } else {
+                    let arg = args[1..].join(" ");
+                    Command::UserMODE(args[0].to_owned(), Mode::as_user_modes(&arg)?)
+                },
             }
         } else if cmd.eq_ignore_ascii_case("SERVICE") {
             match suffix {
@@ -1758,5 +1752,309 @@ impl FromStr for BatchSubCommand {
         } else {
             Ok(BatchSubCommand::CUSTOM(s.to_uppercase()))
         }
+    }
+}
+
+/// A marker trait for different kinds of Modes.
+pub trait ModeType: fmt::Display + fmt::Debug + Clone + PartialEq {
+    /// Creates a command of this kind.
+    fn mode(target: &str, modes: &[Mode<Self>]) -> Command;
+
+    /// Returns true if this mode takes an argument, and false otherwise.
+    fn takes_arg(&self) -> bool;
+}
+
+/// User modes for the MODE command.
+#[derive(Clone, Debug, PartialEq)]
+pub enum UserMode {
+    /// a - user is flagged as away
+    Away,
+    /// i - marks a users as invisible
+    Invisible,
+    /// w - user receives wallops
+    Wallops,
+    /// r - restricted user connection
+    Restricted,
+    /// o - operator flag
+    Oper,
+    /// O - local operator flag
+    LocalOper,
+    /// s - marks a user for receipt of server notices
+    ServerNotices,
+
+    /// Any other unknown-to-the-crate mode.
+    Unknown(char),
+}
+
+impl ModeType for UserMode {
+    fn mode(target: &str, modes: &[Mode<Self>]) -> Command {
+        Command::UserMODE(target.to_owned(), modes.to_owned())
+    }
+
+    fn takes_arg(&self) -> bool {
+        false
+    }
+}
+
+impl UserMode {
+    fn from_char(c: char) -> error::Result<UserMode> {
+        use self::UserMode::*;
+
+        Ok(match c {
+            'a' => Away,
+            'i' => Invisible,
+            'w' => Wallops,
+            'r' => Restricted,
+            'o' => Oper,
+            'O' => LocalOper,
+            's' => ServerNotices,
+            _ => Unknown(c),
+        })
+    }
+}
+
+impl fmt::Display for UserMode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::UserMode::*;
+
+        write!(f, "{}", match *self {
+            Away => 'a',
+            Invisible => 'i',
+            Wallops => 'w',
+            Restricted => 'r',
+            Oper => 'o',
+            LocalOper => 'O',
+            ServerNotices => 's',
+            Unknown(c) => c,
+        })
+    }
+}
+
+/// Channel modes for the MODE command.
+#[derive(Clone, Debug, PartialEq)]
+pub enum ChannelMode {
+    /// b - ban the user from joining or speaking in the channel
+    Ban,
+    /// e - exemptions from bans
+    Exception,
+    /// l - limit the maximum number of users in a channel
+    Limit,
+    /// i - channel becomes invite-only
+    InviteOnly,
+    /// I - exception to invite-only rule
+    InviteException,
+    /// k - specify channel key
+    Key,
+    /// m - channel is in moderated mode
+    Moderated,
+    /// s - channel is hidden from listings
+    Secret,
+    /// t - require permissions to edit topic
+    ProtectedTopic,
+    /// n - users must join channels to message them
+    NoExternalMessages,
+
+    /// q - user gets founder permission
+    Founder,
+    /// a - user gets admin or protected permission
+    Admin,
+    /// o - user gets oper permission
+    Oper,
+    /// h - user gets halfop permission
+    Halfop,
+    /// v - user gets voice permission
+    Voice,
+
+    /// Any other unknown-to-the-crate mode.
+    Unknown(char),
+}
+
+impl ModeType for ChannelMode {
+    fn mode(target: &str, modes: &[Mode<Self>]) -> Command {
+        Command::ChannelMODE(target.to_owned(), modes.to_owned())
+    }
+
+    fn takes_arg(&self) -> bool {
+        use self::ChannelMode::*;
+
+        match *self {
+            Ban | Exception | Limit | InviteException | Key | Founder | Admin | Oper | Halfop |
+            Voice => true,
+            _ => false,
+        }
+    }
+}
+
+impl ChannelMode {
+    fn from_char(c: char) -> error::Result<ChannelMode> {
+        use self::ChannelMode::*;
+
+        Ok(match c {
+            'b' => Ban,
+            'e' => Exception,
+            'l' => Limit,
+            'i' => InviteOnly,
+            'I' => InviteException,
+            'k' => Key,
+            'm' => Moderated,
+            's' => Secret,
+            't' => ProtectedTopic,
+            'n' => NoExternalMessages,
+            'q' => Founder,
+            'a' => Admin,
+            'o' => Oper,
+            'h' => Halfop,
+            'v' => Voice,
+            _ => Unknown(c),
+        })
+    }
+}
+
+impl fmt::Display for ChannelMode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::ChannelMode::*;
+
+        write!(f, "{}", match *self {
+            Ban => 'b',
+            Exception => 'e',
+            Limit => 'l',
+            InviteOnly => 'i',
+            InviteException => 'I',
+            Key => 'k',
+            Moderated => 'm',
+            Secret => 's',
+            ProtectedTopic => 't',
+            NoExternalMessages => 'n',
+            Founder => 'q',
+            Admin => 'a',
+            Oper => 'o',
+            Halfop => 'h',
+            Voice => 'v',
+            Unknown(c) => c,
+        })
+    }
+}
+
+/// A mode argument for the MODE command.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Mode<T>
+where
+    T: ModeType,
+{
+    /// Adding the specified mode, optionally with an argument.
+    Plus(T, Option<String>),
+    /// Removing the specified mode, optionally with an argument.
+    Minus(T, Option<String>),
+}
+
+impl<T> fmt::Display for Mode<T>
+where
+    T: ModeType,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            &Mode::Plus(ref mode, Some(ref arg)) => write!(f, "{}{} {}", "+", mode, arg),
+            &Mode::Minus(ref mode, Some(ref arg)) => write!(f, "{}{} {}", "-", mode, arg),
+            &Mode::Plus(ref mode, None) => write!(f, "{}{}", "+", mode),
+            &Mode::Minus(ref mode, None) => write!(f, "{}{}", "-", mode),
+        }
+    }
+}
+
+enum PlusMinus {
+    Plus,
+    Minus,
+}
+
+// MODE user [modes]
+impl Mode<UserMode> {
+    // TODO: turning more edge cases into errors.
+    /// Parses the specified mode string as user modes.
+    pub fn as_user_modes(s: &str) -> error::Result<Vec<Mode<UserMode>>> {
+        use self::PlusMinus::*;
+
+        let mut res = vec![];
+        let mut pieces = s.split(" ");
+        for term in pieces.clone() {
+            if term.starts_with("+") || term.starts_with("-") {
+                let _ = pieces.next();
+
+                let mut chars = term.chars();
+                let init = match chars.next() {
+                    Some('+') => Plus,
+                    Some('-') => Minus,
+                    _ => return Err(error::ErrorKind::ModeParsingFailed.into()),
+                };
+
+                for c in chars {
+                    let mode = UserMode::from_char(c)?;
+                    let arg = if mode.takes_arg() {
+                        pieces.next()
+                    } else {
+                        None
+                    };
+                    res.push(match init {
+                        Plus => Mode::Plus(mode, arg.map(|s| s.to_owned())),
+                        Minus => Mode::Minus(mode, arg.map(|s| s.to_owned())),
+                    })
+                }
+            }
+        }
+
+        Ok(res)
+    }
+}
+
+// MODE channel [modes [modeparams]]
+impl Mode<ChannelMode> {
+    // TODO: turning more edge cases into errors.
+    /// Parses the specified mode string as channel modes.
+    pub fn as_channel_modes(s: &str) -> error::Result<Vec<Mode<ChannelMode>>> {
+        use self::PlusMinus::*;
+
+        let mut res = vec![];
+        let mut pieces = s.split(" ");
+        for term in pieces.clone() {
+            if term.starts_with("+") || term.starts_with("-") {
+                let _ = pieces.next();
+
+                let mut chars = term.chars();
+                let init = match chars.next() {
+                    Some('+') => Plus,
+                    Some('-') => Minus,
+                    _ => return Err(error::ErrorKind::ModeParsingFailed.into()),
+                };
+
+                for c in chars {
+                    let mode = ChannelMode::from_char(c)?;
+                    let arg = if mode.takes_arg() {
+                        pieces.next()
+                    } else {
+                        None
+                    };
+                    res.push(match init {
+                        Plus => Mode::Plus(mode, arg.map(|s| s.to_owned())),
+                        Minus => Mode::Minus(mode, arg.map(|s| s.to_owned())),
+                    })
+                }
+            }
+        }
+
+        Ok(res)
+    }
+}
+
+/// An extension trait giving strings a function to check if they are a channel.
+pub trait ChannelExt {
+    /// Returns true if the specified name is a channel name.
+    fn is_channel_name(&self) -> bool;
+}
+
+impl<'a> ChannelExt for &'a str {
+    fn is_channel_name(&self) -> bool {
+        self.starts_with("#") ||
+            self.starts_with("&") ||
+            self.starts_with("+") ||
+            self.starts_with("!")
     }
 }

@@ -1,9 +1,9 @@
 //! Utilities and shortcuts for working with IRC servers.
 use std::borrow::ToOwned;
 use error::Result;
-use proto::{Capability, NegotiationVersion};
-use proto::Command::{AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
-use proto::Command::{OPER, PART, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
+use proto::{Capability, Command, Mode, NegotiationVersion};
+use proto::command::Command::*;
+use proto::command::ModeType;
 use client::server::Server;
 use proto::command::CapSubCommand::{END, LS, REQ};
 #[cfg(feature = "ctcp")]
@@ -16,7 +16,7 @@ pub trait ServerExt: Server {
     where
         Self: Sized,
     {
-        self.send(CAP(
+        self.send(Command::CAP(
             None,
             LS,
             match version {
@@ -201,21 +201,13 @@ pub trait ServerExt: Server {
         ))
     }
 
-    /// Changes the mode of the target.
-    /// If `modeparmas` is an empty string, it won't be included in the message.
-    fn send_mode(&self, target: &str, mode: &str, modeparams: &str) -> Result<()>
+    /// Changes the modes for the specified target.
+    fn send_mode<T>(&self, target: &str, modes: &[Mode<T>]) -> Result<()>
     where
         Self: Sized,
+        T: ModeType,
     {
-        self.send(MODE(
-            target.to_owned(),
-            mode.to_owned(),
-            if modeparams.is_empty() {
-                None
-            } else {
-                Some(modeparams.to_owned())
-            },
-        ))
+        self.send(T::mode(target, modes))
     }
 
     /// Changes the mode of the target by force.
@@ -358,6 +350,7 @@ mod test {
     use client::data::Config;
     use client::server::IrcServer;
     use client::server::test::{get_server_value, test_config};
+    use proto::{ChannelMode, Mode};
 
     #[test]
     fn identify() {
@@ -483,14 +476,15 @@ mod test {
     #[test]
     fn send_mode_no_modeparams() {
         let server = IrcServer::from_config(test_config()).unwrap();
-        server.send_mode("#test", "+i", "").unwrap();
+        server.send_mode("#test", &[Mode::Plus(ChannelMode::InviteOnly, None)]).unwrap();
         assert_eq!(&get_server_value(server)[..], "MODE #test +i\r\n");
     }
 
     #[test]
     fn send_mode() {
         let server = IrcServer::from_config(test_config()).unwrap();
-        server.send_mode("#test", "+o", "test").unwrap();
+        server.send_mode("#test", &[Mode::Plus(ChannelMode::Oper, Some("test".to_owned()))])
+              .unwrap();
         assert_eq!(&get_server_value(server)[..], "MODE #test +o test\r\n");
     }
 
