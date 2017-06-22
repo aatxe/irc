@@ -33,6 +33,17 @@ pub trait Server {
     /// Gets a stream of incoming messages from the Server.
     fn stream(&self) -> ServerStream;
 
+    /// Blocks on the stream, running the given function on each incoming message as they arrive.
+    fn for_each_incoming<F>(&self, mut f: F) -> ()
+    where
+        F: FnMut(Message) -> (),
+    {
+        self.stream().for_each(|msg| {
+            f(msg);
+            Ok(())
+        }).wait().unwrap()
+    }
+
     /// Gets a list of currently joined channels. This will be none if tracking is not supported
     /// altogether (such as when the `nochanlists` feature is enabled).
     fn list_channels(&self) -> Option<Vec<String>>;

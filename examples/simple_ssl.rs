@@ -12,9 +12,11 @@ fn main() {
         use_ssl: Some(true),
         ..Default::default()
     };
+
     let server = IrcServer::from_config(config).unwrap();
     server.identify().unwrap();
-    server.stream().for_each(|message| {
+
+    server.for_each_incoming(|message| {
         print!("{}", message);
         match message.command {
             Command::PRIVMSG(ref target, ref msg) => {
@@ -24,6 +26,5 @@ fn main() {
             }
             _ => (),
         }
-        Ok(())
-    }).wait().unwrap()
+    })
 }
