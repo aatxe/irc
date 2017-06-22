@@ -4,7 +4,7 @@ A robust, thread-safe and async-friendly IRC library in Rust. The client portion
 [IRCv3.2](http://ircv3.net/irc/3.2.html), and includes some additional, common features. It also
 features a number of useful built-in features for building a powerful client quickly. The
 server portion does not exist yet, but hopefully will in the future. You can find up-to-date, ready-to-use documentation
-online [here](http://aatxe.github.io/irc/irc/). The documentation is generated with the default
+online [here](https://docs.rs/irc/0.12.0/irc/). The documentation is generated with the default
 features. These are, however, strictly optional and can be disabled accordingly.
 
 ## Getting Started ##
