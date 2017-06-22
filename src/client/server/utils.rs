@@ -3,7 +3,7 @@ use std::borrow::ToOwned;
 use error::Result;
 use proto::{Capability, Command, Mode, NegotiationVersion};
 use proto::command::Command::*;
-use proto::command::ModeType;
+use proto::mode::ModeType;
 use client::server::Server;
 use proto::command::CapSubCommand::{END, LS, REQ};
 #[cfg(feature = "ctcp")]
