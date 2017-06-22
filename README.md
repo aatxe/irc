@@ -81,6 +81,7 @@ fail for obvious reasons). That being said, here's an example of a complete conf
   "port": 6697,
   "password": "",
   "use_ssl": true,
+  "cert_path": "cert.der",
   "encoding": "UTF-8",
   "channels": ["#rust", "#haskell", "#fake"],
   "channel_keys": {
@@ -92,6 +93,8 @@ fail for obvious reasons). That being said, here's an example of a complete conf
   "source": "https://github.com/aatxe/irc",
   "ping_time": 180,
   "ping_timeout": 10,
+  "should_ghost": false,
+  "ghost_sequence": [],
   "options": {
     "key": "value",
     "note": "anything you want can be in here!",
