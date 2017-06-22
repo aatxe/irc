@@ -93,27 +93,33 @@ pub struct LogView {
 impl LogView {
     /// Gets a read guard for all the messages sent on the transport.
     pub fn sent(&self) -> error::Result<RwLockReadGuard<Vec<Message>>> {
-        self.sent.read().map_err(|_|
-            error::ErrorKind::PoisonedLog.into()
+        self.sent.read().map_err(
+            |_| error::ErrorKind::PoisonedLog.into(),
         )
     }
 
     /// Gets a read guard for all the messages received on the transport.
     pub fn received(&self) -> error::Result<RwLockReadGuard<Vec<Message>>> {
-        self.received.read().map_err(|_|
-            error::ErrorKind::PoisonedLog.into()
+        self.received.read().map_err(
+            |_| error::ErrorKind::PoisonedLog.into(),
         )
     }
 }
 
 /// A logged version of the `IrcTransport` that records all sent and received messages.
 /// Note: this will introduce some performance overhead by cloning all messages.
-pub struct Logged<T> where T: AsyncRead + AsyncWrite {
+pub struct Logged<T>
+where
+    T: AsyncRead + AsyncWrite,
+{
     inner: IrcTransport<T>,
     view: LogView,
 }
 
-impl<T> Logged<T> where T: AsyncRead + AsyncWrite {
+impl<T> Logged<T>
+where
+    T: AsyncRead + AsyncWrite,
+{
     /// Wraps the given `IrcTransport` in logging.
     pub fn wrap(inner: IrcTransport<T>) -> Logged<T> {
         Logged {
@@ -121,7 +127,7 @@ impl<T> Logged<T> where T: AsyncRead + AsyncWrite {
             view: LogView {
                 sent: Arc::new(RwLock::new(vec![])),
                 received: Arc::new(RwLock::new(vec![])),
-            }
+            },
         }
     }
 
@@ -132,7 +138,7 @@ impl<T> Logged<T> where T: AsyncRead + AsyncWrite {
 }
 
 impl<T> Stream for Logged<T>
-    where
+where
     T: AsyncRead + AsyncWrite,
 {
     type Item = Message;
@@ -141,19 +147,19 @@ impl<T> Stream for Logged<T>
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
         match try_ready!(self.inner.poll()) {
             Some(msg) => {
-                let recv: error::Result<_> = self.view.received.write().map_err(|_|
+                let recv: error::Result<_> = self.view.received.write().map_err(|_| {
                     error::ErrorKind::PoisonedLog.into()
-                );
+                });
                 recv?.push(msg.clone());
                 Ok(Async::Ready(Some(msg)))
-            },
-            None => Ok(Async::Ready(None))
+            }
+            None => Ok(Async::Ready(None)),
         }
     }
 }
 
 impl<T> Sink for Logged<T>
-    where
+where
     T: AsyncRead + AsyncWrite,
 {
     type SinkItem = Message;
@@ -161,9 +167,9 @@ impl<T> Sink for Logged<T>
 
     fn start_send(&mut self, item: Self::SinkItem) -> StartSend<Self::SinkItem, Self::SinkError> {
         let res = self.inner.start_send(item.clone())?;
-        let sent: error::Result<_> = self.view.sent.write().map_err(|_|
+        let sent: error::Result<_> = self.view.sent.write().map_err(|_| {
             error::ErrorKind::PoisonedLog.into()
-        );
+        });
         sent?.push(item);
         Ok(res)
     }

@@ -6,7 +6,7 @@ use error;
 use client::data::Config;
 use client::transport::{IrcTransport, LogView, Logged};
 use proto::{IrcCodec, Message};
-use encoding::{EncoderTrap};
+use encoding::EncoderTrap;
 use encoding::label::encoding_from_whatwg_label;
 use futures::{Async, Poll, Future, Sink, StartSend, Stream};
 use native_tls::{Certificate, TlsConnector};
@@ -81,12 +81,14 @@ impl<'a> Future for ConnectionFuture<'a> {
                 let encoding = enc?;
                 let init_str = config.mock_initial_value();
                 let initial: error::Result<_> = {
-                    encoding.encode(&init_str, EncoderTrap::Replace).map_err(|data| {
-                        io::Error::new(
-                            io::ErrorKind::InvalidInput,
-                            &format!("Failed to encode {} as {}.", data, encoding.name())[..],
-                        ).into()
-                    })
+                    encoding.encode(&init_str, EncoderTrap::Replace).map_err(
+                        |data| {
+                            io::Error::new(
+                                io::ErrorKind::InvalidInput,
+                                &format!("Failed to encode {} as {}.", data, encoding.name())[..],
+                            ).into()
+                        },
+                    )
                 };
 
                 let framed = MockStream::new(&initial?).framed(IrcCodec::new(config.encoding())?);
@@ -140,7 +142,7 @@ impl Connection {
     pub fn log_view(&self) -> Option<LogView> {
         match self {
             &Connection::Mock(ref inner) => Some(inner.view()),
-            _ => None
+            _ => None,
         }
     }
 }
