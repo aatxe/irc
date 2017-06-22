@@ -1,5 +1,4 @@
 //! An IRC transport that wraps an IRC-framed stream to provide automatic PING replies.
-use std::io;
 use std::sync::{Arc, RwLock, RwLockReadGuard};
 use std::time::Instant;
 
@@ -50,9 +49,7 @@ where
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
         if self.last_ping.elapsed().as_secs() >= self.ping_timeout {
             self.close()?;
-            Err(
-                io::Error::new(io::ErrorKind::ConnectionReset, "Ping timed out.").into(),
-            )
+            Err(error::ErrorKind::PingTimeout.into())
         } else {
             loop {
                 match try_ready!(self.inner.poll()) {
@@ -77,11 +74,25 @@ where
     type SinkError = error::Error;
 
     fn start_send(&mut self, item: Self::SinkItem) -> StartSend<Self::SinkItem, Self::SinkError> {
-        Ok(self.inner.start_send(item)?)
+        if self.last_ping.elapsed().as_secs() >= self.ping_timeout {
+            self.close()?;
+            Err(error::ErrorKind::PingTimeout.into())
+        } else {
+            Ok(self.inner.start_send(item)?)
+        }
     }
 
     fn poll_complete(&mut self) -> Poll<(), Self::SinkError> {
-        Ok(self.inner.poll_complete()?)
+        if self.last_ping.elapsed().as_secs() >= self.ping_timeout {
+            self.close()?;
+            Err(error::ErrorKind::PingTimeout.into())
+        } else {
+            Ok(self.inner.poll_complete()?)
+        }
+    }
+
+    fn close(&mut self) -> Poll<(), Self::SinkError> {
+        self.inner.close()
     }
 }
 

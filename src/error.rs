@@ -30,6 +30,7 @@ error_chain! {
             display("Failed to parse an IRC subcommand.")
         }
 
+        /// Failed to parse a mode correctly.
         ModeParsingFailed {
             description("Failed to parse a mode correctly.")
             display("Failed to parse a mode correctly.")
@@ -45,6 +46,12 @@ error_chain! {
         PoisonedLog {
             description("An error occured causing a mutex for a logged transport to be poisoned.")
             display("An error occured causing a mutex for a logged transport to be poisoned.")
+        }
+
+        /// Connection timed out due to no ping response.
+        PingTimeout {
+            description("The connection timed out due to no ping response.")
+            display("The connection timed out due to no ping response.")
         }
     }
 }
