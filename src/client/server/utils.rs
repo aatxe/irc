@@ -354,15 +354,13 @@ where
 #[cfg(test)]
 mod test {
     use super::ServerExt;
-    use std::default::Default;
-    use client::conn::MockConnection;
     use client::data::Config;
     use client::server::IrcServer;
     use client::server::test::{get_server_value, test_config};
 
     #[test]
     fn identify() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.identify().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -373,14 +371,11 @@ mod test {
 
     #[test]
     fn identify_with_password() {
-        let server = IrcServer::from_connection(
-            Config {
-                nickname: Some(format!("test")),
-                password: Some(format!("password")),
-                ..Default::default()
-            },
-            MockConnection::empty(),
-        );
+        let server = IrcServer::from_config(Config {
+            nickname: Some(format!("test")),
+            password: Some(format!("password")),
+            ..test_config()
+        }).unwrap();
         server.identify().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -391,14 +386,14 @@ mod test {
 
     #[test]
     fn send_pong() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_pong("irc.test.net").unwrap();
         assert_eq!(&get_server_value(server)[..], "PONG :irc.test.net\r\n");
     }
 
     #[test]
     fn send_join() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_join("#test,#test2,#test3").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -408,21 +403,21 @@ mod test {
 
     #[test]
     fn send_part() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_part("#test").unwrap();
         assert_eq!(&get_server_value(server)[..], "PART #test\r\n");
     }
 
     #[test]
     fn send_oper() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_oper("test", "test").unwrap();
         assert_eq!(&get_server_value(server)[..], "OPER test :test\r\n");
     }
 
     #[test]
     fn send_privmsg() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_privmsg("#test", "Hi, everybody!").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -432,7 +427,7 @@ mod test {
 
     #[test]
     fn send_notice() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_notice("#test", "Hi, everybody!").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -442,14 +437,14 @@ mod test {
 
     #[test]
     fn send_topic_no_topic() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_topic("#test", "").unwrap();
         assert_eq!(&get_server_value(server)[..], "TOPIC #test\r\n");
     }
 
     #[test]
     fn send_topic() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_topic("#test", "Testing stuff.").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -459,7 +454,7 @@ mod test {
 
     #[test]
     fn send_kill() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_kill("test", "Testing kills.").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -469,14 +464,14 @@ mod test {
 
     #[test]
     fn send_kick_no_message() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_kick("#test", "test", "").unwrap();
         assert_eq!(&get_server_value(server)[..], "KICK #test test\r\n");
     }
 
     #[test]
     fn send_kick() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_kick("#test", "test", "Testing kicks.").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -486,42 +481,42 @@ mod test {
 
     #[test]
     fn send_mode_no_modeparams() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_mode("#test", "+i", "").unwrap();
         assert_eq!(&get_server_value(server)[..], "MODE #test +i\r\n");
     }
 
     #[test]
     fn send_mode() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_mode("#test", "+o", "test").unwrap();
         assert_eq!(&get_server_value(server)[..], "MODE #test +o test\r\n");
     }
 
     #[test]
     fn send_samode_no_modeparams() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_samode("#test", "+i", "").unwrap();
         assert_eq!(&get_server_value(server)[..], "SAMODE #test +i\r\n");
     }
 
     #[test]
     fn send_samode() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_samode("#test", "+o", "test").unwrap();
         assert_eq!(&get_server_value(server)[..], "SAMODE #test +o test\r\n");
     }
 
     #[test]
     fn send_sanick() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_sanick("test", "test2").unwrap();
         assert_eq!(&get_server_value(server)[..], "SANICK test test2\r\n");
     }
 
     #[test]
     fn send_invite() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_invite("test", "#test").unwrap();
         assert_eq!(&get_server_value(server)[..], "INVITE test #test\r\n");
     }
@@ -529,7 +524,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_ctcp() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_ctcp("test", "MESSAGE").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -540,7 +535,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_action() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_action("test", "tests.").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -551,7 +546,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_finger() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_finger("test").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -562,7 +557,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_version() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_version("test").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -573,7 +568,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_source() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_source("test").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -584,7 +579,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_user_info() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_user_info("test").unwrap();
         assert_eq!(
             &get_server_value(server)[..],
@@ -595,7 +590,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_ctcp_ping() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_ctcp_ping("test").unwrap();
         let val = get_server_value(server);
         println!("{}", val);
@@ -606,7 +601,7 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_time() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         server.send_time("test").unwrap();
         assert_eq!(
             &get_server_value(server)[..],

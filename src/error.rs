@@ -35,5 +35,11 @@ error_chain! {
             description("An error occured on one of the IrcServer's internal channels.")
             display("An error occured on one of the IrcServer's internal channels.")
         }
+
+        /// An error occured causing a mutex for a logged transport to be poisoned.
+        PoisonedLog {
+            description("An error occured causing a mutex for a logged transport to be poisoned.")
+            display("An error occured causing a mutex for a logged transport to be poisoned.")
+        }
     }
 }

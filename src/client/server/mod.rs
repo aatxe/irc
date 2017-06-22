@@ -8,8 +8,8 @@ use client::conn::Connection;
 use client::data::{Command, Config, Message, Response, User};
 use client::data::Command::{JOIN, NICK, NICKSERV, PART, PRIVMSG, MODE, QUIT};
 use client::server::utils::ServerExt;
+use client::transport::LogView;
 use futures::{Async, Poll, Future, Sink, Stream};
-use futures::future;
 use futures::stream::SplitStream;
 use futures::sync::mpsc;
 use futures::sync::oneshot;
@@ -427,6 +427,8 @@ impl ServerState {
 pub struct IrcServer {
     /// The internal, thread-safe server state.
     state: Arc<ServerState>,
+    /// A view of the logs for a mock connection.
+    view: Option<LogView>,
 }
 
 impl Server for IrcServer {
@@ -492,9 +494,10 @@ impl IrcServer {
     /// Creates a new IRC server connection from the specified configuration, connecting
     /// immediately.
     pub fn from_config(config: Config) -> error::Result<IrcServer> {
-        // Setting up a remote reactor running forever.
+        // Setting up a remote reactor running for the length of the connection.
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
         let (tx_incoming, rx_incoming) = oneshot::channel();
+        let (tx_view, rx_view) = oneshot::channel();
 
         let cfg = config.clone();
         let _ = thread::spawn(move || {
@@ -502,39 +505,49 @@ impl IrcServer {
 
             // Setting up internal processing stuffs.
             let handle = reactor.handle();
-            let (sink, stream) = reactor
+            let conn = reactor
                 .run(Connection::new(&cfg, &handle).unwrap())
-                .unwrap()
-                .split();
+                .unwrap();
+
+            tx_view.send(conn.log_view()).unwrap();
+            let (sink, stream) = conn.split();
 
             let outgoing_future = sink.send_all(rx_outgoing.map_err(|_| {
                 let res: error::Error = error::ErrorKind::ChannelError.into();
                 res
-            }));
-            handle.spawn(outgoing_future.map(|_| ()).map_err(|_| ()));
+            })).map(|_| ()).map_err(|_| ());
 
             // Send the stream half back to the original thread.
             tx_incoming.send(stream).unwrap();
 
-            reactor.run(future::empty::<(), ()>()).unwrap();
+            reactor.run(outgoing_future).unwrap();
         });
 
         Ok(IrcServer {
             state: Arc::new(ServerState::new(rx_incoming.wait()?, tx_outgoing, config)),
+            view: rx_view.wait()?,
         })
+    }
+
+    /// Gets the log view from the internal transport. Only used for unit testing.
+    #[cfg(test)]
+    fn log_view(&self) -> &LogView {
+        self.view.as_ref().unwrap()
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::{IrcServer, Server};
+    use std::thread;
+    use std::time::Duration;
     use std::collections::HashMap;
     use std::default::Default;
-    use client::conn::MockConnection;
     use client::data::Config;
     #[cfg(not(feature = "nochanlists"))]
     use client::data::User;
     use proto::command::Command::{PART, PRIVMSG};
+    use futures::{Future, Stream};
 
     pub fn test_config() -> Config {
         Config {
@@ -544,53 +557,67 @@ mod test {
             server: Some(format!("irc.test.net")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             user_info: Some(format!("Testing.")),
+            use_mock_connection: Some(true),
             ..Default::default()
         }
     }
 
     pub fn get_server_value(server: IrcServer) -> String {
-        server.conn().written(server.config().encoding()).unwrap()
+        // We sleep here because of synchronization issues.
+        // We can't guarantee that everything will have been sent by the time of this call.
+        thread::sleep(Duration::from_millis(100));
+        server.log_view().sent().unwrap().iter().fold(String::new(), |mut acc, msg| {
+            acc.push_str(&msg.to_string());
+            acc
+        })
     }
 
     #[test]
-    fn iterator() {
+    fn stream() {
         let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n\
                    :test!test@test JOIN #test\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(exp));
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(exp.to_owned()),
+            ..test_config()
+        }).unwrap();
         let mut messages = String::new();
-        for message in server.iter() {
-            messages.push_str(&message.unwrap().to_string());
-        }
+        server.stream().for_each(|message| {
+            messages.push_str(&message.to_string());
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(&messages[..], exp);
     }
 
     #[test]
     fn handle_message() {
-        let value = "PING :irc.test.net\r\n:irc.test.net 376 test :End of /MOTD command.\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
-            "PONG :irc.test.net\r\nJOIN #test\r\nJOIN #test2\r\n"
+            "JOIN #test\r\nJOIN #test2\r\n"
         );
     }
 
     #[test]
     fn handle_end_motd_with_nick_password() {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-        let server = IrcServer::from_connection(
-            Config {
-                nick_password: Some(format!("password")),
-                channels: Some(vec![format!("#test"), format!("#test2")]),
-                ..Default::default()
-            },
-            MockConnection::new(value),
-        );
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            nick_password: Some(format!("password")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
@@ -601,22 +628,21 @@ mod test {
     #[test]
     fn handle_end_motd_with_chan_keys() {
         let value = ":irc.test.net 376 test :End of /MOTD command\r\n";
-        let server = IrcServer::from_connection(
-            Config {
-                nickname: Some(format!("test")),
-                channels: Some(vec![format!("#test"), format!("#test2")]),
-                channel_keys: {
-                    let mut map = HashMap::new();
-                    map.insert(format!("#test2"), format!("password"));
-                    Some(map)
-                },
-                ..Default::default()
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            nickname: Some(format!("test")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            channel_keys: {
+                let mut map = HashMap::new();
+                map.insert(format!("#test2"), format!("password"));
+                Some(map)
             },
-            MockConnection::new(value),
-        );
-        for message in server.iter() {
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "JOIN #test\r\nJOIN #test2 password\r\n"
@@ -627,20 +653,19 @@ mod test {
     fn handle_end_motd_with_ghost() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
-        let server = IrcServer::from_connection(
-            Config {
-                nickname: Some(format!("test")),
-                alt_nicks: Some(vec![format!("test2")]),
-                nick_password: Some(format!("password")),
-                channels: Some(vec![format!("#test"), format!("#test2")]),
-                should_ghost: Some(true),
-                ..Default::default()
-            },
-            MockConnection::new(value),
-        );
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            nickname: Some(format!("test")),
+            alt_nicks: Some(vec![format!("test2")]),
+            nick_password: Some(format!("password")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            should_ghost: Some(true),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NICK :test2\r\nNICKSERV GHOST test password\r\n\
@@ -652,21 +677,20 @@ mod test {
     fn handle_end_motd_with_ghost_seq() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
-        let server = IrcServer::from_connection(
-            Config {
-                nickname: Some(format!("test")),
-                alt_nicks: Some(vec![format!("test2")]),
-                nick_password: Some(format!("password")),
-                channels: Some(vec![format!("#test"), format!("#test2")]),
-                should_ghost: Some(true),
-                ghost_sequence: Some(vec![format!("RECOVER"), format!("RELEASE")]),
-                ..Default::default()
-            },
-            MockConnection::new(value),
-        );
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            nickname: Some(format!("test")),
+            alt_nicks: Some(vec![format!("test2")]),
+            nick_password: Some(format!("password")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            should_ghost: Some(true),
+            ghost_sequence: Some(vec![format!("RECOVER"), format!("RELEASE")]),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NICK :test2\r\nNICKSERV RECOVER test password\
@@ -678,18 +702,17 @@ mod test {
     #[test]
     fn handle_end_motd_with_umodes() {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-        let server = IrcServer::from_connection(
-            Config {
-                nickname: Some(format!("test")),
-                umodes: Some(format!("+B")),
-                channels: Some(vec![format!("#test"), format!("#test2")]),
-                ..Default::default()
-            },
-            MockConnection::new(value),
-        );
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            nickname: Some(format!("test")),
+            umodes: Some(format!("+B")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "MODE test +B\r\nJOIN #test\r\nJOIN #test2\r\n"
@@ -698,11 +721,15 @@ mod test {
 
     #[test]
     fn nickname_in_use() {
-        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n";
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(&get_server_value(server)[..], "NICK :test2\r\n");
     }
 
@@ -711,15 +738,19 @@ mod test {
     fn ran_out_of_nicknames() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
     }
 
     #[test]
     fn send() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         assert!(
             server
                 .send(PRIVMSG(format!("#test"), format!("Hi there!")))
@@ -733,23 +764,27 @@ mod test {
 
     #[test]
     fn send_no_newline_injection() {
-        let server = IrcServer::from_connection(test_config(), MockConnection::empty());
+        let server = IrcServer::from_config(test_config()).unwrap();
         assert!(
             server
-                .send(PRIVMSG(format!("#test"), format!("Hi there!\nJOIN #bad")))
+                .send(PRIVMSG(format!("#test"), format!("Hi there!\r\nJOIN #bad")))
                 .is_ok()
         );
-        assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\n");
+        assert_eq!(&get_server_value(server)[..], "PRIVMSG #test :Hi there!\r\n");
     }
 
     #[test]
     #[cfg(not(feature = "nochanlists"))]
     fn channel_tracking_names() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(server.list_channels().unwrap(), vec!["#test".to_owned()])
     }
 
@@ -757,10 +792,14 @@ mod test {
     #[cfg(not(feature = "nochanlists"))]
     fn channel_tracking_names_part() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert!(server.send(PART(format!("#test"), None)).is_ok());
         assert!(server.list_channels().unwrap().is_empty())
     }
@@ -769,10 +808,14 @@ mod test {
     #[cfg(not(feature = "nochanlists"))]
     fn user_tracking_names() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             server.list_users("#test").unwrap(),
             vec![User::new("test"), User::new("~owner"), User::new("&admin")]
@@ -784,10 +827,14 @@ mod test {
     fn user_tracking_names_join() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :test2!test@test JOIN #test\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             server.list_users("#test").unwrap(),
             vec![
@@ -804,10 +851,14 @@ mod test {
     fn user_tracking_names_part() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test PART #test\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             server.list_users("#test").unwrap(),
             vec![User::new("test"), User::new("&admin")]
@@ -819,10 +870,14 @@ mod test {
     fn user_tracking_names_mode() {
         let value = ":irc.test.net 353 test = #test :+test ~owner &admin\r\n\
                      :test!test@test MODE #test +o test\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             server.list_users("#test").unwrap(),
             vec![User::new("@test"), User::new("~owner"), User::new("&admin")]
@@ -844,10 +899,14 @@ mod test {
     #[cfg(feature = "nochanlists")]
     fn no_user_tracking() {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert!(server.list_users("#test").is_none())
     }
 
@@ -855,10 +914,14 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn finger_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NOTICE test :\u{001}FINGER :test (test)\u{001}\
@@ -870,10 +933,14 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn version_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}VERSION\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NOTICE test :\u{001}VERSION irc:git:Rust\u{001}\
@@ -885,10 +952,14 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn source_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}SOURCE\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n\
@@ -900,10 +971,14 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn ctcp_ping_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}PING test\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NOTICE test :\u{001}PING test\u{001}\r\n"
@@ -914,10 +989,14 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn time_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}TIME\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         let val = get_server_value(server);
         assert!(val.starts_with("NOTICE test :\u{001}TIME :"));
         assert!(val.ends_with("\u{001}\r\n"));
@@ -927,10 +1006,14 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn user_info_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}USERINFO\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NOTICE test :\u{001}USERINFO :Testing.\u{001}\
@@ -942,10 +1025,14 @@ mod test {
     #[cfg(feature = "ctcp")]
     fn ctcp_ping_no_timestamp() {
         let value = ":test!test@test PRIVMSG test :\u{001}PING\u{001}\r\n";
-        let server = IrcServer::from_connection(test_config(), MockConnection::new(value));
-        for message in server.iter() {
+        let server = IrcServer::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        server.stream().for_each(|message| {
             println!("{:?}", message);
-        }
+            Ok(())
+        }).wait().unwrap();
         assert_eq!(&get_server_value(server)[..], "");
     }
 }
