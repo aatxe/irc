@@ -1,4 +1,5 @@
 //! Interface for working with IRC Servers.
+use std::ascii::AsciiExt;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
@@ -392,35 +393,31 @@ impl ServerState {
         if tokens.is_empty() {
             return Ok(());
         }
-        match tokens[0] {
-            "FINGER" => {
-                self.send_ctcp_internal(
-                    resp,
-                    &format!(
-                        "FINGER :{} ({})",
-                        self.config().real_name(),
-                        self.config().username()
-                    ),
-                )
-            }
-            "VERSION" => {
-                self.send_ctcp_internal(resp, &format!("VERSION {}", self.config().version()))
-            }
-            "SOURCE" => {
-                try!(self.send_ctcp_internal(
-                    resp,
-                    &format!("SOURCE {}", self.config().source()),
-                ));
-                self.send_ctcp_internal(resp, "SOURCE")
-            }
-            "PING" if tokens.len() > 1 => {
-                self.send_ctcp_internal(resp, &format!("PING {}", tokens[1]))
-            }
-            "TIME" => self.send_ctcp_internal(resp, &format!("TIME :{}", time::now().rfc822z())),
-            "USERINFO" => {
-                self.send_ctcp_internal(resp, &format!("USERINFO :{}", self.config().user_info()))
-            }
-            _ => Ok(()),
+        if tokens[0].eq_ignore_ascii_case("FINGER") {
+            self.send_ctcp_internal(
+                resp,
+                &format!(
+                    "FINGER :{} ({})",
+                    self.config().real_name(),
+                    self.config().username()
+                ),
+            )
+        } else if tokens[0].eq_ignore_ascii_case("VERSION") {
+            self.send_ctcp_internal(resp, &format!("VERSION {}", self.config().version()))
+        } else if tokens[0].eq_ignore_ascii_case("SOURCE") {
+            try!(self.send_ctcp_internal(
+                resp,
+                &format!("SOURCE {}", self.config().source()),
+            ));
+            self.send_ctcp_internal(resp, "SOURCE")
+        } else if tokens[0].eq_ignore_ascii_case("PING") && tokens.len() > 1 {
+            self.send_ctcp_internal(resp, &format!("PING {}", tokens[1]))
+        } else if tokens[0].eq_ignore_ascii_case("TIME") {
+            self.send_ctcp_internal(resp, &format!("TIME :{}", time::now().rfc822z()))
+        } else if tokens[0].eq_ignore_ascii_case("USERINFO") {
+            self.send_ctcp_internal(resp, &format!("USERINFO :{}", self.config().user_info()))
+        } else {
+            Ok(())
         }
     }
 

@@ -1,4 +1,5 @@
 //! Enumeration of all available client commands.
+use std::ascii::AsciiExt;
 use std::str::FromStr;
 use error;
 use proto::Response;
@@ -434,7 +435,7 @@ impl<'a> From<&'a Command> for String {
 impl Command {
     /// Constructs a new Command.
     pub fn new(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> error::Result<Command> {
-        Ok(if let "PASS" = cmd {
+        Ok(if cmd.eq_ignore_ascii_case("PASS") {
             match suffix {
                 Some(suffix) => {
                     if !args.is_empty() {
@@ -451,7 +452,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "NICK" = cmd {
+        } else if cmd.eq_ignore_ascii_case("NICK") {
             match suffix {
                 Some(suffix) => {
                     if !args.is_empty() {
@@ -468,7 +469,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "USER" = cmd {
+        } else if cmd.eq_ignore_ascii_case("USER") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 2 {
@@ -485,7 +486,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "OPER" = cmd {
+        } else if cmd.eq_ignore_ascii_case("OPER") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 1 {
@@ -502,7 +503,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "MODE" = cmd {
+        } else if cmd.eq_ignore_ascii_case("MODE") {
             match suffix {
                 Some(suffix) => {
                     if args.len() == 2 {
@@ -531,7 +532,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "SERVICE" = cmd {
+        } else if cmd.eq_ignore_ascii_case("SERVICE") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 5 {
@@ -562,7 +563,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "QUIT" = cmd {
+        } else if cmd.eq_ignore_ascii_case("QUIT") {
             if !args.is_empty() {
                 raw(cmd, args, suffix)
             } else {
@@ -571,7 +572,7 @@ impl Command {
                     None => Command::QUIT(None),
                 }
             }
-        } else if let "SQUIT" = cmd {
+        } else if cmd.eq_ignore_ascii_case("SQUIT") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 1 {
@@ -588,7 +589,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "JOIN" = cmd {
+        } else if cmd.eq_ignore_ascii_case("JOIN") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -621,7 +622,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "PART" = cmd {
+        } else if cmd.eq_ignore_ascii_case("PART") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -642,7 +643,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "TOPIC" = cmd {
+        } else if cmd.eq_ignore_ascii_case("TOPIC") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -663,7 +664,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "NAMES" = cmd {
+        } else if cmd.eq_ignore_ascii_case("NAMES") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -686,7 +687,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "LIST" = cmd {
+        } else if cmd.eq_ignore_ascii_case("LIST") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -709,7 +710,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "INVITE" = cmd {
+        } else if cmd.eq_ignore_ascii_case("INVITE") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 1 {
@@ -726,7 +727,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "KICK" = cmd {
+        } else if cmd.eq_ignore_ascii_case("KICK") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 2 {
@@ -747,7 +748,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "PRIVMSG" = cmd {
+        } else if cmd.eq_ignore_ascii_case("PRIVMSG") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 1 {
@@ -758,7 +759,7 @@ impl Command {
                 }
                 None => raw(cmd, args, suffix),
             }
-        } else if let "NOTICE" = cmd {
+        } else if cmd.eq_ignore_ascii_case("NOTICE") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 1 {
@@ -769,7 +770,7 @@ impl Command {
                 }
                 None => raw(cmd, args, suffix),
             }
-        } else if let "MOTD" = cmd {
+        } else if cmd.eq_ignore_ascii_case("MOTD") {
             if !args.is_empty() {
                 raw(cmd, args, suffix)
             } else {
@@ -778,7 +779,7 @@ impl Command {
                     None => Command::MOTD(None),
                 }
             }
-        } else if let "LUSERS" = cmd {
+        } else if cmd.eq_ignore_ascii_case("LUSERS") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -801,7 +802,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "VERSION" = cmd {
+        } else if cmd.eq_ignore_ascii_case("VERSION") {
             if !args.is_empty() {
                 raw(cmd, args, suffix)
             } else {
@@ -810,7 +811,7 @@ impl Command {
                     None => Command::VERSION(None),
                 }
             }
-        } else if let "STATS" = cmd {
+        } else if cmd.eq_ignore_ascii_case("STATS") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -833,7 +834,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "LINKS" = cmd {
+        } else if cmd.eq_ignore_ascii_case("LINKS") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -852,7 +853,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "TIME" = cmd {
+        } else if cmd.eq_ignore_ascii_case("TIME") {
             if !args.is_empty() {
                 raw(cmd, args, suffix)
             } else {
@@ -861,7 +862,7 @@ impl Command {
                     None => Command::TIME(None),
                 }
             }
-        } else if let "CONNECT" = cmd {
+        } else if cmd.eq_ignore_ascii_case("CONNECT") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 2 {
@@ -882,7 +883,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "TRACE" = cmd {
+        } else if cmd.eq_ignore_ascii_case("TRACE") {
             if !args.is_empty() {
                 raw(cmd, args, suffix)
             } else {
@@ -891,7 +892,7 @@ impl Command {
                     None => Command::TRACE(None),
                 }
             }
-        } else if let "ADMIN" = cmd {
+        } else if cmd.eq_ignore_ascii_case("ADMIN") {
             if !args.is_empty() {
                 raw(cmd, args, suffix)
             } else {
@@ -900,7 +901,7 @@ impl Command {
                     None => Command::ADMIN(None),
                 }
             }
-        } else if let "INFO" = cmd {
+        } else if cmd.eq_ignore_ascii_case("INFO") {
             if !args.is_empty() {
                 raw(cmd, args, suffix)
             } else {
@@ -909,7 +910,7 @@ impl Command {
                     None => Command::INFO(None),
                 }
             }
-        } else if let "SERVLIST" = cmd {
+        } else if cmd.eq_ignore_ascii_case("SERVLIST") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -932,7 +933,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "SQUERY" = cmd {
+        } else if cmd.eq_ignore_ascii_case("SQUERY") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 1 {
@@ -949,7 +950,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "WHO" = cmd {
+        } else if cmd.eq_ignore_ascii_case("WHO") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -972,7 +973,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "WHOIS" = cmd {
+        } else if cmd.eq_ignore_ascii_case("WHOIS") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -993,7 +994,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "WHOWAS" = cmd {
+        } else if cmd.eq_ignore_ascii_case("WHOWAS") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -1026,7 +1027,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "KILL" = cmd {
+        } else if cmd.eq_ignore_ascii_case("KILL") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 1 {
@@ -1043,7 +1044,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "PING" = cmd {
+        } else if cmd.eq_ignore_ascii_case("PING") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -1064,7 +1065,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "PONG" = cmd {
+        } else if cmd.eq_ignore_ascii_case("PONG") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -1085,7 +1086,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "ERROR" = cmd {
+        } else if cmd.eq_ignore_ascii_case("ERROR") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -1096,7 +1097,7 @@ impl Command {
                 }
                 None => raw(cmd, args, suffix),
             }
-        } else if let "AWAY" = cmd {
+        } else if cmd.eq_ignore_ascii_case("AWAY") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -1107,25 +1108,25 @@ impl Command {
                 }
                 None => raw(cmd, args, suffix),
             }
-        } else if let "REHASH" = cmd {
+        } else if cmd.eq_ignore_ascii_case("REHASH") {
             if args.is_empty() {
                 Command::REHASH
             } else {
                 raw(cmd, args, suffix)
             }
-        } else if let "DIE" = cmd {
+        } else if cmd.eq_ignore_ascii_case("DIE") {
             if args.is_empty() {
                 Command::DIE
             } else {
                 raw(cmd, args, suffix)
             }
-        } else if let "RESTART" = cmd {
+        } else if cmd.eq_ignore_ascii_case("RESTART") {
             if args.is_empty() {
                 Command::RESTART
             } else {
                 raw(cmd, args, suffix)
             }
-        } else if let "SUMMON" = cmd {
+        } else if cmd.eq_ignore_ascii_case("SUMMON") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -1158,7 +1159,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "USERS" = cmd {
+        } else if cmd.eq_ignore_ascii_case("USERS") {
             match suffix {
                 Some(suffix) => {
                     if !args.is_empty() {
@@ -1175,7 +1176,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "WALLOPS" = cmd {
+        } else if cmd.eq_ignore_ascii_case("WALLOPS") {
             match suffix {
                 Some(suffix) => {
                     if !args.is_empty() {
@@ -1192,19 +1193,19 @@ impl Command {
                     }
                 }
             }
-        } else if let "USERHOST" = cmd {
+        } else if cmd.eq_ignore_ascii_case("USERHOST") {
             if suffix.is_none() {
                 Command::USERHOST(args.into_iter().map(|s| s.to_owned()).collect())
             } else {
                 raw(cmd, args, suffix)
             }
-        } else if let "ISON" = cmd {
+        } else if cmd.eq_ignore_ascii_case("ISON") {
             if suffix.is_none() {
                 Command::USERHOST(args.into_iter().map(|s| s.to_owned()).collect())
             } else {
                 raw(cmd, args, suffix)
             }
-        } else if let "SAJOIN" = cmd {
+        } else if cmd.eq_ignore_ascii_case("SAJOIN") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 1 {
@@ -1221,7 +1222,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "SAMODE" = cmd {
+        } else if cmd.eq_ignore_ascii_case("SAMODE") {
             match suffix {
                 Some(suffix) => {
                     if args.len() == 1 {
@@ -1250,7 +1251,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "SANICK" = cmd {
+        } else if cmd.eq_ignore_ascii_case("SANICK") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 1 {
@@ -1267,7 +1268,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "SAPART" = cmd {
+        } else if cmd.eq_ignore_ascii_case("SAPART") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 1 {
@@ -1284,7 +1285,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "SAQUIT" = cmd {
+        } else if cmd.eq_ignore_ascii_case("SAQUIT") {
             match suffix {
                 Some(suffix) => {
                     if args.len() != 1 {
@@ -1301,7 +1302,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "NICKSERV" = cmd {
+        } else if cmd.eq_ignore_ascii_case("NICKSERV") {
             match suffix {
                 Some(suffix) => {
                     if !args.is_empty() {
@@ -1318,7 +1319,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "CHANSERV" = cmd {
+        } else if cmd.eq_ignore_ascii_case("CHANSERV") {
             match suffix {
                 Some(suffix) => {
                     if !args.is_empty() {
@@ -1335,7 +1336,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "OPERSERV" = cmd {
+        } else if cmd.eq_ignore_ascii_case("OPERSERV") {
             match suffix {
                 Some(suffix) => {
                     if !args.is_empty() {
@@ -1352,7 +1353,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "BOTSERV" = cmd {
+        } else if cmd.eq_ignore_ascii_case("BOTSERV") {
             match suffix {
                 Some(suffix) => {
                     if !args.is_empty() {
@@ -1369,7 +1370,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "HOSTSERV" = cmd {
+        } else if cmd.eq_ignore_ascii_case("HOSTSERV") {
             match suffix {
                 Some(suffix) => {
                     if !args.is_empty() {
@@ -1386,7 +1387,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "MEMOSERV" = cmd {
+        } else if cmd.eq_ignore_ascii_case("MEMOSERV") {
             match suffix {
                 Some(suffix) => {
                     if !args.is_empty() {
@@ -1403,7 +1404,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "CAP" = cmd {
+        } else if cmd.eq_ignore_ascii_case("CAP") {
             if args.len() == 1 {
                 if let Ok(cmd) = args[0].parse() {
                     match suffix {
@@ -1467,7 +1468,7 @@ impl Command {
             } else {
                 raw(cmd, args, suffix)
             }
-        } else if let "AUTHENTICATE" = cmd {
+        } else if cmd.eq_ignore_ascii_case("AUTHENTICATE") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -1484,7 +1485,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "ACCOUNT" = cmd {
+        } else if cmd.eq_ignore_ascii_case("ACCOUNT") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -1501,7 +1502,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "METADATA" = cmd {
+        } else if cmd.eq_ignore_ascii_case("METADATA") {
             if args.len() == 2 {
                 match suffix {
                     Some(_) => raw(cmd, args, suffix),
@@ -1538,13 +1539,13 @@ impl Command {
             } else {
                 raw(cmd, args, suffix)
             }
-        } else if let "MONITOR" = cmd {
+        } else if cmd.eq_ignore_ascii_case("MONITOR") {
             if args.len() == 1 {
                 Command::MONITOR(args[0].to_owned(), suffix.map(|s| s.to_owned()))
             } else {
                 raw(cmd, args, suffix)
             }
-        } else if let "BATCH" = cmd {
+        } else if cmd.eq_ignore_ascii_case("BATCH") {
             match suffix {
                 Some(suffix) => {
                     if args.is_empty() {
@@ -1582,7 +1583,7 @@ impl Command {
                     }
                 }
             }
-        } else if let "CHGHOST" = cmd {
+        } else if cmd.eq_ignore_ascii_case("CHGHOST") {
             match suffix {
                 Some(suffix) => {
                     if args.len() == 1 {
@@ -1660,16 +1661,24 @@ impl CapSubCommand {
 impl FromStr for CapSubCommand {
     type Err = error::Error;
     fn from_str(s: &str) -> error::Result<CapSubCommand> {
-        match s {
-            "LS" => Ok(CapSubCommand::LS),
-            "LIST" => Ok(CapSubCommand::LIST),
-            "REQ" => Ok(CapSubCommand::REQ),
-            "ACK" => Ok(CapSubCommand::ACK),
-            "NAK" => Ok(CapSubCommand::NAK),
-            "END" => Ok(CapSubCommand::END),
-            "NEW" => Ok(CapSubCommand::NEW),
-            "DEL" => Ok(CapSubCommand::DEL),
-            _ => Err(error::ErrorKind::SubCommandParsingFailed.into()),
+        if s.eq_ignore_ascii_case("LS") {
+            Ok(CapSubCommand::LS)
+        } else if s.eq_ignore_ascii_case("LIST") {
+            Ok(CapSubCommand::LIST)
+        } else if s.eq_ignore_ascii_case("REQ") {
+            Ok(CapSubCommand::REQ)
+        } else if s.eq_ignore_ascii_case("ACK") {
+            Ok(CapSubCommand::ACK)
+        } else if s.eq_ignore_ascii_case("NAK") {
+            Ok(CapSubCommand::NAK)
+        } else if s.eq_ignore_ascii_case("END") {
+            Ok(CapSubCommand::END)
+        } else if s.eq_ignore_ascii_case("NEW") {
+            Ok(CapSubCommand::NEW)
+        } else if s.eq_ignore_ascii_case("DEL") {
+            Ok(CapSubCommand::DEL)
+        } else {
+            Err(error::ErrorKind::SubCommandParsingFailed.into())
         }
     }
 }
@@ -1703,12 +1712,16 @@ impl MetadataSubCommand {
 impl FromStr for MetadataSubCommand {
     type Err = error::Error;
     fn from_str(s: &str) -> error::Result<MetadataSubCommand> {
-        match s {
-            "GET" => Ok(MetadataSubCommand::GET),
-            "LIST" => Ok(MetadataSubCommand::LIST),
-            "SET" => Ok(MetadataSubCommand::SET),
-            "CLEAR" => Ok(MetadataSubCommand::CLEAR),
-            _ => Err(error::ErrorKind::SubCommandParsingFailed.into()),
+        if s.eq_ignore_ascii_case("GET") {
+            Ok(MetadataSubCommand::GET)
+        } else if s.eq_ignore_ascii_case("LIST") {
+            Ok(MetadataSubCommand::LIST)
+        } else if s.eq_ignore_ascii_case("SET") {
+            Ok(MetadataSubCommand::SET)
+        } else if s.eq_ignore_ascii_case("CLEAR") {
+            Ok(MetadataSubCommand::CLEAR)
+        } else {
+            Err(error::ErrorKind::SubCommandParsingFailed.into())
         }
     }
 }
@@ -1738,10 +1751,12 @@ impl BatchSubCommand {
 impl FromStr for BatchSubCommand {
     type Err = error::Error;
     fn from_str(s: &str) -> error::Result<BatchSubCommand> {
-        match s {
-            "NETSPLIT" => Ok(BatchSubCommand::NETSPLIT),
-            "NETJOIN" => Ok(BatchSubCommand::NETJOIN),
-            _ => Ok(BatchSubCommand::CUSTOM(s.to_owned())),
+        if s.eq_ignore_ascii_case("NETSPLIT") {
+            Ok(BatchSubCommand::NETSPLIT)
+        } else if s.eq_ignore_ascii_case("NETJOIN") {
+            Ok(BatchSubCommand::NETJOIN)
+        } else {
+            Ok(BatchSubCommand::CUSTOM(s.to_uppercase()))
         }
     }
 }
