@@ -31,9 +31,10 @@ fn main() {
     };
     let server = IrcServer::from_config(cfg).unwrap();
     server.identify().unwrap();
-    for message in server.iter() {
+    server.stream().for_each(|message| {
         // Do message processing.
-    }
+        Ok(())
+    }).wait().unwrap()
 }
 ```
 
@@ -54,9 +55,10 @@ use irc::client::prelude::*;
 fn main() {
     let server = IrcServer::new("config.json").unwrap();
     server.identify().unwrap();
-    for message in server.iter() {
+    server.stream().for_each(|message| {
         // Do message processing.
-    }
+        Ok(())
+    }).wait().unwrap()
 }
 ```
 
