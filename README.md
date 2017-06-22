@@ -1,10 +1,9 @@
 # irc [![Build Status](https://travis-ci.org/aatxe/irc.svg?branch=master)](https://travis-ci.org/aatxe/irc) [![Crates.io](https://img.shields.io/crates/v/irc.svg)](https://crates.io/crates/irc) [![Built with Spacemacs](https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg)](http://spacemacs.org) #
-A robust, thread-safe IRC library in Rust. The client portion is compliant with
+A robust, thread-safe and async-friendly IRC library in Rust. The client portion is compliant with
 [RFC 2812](http://tools.ietf.org/html/rfc2812), [IRCv3.1](http://ircv3.net/irc/3.1.html),
 [IRCv3.2](http://ircv3.net/irc/3.2.html), and includes some additional, common features. It also
-features automatic reconnection in unstable networking conditions, flexibility allowing easy unit
-testing, and a number of useful built-in features for building a powerful client quickly. The
-server portion is still a work in progress. You can find up-to-date, ready-to-use documentation
+features a number of useful built-in features for building a powerful client quickly. The
+server portion does not exist yet, but hopefully will in the future. You can find up-to-date, ready-to-use documentation
 online [here](http://aatxe.github.io/irc/irc/). The documentation is generated with the default
 features. These are, however, strictly optional and can be disabled accordingly.
 
@@ -65,9 +64,9 @@ fn main() {
 Like the rest of the IRC crate, configuration is built with flexibility in mind. You can easily
 create `Config` objects programmatically and choose your own methods for handling any saving or
 loading of configuration required. However, for convenience, we've also included the option of
-loading JSON files with `rust-serialize` to write configurations. All the fields are optional, and
-thus any of them can be omitted (though, omitting a nickname or server will cause the program to
-fail for obvious reasons). That being said, here's an example of a complete configuration:
+loading JSON files with `serde` to write configurations. All the fields are optional, and thus
+any of them can be omitted (though, omitting a nickname or server will cause the program to fail
+for obvious reasons). That being said, here's an example of a complete configuration:
 
 ```json
 {
