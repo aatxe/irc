@@ -1,9 +1,9 @@
 //! Utilities and shortcuts for working with IRC servers.
 use std::borrow::ToOwned;
 use error::Result;
-use client::data::{Capability, NegotiationVersion};
-use client::data::Command::{AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
-use client::data::Command::{OPER, PART, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
+use proto::{Capability, NegotiationVersion};
+use proto::Command::{AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, MODE, NICK, NOTICE};
+use proto::Command::{OPER, PART, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER};
 use client::server::Server;
 use proto::command::CapSubCommand::{END, LS, REQ};
 #[cfg(feature = "ctcp")]

@@ -1,7 +1,7 @@
 //! Enumeration of all available client commands.
 use std::str::FromStr;
 use error;
-use client::data::Response;
+use proto::Response;
 
 /// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This
 /// also includes commands from the

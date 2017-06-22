@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 use error;
 use error::{Error, ErrorKind};
-use client::data::Command;
+use proto::Command;
 
 /// IRC Message data.
 #[derive(Clone, PartialEq, Debug)]
@@ -158,7 +158,7 @@ pub struct Tag(pub String, pub Option<String>);
 #[cfg(test)]
 mod test {
     use super::{Message, Tag};
-    use client::data::Command::{PRIVMSG, Raw};
+    use proto::Command::{PRIVMSG, Raw};
 
     #[test]
     fn new() {

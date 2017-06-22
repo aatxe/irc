@@ -7,9 +7,10 @@ pub mod transport;
 
 pub mod prelude {
     //! A client-side IRC prelude, re-exporting all the necessary basics.
+    pub use client::data::Config;
     pub use client::server::{IrcServer, Server};
     pub use client::server::utils::ServerExt;
-    pub use client::data::{Capability, Command, Config, Message, NegotiationVersion, Response};
-    pub use client::data::kinds::{IrcRead, IrcWrite};
+    pub use proto::{Capability, Command, Message, NegotiationVersion, Response};
+
     pub use futures::{Future, Stream};
 }
