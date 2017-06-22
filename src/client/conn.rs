@@ -104,7 +104,7 @@ impl Connection {
         if config.use_mock_connection() {
             Ok(ConnectionFuture::Mock(config))
         } else if config.use_ssl() {
-            let domain = format!("{}:{}", config.server(), config.port());
+            let domain = format!("{}", config.server());
             let mut builder = TlsConnector::builder()?;
             if let Some(cert_path) = config.cert_path() {
                 let mut file = File::open(cert_path)?;

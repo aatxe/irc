@@ -8,7 +8,6 @@ fn main() {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.fyrechat.net".to_owned()),
         channels: Some(vec!["#irc-crate".to_owned()]),
-        port: Some(6697),
         use_ssl: Some(true),
         ..Default::default()
     };
