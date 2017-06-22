@@ -220,9 +220,10 @@ impl Config {
     }
 
     /// Gets the string to be sent in response to CTCP VERSION requests.
-    /// This defaults to `irc:git:Rust` when not specified.
+    /// This defaults to `irc:version:env` when not specified.
+    /// For example, `irc:0.12.0:Compiled with rustc`
     pub fn version(&self) -> &str {
-        self.version.as_ref().map_or("irc:git:Rust", |s| &s)
+        self.version.as_ref().map_or(::VERSION_STR, |s| &s)
     }
 
     /// Gets the string to be sent in response to CTCP SOURCE requests.

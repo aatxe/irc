@@ -24,3 +24,10 @@ pub mod client;
 pub mod error;
 pub mod proto;
 pub mod server;
+
+const VERSION_STR: &'static str = concat!(
+    env!("CARGO_PKG_NAME"),
+    ":",
+    env!("CARGO_PKG_VERSION"),
+    ":Compiled with rustc",
+);
