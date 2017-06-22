@@ -35,8 +35,10 @@ make_response! {
     RPL_CREATED         =   3,
     /// `004 <servername> <version> <available user modes> available channel modes>`
     RPL_MYINFO          =   4,
-    /// `005 Try server <server name>, port <port number>`
-    RPL_BOUNCE          =   5,
+    /// `005 <servername> *(<feature>(=<value>)) :are supported by this server`
+    RPL_ISUPPORT        =   5,
+    /// `010 Try server <server name>, port <port number>`
+    RPL_BOUNCE          =  10,
     /// `302 :*1<reply> *( " " <reply> )`
     RPL_USERHOST        = 302,
     /// `303 :*1<nick> *( " " <nick> )`
