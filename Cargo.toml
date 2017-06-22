@@ -1,5 +1,4 @@
 [package]
-
 name = "irc"
 version = "0.12.0"
 description = "A simple, thread-safe, and async-friendly IRC client library."
@@ -11,7 +10,6 @@ repository = "https://github.com/aatxe/irc"
 readme = "README.md"
 
 [features]
-
 default = ["ctcp"]
 ctcp = []
 nochanlists = []
