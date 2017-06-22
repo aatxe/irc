@@ -33,6 +33,8 @@ pub struct Config {
     /// Whether or not to use SSL.
     /// Clients will automatically panic if this is enabled without SSL support.
     pub use_ssl: Option<bool>,
+    /// The path to the SSL certificate for this server in DER format.
+    pub cert_path: Option<String>,
     /// The encoding type used for this connection.
     /// This is typically UTF-8, but could be something else.
     pub encoding: Option<String>,
@@ -174,6 +176,11 @@ impl Config {
     /// This defaults to false when not specified.
     pub fn use_ssl(&self) -> bool {
         self.use_ssl.as_ref().cloned().unwrap_or(false)
+    }
+
+    /// Gets the path to the SSL certificate in DER format if specified.
+    pub fn cert_path(&self) -> Option<&str> {
+        self.cert_path.as_ref().map(|s| &s[..])
     }
 
     /// Gets the encoding to use for this connection. This requires the encode feature to work.

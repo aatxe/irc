@@ -1,5 +1,7 @@
 //! A module providing IRC connections for use by `IrcServer`s.
+use std::fs::File;
 use std::{fmt, io};
+use std::io::Read;
 use error;
 use client::data::Config;
 use client::transport::{IrcTransport, LogView, Logged};
@@ -7,7 +9,7 @@ use proto::{IrcCodec, Message};
 use encoding::{EncoderTrap};
 use encoding::label::encoding_from_whatwg_label;
 use futures::{Async, Poll, Future, Sink, StartSend, Stream};
-use native_tls::TlsConnector;
+use native_tls::{Certificate, TlsConnector};
 use tokio_core::reactor::Handle;
 use tokio_core::net::{TcpStream, TcpStreamNew};
 use tokio_io::AsyncRead;
@@ -103,7 +105,16 @@ impl Connection {
             Ok(ConnectionFuture::Mock(config))
         } else if config.use_ssl() {
             let domain = format!("{}:{}", config.server(), config.port());
-            let connector = TlsConnector::builder()?.build()?;
+            let mut builder = TlsConnector::builder()?;
+            if let Some(cert_path) = config.cert_path() {
+                let mut file = File::open(cert_path)?;
+                let mut cert_data = vec![];
+                file.read_to_end(&mut cert_data)?;
+                let cert = Certificate::from_der(&cert_data)?;
+                builder.add_root_certificate(cert)?;
+                println!("Added {} to trusted certificates.", cert_path);
+            }
+            let connector = builder.build()?;
             let stream = TcpStream::connect(&config.socket_addr(), handle)
                 .map_err(|e| {
                     let res: error::Error = e.into();
