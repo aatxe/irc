@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Capability","List of all supported IRCv3 capability extensions from the IRCv3 specifications."],["NegotiationVersion","List of IRCv3 capability negotiation versions."]]});

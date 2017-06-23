@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["ServerExt","Extensions for Server capabilities that make it easier to work directly with the protocol."]]});

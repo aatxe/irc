@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["utils","Utilities and shortcuts for working with IRC servers."]],"struct":[["IrcServer","A thread-safe implementation of an IRC Server connection."],["ServerIterator","An Iterator over an IrcServer's incoming Messages."]],"trait":[["Server","An interface for interacting with an IRC server."]]});
