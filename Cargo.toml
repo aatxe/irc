@@ -2,7 +2,7 @@
 name = "irc"
 version = "0.12.0"
 description = "A simple, thread-safe, and async-friendly IRC client library."
-authors = ["Aaron Weiss <aaronweiss74@gmail.com>"]
+authors = ["Aaron Weiss <awe@pdgn.co>"]
 license = "MPL-2.0"
 keywords = ["irc", "client", "thread-safe", "async", "tokio"]
 documentation = "https://docs.rs/irc/"
