@@ -32,7 +32,7 @@ fn main() {
     server.identify().unwrap();
     server.for_each_incoming(|message| {
         // Do message processing.
-    })
+    }).unwrap()
 }
 ```
 
@@ -55,7 +55,7 @@ fn main() {
     server.identify().unwrap();
     server.for_each_incoming(|message| {
         // Do message processing.
-    })
+    }).unwrap()
 }
 ```
 
