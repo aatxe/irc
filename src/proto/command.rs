@@ -30,7 +30,7 @@ pub enum Command {
     SQUIT(String, String),
 
     // 3.2 Channel operations
-    /// JOIN chanlist [chankeys]
+    /// JOIN chanlist [chankeys] :[Real name]
     JOIN(String, Option<String>, Option<String>),
     /// PART chanlist :[comment]
     PART(String, Option<String>),
