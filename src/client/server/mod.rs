@@ -580,8 +580,6 @@ mod test {
     use std::thread;
     use std::time::Duration;
 
-    use futures::{Future, Stream};
-
     use super::{IrcServer, Server};
     use client::data::Config;
     #[cfg(not(feature = "nochanlists"))]
@@ -621,10 +619,9 @@ mod test {
             ..test_config()
         }).unwrap();
         let mut messages = String::new();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             messages.push_str(&message.to_string());
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(&messages[..], exp);
     }
 
@@ -635,10 +632,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "JOIN #test\r\nJOIN #test2\r\n"
@@ -654,10 +650,9 @@ mod test {
             channels: Some(vec![format!("#test"), format!("#test2")]),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
@@ -679,10 +674,9 @@ mod test {
             },
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "JOIN #test\r\nJOIN #test2 password\r\n"
@@ -702,10 +696,9 @@ mod test {
             should_ghost: Some(true),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NICK :test2\r\nNICKSERV GHOST test password\r\n\
@@ -727,10 +720,9 @@ mod test {
             ghost_sequence: Some(vec![format!("RECOVER"), format!("RELEASE")]),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NICK :test2\r\nNICKSERV RECOVER test password\
@@ -749,10 +741,9 @@ mod test {
             channels: Some(vec![format!("#test"), format!("#test2")]),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "MODE test +B\r\nJOIN #test\r\nJOIN #test2\r\n"
@@ -766,10 +757,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(&get_server_value(server)[..], "NICK :test2\r\n");
     }
 
@@ -782,10 +772,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
     }
 
     #[test]
@@ -821,10 +810,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(server.list_channels().unwrap(), vec!["#test".to_owned()])
     }
 
@@ -836,10 +824,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert!(server.send(PART(format!("#test"), None)).is_ok());
         assert!(server.list_channels().unwrap().is_empty())
     }
@@ -852,10 +839,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             server.list_users("#test").unwrap(),
             vec![User::new("test"), User::new("~owner"), User::new("&admin")]
@@ -871,10 +857,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             server.list_users("#test").unwrap(),
             vec![
@@ -895,10 +880,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             server.list_users("#test").unwrap(),
             vec![User::new("test"), User::new("&admin")]
@@ -914,10 +898,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             server.list_users("#test").unwrap(),
             vec![User::new("@test"), User::new("~owner"), User::new("&admin")]
@@ -943,10 +926,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert!(server.list_users("#test").is_none())
     }
 
@@ -958,10 +940,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NOTICE test :\u{001}FINGER :test (test)\u{001}\r\n"
@@ -976,10 +957,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             &format!(
@@ -997,10 +977,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n\
@@ -1016,10 +995,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NOTICE test :\u{001}PING test\u{001}\r\n"
@@ -1034,10 +1012,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         let val = get_server_value(server);
         assert!(val.starts_with("NOTICE test :\u{001}TIME :"));
         assert!(val.ends_with("\u{001}\r\n"));
@@ -1051,10 +1028,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(
             &get_server_value(server)[..],
             "NOTICE test :\u{001}USERINFO :Testing.\u{001}\
@@ -1070,10 +1046,9 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        server.stream().for_each(|message| {
+        server.for_each_incoming(|message| {
             println!("{:?}", message);
-            Ok(())
-        }).wait().unwrap();
+        }).unwrap();
         assert_eq!(&get_server_value(server)[..], "");
     }
 }
