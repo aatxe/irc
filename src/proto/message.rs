@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use error;
 use error::{Error, ErrorKind};
-use proto::Command;
+use proto::{Command, ChannelExt};
 
 /// IRC Message data.
 #[derive(Clone, PartialEq, Debug)]
@@ -58,6 +58,17 @@ impl Message {
             (None, None, None) => Some(s), // <nick>
             _ => None, // <servername>
         })
+    }
+
+    /// Gets the likely intended place to respond to this message.
+    /// If the type of the message is a `PRIVMSG` or `NOTICE` and the message is sent to a channel,
+    /// the result will be that channel. In all other cases, this will call `source_nickname`.
+    pub fn response_target(&self) -> Option<&str> {
+        match self.command {
+            Command::PRIVMSG(ref target, _) if target.is_channel_name() => Some(target),
+            Command::NOTICE(ref target, _) if target.is_channel_name() => Some(target),
+            _ => self.source_nickname()
+        }
     }
 
     /// Converts a Message into a String according to the IRC protocol.
