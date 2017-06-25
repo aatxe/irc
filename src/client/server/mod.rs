@@ -36,6 +36,7 @@ pub trait Server {
         Self: Sized;
 
     /// Gets a stream of incoming messages from the Server.
+    /// Note: The stream can only be gotten once. Subsequent attempts will panic.
     fn stream(&self) -> ServerStream;
 
     /// Blocks on the stream, running the given function on each incoming message as they arrive.
@@ -466,7 +467,9 @@ impl Server for IrcServer {
     fn stream(&self) -> ServerStream {
         ServerStream {
             state: self.state.clone(),
-            stream: self.state.incoming.lock().unwrap().take().unwrap(),
+            stream: self.state.incoming.lock().unwrap().take().expect(
+                "Stream was already obtained once, and cannot be reobtained."
+            ),
         }
     }
 
