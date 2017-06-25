@@ -25,6 +25,23 @@ use proto::Command::{JOIN, NICK, NICKSERV, PART, PRIVMSG, ChannelMODE, QUIT};
 
 pub mod utils;
 
+/// Trait extending all IRC streams with `for_each_incoming` convenience function.
+pub trait EachIncomingExt: Stream<Item=Message, Error=error::Error> {
+    /// Blocks on the stream, running the given function on each incoming message as they arrive.
+    fn for_each_incoming<F>(self, mut f: F) -> error::Result<()>
+        where
+        F: FnMut(Message) -> (),
+        Self: Sized,
+    {
+        self.for_each(|msg| {
+            f(msg);
+            Ok(())
+        }).wait()
+    }
+}
+
+impl<T> EachIncomingExt for T where T: Stream<Item=Message, Error=error::Error> {}
+
 /// An interface for interacting with an IRC server.
 pub trait Server {
     /// Gets the configuration being used with this Server.
@@ -40,14 +57,11 @@ pub trait Server {
     fn stream(&self) -> ServerStream;
 
     /// Blocks on the stream, running the given function on each incoming message as they arrive.
-    fn for_each_incoming<F>(&self, mut f: F) -> ()
+    fn for_each_incoming<F>(&self, f: F) -> error::Result<()>
     where
         F: FnMut(Message) -> (),
     {
-        self.stream().for_each(|msg| {
-            f(msg);
-            Ok(())
-        }).wait().unwrap()
+        self.stream().for_each_incoming(f)
     }
 
     /// Gets a list of currently joined channels. This will be none if tracking is not supported
