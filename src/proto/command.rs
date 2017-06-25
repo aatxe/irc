@@ -3,7 +3,7 @@ use std::ascii::AsciiExt;
 use std::str::FromStr;
 
 use error;
-use proto::{ChannelMode, Mode, Response, UserMode};
+use proto::{ChannelExt, ChannelMode, Mode, Response, UserMode};
 
 /// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This
 /// also includes commands from the
@@ -1752,20 +1752,5 @@ impl FromStr for BatchSubCommand {
         } else {
             Ok(BatchSubCommand::CUSTOM(s.to_uppercase()))
         }
-    }
-}
-
-/// An extension trait giving strings a function to check if they are a channel.
-pub trait ChannelExt {
-    /// Returns true if the specified name is a channel name.
-    fn is_channel_name(&self) -> bool;
-}
-
-impl<'a> ChannelExt for &'a str {
-    fn is_channel_name(&self) -> bool {
-        self.starts_with("#") ||
-            self.starts_with("&") ||
-            self.starts_with("+") ||
-            self.starts_with("!")
     }
 }
