@@ -8,7 +8,7 @@ pub mod transport;
 pub mod prelude {
     //! A client-side IRC prelude, re-exporting all the necessary basics.
     pub use client::data::Config;
-    pub use client::server::{IrcServer, Server};
+    pub use client::server::{EachIncomingExt, IrcServer, Server};
     pub use client::server::utils::ServerExt;
     pub use proto::{Capability, ChannelExt, Command, Message, NegotiationVersion, Response};
     pub use proto::{ChannelMode, Mode, UserMode};
