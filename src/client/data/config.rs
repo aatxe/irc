@@ -77,9 +77,9 @@ pub struct Config {
 impl Config {
     /// Loads a JSON configuration from the desired path.
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Config> {
-        let mut file = try!(File::open(path));
+        let mut file = File::open(path)?;
         let mut data = String::new();
-        try!(file.read_to_string(&mut data));
+        file.read_to_string(&mut data)?;
         serde_json::from_str(&data[..]).map_err(|_| {
             Error::new(
                 ErrorKind::InvalidInput,
@@ -90,14 +90,14 @@ impl Config {
 
     /// Saves a JSON configuration to the desired path.
     pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<()> {
-        let mut file = try!(File::create(path));
+        let mut file = File::create(path)?;
         file.write_all(
-            try!(serde_json::to_string(self).map_err(|_| {
+            serde_json::to_string(self).map_err(|_| {
                 Error::new(
                     ErrorKind::InvalidInput,
                     "Failed to encode configuration file.",
                 )
-            })).as_bytes(),
+            })?.as_bytes(),
         ).map_err(|e| e.into())
     }
 

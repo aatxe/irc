@@ -54,16 +54,16 @@ pub trait ServerExt: Server {
         Self: Sized,
     {
         // Send a CAP END to signify that we're IRCv3-compliant (and to end negotiations!).
-        try!(self.send(CAP(None, END, None, None)));
+        self.send(CAP(None, END, None, None))?;
         if self.config().password() != "" {
-            try!(self.send(PASS(self.config().password().to_owned())));
+            self.send(PASS(self.config().password().to_owned()))?;
         }
-        try!(self.send(NICK(self.config().nickname().to_owned())));
-        try!(self.send(USER(
+        self.send(NICK(self.config().nickname().to_owned()))?;
+        self.send(USER(
             self.config().username().to_owned(),
             "0".to_owned(),
             self.config().real_name().to_owned(),
-        )));
+        ))?;
         Ok(())
     }
 
@@ -146,7 +146,7 @@ pub trait ServerExt: Server {
         Self: Sized,
     {
         for line in message.split("\r\n") {
-            try!(self.send(PRIVMSG(target.to_owned(), line.to_owned())))
+            self.send(PRIVMSG(target.to_owned(), line.to_owned()))?
         }
         Ok(())
     }
@@ -157,7 +157,7 @@ pub trait ServerExt: Server {
         Self: Sized,
     {
         for line in message.split("\r\n") {
-            try!(self.send(NOTICE(target.to_owned(), line.to_owned())))
+            self.send(NOTICE(target.to_owned(), line.to_owned()))?
         }
         Ok(())
     }

@@ -120,7 +120,7 @@ impl<'a> Server for ServerState {
         Self: Sized,
     {
         let msg = &msg.into();
-        try!(self.handle_sent_message(&msg));
+        self.handle_sent_message(&msg)?;
         Ok((&self.outgoing).send(
             ServerState::sanitize(&msg.to_string())
                 .into(),
@@ -236,9 +236,9 @@ impl ServerState {
                         body[1..end].split(' ').collect()
                     };
                     if target.starts_with('#') {
-                        try!(self.handle_ctcp(target, tokens))
+                        self.handle_ctcp(target, tokens)?
                     } else if let Some(user) = msg.source_nickname() {
-                        try!(self.handle_ctcp(user, tokens))
+                        self.handle_ctcp(user, tokens)?
                     }
                 }
             }
@@ -272,7 +272,7 @@ impl ServerState {
                 if *index >= alt_nicks.len() {
                     panic!("All specified nicknames were in use or disallowed.")
                 } else {
-                    try!(self.send(NICK(alt_nicks[*index].to_owned())));
+                    self.send(NICK(alt_nicks[*index].to_owned()))?;
                     *index += 1;
                 }
             }
@@ -288,15 +288,15 @@ impl ServerState {
             let mut index = self.alt_nick_index.write().unwrap();
             if self.config().should_ghost() && *index != 0 {
                 for seq in &self.config().ghost_sequence() {
-                    try!(self.send(NICKSERV(format!(
+                    self.send(NICKSERV(format!(
                         "{} {} {}",
                         seq,
                         self.config().nickname(),
                         self.config().nick_password()
-                    ))));
+                    )))?;
                 }
                 *index = 0;
-                try!(self.send(NICK(self.config().nickname().to_owned())))
+                self.send(NICK(self.config().nickname().to_owned()))?
             }
             self.send(NICKSERV(
                 format!("IDENTIFY {}", self.config().nick_password()),
@@ -430,10 +430,10 @@ impl ServerState {
         } else if tokens[0].eq_ignore_ascii_case("VERSION") {
             self.send_ctcp_internal(resp, &format!("VERSION {}", self.config().version()))
         } else if tokens[0].eq_ignore_ascii_case("SOURCE") {
-            try!(self.send_ctcp_internal(
+            self.send_ctcp_internal(
                 resp,
                 &format!("SOURCE {}", self.config().source()),
-            ));
+            )?;
             self.send_ctcp_internal(resp, "SOURCE")
         } else if tokens[0].eq_ignore_ascii_case("PING") && tokens.len() > 1 {
             self.send_ctcp_internal(resp, &format!("PING {}", tokens[1]))
