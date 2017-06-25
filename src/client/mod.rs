@@ -10,7 +10,7 @@ pub mod prelude {
     pub use client::data::Config;
     pub use client::server::{IrcServer, Server};
     pub use client::server::utils::ServerExt;
-    pub use proto::{Capability, Command, Message, NegotiationVersion, Response};
+    pub use proto::{Capability, ChannelExt, Command, Message, NegotiationVersion, Response};
     pub use proto::{ChannelMode, Mode, UserMode};
 
     pub use futures::{Future, Stream};
