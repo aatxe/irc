@@ -195,7 +195,7 @@ impl ServerState {
     }
 
     /// Gets the current nickname in use.
-    pub fn current_nickname(&self) -> &str {
+    fn current_nickname(&self) -> &str {
         let alt_nicks = self.config().alternate_nicknames();
         let index = self.alt_nick_index.read().unwrap();
         match *index {
@@ -564,6 +564,11 @@ impl IrcServer {
             state: Arc::new(ServerState::new(rx_incoming.wait()?, tx_outgoing, config)),
             view: rx_view.wait()?,
         })
+    }
+
+    /// Gets the current nickname in use.
+    pub fn current_nickname(&self) -> &str {
+        self.state.current_nickname()
     }
 
     /// Gets the log view from the internal transport. Only used for unit testing.
