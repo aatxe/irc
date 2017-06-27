@@ -552,7 +552,7 @@ impl IrcServer {
             let outgoing_future = sink.send_all(rx_outgoing.map_err(|_| {
                 let res: error::Error = error::ErrorKind::ChannelError.into();
                 res
-            })).map(|_| ()).map_err(|_| ());
+            })).map(|_| ()).map_err(|e| panic!("{}", e));
 
             // Send the stream half back to the original thread.
             tx_incoming.send(stream).unwrap();
