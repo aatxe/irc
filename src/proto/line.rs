@@ -2,7 +2,7 @@
 
 use std::io;
 
-use bytes::{BufMut, BytesMut};
+use bytes::BytesMut;
 use encoding::{DecoderTrap, EncoderTrap, EncodingRef};
 use encoding::label::encoding_from_whatwg_label;
 use tokio_io::codec::{Decoder, Encoder};
@@ -69,7 +69,7 @@ impl Encoder for LineCodec {
             });
 
         // Write the encoded message to the output buffer.
-        dst.put(&data?);
+        dst.extend(&data?);
 
         Ok(())
     }
