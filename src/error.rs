@@ -9,6 +9,7 @@ error_chain! {
         Recv(::std::sync::mpsc::RecvError);
         SendMessage(::futures::sync::mpsc::SendError<::proto::Message>);
         OneShotCancelled(::futures::sync::oneshot::Canceled);
+        Timer(::tokio_timer::TimerError);
     }
 
     errors {

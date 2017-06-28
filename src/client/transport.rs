@@ -1,10 +1,13 @@
 //! An IRC transport that wraps an IRC-framed stream to provide automatic PING replies.
 use std::sync::{Arc, RwLock, RwLockReadGuard};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use futures::{Async, Poll, Sink, StartSend, Stream};
+use time;
 use tokio_io::{AsyncRead, AsyncWrite};
 use tokio_io::codec::Framed;
+use tokio_timer;
+use tokio_timer::Interval;
 
 use error;
 use client::data::Config;
@@ -16,8 +19,11 @@ where
     T: AsyncRead + AsyncWrite,
 {
     inner: Framed<T, IrcCodec>,
+    ping_timer: Interval,
     ping_timeout: u64,
-    last_ping: Instant,
+    last_ping_data: String,
+    last_ping_sent: Instant,
+    last_pong_received: Instant,
 }
 
 impl<T> IrcTransport<T>
@@ -28,14 +34,37 @@ where
     pub fn new(config: &Config, inner: Framed<T, IrcCodec>) -> IrcTransport<T> {
         IrcTransport {
             inner: inner,
-            ping_timeout: config.ping_time() as u64,
-            last_ping: Instant::now(),
+            ping_timer: tokio_timer::wheel().build().interval(
+                Duration::from_secs(config.ping_time() as u64)
+            ),
+            ping_timeout: config.ping_timeout() as u64,
+            last_ping_data: String::new(),
+            last_ping_sent: Instant::now(),
+            last_pong_received: Instant::now(),
         }
     }
 
     /// Gets the inner stream underlying the `IrcTransport`.
     pub fn into_inner(self) -> Framed<T, IrcCodec> {
         self.inner
+    }
+
+    fn ping_timed_out(&self) -> bool {
+        if self.last_pong_received < self.last_ping_sent {
+            self.last_ping_sent.elapsed().as_secs() >= self.ping_timeout
+        } else {
+            false
+        }
+    }
+
+    fn send_ping(&mut self) -> error::Result<()> {
+        self.last_ping_sent = Instant::now();
+        self.last_ping_data = format!("{}", time::now().to_timespec().sec);
+        let data = self.last_ping_data.clone();
+        let result = self.start_send(Command::PING(data, None).into())?;
+        assert!(result.is_ready());
+        self.poll_complete()?;
+        Ok(())
     }
 }
 
@@ -47,20 +76,49 @@ where
     type Error = error::Error;
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
-        if self.last_ping.elapsed().as_secs() >= self.ping_timeout {
+        if self.ping_timed_out() {
             self.close()?;
-            Err(error::ErrorKind::PingTimeout.into())
-        } else {
-            loop {
-                match try_ready!(self.inner.poll()) {
-                    Some(Message { command: Command::PING(ref data, _), .. }) => {
-                        self.last_ping = Instant::now();
+            return Err(error::ErrorKind::PingTimeout.into())
+        }
+
+        let timer_poll = self.ping_timer.poll()?;
+        let inner_poll = self.inner.poll()?;
+
+        match (inner_poll, timer_poll) {
+            (Async::NotReady, Async::NotReady) => Ok(Async::NotReady),
+            (Async::NotReady, Async::Ready(msg)) => {
+                assert!(msg.is_some());
+                self.send_ping()?;
+                Ok(Async::NotReady)
+            }
+            (Async::Ready(None), _) => Ok(Async::Ready(None)),
+            (Async::Ready(Some(msg)), _) => {
+                match timer_poll {
+                    Async::Ready(msg) => {
+                        assert!(msg.is_some());
+                        self.send_ping()?;
+                    }
+                    Async::NotReady => (),
+                }
+
+                match msg.command {
+                    // Automatically respond to PINGs from the server.
+                    Command::PING(ref data, _) => {
                         let result = self.start_send(Command::PONG(data.to_owned(), None).into())?;
                         assert!(result.is_ready());
                         self.poll_complete()?;
                     }
-                    message => return Ok(Async::Ready(message)),
+                    // Check PONG responses from the server.
+                    Command::PONG(ref data, None) |
+                    Command::PONG(_, Some(ref data)) => {
+                        if self.last_ping_data == &data[..] {
+                            self.last_pong_received = Instant::now();
+                        }
+                    }
+                    _ => (),
                 }
+
+                Ok(Async::Ready(Some(msg)))
             }
         }
     }
@@ -74,7 +132,7 @@ where
     type SinkError = error::Error;
 
     fn start_send(&mut self, item: Self::SinkItem) -> StartSend<Self::SinkItem, Self::SinkError> {
-        if self.last_ping.elapsed().as_secs() >= self.ping_timeout {
+        if self.ping_timed_out() {
             self.close()?;
             Err(error::ErrorKind::PingTimeout.into())
         } else {
@@ -83,7 +141,7 @@ where
     }
 
     fn poll_complete(&mut self) -> Poll<(), Self::SinkError> {
-        if self.last_ping.elapsed().as_secs() >= self.ping_timeout {
+        if self.ping_timed_out() {
             self.close()?;
             Err(error::ErrorKind::PingTimeout.into())
         } else {

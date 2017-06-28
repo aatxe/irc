@@ -1,6 +1,7 @@
 //! A simple, thread-safe, and async-friendly IRC library.
 
 #![warn(missing_docs)]
+#![recursion_limit="128"]
 
 extern crate bufstream;
 extern crate bytes;
@@ -18,6 +19,7 @@ extern crate time;
 extern crate tokio_core;
 extern crate tokio_io;
 extern crate tokio_mockstream;
+extern crate tokio_timer;
 extern crate tokio_tls;
 
 pub mod client;
