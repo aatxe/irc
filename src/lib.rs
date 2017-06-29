@@ -5,6 +5,7 @@
 
 extern crate bufstream;
 extern crate bytes;
+extern crate chrono;
 #[macro_use]
 extern crate error_chain;
 extern crate encoding;
@@ -15,7 +16,6 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
-extern crate time;
 extern crate tokio_core;
 extern crate tokio_io;
 extern crate tokio_mockstream;

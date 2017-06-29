@@ -3,7 +3,7 @@ use std::sync::{Arc, RwLock, RwLockReadGuard};
 use std::time::{Duration, Instant};
 
 use futures::{Async, Poll, Sink, StartSend, Stream};
-use time;
+use chrono::prelude::*;
 use tokio_io::{AsyncRead, AsyncWrite};
 use tokio_io::codec::Framed;
 use tokio_timer;
@@ -59,7 +59,7 @@ where
 
     fn send_ping(&mut self) -> error::Result<()> {
         self.last_ping_sent = Instant::now();
-        self.last_ping_data = format!("{}", time::now().to_timespec().sec);
+        self.last_ping_data = format!("{}", Local::now().timestamp());
         let data = self.last_ping_data.clone();
         let result = self.start_send(Command::PING(data, None).into())?;
         assert!(result.is_ready());

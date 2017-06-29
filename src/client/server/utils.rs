@@ -2,7 +2,7 @@
 use std::borrow::ToOwned;
 
 #[cfg(feature = "ctcp")]
-use time;
+use chrono::prelude::*;
 
 use error::Result;
 use proto::{Capability, Command, Mode, NegotiationVersion};
@@ -325,8 +325,8 @@ pub trait ServerExt: Server {
     where
         Self: Sized,
     {
-        let time = time::get_time();
-        self.send_ctcp(target, &format!("PING {}.{}", time.sec, time.nsec)[..])
+        let time = Local::now();
+        self.send_ctcp(target, &format!("PING {}", time.timestamp())[..])
     }
 
     /// Sends a time request to the specified target.

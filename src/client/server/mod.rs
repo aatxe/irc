@@ -6,13 +6,13 @@ use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
 use std::thread;
 
+#[cfg(feature = "ctcp")]
+use chrono::prelude::*;
 use futures::{Async, Poll, Future, Sink, Stream};
 use futures::stream::SplitStream;
 use futures::sync::mpsc;
 use futures::sync::oneshot;
 use futures::sync::mpsc::UnboundedSender;
-#[cfg(feature = "ctcp")]
-use time;
 use tokio_core::reactor::Core;
 
 use error;
@@ -438,7 +438,7 @@ impl ServerState {
         } else if tokens[0].eq_ignore_ascii_case("PING") && tokens.len() > 1 {
             self.send_ctcp_internal(resp, &format!("PING {}", tokens[1]))
         } else if tokens[0].eq_ignore_ascii_case("TIME") {
-            self.send_ctcp_internal(resp, &format!("TIME :{}", time::now().rfc822z()))
+            self.send_ctcp_internal(resp, &format!("TIME :{}", Local::now().to_rfc2822()))
         } else if tokens[0].eq_ignore_ascii_case("USERINFO") {
             self.send_ctcp_internal(resp, &format!("USERINFO :{}", self.config().user_info()))
         } else {
