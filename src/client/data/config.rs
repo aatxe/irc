@@ -7,7 +7,12 @@ use std::io::{Error, ErrorKind};
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::path::Path;
 
+#[cfg(feature = "json")]
 use serde_json;
+#[cfg(feature = "yaml")]
+use serde_yaml;
+#[cfg(feature = "toml")]
+use toml;
 
 use error::Result;
 
@@ -80,30 +85,157 @@ pub struct Config {
 }
 
 impl Config {
-    /// Loads a JSON configuration from the desired path.
+    /// Loads a configuration from the desired path. This will use the file extension to detect
+    /// which format to parse the file as (json, toml, or yaml). Using each format requires having
+    /// its respective crate feature enabled. Only json is available by default.
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Config> {
-        let mut file = File::open(path)?;
+        let mut file = File::open(&path)?;
         let mut data = String::new();
         file.read_to_string(&mut data)?;
+
+        match path.as_ref().extension().and_then(|s| s.to_str()) {
+            Some("json") => Config::load_json(&data),
+            Some("toml") => Config::load_toml(&data),
+            Some("yaml") | Some("yml") => Config::load_yaml(&data),
+            Some(ext) => return Err(Error::new(
+                ErrorKind::InvalidInput,
+                format!("Failed to decode configuration of unknown format {}", ext),
+            ).into()),
+            None => return Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Failed to decode configuration of missing or non-unicode format.",
+            ).into()),
+        }
+    }
+
+    #[cfg(feature = "json")]
+    fn load_json(data: &str) -> Result<Config> {
         serde_json::from_str(&data[..]).map_err(|_| {
             Error::new(
                 ErrorKind::InvalidInput,
-                "Failed to decode configuration file.",
+                "Failed to decode JSON configuration file.",
             ).into()
         })
     }
 
-    /// Saves a JSON configuration to the desired path.
+    #[cfg(not(feature = "json"))]
+    fn load_json(_: &str) -> Result<Config> {
+        Err(Error::new(
+            ErrorKind::InvalidInput,
+            "JSON file decoding is disabled.",
+        ).into())
+    }
+
+    #[cfg(feature = "toml")]
+    fn load_toml(data: &str) -> Result<Config> {
+        toml::from_str(&data[..]).map_err(|_| {
+            Error::new(
+                ErrorKind::InvalidInput,
+                "Failed to decode TOML configuration file.",
+            ).into()
+        })
+    }
+
+    #[cfg(not(feature = "toml"))]
+    fn load_toml(_: &str) -> Result<Config> {
+        Err(Error::new(
+            ErrorKind::InvalidInput,
+            "TOML file decoding is disabled.",
+        ).into())
+    }
+
+    #[cfg(feature = "yaml")]
+    fn load_yaml(data: &str) -> Result<Config> {
+        serde_yaml::from_str(&data[..]).map_err(|_| {
+            Error::new(
+                ErrorKind::InvalidInput,
+                "Failed to decode YAML configuration file.",
+            ).into()
+        })
+    }
+
+    #[cfg(not(feature = "yaml"))]
+    fn load_yaml(_: &str) -> Result<Config> {
+        Err(Error::new(
+            ErrorKind::InvalidInput,
+            "YAML file decoding is disabled.",
+        ).into())
+    }
+
+    /// Saves a configuration to the desired path. This will use the file extension to detect
+    /// which format to parse the file as (json, toml, or yaml). Using each format requires having
+    /// its respective crate feature enabled. Only json is available by default.
     pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<()> {
-        let mut file = File::create(path)?;
-        file.write_all(
-            serde_json::to_string(self).map_err(|_| {
-                Error::new(
-                    ErrorKind::InvalidInput,
-                    "Failed to encode configuration file.",
-                )
-            })?.as_bytes(),
-        ).map_err(|e| e.into())
+        let mut file = File::create(&path)?;
+        let data = match path.as_ref().extension().and_then(|s| s.to_str()) {
+            Some("json") => self.save_json()?,
+            Some("toml") => self.save_toml()?,
+            Some("yaml") | Some("yml") => self.save_yaml()?,
+            Some(ext) => return Err(Error::new(
+                ErrorKind::InvalidInput,
+                format!("Failed to encode configuration of unknown format {}", ext),
+            ).into()),
+            None => return Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Failed to encode configuration of missing or non-unicode format.",
+            ).into()),
+        };
+        file.write_all(data.as_bytes())?;
+        Ok(())
+    }
+
+    #[cfg(feature = "json")]
+    fn save_json(&self) -> Result<String> {
+        serde_json::to_string(self).map_err(|_| {
+            Error::new(
+                ErrorKind::InvalidInput,
+                "Failed to encode JSON configuration file.",
+            ).into()
+        })
+    }
+
+    #[cfg(not(feature = "json"))]
+    fn save_json(&self) -> Result<String> {
+        Err(Error::new(
+            ErrorKind::InvalidInput,
+            "JSON file encoding is disabled.",
+        ).into())
+    }
+
+    #[cfg(feature = "toml")]
+    fn save_toml(&self) -> Result<String> {
+        toml::to_string(self).map_err(|_| {
+            Error::new(
+                ErrorKind::InvalidInput,
+                "Failed to encode TOML configuration file.",
+            ).into()
+        })
+    }
+
+    #[cfg(not(feature = "toml"))]
+    fn save_toml(&self) -> Result<String> {
+        Err(Error::new(
+            ErrorKind::InvalidInput,
+            "TOML file encoding is disabled.",
+        ).into())
+    }
+
+    #[cfg(feature = "yaml")]
+    fn save_yaml(&self) -> Result<String> {
+        serde_yaml::to_string(self).map_err(|_| {
+            Error::new(
+                ErrorKind::InvalidInput,
+                "Failed to encode YAML configuration file.",
+            ).into()
+        })
+    }
+
+    #[cfg(not(feature = "yaml"))]
+    fn save_yaml(&self) -> Result<String> {
+        Err(Error::new(
+            ErrorKind::InvalidInput,
+            "YAML file encoding is disabled.",
+        ).into())
     }
 
     /// Determines whether or not the nickname provided is the owner of the bot.
@@ -308,78 +440,66 @@ impl Config {
 mod test {
     use std::collections::HashMap;
     use std::default::Default;
+    #[cfg(feature = "json")]
     use std::path::Path;
 
     use super::Config;
 
+    fn test_config() -> Config {
+        Config {
+            owners: Some(vec![format!("test")]),
+            nickname: Some(format!("test")),
+            nick_password: None,
+            alt_nicks: None,
+            username: Some(format!("test")),
+            realname: Some(format!("test")),
+            password: Some(String::new()),
+            umodes: Some(format!("+BR")),
+            server: Some(format!("irc.test.net")),
+            port: Some(6667),
+            use_ssl: Some(false),
+            cert_path: None,
+            encoding: Some(format!("UTF-8")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            channel_keys: None,
+            user_info: None,
+            version: None,
+            source: None,
+            ping_time: None,
+            ping_timeout: None,
+            burst_window_length: None,
+            max_messages_in_burst: None,
+            should_ghost: None,
+            ghost_sequence: None,
+            options: Some(HashMap::new()),
+            use_mock_connection: None,
+            mock_initial_value: None,
+        }
+    }
+
     #[test]
+    #[cfg(feature = "json")]
     fn load() {
-        let cfg = Config {
-            owners: Some(vec![format!("test")]),
-            nickname: Some(format!("test")),
-            nick_password: None,
-            alt_nicks: None,
-            username: Some(format!("test")),
-            realname: Some(format!("test")),
-            password: Some(String::new()),
-            umodes: Some(format!("+BR")),
-            server: Some(format!("irc.test.net")),
-            port: Some(6667),
-            use_ssl: Some(false),
-            cert_path: None,
-            encoding: Some(format!("UTF-8")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
-            channel_keys: None,
-            user_info: None,
-            version: None,
-            source: None,
-            ping_time: None,
-            ping_timeout: None,
-            burst_window_length: None,
-            max_messages_in_burst: None,
-            should_ghost: None,
-            ghost_sequence: None,
-            options: Some(HashMap::new()),
-            use_mock_connection: None,
-            mock_initial_value: None,
-        };
-        assert_eq!(Config::load(Path::new("client_config.json")).unwrap(), cfg);
+        assert_eq!(Config::load(Path::new("client_config.json")).unwrap(), test_config());
     }
 
     #[test]
+    #[cfg(feature = "json")]
     fn load_from_str() {
-        let cfg = Config {
-            owners: Some(vec![format!("test")]),
-            nickname: Some(format!("test")),
-            nick_password: None,
-            alt_nicks: None,
-            username: Some(format!("test")),
-            realname: Some(format!("test")),
-            umodes: Some(format!("+BR")),
-            password: Some(String::new()),
-            server: Some(format!("irc.test.net")),
-            port: Some(6667),
-            use_ssl: Some(false),
-            cert_path: None,
-            encoding: Some(format!("UTF-8")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
-            channel_keys: None,
-            user_info: None,
-            version: None,
-            source: None,
-            ping_time: None,
-            ping_timeout: None,
-            burst_window_length: None,
-            max_messages_in_burst: None,
-            should_ghost: None,
-            ghost_sequence: None,
-            options: Some(HashMap::new()),
-            use_mock_connection: None,
-            mock_initial_value: None,
-        };
-        assert_eq!(Config::load("client_config.json").unwrap(), cfg);
+        assert_eq!(Config::load("client_config.json").unwrap(), test_config());
     }
 
+    #[test]
+    #[cfg(feature = "toml")]
+    fn load_from_toml() {
+        assert_eq!(Config::load("client_config.toml").unwrap(), test_config());
+    }
+
+    #[test]
+    #[cfg(feature = "yaml")]
+    fn load_from_yaml() {
+        assert_eq!(Config::load("client_config.yaml").unwrap(), test_config());
+    }
 
     #[test]
     fn is_owner() {

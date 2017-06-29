@@ -7,10 +7,10 @@ sudo: false
 script:
   - chmod +x mktestconfig.sh
   - ./mktestconfig.sh
+  - cargo build --verbose --features "toml yaml"
+  - cargo test --verbose --features "toml yaml"
   - cargo build --verbose --no-default-features
-  - cargo build --verbose
   - cargo test --verbose --no-default-features
-  - cargo test --verbose
 notifications:
   email: false
   irc:
