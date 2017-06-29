@@ -235,15 +235,14 @@ impl Config {
         )
     }
 
-    /// Gets the amount of time in seconds since last activity necessary for the client to ping the
-    /// server. This is also used as the timeout for receiving pings from the server.
+    /// Gets the amount of time in seconds for the interval at which the client pings the server.
     /// This defaults to 180 seconds when not specified.
     pub fn ping_time(&self) -> u32 {
         self.ping_time.as_ref().cloned().unwrap_or(180)
     }
 
-    /// Gets the amount of time in seconds for the client to disconnect after no ping response is
-    /// received.
+    /// Gets the amount of time in seconds for the client to disconnect after not receiving a ping
+    /// response.
     /// This defaults to 10 seconds when not specified.
     pub fn ping_timeout(&self) -> u32 {
         self.ping_timeout.as_ref().cloned().unwrap_or(10)
