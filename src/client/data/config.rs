@@ -56,6 +56,11 @@ pub struct Config {
     pub ping_time: Option<u32>,
     /// The amount of time in seconds for a client to reconnect due to no ping response.
     pub ping_timeout: Option<u32>,
+    /// The amount of time in seconds to consider a window for burst messages.
+    pub burst_window_length: Option<u32>,
+    /// The maximum number of messages that can be sent in a burst window before they'll be delayed.
+    /// Messages are automatically delayed until the start of the next window.
+    pub max_messages_in_burst: Option<u32>,
     /// Whether the client should use NickServ GHOST to reclaim its primary nickname if it is in
     /// use. This has no effect if `nick_password` is not set.
     pub should_ghost: Option<bool>,
@@ -248,6 +253,19 @@ impl Config {
         self.ping_timeout.as_ref().cloned().unwrap_or(10)
     }
 
+    /// The amount of time in seconds to consider a window for burst messages.
+    /// This defaults to 8 seconds when not specified.
+    pub fn burst_window_length(&self) -> u32 {
+        self.burst_window_length.as_ref().cloned().unwrap_or(8)
+    }
+
+    /// The maximum number of messages that can be sent in a burst window before they'll be delayed.
+    /// Messages are automatically delayed until the start of the next window.
+    /// This defaults to 15 messages when not specified.
+    pub fn max_messages_in_burst(&self) -> u32 {
+        self.max_messages_in_burst.as_ref().cloned().unwrap_or(15)
+    }
+
     /// Gets whether or not to attempt nickname reclamation using NickServ GHOST.
     /// This defaults to false when not specified.
     pub fn should_ghost(&self) -> bool {
@@ -317,6 +335,8 @@ mod test {
             source: None,
             ping_time: None,
             ping_timeout: None,
+            burst_window_length: None,
+            max_messages_in_burst: None,
             should_ghost: None,
             ghost_sequence: None,
             options: Some(HashMap::new()),
@@ -349,6 +369,8 @@ mod test {
             source: None,
             ping_time: None,
             ping_timeout: None,
+            burst_window_length: None,
+            max_messages_in_burst: None,
             should_ghost: None,
             ghost_sequence: None,
             options: Some(HashMap::new()),

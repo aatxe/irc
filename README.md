@@ -92,6 +92,8 @@ for obvious reasons). That being said, here's an example of a complete configura
   "source": "https://github.com/aatxe/irc",
   "ping_time": 180,
   "ping_timeout": 10,
+  "burst_window_length": 8,
+  "max_messages_in_burst": 15,
   "should_ghost": false,
   "ghost_sequence": [],
   "options": {

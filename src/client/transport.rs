@@ -19,6 +19,9 @@ where
     T: AsyncRead + AsyncWrite,
 {
     inner: Framed<T, IrcCodec>,
+    burst_timer: Interval,
+    max_burst_messages: u32,
+    current_burst_messages: u32,
     ping_timer: Interval,
     ping_timeout: u64,
     last_ping_data: String,
@@ -32,11 +35,13 @@ where
 {
     /// Creates a new `IrcTransport` from the given IRC stream.
     pub fn new(config: &Config, inner: Framed<T, IrcCodec>) -> IrcTransport<T> {
+        let timer = tokio_timer::wheel().build();
         IrcTransport {
             inner: inner,
-            ping_timer: tokio_timer::wheel().build().interval(
-                Duration::from_secs(config.ping_time() as u64)
-            ),
+            burst_timer: timer.interval(Duration::from_secs(config.burst_window_length() as u64)),
+            max_burst_messages: config.max_messages_in_burst(),
+            current_burst_messages: 0,
+            ping_timer: timer.interval(Duration::from_secs(config.ping_time() as u64)),
             ping_timeout: config.ping_timeout() as u64,
             last_ping_data: String::new(),
             last_ping_sent: Instant::now(),
@@ -145,7 +150,26 @@ where
             self.close()?;
             Err(error::ErrorKind::PingTimeout.into())
         } else {
-            Ok(self.inner.poll_complete()?)
+            match self.burst_timer.poll()? {
+                Async::NotReady => (),
+                Async::Ready(msg) => {
+                    assert!(msg.is_some());
+                    self.current_burst_messages = 0;
+                }
+            }
+
+            // Throttling if too many messages have been sent recently.
+            if self.current_burst_messages >= self.max_burst_messages {
+                return Ok(Async::NotReady)
+            }
+
+            match self.inner.poll_complete()? {
+                Async::NotReady => Ok(Async::NotReady),
+                Async::Ready(()) => {
+                    self.current_burst_messages += 1;
+                    Ok(Async::Ready(()))
+                }
+            }
         }
     }
 
