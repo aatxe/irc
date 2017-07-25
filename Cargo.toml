@@ -10,6 +10,9 @@ documentation = "https://docs.rs/irc/"
 repository = "https://github.com/aatxe/irc"
 readme = "README.md"
 
+[badges]
+travis-ci = { repository = "aatxe/irc" }
+
 [features]
 default = ["ctcp", "json"]
 ctcp = []
