@@ -9,7 +9,7 @@ the default features. These are, however, strictly optional and can be disabled 
 
 ## Getting Started ##
 
-To start using this library with cargo, you can simply add `irc = "0.12.0"` to your dependencies in
+To start using this library with cargo, you can simply add `irc = "0.12"` to your dependencies in
 your Cargo.toml file. You'll likely want to take a look at some of the examples, as well as the
 documentation. You'll also be able to find below a small template to get a feel for the library.
 
