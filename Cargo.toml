@@ -1,6 +1,6 @@
 [package]
 name = "irc"
-version = "0.12.3"
+version = "0.12.4"
 description = "A simple, thread-safe, and async-friendly IRC client library."
 authors = ["Aaron Weiss <awe@pdgn.co>"]
 license = "MPL-2.0"
@@ -14,7 +14,7 @@ readme = "README.md"
 travis-ci = { repository = "aatxe/irc" }
 
 [features]
-default = ["ctcp", "json"]
+default = ["ctcp", "json", "toml"]
 ctcp = []
 nochanlists = []
 json = ["serde_json"]
