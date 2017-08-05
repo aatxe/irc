@@ -14,7 +14,8 @@ use serde_yaml;
 #[cfg(feature = "toml")]
 use toml;
 
-use error::Result;
+use error;
+use error::{Result, ResultExt};
 
 /// Configuration data.
 #[derive(Clone, Deserialize, Serialize, Default, PartialEq, Debug)]
@@ -47,8 +48,6 @@ pub struct Config {
     pub encoding: Option<String>,
     /// A list of channels to join on connection.
     pub channels: Option<Vec<String>>,
-    /// A mapping of channel names to keys for join-on-connect.
-    pub channel_keys: Option<HashMap<String, String>>,
     /// User modes to set on connect. Example: "+RB -x"
     pub umodes: Option<String>,
     /// The text that'll be sent in response to CTCP USERINFO requests.
@@ -74,14 +73,17 @@ pub struct Config {
     /// E.g. `["RECOVER", "RELEASE"]` means `RECOVER nick pass` and `RELEASE nick pass` will be sent
     /// in that order.
     pub ghost_sequence: Option<Vec<String>>,
-    /// A map of additional options to be stored in config.
-    pub options: Option<HashMap<String, String>>,
     /// Whether or not to use a fake connection for testing purposes. You probably will never want
     /// to enable this, but it is used in unit testing for the `irc` crate.
     pub use_mock_connection: Option<bool>,
     /// The initial value used by the fake connection for testing. You probably will never need to
     /// set this, but it is used in unit testing for the `irc` crate.
     pub mock_initial_value: Option<String>,
+
+    /// A mapping of channel names to keys for join-on-connect.
+    pub channel_keys: Option<HashMap<String, String>>,
+    /// A map of additional options to be stored in config.
+    pub options: Option<HashMap<String, String>>,
 }
 
 impl Config {
@@ -110,11 +112,12 @@ impl Config {
 
     #[cfg(feature = "json")]
     fn load_json(data: &str) -> Result<Config> {
-        serde_json::from_str(&data[..]).map_err(|_| {
-            Error::new(
+        serde_json::from_str(&data[..]).chain_err(|| {
+            let e: error::Error = Error::new(
                 ErrorKind::InvalidInput,
                 "Failed to decode JSON configuration file.",
-            ).into()
+            ).into();
+            e
         })
     }
 
@@ -128,11 +131,12 @@ impl Config {
 
     #[cfg(feature = "toml")]
     fn load_toml(data: &str) -> Result<Config> {
-        toml::from_str(&data[..]).map_err(|_| {
-            Error::new(
+        toml::from_str(&data[..]).chain_err(|| {
+            let e: error::Error = Error::new(
                 ErrorKind::InvalidInput,
                 "Failed to decode TOML configuration file.",
-            ).into()
+            ).into();
+            e
         })
     }
 
@@ -146,11 +150,12 @@ impl Config {
 
     #[cfg(feature = "yaml")]
     fn load_yaml(data: &str) -> Result<Config> {
-        serde_yaml::from_str(&data[..]).map_err(|_| {
-            Error::new(
+        serde_yaml::from_str(&data[..]).chain_err(|| {
+            let e: error::Error = Error::new(
                 ErrorKind::InvalidInput,
                 "Failed to decode YAML configuration file.",
-            ).into()
+            ).into();
+            e
         })
     }
 
@@ -186,11 +191,12 @@ impl Config {
 
     #[cfg(feature = "json")]
     fn save_json(&self) -> Result<String> {
-        serde_json::to_string(self).map_err(|_| {
-            Error::new(
+        serde_json::to_string(self).chain_err(|| {
+            let e: error::Error = Error::new(
                 ErrorKind::InvalidInput,
                 "Failed to encode JSON configuration file.",
-            ).into()
+            ).into();
+            e
         })
     }
 
@@ -204,11 +210,12 @@ impl Config {
 
     #[cfg(feature = "toml")]
     fn save_toml(&self) -> Result<String> {
-        toml::to_string(self).map_err(|_| {
-            Error::new(
+        toml::to_string(self).chain_err(|| {
+            let e: error::Error = Error::new(
                 ErrorKind::InvalidInput,
                 "Failed to encode TOML configuration file.",
-            ).into()
+            ).into();
+            e
         })
     }
 
@@ -222,11 +229,12 @@ impl Config {
 
     #[cfg(feature = "yaml")]
     fn save_yaml(&self) -> Result<String> {
-        serde_yaml::to_string(self).map_err(|_| {
-            Error::new(
+        serde_yaml::to_string(self).chain_err(|| {
+            let e: error::Error = Error::new(
                 ErrorKind::InvalidInput,
                 "Failed to encode YAML configuration file.",
-            ).into()
+            ).into();
+            e
         })
     }
 
