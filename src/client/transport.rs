@@ -1,4 +1,5 @@
-//! An IRC transport that wraps an IRC-framed stream to provide automatic PING replies.
+//! An IRC transport that wraps an IRC-framed stream to provide a number of features including
+//! automatic PING replies, automatic sending of PINGs, and message rate-limiting.
 use std::sync::{Arc, RwLock, RwLockReadGuard};
 use std::time::{Duration, Instant};
 
@@ -13,7 +14,7 @@ use error;
 use client::data::Config;
 use proto::{Command, IrcCodec, Message};
 
-/// An IRC transport that handles automatically replying to PINGs.
+/// An IRC transport that handles core functionality.
 pub struct IrcTransport<T>
 where
     T: AsyncRead + AsyncWrite,
