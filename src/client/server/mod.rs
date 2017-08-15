@@ -12,11 +12,11 @@ use futures::{Async, Poll, Future, Sink, Stream};
 use futures::stream::SplitStream;
 use futures::sync::mpsc;
 use futures::sync::oneshot;
-use futures::sync::mpsc::UnboundedSender;
-use tokio_core::reactor::Core;
+use futures::sync::mpsc::{UnboundedReceiver, UnboundedSender};
+use tokio_core::reactor::{Core, Handle};
 
 use error;
-use client::conn::Connection;
+use client::conn::{Connection, ConnectionFuture};
 use client::data::{Config, User};
 use client::server::utils::ServerExt;
 use client::transport::LogView;
@@ -566,6 +566,21 @@ impl IrcServer {
         })
     }
 
+    /// Creates a new IRC server connection from the specified configration and on event loop
+    /// corresponding to the given handle. This can be used to set up a number of IrcServers on a
+    /// single, shared event loop. Connection will not occur until the event loop is run.
+    pub fn new_future<'a>(handle: Handle, config: &'a Config) -> error::Result<IrcServerFuture<'a>> {
+        let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
+
+        Ok(IrcServerFuture {
+            conn: Connection::new(&config, &handle)?,
+            handle: handle,
+            config: config,
+            tx_outgoing: Some(tx_outgoing),
+            rx_outgoing: Some(rx_outgoing),
+        })
+    }
+
     /// Gets the current nickname in use.
     pub fn current_nickname(&self) -> &str {
         self.state.current_nickname()
@@ -577,6 +592,42 @@ impl IrcServer {
         self.view.as_ref().unwrap()
     }
 }
+
+/// A future representing the eventual creation of an `IrcServer`.
+pub struct IrcServerFuture<'a> {
+    conn: ConnectionFuture<'a>,
+    handle: Handle,
+    config: &'a Config,
+    tx_outgoing: Option<UnboundedSender<Message>>,
+    rx_outgoing: Option<UnboundedReceiver<Message>>,
+}
+
+impl<'a> Future for IrcServerFuture<'a> {
+    type Item = IrcServer;
+    type Error = error::Error;
+
+    fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
+        let conn = try_ready!(self.conn.poll());
+
+        let view = conn.log_view();
+        let (sink, stream) = conn.split();
+
+        let outgoing_future = sink.send_all(self.rx_outgoing.take().unwrap().map_err(|()| {
+            let res: error::Error = error::ErrorKind::ChannelError.into();
+            res
+        })).map(|_| ()).map_err(|e| panic!(e));
+
+        self.handle.spawn(outgoing_future);
+
+        Ok(Async::Ready(IrcServer {
+            state: Arc::new(ServerState::new(
+                stream, self.tx_outgoing.take().unwrap(), self.config.clone()
+            )),
+            view: view,
+        }))
+    }
+}
+
 
 #[cfg(test)]
 mod test {
