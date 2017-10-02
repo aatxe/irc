@@ -121,7 +121,7 @@ impl<'a> Server for ServerState {
     {
         let msg = &msg.into();
         self.handle_sent_message(&msg)?;
-        Ok((&self.outgoing).send(
+        Ok((&self.outgoing).unbounded_send(
             ServerState::sanitize(&msg.to_string())
                 .into(),
         )?)
