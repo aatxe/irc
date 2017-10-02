@@ -1,6 +1,6 @@
 [package]
 name = "irc"
-version = "0.12.4"
+version = "0.12.5"
 description = "A simple, thread-safe, and async-friendly IRC client library."
 authors = ["Aaron Weiss <awe@pdgn.co>"]
 license = "MPL-2.0"
