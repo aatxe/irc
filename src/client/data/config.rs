@@ -305,12 +305,10 @@ impl Config {
 
     /// Gets the server and port as a `SocketAddr`.
     /// This panics when server is not specified or the address is malformed.
-    pub fn socket_addr(&self) -> SocketAddr {
-        format!("{}:{}", self.server(), self.port())
-            .to_socket_addrs()
-            .unwrap()
-            .next()
-            .unwrap()
+    pub fn socket_addr(&self) -> Result<SocketAddr> {
+        format!("{}:{}", self.server(), self.port()).to_socket_addrs()
+            .map(|mut i| i.next().unwrap())
+            .map_err(|e| e.into())
     }
 
     /// Gets the server password specified in the configuration.
