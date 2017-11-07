@@ -30,6 +30,8 @@ pub enum UserMode {
     LocalOper,
     /// s - marks a user for receipt of server notices
     ServerNotices,
+    /// x - masked hostname
+    MaskedHost,
 
     /// Any other unknown-to-the-crate mode.
     Unknown(char),
@@ -57,6 +59,7 @@ impl UserMode {
             'o' => Oper,
             'O' => LocalOper,
             's' => ServerNotices,
+            'x' => MaskedHost,
             _ => Unknown(c),
         })
     }
@@ -74,6 +77,7 @@ impl fmt::Display for UserMode {
             Oper => 'o',
             LocalOper => 'O',
             ServerNotices => 's',
+            MaskedHost => 'x',
             Unknown(c) => c,
         })
     }
@@ -96,6 +100,8 @@ pub enum ChannelMode {
     Key,
     /// m - channel is in moderated mode
     Moderated,
+    /// r - entry for registered users only
+    RegisteredOnly,
     /// s - channel is hidden from listings
     Secret,
     /// t - require permissions to edit topic
@@ -146,6 +152,7 @@ impl ChannelMode {
             'I' => InviteException,
             'k' => Key,
             'm' => Moderated,
+            'r' => RegisteredOnly,
             's' => Secret,
             't' => ProtectedTopic,
             'n' => NoExternalMessages,
@@ -171,6 +178,7 @@ impl fmt::Display for ChannelMode {
             InviteException => 'I',
             Key => 'k',
             Moderated => 'm',
+            RegisteredOnly => 'r',
             Secret => 's',
             ProtectedTopic => 't',
             NoExternalMessages => 'n',
