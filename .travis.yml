@@ -9,6 +9,7 @@ script:
   - ./mktestconfig.sh
   - cargo build --verbose --features "toml yaml"
   - cargo test --verbose --features "toml yaml"
+  - cargo test --doc
   - cargo build --verbose --no-default-features
   - cargo test --verbose --no-default-features
 notifications:
