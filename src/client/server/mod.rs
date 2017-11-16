@@ -658,7 +658,7 @@ impl Server for IrcServer {
 impl IrcServer {
     /// Creates a new IRC Server connection from the configuration at the specified path, connecting
     /// immediately. This function is short-hand for loading the configuration and then calling
-    /// `IrcServer::from_config` and subsequently inherits its behaviors.
+    /// `IrcServer::from_config` and consequently inherits its behaviors.
     ///
     /// # Example
     /// ```no_run
@@ -728,7 +728,7 @@ impl IrcServer {
         })
     }
 
-    /// Creates a new IRC server connection from the specified configration and on the event loop
+    /// Creates a new IRC server connection from the specified configuration and on the event loop
     /// corresponding to the given handle. This can be used to set up a number of IrcServers on a
     /// single, shared event loop. It can also be used to take more control over execution and error
     /// handling. Connection will not occur until the event loop is run.
