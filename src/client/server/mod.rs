@@ -1,4 +1,50 @@
-//! Interface for working with IRC Servers.
+//! The primary API for communicating with an IRC server.
+//!
+//! This API provides the ability to connect to an IRC server via the
+//! [IrcServer](struct.IrcServer.html) type. The [Server](trait.Server.html) trait that
+//! [IrcServer](struct.IrcServer.html) implements provides methods for communicating with this
+//! server. An extension trait, [ServerExt](utils/trait.ServerExt.html), provides short-hand for
+//! sending a variety of important messages without referring to their entries in
+//! [proto::command](../../proto/command/enum.Command.html).
+//!
+//! # Examples
+//!
+//! Using these APIs, we can connect to a server and send a one-off message (in this case,
+//! identifying with the server).
+//!
+//! ```no_run
+//! # extern crate irc;
+//! use irc::client::prelude::{IrcServer, ServerExt};
+//!
+//! # fn main() {
+//! let server = IrcServer::new("config.toml").unwrap(); 
+//! // identify comes from `ServerExt`
+//! server.identify().unwrap();
+//! # }
+//! ```
+//!
+//! We can then use functions from [Server](trait.Server.html) to receive messages from the
+//! server in a blocking fashion and perform any desired actions in response. The following code
+//! performs a simple call-and-response when the bot's name is mentioned in a channel.
+//! 
+//! ```no_run
+//! # extern crate irc;
+//! # use irc::client::prelude::{IrcServer, ServerExt};
+//! use irc::client::prelude::{Server, Command};
+//!
+//! # fn main() {
+//! # let server = IrcServer::new("config.toml").unwrap(); 
+//! # server.identify().unwrap();
+//! server.for_each_incoming(|irc_msg| {
+//!   match irc_msg.command {
+//!     Command::PRIVMSG(channel, message) => if message.contains(server.current_nickname()) {
+//!       server.send_privmsg(&channel, "beep boop").unwrap();
+//!     }
+//!     _ => ()
+//!   }
+//! }).unwrap();
+//! # }
+//! ```
 #[cfg(feature = "ctcp")]
 use std::ascii::AsciiExt;
 use std::collections::HashMap;
@@ -26,6 +72,31 @@ use proto::Command::{JOIN, NICK, NICKSERV, PART, PRIVMSG, ChannelMODE, QUIT};
 pub mod utils;
 
 /// Trait extending all IRC streams with `for_each_incoming` convenience function.
+///
+/// This is typically used in conjunction with [Server::stream](trait.Server.html#tymethod.stream)
+/// in order to use an API akin to
+/// [Server::for_each_incoming](trait.Server.html#method.for_each_incoming).
+///
+/// # Example
+///
+/// ```no_run
+/// # extern crate irc;
+/// # use irc::client::prelude::{IrcServer, Server, Command, ServerExt};
+/// use irc::client::prelude::EachIncomingExt;
+///
+/// # fn main() {
+/// # let server = IrcServer::new("config.toml").unwrap(); 
+/// # server.identify().unwrap();
+/// server.stream().for_each_incoming(|irc_msg| {
+///   match irc_msg.command {
+///     Command::PRIVMSG(channel, message) => if message.contains(server.current_nickname()) {
+///       server.send_privmsg(&channel, "beep boop").unwrap();
+///     }
+///     _ => ()
+///   }
+/// }).unwrap();
+/// # }
+/// ```
 pub trait EachIncomingExt: Stream<Item=Message, Error=error::Error> {
     /// Blocks on the stream, running the given function on each incoming message as they arrive.
     fn for_each_incoming<F>(self, mut f: F) -> error::Result<()>
@@ -42,21 +113,58 @@ pub trait EachIncomingExt: Stream<Item=Message, Error=error::Error> {
 
 impl<T> EachIncomingExt for T where T: Stream<Item=Message, Error=error::Error> {}
 
-/// An interface for interacting with an IRC server.
+/// An interface for communicating with an IRC server.
 pub trait Server {
     /// Gets the configuration being used with this Server.
     fn config(&self) -> &Config;
 
-    /// Sends a Command to this Server.
+    /// Sends a [Command](../../proto/command/enum.Command.html) to this Server. This is the core
+    /// primitive for sending messages to the server. In practice, it's often more pleasant (and
+    /// more idiomatic) to use the functions defined on [ServerExt](util/trait.ServerExt.html). They
+    /// capture a lot of the more repetitive aspects of sending messages.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # extern crate irc;
+    /// # use irc::client::prelude::*;
+    /// # fn main() {
+    /// # let server = IrcServer::new("config.toml").unwrap(); 
+    /// server.send(Command::NICK("example".to_owned())).unwrap();
+    /// server.send(Command::USER("user".to_owned(), "0".to_owned(), "name".to_owned())).unwrap();
+    /// # }
+    /// ```
     fn send<M: Into<Message>>(&self, message: M) -> error::Result<()>
     where
         Self: Sized;
 
-    /// Gets a stream of incoming messages from the Server.
-    /// Note: The stream can only be gotten once. Subsequent attempts will panic.
+    /// Gets a stream of incoming messages from the Server. This is only necessary when trying to
+    /// set up more complex clients, and requires use of the `futures` crate. Most IRC bots should
+    /// be able to get by using only `for_each_incoming` to handle received messages. You can find
+    /// some examples of more complex setups using `stream` in the
+    /// [GitHub repository](https://github.com/aatxe/irc/tree/master/examples).
+    ///
+    /// **Note**: The stream can only be returned once. Subsequent attempts will cause a panic.
     fn stream(&self) -> ServerStream;
 
     /// Blocks on the stream, running the given function on each incoming message as they arrive.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # extern crate irc;
+    /// # use irc::client::prelude::{IrcServer, ServerExt, Server, Command};
+    /// # fn main() {
+    /// # let server = IrcServer::new("config.toml").unwrap(); 
+    /// # server.identify().unwrap();
+    /// server.for_each_incoming(|irc_msg| {
+    ///   match irc_msg.command {
+    ///     Command::PRIVMSG(channel, message) => if message.contains(server.current_nickname()) {
+    ///       server.send_privmsg(&channel, "beep boop").unwrap();
+    ///     }
+    ///     _ => ()
+    ///   }
+    /// }).unwrap();
+    /// # }
+    /// ```
     fn for_each_incoming<F>(&self, f: F) -> error::Result<()>
     where
         F: FnMut(Message) -> (),
@@ -64,18 +172,37 @@ pub trait Server {
         self.stream().for_each_incoming(f)
     }
 
-    /// Gets a list of currently joined channels. This will be none if tracking is not supported
-    /// altogether (such as when the `nochanlists` feature is enabled).
+    /// Gets a list of currently joined channels. This will be `None` if tracking is disabled
+    /// altogether via the `nochanlists` feature.
     fn list_channels(&self) -> Option<Vec<String>>;
 
-    /// Gets a list of Users in the specified channel. This will be none if the channel is not
-    /// being tracked, or if tracking is not supported altogether. For best results, be sure to
-    /// request `multi-prefix` support from the server.
+    /// Gets a list of [Users](../data/user/struct.User.html) in the specified channel. If the
+    /// specified channel hasn't been joined or the `nochanlists` feature is enabled, this function
+    /// will return `None`.
+    ///
+    /// For best results, be sure to request `multi-prefix` support from the server. This will allow
+    /// for more accurate tracking of user rank (e.g. oper, half-op, etc.).
+    /// # Requesting multi-prefix support
+    /// ```no_run
+    /// # extern crate irc;
+    /// # use irc::client::prelude::{IrcServer, ServerExt, Server, Command};
+    /// use irc::proto::caps::Capability;
+    ///
+    /// # fn main() {
+    /// # let server = IrcServer::new("config.toml").unwrap(); 
+    /// server.send_cap_req(&[Capability::MultiPrefix]).unwrap();
+    /// server.identify().unwrap();
+    /// # }
+    /// ```
     fn list_users(&self, channel: &str) -> Option<Vec<User>>;
 }
 
-/// A stream of `Messages` from the `IrcServer`. Interaction with this stream relies on the
-/// `futures` API.
+/// A stream of `Messages` from the `IrcServer`.
+///
+/// Interaction with this stream relies on the `futures` API, but is only expected for less
+/// traditional use cases. To learn more, you can view the documentation for the
+/// [futures](https://docs.rs/futures/) crate, or the tutorials for
+/// [tokio](https://tokio.rs/docs/getting-started/futures/).
 pub struct ServerStream {
     state: Arc<ServerState>,
     stream: SplitStream<Connection>,
@@ -457,7 +584,14 @@ impl ServerState {
     }
 }
 
-/// A thread-safe implementation of an IRC Server connection.
+/// The canonical implementation of a connection to an IRC server.
+///
+/// The type itself provides a number of methods to create new connections, but most of the API
+/// surface is in the form of the [Server](trait.Server.html) and
+/// [ServerExt](util/trait.ServerExt.html) traits that provide methods of communicating with the
+/// server after connection. Cloning an `IrcServer` is relatively cheap, as it's equivalent to
+/// cloning a single `Arc`. This may be useful for setting up multiple threads with access to one
+/// connection.
 #[derive(Clone)]
 pub struct IrcServer {
     /// The internal, thread-safe server state.
@@ -522,14 +656,42 @@ impl Server for IrcServer {
 }
 
 impl IrcServer {
-    /// Creates a new IRC Server connection from the configuration at the specified path,
-    /// connecting immediately.
+    /// Creates a new IRC Server connection from the configuration at the specified path, connecting
+    /// immediately. This function is short-hand for loading the configuration and then calling
+    /// `IrcServer::from_config` and subsequently inherits its behaviors.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # extern crate irc;
+    /// # use irc::client::prelude::*;
+    /// # fn main() {
+    /// let server = IrcServer::new("config.toml").unwrap(); 
+    /// # }
+    /// ```
     pub fn new<P: AsRef<Path>>(config: P) -> error::Result<IrcServer> {
         IrcServer::from_config(Config::load(config)?)
     }
 
     /// Creates a new IRC server connection from the specified configuration, connecting
-    /// immediately.
+    /// immediately. Due to current design limitations, error handling here is somewhat limited. In
+    /// particular, failed connections will cause the program to panic because the connection
+    /// attempt is made on a freshly created thread. If you need to avoid this behavior and handle
+    /// errors more gracefully, it is recommended that you use `IrcServer::new_future` instead.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # extern crate irc;
+    /// # use std::default::Default;
+    /// # use irc::client::prelude::*;
+    /// # fn main() {
+    /// let config = Config {
+    ///   nickname: Some("example".to_owned()),
+    ///   server: Some("irc.example.com".to_owned()),
+    ///   .. Default::default()
+    /// };
+    /// let server = IrcServer::from_config(config).unwrap(); 
+    /// # }
+    /// ```
     pub fn from_config(config: Config) -> error::Result<IrcServer> {
         // Setting up a remote reactor running for the length of the connection.
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
@@ -566,9 +728,42 @@ impl IrcServer {
         })
     }
 
-    /// Creates a new IRC server connection from the specified configration and on event loop
+    /// Creates a new IRC server connection from the specified configration and on the event loop
     /// corresponding to the given handle. This can be used to set up a number of IrcServers on a
-    /// single, shared event loop. Connection will not occur until the event loop is run.
+    /// single, shared event loop. It can also be used to take more control over execution and error
+    /// handling. Connection will not occur until the event loop is run.
+    ///
+    /// Proper usage requires familiarity with `tokio` and `futures`. You can find more information
+    /// in the crate documentation for [tokio-core](http://docs.rs/tokio-core) or
+    /// [futures](http://docs.rs/futures). Additionally, you can find detailed tutorials on using
+    /// both libraries on the [tokio website](https://tokio.rs/docs/getting-started/tokio/).
+    ///
+    /// # Example
+    /// ```no_run
+    /// # extern crate irc;
+    /// # extern crate tokio_core;
+    /// # use std::default::Default;
+    /// # use irc::client::prelude::*;
+    /// # use irc::error;
+    /// # use tokio_core::reactor::Core;
+    /// # fn main() {
+    /// # let config = Config {
+    /// #  nickname: Some("example".to_owned()),
+    /// #  server: Some("irc.example.com".to_owned()),
+    /// #  .. Default::default()
+    /// # };
+    /// let mut reactor = Core::new().unwrap();
+    /// let future = IrcServer::new_future(reactor.handle(), &config).unwrap(); 
+    /// // immediate connection errors (like no internet) will turn up here...
+    /// let server = reactor.run(future).unwrap();
+    /// // runtime errors (like disconnections and so forth) will turn up here...
+    /// reactor.run(server.stream().for_each(move |irc_msg| {
+    ///   // processing messages works like usual
+    ///   process_msg(&server, irc_msg)
+    /// })).unwrap();
+    /// # }
+    /// # fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> { Ok(()) }
+    /// ```
     pub fn new_future<'a>(handle: Handle, config: &'a Config) -> error::Result<IrcServerFuture<'a>> {
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
 
@@ -581,7 +776,9 @@ impl IrcServer {
         })
     }
 
-    /// Gets the current nickname in use.
+    /// Gets the current nickname in use. This may be the primary username set in the configuration,
+    /// or it could be any of the alternative nicknames listed as well. As a result, this is the
+    /// preferred way to refer to the client's nickname.
     pub fn current_nickname(&self) -> &str {
         self.state.current_nickname()
     }
@@ -594,6 +791,11 @@ impl IrcServer {
 }
 
 /// A future representing the eventual creation of an `IrcServer`.
+///
+/// Interaction with this future relies on the `futures` API, but is only expected for more advanced
+/// use cases. To learn more, you can view the documentation for the
+/// [futures](https://docs.rs/futures/) crate, or the tutorials for
+/// [tokio](https://tokio.rs/docs/getting-started/futures/).
 pub struct IrcServerFuture<'a> {
     conn: ConnectionFuture<'a>,
     handle: Handle,

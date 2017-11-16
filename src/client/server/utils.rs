@@ -1,4 +1,41 @@
 //! Utilities and shortcuts for working with IRC servers.
+//!
+//! This module provides the [ServerExt](trait.ServerExt.html) trait which is the idiomatic way of
+//! sending messages to an IRC server. This trait is automatically implemented for everything that
+//! implements [Server](../trait.Server.html) and is designed to provide important functionality
+//! without clutter.
+//!
+//! # Examples
+//! 
+//! Using these APIs, we can connect to a server and send a one-off message (in this case,
+//! identifying with the server).
+//!
+//! ```no_run
+//! # extern crate irc;
+//! use irc::client::prelude::{IrcServer, ServerExt};
+//!
+//! # fn main() {
+//! let server = IrcServer::new("config.toml").unwrap(); 
+//! // identify and send_privmsg both come from `ServerExt`
+//! server.identify().unwrap();
+//! server.send_privmsg("#example", "Hello, world!").unwrap();
+//! # }
+//! ```
+//!
+//! `ServerExt::identify` also plays an important role in performing IRCv3 capability negotiations.
+//! In particular, calling `identify` will close the negotiations (and otherwise indicate IRCv3
+//! compatibility). This means that all IRCv3 capability requests should be performed before calling
+//! `identify`. For example:
+//!
+//! ```no_run
+//! # extern crate irc;
+//! # use irc::client::prelude::*;
+//! # fn main() {
+//! # let server = IrcServer::new("config.toml").unwrap(); 
+//! server.send_cap_req(&[Capability::MultiPrefix, Capability::UserhostInNames]).unwrap();
+//! server.identify().unwrap();
+//! # }
+//! ```
 use std::borrow::ToOwned;
 
 #[cfg(feature = "ctcp")]
@@ -11,7 +48,7 @@ use proto::command::Command::*;
 use proto::mode::ModeType;
 use client::server::Server;
 
-/// Extensions for Server capabilities that make it easier to work directly with the protocol.
+/// Idiomatic extensions for sending messages to an IRC server.
 pub trait ServerExt: Server {
     /// Sends a request for a list of server capabilities for a specific IRCv3 version.
     fn send_cap_ls(&self, version: NegotiationVersion) -> Result<()>
@@ -361,7 +398,7 @@ mod test {
         assert_eq!(
             &get_server_value(server)[..],
             "CAP END\r\nNICK :test\r\n\
-                                                   USER test 0 * :test\r\n"
+             USER test 0 * :test\r\n"
         );
     }
 
@@ -376,7 +413,7 @@ mod test {
         assert_eq!(
             &get_server_value(server)[..],
             "CAP END\r\nPASS :password\r\nNICK :test\r\n\
-                                                   USER test 0 * :test\r\n"
+             USER test 0 * :test\r\n"
         );
     }
 
