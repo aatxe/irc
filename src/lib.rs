@@ -11,6 +11,8 @@ extern crate error_chain;
 extern crate encoding;
 #[macro_use]
 extern crate futures;
+#[macro_use]
+extern crate log;
 extern crate native_tls;
 extern crate serde;
 #[macro_use]

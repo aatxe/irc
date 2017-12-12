@@ -333,6 +333,7 @@ impl ServerState {
 
     /// Handles sent messages internally for basic client functionality.
     fn handle_sent_message(&self, msg: &Message) -> error::Result<()> {
+        trace!("[SENT] {}", msg.to_string());
         match msg.command {
             PART(ref chan, _) => {
                 let _ = self.chanlists.lock().unwrap().remove(chan);
@@ -344,6 +345,7 @@ impl ServerState {
 
     /// Handles received messages internally for basic client functionality.
     fn handle_message(&self, msg: &Message) -> error::Result<()> {
+        trace!("[RECV] {}", msg.to_string());
         match msg.command {
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),

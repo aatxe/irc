@@ -109,6 +109,7 @@ impl Connection {
             Ok(ConnectionFuture::Mock(config))
         } else if config.use_ssl() {
             let domain = format!("{}", config.server());
+            info!("Connecting via SSL to {}.", domain);
             let mut builder = TlsConnector::builder()?;
             if let Some(cert_path) = config.cert_path() {
                 let mut file = File::open(cert_path)?;
@@ -116,7 +117,7 @@ impl Connection {
                 file.read_to_end(&mut cert_data)?;
                 let cert = Certificate::from_der(&cert_data)?;
                 builder.add_root_certificate(cert)?;
-                println!("Added {} to trusted certificates.", cert_path);
+                info!("Added {} to trusted certificates.", cert_path);
             }
             let connector = builder.build()?;
             let stream = Box::new(TcpStream::connect(&config.socket_addr()?, handle)
@@ -132,6 +133,7 @@ impl Connection {
             ));
             Ok(ConnectionFuture::Secured(config, stream))
         } else {
+            info!("Connecting to {}.", config.server());
             Ok(ConnectionFuture::Unsecured(
                 config,
                 TcpStream::connect(&config.socket_addr()?, handle),
