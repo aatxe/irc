@@ -1,11 +1,21 @@
-# irc [![Build Status](https://travis-ci.org/aatxe/irc.svg?branch=master)](https://travis-ci.org/aatxe/irc) [![Crates.io](https://img.shields.io/crates/v/irc.svg)](https://crates.io/crates/irc) [![Docs](https://docs.rs/irc/badge.svg)](https://docs.rs/irc) [![Built with Spacemacs](https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg)](http://spacemacs.org) #
-A robust, thread-safe and async-friendly IRC library in Rust. The client portion is compliant with
+# irc [![Build Status][ci-badge]][ci] [![Crates.io][cr-badge]][cr] [![Docs][doc-badge]][doc] [![Built with Spacemacs][bws]][sm]
+
+[ci-badge]: https://travis-ci.org/aatxe/irc.svg?branch=master
+[ci]: https://travis-ci.org/aatxe/irc
+[cr-badge]: https://img.shields.io/crates/v/irc.svg
+[cr]: https://crates.io/crates/irc
+[doc-badge]: https://docs.rs/irc/badge.svg
+[doc]: https://docs.rs/irc
+[bws]: https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg
+[sm]: http://spacemacs.org
+
+A robust, thread-safe and async-friendly library for IRC clients in Rust. It's compliant with
 [RFC 2812](http://tools.ietf.org/html/rfc2812), [IRCv3.1](http://ircv3.net/irc/3.1.html),
 [IRCv3.2](http://ircv3.net/irc/3.2.html), and includes some additional, common features. It also
-features a number of useful built-in features for building a powerful client quickly. The
-server portion does not exist yet, but hopefully will in the future. You can find up-to-date,
-ready-to-use documentation online [here](https://docs.rs/irc/). The documentation is generated with
-the default features. These are, however, strictly optional and can be disabled accordingly.
+includes a number of useful built-in features to faciliate rapid development of clients. You can
+find up-to-date, ready-to-use documentation online [here](https://docs.rs/irc/). The
+documentation is generated with the default features. These are, however, strictly optional and
+can be disabled accordingly.
 
 ## Getting Started ##
 
@@ -68,8 +78,8 @@ loading files with `serde` to write configurations. By default, we support JSON 
 0.12.4, TOML is the preferred configuration format. We have bundled a conversion tool as
 `convertconf` in the examples. In a future version, we will likely disable JSON by default.
 Additionally, you can enable the optional `yaml` feature to get support for YAML as well. All the
-configuration fields are optional, and thus any of them can be omitted (though, omitting a nickname
-or server will cause the program to fail for obvious reasons).
+configuration fields are optional, and thus any of them can be omitted (though, omitting a
+nickname or server will cause the program to fail for obvious reasons).
 
 Here's an example of a complete configuration in TOML:
 
@@ -107,7 +117,16 @@ and = "you can use it to build your own additional configuration options."
 key = "value"
 ```
 
+You can convert between different configuration formats with `convertconf` like so:
+
+```
+cargo run --example convertconf -- -i client_config.json -o client_config.toml
+```
+
+Note that the formats are automatically determined based on the selected file extensions. This 
+tool should make it easy for users to migrate their old configurations to TOML.
+
 ## Contributing ##
-Contributions to this library would be immensely appreciated. Prior to version 0.12.0, this library
-was public domain. As of 0.12.0, this library is offered under the Mozilla Public License 2.0 whose
-text can be found in `LICENSE.md`.
+Contributions to this library would be immensely appreciated. Prior to version 0.12.0, this
+library was public domain. As of 0.12.0, this library is offered under the Mozilla Public License
+2.0 whose text can be found in `LICENSE.md`.

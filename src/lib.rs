@@ -1,4 +1,4 @@
-//! A simple, thread-safe, and async-friendly IRC library.
+//! A simple, thread-safe, and async-friendly library for IRC clients.
 
 #![warn(missing_docs)]
 #![recursion_limit="128"]
@@ -32,7 +32,6 @@ extern crate toml;
 pub mod client;
 pub mod error;
 pub mod proto;
-pub mod server;
 
 const VERSION_STR: &'static str = concat!(
     env!("CARGO_PKG_NAME"),
