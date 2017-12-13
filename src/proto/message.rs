@@ -1,4 +1,4 @@
-//! Messages to and from the server.
+//! A module providing a data structure for messages to and from IRC servers.
 use std::borrow::ToOwned;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
@@ -7,7 +7,7 @@ use error;
 use error::{Error, ErrorKind};
 use proto::{Command, ChannelExt};
 
-/// IRC Message data.
+/// A data structure representing an IRC message according to the protocol specification.
 #[derive(Clone, PartialEq, Debug)]
 pub struct Message {
     /// Message tags as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
@@ -19,7 +19,7 @@ pub struct Message {
 }
 
 impl Message {
-    /// Creates a new Message.
+    /// Creates a new message from the given components.
     pub fn new(
         prefix: Option<&str>,
         command: &str,
@@ -29,7 +29,7 @@ impl Message {
         Message::with_tags(None, prefix, command, args, suffix)
     }
 
-    /// Creates a new Message optionally including IRCv3.2 message tags.
+    /// Creates a new IRCv3.2 message from the given components, including message tags.
     pub fn with_tags(
         tags: Option<Vec<Tag>>,
         prefix: Option<&str>,
