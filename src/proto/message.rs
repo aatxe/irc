@@ -73,8 +73,20 @@ impl Message {
 
     /// Converts a Message into a String according to the IRC protocol.
     pub fn to_string(&self) -> String {
-        // TODO: tags
         let mut ret = String::new();
+        if let Some(ref tags) = self.tags {
+            ret.push('@');
+            for tag in tags {
+                ret.push_str(&tag.0);
+                if let Some(ref value) = tag.1 {
+                    ret.push('=');
+                    ret.push_str(value);
+                }
+                ret.push(';');
+            }
+            ret.pop();
+            ret.push(' ');
+        }
         if let Some(ref prefix) = self.prefix {
             ret.push(':');
             ret.push_str(prefix);
@@ -301,6 +313,13 @@ mod test {
                 .unwrap(),
             message
         )
+    }
+
+    #[test]
+    fn from_and_to_string() {
+        let message = "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
+                       tags!\r\n";
+        assert_eq!(message.parse::<Message>().unwrap().to_string(), message);
     }
 
     #[test]
