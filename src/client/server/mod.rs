@@ -3,7 +3,7 @@
 //! This API provides the ability to connect to an IRC server via the
 //! [IrcServer](struct.IrcServer.html) type. The [Server](trait.Server.html) trait that
 //! [IrcServer](struct.IrcServer.html) implements provides methods for communicating with this
-//! server. An extension trait, [ServerExt](utils/trait.ServerExt.html), provides short-hand for
+//! server. An extension trait, [ServerExt](./utils/trait.ServerExt.html), provides short-hand for
 //! sending a variety of important messages without referring to their entries in
 //! [proto::command](../../proto/command/enum.Command.html).
 //!
@@ -26,14 +26,14 @@
 //! We can then use functions from [Server](trait.Server.html) to receive messages from the
 //! server in a blocking fashion and perform any desired actions in response. The following code
 //! performs a simple call-and-response when the bot's name is mentioned in a channel.
-//! 
+//!
 //! ```no_run
 //! # extern crate irc;
 //! # use irc::client::prelude::{IrcServer, ServerExt};
 //! use irc::client::prelude::{Server, Command};
 //!
 //! # fn main() {
-//! # let server = IrcServer::new("config.toml").unwrap(); 
+//! # let server = IrcServer::new("config.toml").unwrap();
 //! # server.identify().unwrap();
 //! server.for_each_incoming(|irc_msg| {
 //!   match irc_msg.command {
@@ -120,8 +120,8 @@ pub trait Server {
 
     /// Sends a [Command](../../proto/command/enum.Command.html) to this Server. This is the core
     /// primitive for sending messages to the server. In practice, it's often more pleasant (and
-    /// more idiomatic) to use the functions defined on [ServerExt](util/trait.ServerExt.html). They
-    /// capture a lot of the more repetitive aspects of sending messages.
+    /// more idiomatic) to use the functions defined on [ServerExt](./utils/trait.ServerExt.html).
+    /// They capture a lot of the more repetitive aspects of sending messages.
     ///
     /// # Example
     /// ```no_run
@@ -590,7 +590,7 @@ impl ServerState {
 ///
 /// The type itself provides a number of methods to create new connections, but most of the API
 /// surface is in the form of the [Server](trait.Server.html) and
-/// [ServerExt](util/trait.ServerExt.html) traits that provide methods of communicating with the
+/// [ServerExt](./utils/trait.ServerExt.html) traits that provide methods of communicating with the
 /// server after connection. Cloning an `IrcServer` is relatively cheap, as it's equivalent to
 /// cloning a single `Arc`. This may be useful for setting up multiple threads with access to one
 /// connection.
