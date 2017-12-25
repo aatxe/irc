@@ -7,19 +7,37 @@ use error;
 use error::{Error, ErrorKind};
 use proto::{Command, ChannelExt};
 
-/// A data structure representing an IRC message according to the protocol specification.
+/// A data structure representing an IRC message according to the protocol specification. It
+/// consists of a collection of IRCv3 tags, a prefix (describing the source of the message), and
+/// the protocol command. If the command is unknown, it is treated as a special raw command that
+/// consists of a collection of arguments and the special suffix argument. Otherwise, the command
+/// is parsed into a more useful form as described in [Command](../command/enum.Command.html).
 #[derive(Clone, PartialEq, Debug)]
 pub struct Message {
     /// Message tags as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
+    /// These tags are used to add extended information to the given message, and are commonly used
+    /// in IRCv3 extensions to the IRC protocol.
     pub tags: Option<Vec<Tag>>,
     /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
     pub prefix: Option<String>,
-    /// The IRC command.
+    /// The IRC command, parsed according to the known specifications. The command itself and its
+    /// arguments (including the special suffix argument) are captured in this component.
     pub command: Command,
 }
 
 impl Message {
     /// Creates a new message from the given components.
+    ///
+    /// # Example
+    /// ```
+    /// # extern crate irc;
+    /// # use irc::client::prelude::*;
+    /// # fn main() {
+    /// let message = Message::new(
+    ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"], None
+    /// ).unwrap();
+    /// # }
+    /// ```
     pub fn new(
         prefix: Option<&str>,
         command: &str,
@@ -29,7 +47,9 @@ impl Message {
         Message::with_tags(None, prefix, command, args, suffix)
     }
 
-    /// Creates a new IRCv3.2 message from the given components, including message tags.
+    /// Creates a new IRCv3.2 message from the given components, including message tags. These tags
+    /// are used to add extended information to the given message, and are commonly used in IRCv3
+    /// extensions to the IRC protocol.
     pub fn with_tags(
         tags: Option<Vec<Tag>>,
         prefix: Option<&str>,
@@ -45,6 +65,18 @@ impl Message {
     }
 
     /// Gets the nickname of the message source, if it exists.
+    ///
+    /// # Example
+    /// ```
+    /// # extern crate irc;
+    /// # use irc::client::prelude::*;
+    /// # fn main() {
+    /// let message = Message::new(
+    ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"], None
+    /// ).unwrap();
+    /// assert_eq!(message.source_nickname(), Some("nickname"));
+    /// # }
+    /// ```
     pub fn source_nickname(&self) -> Option<&str> {
         // <prefix> ::= <servername> | <nick> [ '!' <user> ] [ '@' <host> ]
         // <servername> ::= <host>
@@ -63,6 +95,22 @@ impl Message {
     /// Gets the likely intended place to respond to this message.
     /// If the type of the message is a `PRIVMSG` or `NOTICE` and the message is sent to a channel,
     /// the result will be that channel. In all other cases, this will call `source_nickname`.
+    ///
+    /// # Example
+    /// ```
+    /// # extern crate irc;
+    /// # use irc::client::prelude::*;
+    /// # fn main() {
+    /// let msg1 = Message::new(
+    ///     Some("ada"), "PRIVMSG", vec!["#channel"], Some("Hi, everyone!")
+    /// ).unwrap();
+    /// assert_eq!(msg1.response_target(), Some("#channel"));
+    /// let msg2 = Message::new(
+    ///     Some("ada"), "PRIVMSG", vec!["betsy"], Some("betsy: hi")
+    /// ).unwrap();
+    /// assert_eq!(msg2.response_target(), Some("ada"));
+    /// # }
+    /// ```
     pub fn response_target(&self) -> Option<&str> {
         match self.command {
             Command::PRIVMSG(ref target, _) if target.is_channel_name() => Some(target),
@@ -72,6 +120,18 @@ impl Message {
     }
 
     /// Converts a Message into a String according to the IRC protocol.
+    ///
+    /// # Example
+    /// ```
+    /// # extern crate irc;
+    /// # use irc::client::prelude::*;
+    /// # fn main() {
+    /// let msg = Message::new(
+    ///     Some("ada"), "PRIVMSG", vec!["#channel"], Some("Hi, everyone!")
+    /// ).unwrap();
+    /// assert_eq!(msg.to_string(), ":ada PRIVMSG #channel :Hi, everyone!\r\n");
+    /// # }
+    /// ```
     pub fn to_string(&self) -> String {
         let mut ret = String::new();
         if let Some(ref tags) = self.tags {
@@ -176,6 +236,9 @@ impl Display for Message {
 }
 
 /// A message tag as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
+/// It consists of a tag key, and an optional value for the tag. Each message can contain a number
+/// of tags (in the string format, they are separated by semicolons). Tags are used to add extended
+/// information to a message under IRCv3.
 #[derive(Clone, PartialEq, Debug)]
 pub struct Tag(pub String, pub Option<String>);
 
