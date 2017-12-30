@@ -200,11 +200,21 @@ impl FromStr for Message {
         } else {
             None
         };
+        let line_ending_len = if state.ends_with("\r\n") {
+            "\r\n"
+        } else if state.ends_with("\r") {
+            "\r"
+        } else if state.ends_with("\n") {
+            "\n"
+        } else {
+            ""
+        }.len();
         let suffix = if state.contains(" :") {
-            let suffix = state.find(" :").map(|i| &state[i + 2..state.len() - 2]);
+            let suffix = state.find(" :").map(|i| &state[i + 2..state.len() - line_ending_len]);
             state = state.find(" :").map_or("", |i| &state[..i + 1]);
             suffix
         } else {
+            state = &state[..state.len() - line_ending_len];
             None
         };
         let command = match state.find(' ').map(|i| &state[..i]) {
@@ -214,9 +224,6 @@ impl FromStr for Message {
             }
             _ => return Err(ErrorKind::InvalidCommand.into()),
         };
-        if suffix.is_none() {
-            state = &state[..state.len() - 2]
-        }
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
         Message::with_tags(tags, prefix, command, args, suffix)
             .map_err(|_| ErrorKind::InvalidCommand.into())
@@ -376,6 +383,27 @@ mod test {
                 .unwrap(),
             message
         )
+    }
+
+    #[test]
+    fn from_string_atypical_endings() {
+        let message = Message {
+            tags: None,
+            prefix: None,
+            command: PRIVMSG(format!("test"), format!("Testing!")),
+        };
+        assert_eq!(
+            "PRIVMSG test :Testing!\r".parse::<Message>().unwrap(),
+            message
+        );
+        assert_eq!(
+            "PRIVMSG test :Testing!\n".parse::<Message>().unwrap(),
+            message
+        );
+        assert_eq!(
+            "PRIVMSG test :Testing!".parse::<Message>().unwrap(),
+            message
+        );
     }
 
     #[test]
