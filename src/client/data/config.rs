@@ -60,10 +60,14 @@ pub struct Config {
     pub ping_time: Option<u32>,
     /// The amount of time in seconds for a client to reconnect due to no ping response.
     pub ping_timeout: Option<u32>,
-    /// The amount of time in seconds to consider a window for burst messages.
+    /// The length in seconds of a rolling window for message throttling. If more than
+    /// `max_messages_in_burst` messages are sent within `burst_window_length` seconds, additional
+    /// messages will be delayed automatically as appropriate. In particular, in the past
+    /// `burst_window_length` seconds, there will never be more than `max_messages_in_burst` messages
+    /// sent.
     pub burst_window_length: Option<u32>,
     /// The maximum number of messages that can be sent in a burst window before they'll be delayed.
-    /// Messages are automatically delayed until the start of the next window.
+    /// Messages are automatically delayed as appropriate.
     pub max_messages_in_burst: Option<u32>,
     /// Whether the client should use NickServ GHOST to reclaim its primary nickname if it is in
     /// use. This has no effect if `nick_password` is not set.
@@ -391,14 +395,18 @@ impl Config {
         self.ping_timeout.as_ref().cloned().unwrap_or(10)
     }
 
-    /// The amount of time in seconds to consider a window for burst messages.
+    /// The amount of time in seconds to consider a window for burst messages. The message throttling
+    /// system maintains the invariant that in the past `burst_window_length` seconds, the maximum
+    /// number of messages sent is `max_messages_in_burst`.
     /// This defaults to 8 seconds when not specified.
     pub fn burst_window_length(&self) -> u32 {
         self.burst_window_length.as_ref().cloned().unwrap_or(8)
     }
 
     /// The maximum number of messages that can be sent in a burst window before they'll be delayed.
-    /// Messages are automatically delayed until the start of the next window.
+    /// Messages are automatically delayed until the start of the next window. The message throttling
+    /// system maintains the invariant that in the past `burst_window_length` seconds, the maximum
+    /// number of messages sent is `max_messages_in_burst`.
     /// This defaults to 15 messages when not specified.
     pub fn max_messages_in_burst(&self) -> u32 {
         self.max_messages_in_burst.as_ref().cloned().unwrap_or(15)
