@@ -152,12 +152,9 @@ where
             Err(error::ErrorKind::PingTimeout.into())
         } else {
             // Check if the oldest message in the rolling window is discounted.
-            match self.rolling_burst_window_front()? {
-                Async::NotReady => (),
-                Async::Ready(()) => {
-                    self.current_burst_messages -= 1;
-                    self.rolling_burst_window.pop_front();
-                }
+            if let Async::Ready(()) = self.rolling_burst_window_front()? {
+                self.current_burst_messages -= 1;
+                self.rolling_burst_window.pop_front();
             }
 
             // Throttling if too many messages have been sent recently.
