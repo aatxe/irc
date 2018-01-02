@@ -581,7 +581,7 @@ impl ServerState {
     }
 
     #[cfg(not(feature = "ctcp"))]
-    fn handle_ctcp(&self, _: &str, _: Vec<&str>) -> error::Result<()> {
+    fn handle_ctcp(&self, _: &str, _: &[&str]) -> error::Result<()> {
         Ok(())
     }
 }
