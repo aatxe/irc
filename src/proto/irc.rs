@@ -1,5 +1,4 @@
 //! Implementation of IRC codec for Tokio.
-
 use bytes::BytesMut;
 use tokio_io::codec::{Decoder, Encoder};
 
