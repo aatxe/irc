@@ -202,9 +202,9 @@ impl FromStr for Message {
         };
         let line_ending_len = if state.ends_with("\r\n") {
             "\r\n"
-        } else if state.ends_with("\r") {
+        } else if state.ends_with('\r') {
             "\r"
-        } else if state.ends_with("\n") {
+        } else if state.ends_with('\n') {
             "\n"
         } else {
             ""

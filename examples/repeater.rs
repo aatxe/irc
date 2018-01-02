@@ -23,7 +23,7 @@ fn main() {
         match message.command {
             Command::PRIVMSG(ref target, ref msg) => {
                 if msg.starts_with(server.current_nickname()) {
-                    let tokens: Vec<_> = msg.split(" ").collect();
+                    let tokens: Vec<_> = msg.split(' ').collect();
                     if tokens.len() > 2 {
                         let n = tokens[0].len() + tokens[1].len() + 2;
                         if let Ok(count) = tokens[1].parse::<u8>() {

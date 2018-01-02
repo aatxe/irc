@@ -247,7 +247,7 @@ impl<'a> Server for ServerState {
         Self: Sized,
     {
         let msg = &msg.into();
-        self.handle_sent_message(&msg)?;
+        self.handle_sent_message(msg)?;
         Ok((&self.outgoing).unbounded_send(
             ServerState::sanitize(&msg.to_string())
                 .into(),
@@ -365,9 +365,9 @@ impl ServerState {
                         body[1..end].split(' ').collect()
                     };
                     if target.starts_with('#') {
-                        self.handle_ctcp(target, tokens)?
+                        self.handle_ctcp(target, &tokens)?
                     } else if let Some(user) = msg.source_nickname() {
-                        self.handle_ctcp(user, tokens)?
+                        self.handle_ctcp(user, &tokens)?
                     }
                 }
             }
@@ -510,8 +510,8 @@ impl ServerState {
     #[cfg(not(feature = "nochanlists"))]
     fn handle_mode(&self, chan: &str, modes: &[Mode<ChannelMode>]) {
         for mode in modes {
-            match mode {
-                &Mode::Plus(_, Some(ref user)) | &Mode::Minus(_, Some(ref user)) => {
+            match *mode {
+                Mode::Plus(_, Some(ref user)) | Mode::Minus(_, Some(ref user)) => {
                     if let Some(vec) = self.chanlists.lock().unwrap().get_mut(chan) {
                         if let Some(n) = vec.iter().position(|x| x.get_nickname() == user) {
                             vec[n].update_access_level(mode)
@@ -543,7 +543,7 @@ impl ServerState {
     }
 
     #[cfg(feature = "ctcp")]
-    fn handle_ctcp(&self, resp: &str, tokens: Vec<&str>) -> error::Result<()> {
+    fn handle_ctcp(&self, resp: &str, tokens: &[&str]) -> error::Result<()> {
         if tokens.is_empty() {
             return Ok(());
         }
@@ -616,7 +616,7 @@ impl Server for IrcServer {
 
     fn stream(&self) -> ServerStream {
         ServerStream {
-            state: self.state.clone(),
+            state: Arc::clone(&self.state),
             stream: self.state.incoming.lock().unwrap().take().expect(
                 "Stream was already obtained once, and cannot be reobtained."
             ),
@@ -766,11 +766,11 @@ impl IrcServer {
     /// # }
     /// # fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> { Ok(()) }
     /// ```
-    pub fn new_future<'a>(handle: Handle, config: &'a Config) -> error::Result<IrcServerFuture<'a>> {
+    pub fn new_future(handle: Handle, config: &Config) -> error::Result<IrcServerFuture> {
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
 
         Ok(IrcServerFuture {
-            conn: Connection::new(&config, &handle)?,
+            conn: Connection::new(config, &handle)?,
             handle: handle,
             config: config,
             tx_outgoing: Some(tx_outgoing),

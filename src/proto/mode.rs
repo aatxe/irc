@@ -224,11 +224,11 @@ where
     T: ModeType,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &Mode::Plus(ref mode, Some(ref arg)) => write!(f, "{}{} {}", "+", mode, arg),
-            &Mode::Minus(ref mode, Some(ref arg)) => write!(f, "{}{} {}", "-", mode, arg),
-            &Mode::Plus(ref mode, None) => write!(f, "{}{}", "+", mode),
-            &Mode::Minus(ref mode, None) => write!(f, "{}{}", "-", mode),
+        match *self {
+            Mode::Plus(ref mode, Some(ref arg)) => write!(f, "{}{} {}", "+", mode, arg),
+            Mode::Minus(ref mode, Some(ref arg)) => write!(f, "{}{} {}", "-", mode, arg),
+            Mode::Plus(ref mode, None) => write!(f, "{}{}", "+", mode),
+            Mode::Minus(ref mode, None) => write!(f, "{}{}", "-", mode),
         }
     }
 }
@@ -246,9 +246,9 @@ impl Mode<UserMode> {
         use self::PlusMinus::*;
 
         let mut res = vec![];
-        let mut pieces = s.split(" ");
+        let mut pieces = s.split(' ');
         for term in pieces.clone() {
-            if term.starts_with("+") || term.starts_with("-") {
+            if term.starts_with('+') || term.starts_with('-') {
                 let _ = pieces.next();
 
                 let mut chars = term.chars();
@@ -285,9 +285,9 @@ impl Mode<ChannelMode> {
         use self::PlusMinus::*;
 
         let mut res = vec![];
-        let mut pieces = s.split(" ");
+        let mut pieces = s.split(' ');
         for term in pieces.clone() {
-            if term.starts_with("+") || term.starts_with("-") {
+            if term.starts_with('+') || term.starts_with('-') {
                 let _ = pieces.next();
 
                 let mut chars = term.chars();

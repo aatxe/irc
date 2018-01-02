@@ -9,8 +9,8 @@ use args::{Args, ArgsError};
 use getopts::Occur;
 use irc::client::data::Config;
 
-const PROGRAM_DESC: &'static str = "Use this program to convert configs between {JSON, TOML, YAML}.";
-const PROGRAM_NAME: &'static str = "convertconf";
+const PROGRAM_DESC: &str = "Use this program to convert configs between {JSON, TOML, YAML}.";
+const PROGRAM_NAME: &str = "convertconf";
 
 fn main() {
     let args: Vec<_> = env::args().collect();
@@ -31,7 +31,7 @@ fn main() {
     }
 }
 
-fn parse(input: &Vec<String>) -> Result<Option<(String, String)>, ArgsError> {
+fn parse(input: &[String]) -> Result<Option<(String, String)>, ArgsError> {
     let mut args = Args::new(PROGRAM_NAME, PROGRAM_DESC);
     args.flag("h", "help", "Print the usage menu");
     args.option("i",

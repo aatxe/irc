@@ -80,17 +80,17 @@ impl User {
 
     /// Updates the user's access level.
     pub fn update_access_level(&mut self, mode: &Mode<ChannelMode>) {
-        match mode {
-            &Mode::Plus(ChannelMode::Founder, _) => self.add_access_level(AccessLevel::Owner),
-            &Mode::Minus(ChannelMode::Founder, _) => self.sub_access_level(AccessLevel::Owner),
-            &Mode::Plus(ChannelMode::Admin, _) => self.add_access_level(AccessLevel::Admin),
-            &Mode::Minus(ChannelMode::Admin, _) => self.sub_access_level(AccessLevel::Admin),
-            &Mode::Plus(ChannelMode::Oper, _) => self.add_access_level(AccessLevel::Oper),
-            &Mode::Minus(ChannelMode::Oper, _) => self.sub_access_level(AccessLevel::Oper),
-            &Mode::Plus(ChannelMode::Halfop, _) => self.add_access_level(AccessLevel::HalfOp),
-            &Mode::Minus(ChannelMode::Halfop, _) => self.sub_access_level(AccessLevel::HalfOp),
-            &Mode::Plus(ChannelMode::Voice, _) => self.add_access_level(AccessLevel::Voice),
-            &Mode::Minus(ChannelMode::Voice, _) => self.sub_access_level(AccessLevel::Voice),
+        match *mode {
+            Mode::Plus(ChannelMode::Founder, _) => self.add_access_level(AccessLevel::Owner),
+            Mode::Minus(ChannelMode::Founder, _) => self.sub_access_level(AccessLevel::Owner),
+            Mode::Plus(ChannelMode::Admin, _) => self.add_access_level(AccessLevel::Admin),
+            Mode::Minus(ChannelMode::Admin, _) => self.sub_access_level(AccessLevel::Admin),
+            Mode::Plus(ChannelMode::Oper, _) => self.add_access_level(AccessLevel::Oper),
+            Mode::Minus(ChannelMode::Oper, _) => self.sub_access_level(AccessLevel::Oper),
+            Mode::Plus(ChannelMode::Halfop, _) => self.add_access_level(AccessLevel::HalfOp),
+            Mode::Minus(ChannelMode::Halfop, _) => self.sub_access_level(AccessLevel::HalfOp),
+            Mode::Plus(ChannelMode::Voice, _) => self.add_access_level(AccessLevel::Voice),
+            Mode::Minus(ChannelMode::Voice, _) => self.sub_access_level(AccessLevel::Voice),
             _ => {}
         }
     }

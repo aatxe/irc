@@ -42,7 +42,7 @@ impl fmt::Debug for Connection {
     }
 }
 
-/// A convenient type alias representing the TlsStream future.
+/// A convenient type alias representing the `TlsStream` future.
 type TlsFuture = Box<Future<Error = error::Error, Item = TlsStream<TcpStream>> + Send>;
 
 /// A future representing an eventual `Connection`.
@@ -60,30 +60,30 @@ impl<'a> Future for ConnectionFuture<'a> {
     type Error = error::Error;
 
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
-        match self {
-            &mut ConnectionFuture::Unsecured(ref config, ref mut inner) => {
+        match *self {
+            ConnectionFuture::Unsecured(ref config, ref mut inner) => {
                 let framed = try_ready!(inner.poll()).framed(IrcCodec::new(config.encoding())?);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Unsecured(transport)))
             }
-            &mut ConnectionFuture::Secured(ref config, ref mut inner) => {
+            ConnectionFuture::Secured(ref config, ref mut inner) => {
                 let framed = try_ready!(inner.poll()).framed(IrcCodec::new(config.encoding())?);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Secured(transport)))
             }
-            &mut ConnectionFuture::Mock(ref config) => {
-                let enc: error::Result<_> = encoding_from_whatwg_label(config.encoding()).ok_or(
-                    io::Error::new(
-                        io::ErrorKind::InvalidInput,
-                        &format!("Attempted to use unknown codec {}.", config.encoding())[..],
-                    ).into(),
-                );
+            ConnectionFuture::Mock(ref config) => {
+                let enc: error::Result<_> = encoding_from_whatwg_label(
+                    config.encoding()
+                ).ok_or_else(|| io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    &format!("Attempted to use unknown codec {}.", config.encoding())[..],
+                ).into());
                 let encoding = enc?;
                 let init_str = config.mock_initial_value();
                 let initial: error::Result<_> = {
-                    encoding.encode(&init_str, EncoderTrap::Replace).map_err(
+                    encoding.encode(init_str, EncoderTrap::Replace).map_err(
                         |data| {
                             io::Error::new(
                                 io::ErrorKind::InvalidInput,
@@ -144,8 +144,8 @@ impl Connection {
     /// Gets a view of the internal logging if and only if this connection is using a mock stream.
     /// Otherwise, this will always return `None`. This is used for unit testing.
     pub fn log_view(&self) -> Option<LogView> {
-        match self {
-            &Connection::Mock(ref inner) => Some(inner.view()),
+        match *self {
+            Connection::Mock(ref inner) => Some(inner.view()),
             _ => None,
         }
     }
@@ -156,10 +156,10 @@ impl Stream for Connection {
     type Error = error::Error;
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
-        match self {
-            &mut Connection::Unsecured(ref mut inner) => inner.poll(),
-            &mut Connection::Secured(ref mut inner) => inner.poll(),
-            &mut Connection::Mock(ref mut inner) => inner.poll(),
+        match *self {
+            Connection::Unsecured(ref mut inner) => inner.poll(),
+            Connection::Secured(ref mut inner) => inner.poll(),
+            Connection::Mock(ref mut inner) => inner.poll(),
         }
     }
 }
@@ -169,18 +169,18 @@ impl Sink for Connection {
     type SinkError = error::Error;
 
     fn start_send(&mut self, item: Self::SinkItem) -> StartSend<Self::SinkItem, Self::SinkError> {
-        match self {
-            &mut Connection::Unsecured(ref mut inner) => inner.start_send(item),
-            &mut Connection::Secured(ref mut inner) => inner.start_send(item),
-            &mut Connection::Mock(ref mut inner) => inner.start_send(item),
+        match *self {
+            Connection::Unsecured(ref mut inner) => inner.start_send(item),
+            Connection::Secured(ref mut inner) => inner.start_send(item),
+            Connection::Mock(ref mut inner) => inner.start_send(item),
         }
     }
 
     fn poll_complete(&mut self) -> Poll<(), Self::SinkError> {
-        match self {
-            &mut Connection::Unsecured(ref mut inner) => inner.poll_complete(),
-            &mut Connection::Secured(ref mut inner) => inner.poll_complete(),
-            &mut Connection::Mock(ref mut inner) => inner.poll_complete(),
+        match *self {
+            Connection::Unsecured(ref mut inner) => inner.poll_complete(),
+            Connection::Secured(ref mut inner) => inner.poll_complete(),
+            Connection::Mock(ref mut inner) => inner.poll_complete(),
         }
     }
 }

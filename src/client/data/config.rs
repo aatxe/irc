@@ -103,11 +103,11 @@ impl Config {
             Some("json") => Config::load_json(&data),
             Some("toml") => Config::load_toml(&data),
             Some("yaml") | Some("yml") => Config::load_yaml(&data),
-            Some(ext) => return Err(Error::new(
+            Some(ext) => Err(Error::new(
                 ErrorKind::InvalidInput,
                 format!("Failed to decode configuration of unknown format {}", ext),
             ).into()),
-            None => return Err(Error::new(
+            None => Err(Error::new(
                 ErrorKind::InvalidInput,
                 "Failed to decode configuration of missing or non-unicode format.",
             ).into()),

@@ -126,7 +126,7 @@ where
                     // Check PONG responses from the server.
                     Command::PONG(ref data, None) |
                     Command::PONG(_, Some(ref data)) => {
-                        if self.last_ping_data == &data[..] {
+                        if self.last_ping_data == data[..] {
                             self.last_pong_received = Instant::now();
                         }
                     }

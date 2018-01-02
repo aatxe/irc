@@ -19,12 +19,10 @@ impl LineCodec {
     pub fn new(label: &str) -> error::Result<LineCodec> {
         encoding_from_whatwg_label(label)
             .map(|enc| LineCodec { encoding: enc })
-            .ok_or(
-                io::Error::new(
-                    io::ErrorKind::InvalidInput,
-                    &format!("Attempted to use unknown codec {}.", label)[..],
-                ).into(),
-            )
+            .ok_or_else(|| io::Error::new(
+                io::ErrorKind::InvalidInput,
+                &format!("Attempted to use unknown codec {}.", label)[..],
+            ).into())
     }
 }
 
