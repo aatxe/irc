@@ -222,7 +222,15 @@ impl FromStr for Message {
                 state = state.find(' ').map_or("", |i| &state[i + 1..]);
                 cmd
             }
-            _ => return Err(ErrorKind::InvalidCommand.into()),
+            // If there's no arguments but the "command" starts with colon, it's not a command.
+            None if state.starts_with(":") => return Err(ErrorKind::InvalidCommand.into()),
+            // If there's no arguments following the command, the rest of the state is the command.
+            None => {
+                let cmd = state;
+                state = "";
+                cmd
+            },
+
         };
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
         Message::with_tags(tags, prefix, command, args, suffix)
@@ -252,7 +260,7 @@ pub struct Tag(pub String, pub Option<String>);
 #[cfg(test)]
 mod test {
     use super::{Message, Tag};
-    use proto::Command::{PRIVMSG, Raw};
+    use proto::Command::{PRIVMSG, QUIT, Raw};
 
     #[test]
     fn new() {
@@ -445,6 +453,17 @@ mod test {
             ),
         };
         let msg: Message = ":test!test@test COMMAND ARG:test :Testing!\r\n".into();
+        assert_eq!(msg, message);
+    }
+
+    #[test]
+    fn to_message_no_prefix_no_args() {
+        let message = Message {
+            tags: None,
+            prefix: None,
+            command: QUIT(None),
+        };
+        let msg: Message = "QUIT\r\n".into();
         assert_eq!(msg, message);
     }
 
