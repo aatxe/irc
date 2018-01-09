@@ -1,13 +1,13 @@
 //! A system for creating and managing multiple connections to IRC servers.
 
+use futures::{Future, Stream};
+use futures::future;
+use tokio_core::reactor::Core;
+
 use client::data::Config;
 use client::server::{IrcServer, IrcServerFuture, Server};
 use error;
 use proto::Message;
-
-use futures::{Future, Stream};
-use futures::future;
-use tokio_core::reactor::Core;
 
 pub struct IrcReactor {
     inner: Core,
