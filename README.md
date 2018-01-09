@@ -1,6 +1,6 @@
 # irc [![Build Status][ci-badge]][ci] [![Crates.io][cr-badge]][cr] [![Docs][doc-badge]][doc] [![Built with Spacemacs][bws]][sm]
 
-[ci-badge]: https://travis-ci.org/aatxe/irc.svg?branch=master
+[ci-badge]: https://travis-ci.org/aatxe/irc.svg?branch=stable
 [ci]: https://travis-ci.org/aatxe/irc
 [cr-badge]: https://img.shields.io/crates/v/irc.svg
 [cr]: https://crates.io/crates/irc
