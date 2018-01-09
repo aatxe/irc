@@ -2,6 +2,7 @@
 
 pub mod conn;
 pub mod data;
+pub mod reactor;
 pub mod server;
 pub mod transport;
 
@@ -29,6 +30,7 @@ pub mod prelude {
     //! as well as in the parsed form of received mode commands.
 
     pub use client::data::Config;
+    pub use client::reactor::IrcReactor;
     pub use client::server::{EachIncomingExt, IrcServer, Server};
     pub use client::server::utils::ServerExt;
     pub use proto::{Capability, ChannelExt, Command, Message, NegotiationVersion, Response};
