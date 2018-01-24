@@ -42,6 +42,12 @@ impl IrcReactor {
         })));
     }
 
+    pub fn register_future<F>(
+        &mut self, future: F
+    ) where F: Future<Item = (), Error = error::Error> + 'static {
+        self.handlers.push(Box::new(future))
+    }
+
     pub fn run(&mut self) -> error::Result<()> {
         let mut handlers = Vec::new();
         while let Some(handler) = self.handlers.pop() {
