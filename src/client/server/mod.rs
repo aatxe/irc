@@ -17,7 +17,7 @@
 //! use irc::client::prelude::{IrcServer, ServerExt};
 //!
 //! # fn main() {
-//! let server = IrcServer::new("config.toml").unwrap(); 
+//! let server = IrcServer::new("config.toml").unwrap();
 //! // identify comes from `ServerExt`
 //! server.identify().unwrap();
 //! # }
@@ -85,7 +85,7 @@ pub mod utils;
 /// use irc::client::prelude::EachIncomingExt;
 ///
 /// # fn main() {
-/// # let server = IrcServer::new("config.toml").unwrap(); 
+/// # let server = IrcServer::new("config.toml").unwrap();
 /// # server.identify().unwrap();
 /// server.stream().for_each_incoming(|irc_msg| {
 ///   match irc_msg.command {
@@ -128,7 +128,7 @@ pub trait Server {
     /// # extern crate irc;
     /// # use irc::client::prelude::*;
     /// # fn main() {
-    /// # let server = IrcServer::new("config.toml").unwrap(); 
+    /// # let server = IrcServer::new("config.toml").unwrap();
     /// server.send(Command::NICK("example".to_owned())).unwrap();
     /// server.send(Command::USER("user".to_owned(), "0".to_owned(), "name".to_owned())).unwrap();
     /// # }
@@ -153,7 +153,7 @@ pub trait Server {
     /// # extern crate irc;
     /// # use irc::client::prelude::{IrcServer, ServerExt, Server, Command};
     /// # fn main() {
-    /// # let server = IrcServer::new("config.toml").unwrap(); 
+    /// # let server = IrcServer::new("config.toml").unwrap();
     /// # server.identify().unwrap();
     /// server.for_each_incoming(|irc_msg| {
     ///   match irc_msg.command {
@@ -189,7 +189,7 @@ pub trait Server {
     /// use irc::proto::caps::Capability;
     ///
     /// # fn main() {
-    /// # let server = IrcServer::new("config.toml").unwrap(); 
+    /// # let server = IrcServer::new("config.toml").unwrap();
     /// server.send_cap_req(&[Capability::MultiPrefix]).unwrap();
     /// server.identify().unwrap();
     /// # }
@@ -667,7 +667,7 @@ impl IrcServer {
     /// # extern crate irc;
     /// # use irc::client::prelude::*;
     /// # fn main() {
-    /// let server = IrcServer::new("config.toml").unwrap(); 
+    /// let server = IrcServer::new("config.toml").unwrap();
     /// # }
     /// ```
     pub fn new<P: AsRef<Path>>(config: P) -> error::Result<IrcServer> {
@@ -691,7 +691,7 @@ impl IrcServer {
     ///   server: Some("irc.example.com".to_owned()),
     ///   .. Default::default()
     /// };
-    /// let server = IrcServer::from_config(config).unwrap(); 
+    /// let server = IrcServer::from_config(config).unwrap();
     /// # }
     /// ```
     pub fn from_config(config: Config) -> error::Result<IrcServer> {
@@ -755,7 +755,7 @@ impl IrcServer {
     /// #  .. Default::default()
     /// # };
     /// let mut reactor = Core::new().unwrap();
-    /// let future = IrcServer::new_future(reactor.handle(), &config).unwrap(); 
+    /// let future = IrcServer::new_future(reactor.handle(), &config).unwrap();
     /// // immediate connection errors (like no internet) will turn up here...
     /// let server = reactor.run(future).unwrap();
     /// // runtime errors (like disconnections and so forth) will turn up here...
