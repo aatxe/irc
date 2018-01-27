@@ -741,7 +741,9 @@ impl IrcServer {
     /// Proper usage requires familiarity with `tokio` and `futures`. You can find more information
     /// in the crate documentation for [tokio-core](http://docs.rs/tokio-core) or
     /// [futures](http://docs.rs/futures). Additionally, you can find detailed tutorials on using
-    /// both libraries on the [tokio website](https://tokio.rs/docs/getting-started/tokio/).
+    /// both libraries on the [tokio website](https://tokio.rs/docs/getting-started/tokio/). An easy
+    /// to use abstraction that does not require this knowledge is available via
+    /// [IrcReactors](../reactor/struct.IrcReactor.html).
     ///
     /// # Example
     /// ```no_run
@@ -749,6 +751,7 @@ impl IrcServer {
     /// # extern crate tokio_core;
     /// # use std::default::Default;
     /// # use irc::client::prelude::*;
+    /// # use irc::client::server::PackedIrcServer;
     /// # use irc::error;
     /// # use tokio_core::reactor::Core;
     /// # fn main() {
@@ -760,21 +763,21 @@ impl IrcServer {
     /// let mut reactor = Core::new().unwrap();
     /// let future = IrcServer::new_future(reactor.handle(), &config).unwrap();
     /// // immediate connection errors (like no internet) will turn up here...
-    /// let server = reactor.run(future).unwrap();
+    /// let PackedIrcServer(server, future) = reactor.run(future).unwrap();
     /// // runtime errors (like disconnections and so forth) will turn up here...
     /// reactor.run(server.stream().for_each(move |irc_msg| {
     ///   // processing messages works like usual
     ///   process_msg(&server, irc_msg)
-    /// })).unwrap();
+    /// }).join(future)).unwrap();
     /// # }
     /// # fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> { Ok(()) }
     /// ```
-    pub(crate) fn new_future(handle: Handle, config: &Config) -> error::Result<IrcServerFuture> {
+    pub fn new_future(handle: Handle, config: &Config) -> error::Result<IrcServerFuture> {
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
 
         Ok(IrcServerFuture {
             conn: Connection::new(config, &handle)?,
-            handle: handle,
+            _handle: handle,
             config: config,
             tx_outgoing: Some(tx_outgoing),
             rx_outgoing: Some(rx_outgoing),
@@ -800,17 +803,18 @@ impl IrcServer {
 /// Interaction with this future relies on the `futures` API, but is only expected for more advanced
 /// use cases. To learn more, you can view the documentation for the
 /// [futures](https://docs.rs/futures/) crate, or the tutorials for
-/// [tokio](https://tokio.rs/docs/getting-started/futures/).
+/// [tokio](https://tokio.rs/docs/getting-started/futures/). An easy to use abstraction that does
+/// not require this knowledge is available via [IrcReactors](../reactor/struct.IrcReactor.html).
 pub struct IrcServerFuture<'a> {
     conn: ConnectionFuture<'a>,
-    handle: Handle,
+    _handle: Handle,
     config: &'a Config,
     tx_outgoing: Option<UnboundedSender<Message>>,
     rx_outgoing: Option<UnboundedReceiver<Message>>,
 }
 
 impl<'a> Future for IrcServerFuture<'a> {
-    type Item = IrcServer;
+    type Item = PackedIrcServer;
     type Error = error::Error;
 
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
@@ -822,19 +826,25 @@ impl<'a> Future for IrcServerFuture<'a> {
         let outgoing_future = sink.send_all(self.rx_outgoing.take().unwrap().map_err(|()| {
             let res: error::Error = error::ErrorKind::ChannelError.into();
             res
-        })).map(|_| ()).map_err(|e| panic!(e));
+        })).map(|_| ());
 
-        self.handle.spawn(outgoing_future);
-
-        Ok(Async::Ready(IrcServer {
+        let server = IrcServer {
             state: Arc::new(ServerState::new(
                 stream, self.tx_outgoing.take().unwrap(), self.config.clone()
             )),
             view: view,
-        }))
+        };
+        Ok(Async::Ready(PackedIrcServer(server, Box::new(outgoing_future))))
     }
 }
 
+/// An `IrcServer` packaged with a future that drives its message sending. In order for the server
+/// to actually work properly, this future _must_ be running.
+///
+/// This type should only be used by advanced users who are familiar with the implementation of this
+/// crate. An easy to use abstraction that does not require this knowledge is available via
+/// [IrcReactors](../reactor/struct.IrcReactor.html).
+pub struct PackedIrcServer(pub IrcServer, pub Box<Future<Item = (), Error = error::Error>>);
 
 #[cfg(test)]
 mod test {

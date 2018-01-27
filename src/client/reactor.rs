@@ -1,10 +1,10 @@
 //! A system for creating and managing IRC server connections.
 //!
 //! This API provides the ability to create and manage multiple IRC servers that can run on the same
-//! thread through the use of a shared event loop. It also replaces the old functionality of
-//! `IrcServer::new_future` and better encapsulates dependencies on `tokio` and `futures`. Finally,
-//! it provides some escape hatches that let advanced users take advantage of these dependencies
-//! regardless.
+//! thread through the use of a shared event loop. It can also be used to encapsulate the dependency
+//! on `tokio` and `futures` in the use of `IrcServer::new_future`. This means that knowledge of
+//! those libraries should be unnecessary for the average user. Nevertheless, this API also provides
+//! some escape hatches that let advanced users take further advantage of these dependencies.
 //! 
 //! # Example
 //! ```no_run
@@ -28,7 +28,7 @@ use futures::future;
 use tokio_core::reactor::{Core, Handle};
 
 use client::data::Config;
-use client::server::{IrcServer, IrcServerFuture, Server};
+use client::server::{IrcServer, IrcServerFuture, PackedIrcServer, Server};
 use error;
 use proto::Message;
 
@@ -70,7 +70,7 @@ impl IrcReactor {
     /// # }
     /// ```
     pub fn prepare_server<'a>(&mut self, config: &'a Config) -> error::Result<IrcServerFuture<'a>> {
-        IrcServer::new_future(self.inner.handle(), config)
+        IrcServer::new_future(self.inner_handle(), config)
     }
 
     /// Runs an [IrcServerFuture](./server/struct.IrcServerFuture.html), such as one from
@@ -91,7 +91,10 @@ impl IrcReactor {
     /// # }
     /// ```
     pub fn connect_server(&mut self, future: IrcServerFuture) -> error::Result<IrcServer> {
-        self.inner.run(future)
+        self.inner.run(future).map(|PackedIrcServer(server, future)| {
+            self.register_future(future);
+            server
+        })
     }
 
     /// Creates a new IRC server from the specified configuration, connecting immediately. This is
