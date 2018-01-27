@@ -77,7 +77,8 @@ loading of configuration required. However, for convenience, we've also included
 loading files with `serde` to write configurations. The default configuration format is TOML,
 though there is optional support for JSON and YAML via the optional `json` and `yaml` features. All
 the configuration fields are optional, and can thus be omitted, but a working configuration requires
-at least a `server` and `nickname`.
+at least a `server` and `nickname`. You can find detailed explanations of the configuration format
+[here](https://docs.rs/irc/0.12.8/irc/client/data/config/struct.Config.html#fields).
 
 Here's an example of a complete configuration in TOML:
 
