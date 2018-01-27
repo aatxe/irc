@@ -74,12 +74,10 @@ fn main() {
 Like the rest of the IRC crate, configuration is built with flexibility in mind. You can easily
 create `Config` objects programmatically and choose your own methods for handling any saving or
 loading of configuration required. However, for convenience, we've also included the option of
-loading files with `serde` to write configurations. By default, we support JSON and TOML. As of
-0.12.4, TOML is the preferred configuration format. We have bundled a conversion tool as
-`convertconf` in the examples. In a future version, we will likely disable JSON by default.
-Additionally, you can enable the optional `yaml` feature to get support for YAML as well. All the
-configuration fields are optional, and thus any of them can be omitted (though, omitting a
-nickname or server will cause the program to fail for obvious reasons).
+loading files with `serde` to write configurations. The default configuration format is TOML,
+though there is optional support for JSON and YAML via the optional `json` and `yaml` features. All
+the configuration fields are optional, and can thus be omitted, but a working configuration requires
+at least a `server` and `nickname`.
 
 Here's an example of a complete configuration in TOML:
 

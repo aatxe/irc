@@ -14,7 +14,7 @@ readme = "README.md"
 travis-ci = { repository = "aatxe/irc" }
 
 [features]
-default = ["ctcp", "json", "toml"]
+default = ["ctcp", "toml"]
 ctcp = []
 nochanlists = []
 json = ["serde_json"]
