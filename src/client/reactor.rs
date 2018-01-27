@@ -12,13 +12,13 @@
 //! # use std::default::Default;
 //! use irc::client::prelude::*;
 //! use irc::error;
-//! 
+//!
 //! fn main() {
 //!   let config = Config::default();
 //!   let mut reactor = IrcReactor::new().unwrap();
 //!   let server = reactor.prepare_server_and_connect(&config).unwrap();
 //!   reactor.register_server_with_handler(server, process_msg);
-//!   reactor.run().unwrap(); 
+//!   reactor.run().unwrap();
 //! }
 //! # fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> { Ok(()) }
 //! ```
