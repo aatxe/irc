@@ -1,4 +1,27 @@
 //! A system for creating and managing IRC server connections.
+//!
+//! This API provides the ability to create and manage multiple IRC servers that can run on the same
+//! thread through the use of a shared event loop. It also replaces the old functionality of
+//! `IrcServer::new_future` and better encapsulates dependencies on `tokio` and `futures`. Finally,
+//! it provides some escape hatches that let advanced users take advantage of these dependencies
+//! regardless.
+//! 
+//! # Example
+//! ```no_run
+//! # extern crate irc;
+//! # use std::default::Default;
+//! use irc::client::prelude::*;
+//! use irc::error;
+//! 
+//! fn main() {
+//!   let config = Config::default();
+//!   let mut reactor = IrcReactor::new().unwrap();
+//!   let server = reactor.prepare_server_and_connect(&config).unwrap();
+//!   reactor.register_server_with_handler(server, process_msg);
+//!   reactor.run().unwrap(); 
+//! }
+//! # fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> { Ok(()) }
+//! ```
 
 use futures::{Future, IntoFuture, Stream};
 use futures::future;
@@ -9,6 +32,13 @@ use client::server::{IrcServer, IrcServerFuture, Server};
 use error;
 use proto::Message;
 
+/// A thin wrapper over an event loop.
+///
+/// An IRC reactor is used to create new connections to IRC servers and to drive the management of
+/// all connected servers as the application runs. It can be used to run multiple servers on the
+/// same thread, as well as to get better control over error management in an IRC client.
+///
+/// For a full example usage, see [irc::client::reactor](./index.html).
 pub struct IrcReactor {
     inner: Core,
     handlers: Vec<Box<Future<Item = (), Error = error::Error>>>,
@@ -26,18 +56,59 @@ impl IrcReactor {
     /// Creates a representation of an IRC server that has not yet attempted to connect. In
     /// particular, this representation is as a Future that when run will produce a connected
     /// [IrcServer](./server/struct.IrcServer.html).
+    ///
+    /// # Example
+    /// ```no_run
+    /// # extern crate irc;
+    /// # use std::default::Default;
+    /// # use irc::client::prelude::*;
+    /// # fn main() {
+    /// # let config = Config::default();
+    /// let future_server = IrcReactor::new().and_then(|mut reactor| {
+    ///     reactor.prepare_server(&config)
+    /// });
+    /// # }
+    /// ```
     pub fn prepare_server<'a>(&mut self, config: &'a Config) -> error::Result<IrcServerFuture<'a>> {
         IrcServer::new_future(self.inner.handle(), config)
     }
 
     /// Runs an [IrcServerFuture](./server/struct.IrcServerFuture.html), such as one from
     /// `prepare_server` to completion, yielding an [IrcServer](./server/struct.IrcServer.html).
+    ///
+    /// # Example
+    /// ```no_run
+    /// # extern crate irc;
+    /// # use std::default::Default;
+    /// # use irc::client::prelude::*;
+    /// # fn main() {
+    /// # let config = Config::default();
+    /// let server = IrcReactor::new().and_then(|mut reactor| {
+    ///     reactor.prepare_server(&config).and_then(|future| {
+    ///         reactor.connect_server(future)
+    ///     })
+    /// });
+    /// # }
+    /// ```
     pub fn connect_server(&mut self, future: IrcServerFuture) -> error::Result<IrcServer> {
         self.inner.run(future)
     }
 
     /// Creates a new IRC server from the specified configuration, connecting immediately. This is
     /// guaranteed to be the composition of prepare_server and connect_server.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # extern crate irc;
+    /// # use std::default::Default;
+    /// # use irc::client::prelude::*;
+    /// # fn main() {
+    /// # let config = Config::default();
+    /// let server = IrcReactor::new().and_then(|mut reactor| {
+    ///     reactor.prepare_server_and_connect(&config)
+    /// });
+    /// # }
+    /// ```
     pub fn prepare_server_and_connect(&mut self, config: &Config) -> error::Result<IrcServer> {
         self.prepare_server(config).and_then(|future| self.connect_server(future))
     }
@@ -46,6 +117,22 @@ impl IrcReactor {
     /// setup until the next call to run, where it will be used to process new messages over the
     /// connection indefinitely (or until failure). As registration is consumed by `run`, subsequent
     /// calls to run will require new registration.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # extern crate irc;
+    /// # use std::default::Default;
+    /// # use irc::client::prelude::*;
+    /// # fn main() {
+    /// # let config = Config::default();
+    /// let mut reactor = IrcReactor::new().unwrap();
+    /// let server = reactor.prepare_server_and_connect(&config).unwrap();
+    /// reactor.register_server_with_handler(server, |server, msg| {
+    ///   // Message processing happens here.
+    ///   Ok(())
+    /// })
+    /// # }
+    /// ```
     pub fn register_server_with_handler<F, U>(
         &mut self, server: IrcServer, handler: F
     ) where F: Fn(&IrcServer, Message) -> U + 'static,
@@ -75,6 +162,21 @@ impl IrcReactor {
     /// Consumes all registered handlers and futures, and runs them. When using
     /// `register_server_with_handler`, this will block indefinitely (until failure occurs) as it
     /// will simply continue to process new, incoming messages for each server that was registered.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # extern crate irc;
+    /// # use std::default::Default;
+    /// # use irc::client::prelude::*;
+    /// # use irc::error;
+    /// # fn main() {
+    /// # let config = Config::default();
+    /// let mut reactor = IrcReactor::new().unwrap();
+    /// let server = reactor.prepare_server_and_connect(&config).unwrap();
+    /// reactor.register_server_with_handler(server, process_msg)
+    /// # }
+    /// # fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> { Ok(()) }
+    /// ```
     pub fn run(&mut self) -> error::Result<()> {
         let mut handlers = Vec::new();
         while let Some(handler) = self.handlers.pop() {

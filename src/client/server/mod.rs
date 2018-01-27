@@ -594,6 +594,8 @@ impl ServerState {
 /// server after connection. Cloning an `IrcServer` is relatively cheap, as it's equivalent to
 /// cloning a single `Arc`. This may be useful for setting up multiple threads with access to one
 /// connection.
+///
+/// For a full example usage, see [irc::client::server](./index.html).
 #[derive(Clone)]
 pub struct IrcServer {
     /// The internal, thread-safe server state.
@@ -678,7 +680,8 @@ impl IrcServer {
     /// immediately. Due to current design limitations, error handling here is somewhat limited. In
     /// particular, failed connections will cause the program to panic because the connection
     /// attempt is made on a freshly created thread. If you need to avoid this behavior and handle
-    /// errors more gracefully, it is recommended that you use `IrcServer::new_future` instead.
+    /// errors more gracefully, it is recommended that you use an
+    /// [IrcReactor](../reactor/struct.IrcReactor.html) instead.
     ///
     /// # Example
     /// ```no_run
@@ -766,7 +769,7 @@ impl IrcServer {
     /// # }
     /// # fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> { Ok(()) }
     /// ```
-    pub fn new_future(handle: Handle, config: &Config) -> error::Result<IrcServerFuture> {
+    pub(crate) fn new_future(handle: Handle, config: &Config) -> error::Result<IrcServerFuture> {
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
 
         Ok(IrcServerFuture {
