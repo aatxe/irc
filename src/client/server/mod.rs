@@ -326,7 +326,9 @@ impl ServerState {
         let alt_nicks = self.config().alternate_nicknames();
         let index = self.alt_nick_index.read().unwrap();
         match *index {
-            0 => self.config().nickname(),
+            0 => self.config().nickname().expect(
+                "current_nickname should not be callable if nickname is not defined."
+            ),
             i => alt_nicks[i - 1],
         }
     }
@@ -348,6 +350,7 @@ impl ServerState {
         trace!("[RECV] {}", msg.to_string());
         match msg.command {
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
+            /// This will panic if not specified.
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
             QUIT(_) => self.handle_quit(msg.source_nickname().unwrap_or("")),
             NICK(ref new_nick) => {
@@ -420,12 +423,12 @@ impl ServerState {
                     self.send(NICKSERV(format!(
                         "{} {} {}",
                         seq,
-                        self.config().nickname(),
+                        self.config().nickname()?,
                         self.config().nick_password()
                     )))?;
                 }
                 *index = 0;
-                self.send(NICK(self.config().nickname().to_owned()))?
+                self.send(NICK(self.config().nickname()?.to_owned()))?
             }
             self.send(NICKSERV(
                 format!("IDENTIFY {}", self.config().nick_password()),

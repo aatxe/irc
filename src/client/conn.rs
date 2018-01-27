@@ -108,7 +108,7 @@ impl Connection {
         if config.use_mock_connection() {
             Ok(ConnectionFuture::Mock(config))
         } else if config.use_ssl() {
-            let domain = format!("{}", config.server());
+            let domain = format!("{}", config.server()?);
             info!("Connecting via SSL to {}.", domain);
             let mut builder = TlsConnector::builder()?;
             if let Some(cert_path) = config.cert_path() {
@@ -133,7 +133,7 @@ impl Connection {
             ));
             Ok(ConnectionFuture::Secured(config, stream))
         } else {
-            info!("Connecting to {}.", config.server());
+            info!("Connecting to {}.", config.server()?);
             Ok(ConnectionFuture::Unsecured(
                 config,
                 TcpStream::connect(&config.socket_addr()?, handle),

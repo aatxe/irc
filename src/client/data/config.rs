@@ -259,9 +259,8 @@ impl Config {
     }
 
     /// Gets the nickname specified in the configuration.
-    /// This will panic if not specified.
-    pub fn nickname(&self) -> &str {
-        self.nickname.as_ref().map(|s| &s[..]).unwrap()
+    pub fn nickname(&self) -> Result<&str> {
+        self.nickname.as_ref().map(|s| &s[..]).ok_or(error::ErrorKind::NicknameNotSpecified.into())
     }
 
     /// Gets the bot's nickserv password specified in the configuration.
@@ -282,19 +281,19 @@ impl Config {
     /// Gets the username specified in the configuration.
     /// This defaults to the user's nickname when not specified.
     pub fn username(&self) -> &str {
-        self.username.as_ref().map_or(self.nickname(), |s| &s)
+        self.username.as_ref().map_or(self.nickname().unwrap_or("user"), |s| &s)
     }
 
     /// Gets the real name specified in the configuration.
     /// This defaults to the user's nickname when not specified.
     pub fn real_name(&self) -> &str {
-        self.realname.as_ref().map_or(self.nickname(), |s| &s)
+        self.realname.as_ref().map_or(self.nickname().unwrap_or("irc"), |s| &s)
     }
 
     /// Gets the address of the server specified in the configuration.
-    /// This panics when not specified.
-    pub fn server(&self) -> &str {
-        self.server.as_ref().map(|s| &s[..]).unwrap()
+    pub fn server(&self) -> Result<&str> {
+        self.server.as_ref().map(|s| &s[..]).ok_or(error::ErrorKind::NicknameNotSpecified.into())
+
     }
 
     /// Gets the port of the server specified in the configuration.
@@ -310,7 +309,7 @@ impl Config {
     /// Gets the server and port as a `SocketAddr`.
     /// This panics when server is not specified or the address is malformed.
     pub fn socket_addr(&self) -> Result<SocketAddr> {
-        format!("{}:{}", self.server(), self.port()).to_socket_addrs()
+        format!("{}:{}", self.server()?, self.port()).to_socket_addrs()
             .map(|mut i| i.next().unwrap())
             .map_err(|e| e.into())
     }

@@ -1,5 +1,4 @@
 //! Errors for `irc` crate using `error_chain`.
-
 #![allow(missing_docs)]
 
 error_chain! {
@@ -53,6 +52,16 @@ error_chain! {
         PingTimeout {
             description("The connection timed out due to no ping response.")
             display("The connection timed out due to no ping response.")
+        }
+
+        NicknameNotSpecified {
+            description("No nickname was specified for use with this IrcServer.")
+            display("No nickname was specified for use with this IrcServer.")
+        }
+
+        ServerNotSpecified {
+            description("No server was specified to connect to.")
+            display("No server was specified to connect to.")
         }
     }
 }

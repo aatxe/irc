@@ -95,7 +95,7 @@ pub trait ServerExt: Server {
         if self.config().password() != "" {
             self.send(PASS(self.config().password().to_owned()))?;
         }
-        self.send(NICK(self.config().nickname().to_owned()))?;
+        self.send(NICK(self.config().nickname()?.to_owned()))?;
         self.send(USER(
             self.config().username().to_owned(),
             "0".to_owned(),
