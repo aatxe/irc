@@ -203,6 +203,7 @@ pub trait Server {
 /// traditional use cases. To learn more, you can view the documentation for the
 /// [futures](https://docs.rs/futures/) crate, or the tutorials for
 /// [tokio](https://tokio.rs/docs/getting-started/futures/).
+#[derive(Debug)]
 pub struct ServerStream {
     state: Arc<ServerState>,
     stream: SplitStream<Connection>,
@@ -224,6 +225,7 @@ impl Stream for ServerStream {
 }
 
 /// Thread-safe internal state for an IRC server connection.
+#[derive(Debug)]
 struct ServerState {
     /// The configuration used with this connection.
     config: Config,
@@ -597,7 +599,7 @@ impl ServerState {
 /// server after connection. Cloning an `IrcServer` is relatively cheap, as it's equivalent to
 /// cloning a single `Arc`. This may be useful for setting up multiple threads with access to one
 /// connection.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IrcServer {
     /// The internal, thread-safe server state.
     state: Arc<ServerState>,
@@ -801,6 +803,7 @@ impl IrcServer {
 /// use cases. To learn more, you can view the documentation for the
 /// [futures](https://docs.rs/futures/) crate, or the tutorials for
 /// [tokio](https://tokio.rs/docs/getting-started/futures/).
+#[derive(Debug)]
 pub struct IrcServerFuture<'a> {
     conn: ConnectionFuture<'a>,
     handle: Handle,

@@ -55,6 +55,25 @@ pub enum ConnectionFuture<'a> {
     Mock(&'a Config),
 }
 
+impl<'a> fmt::Debug for ConnectionFuture<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}({:?}, ...)",
+            match *self {
+                ConnectionFuture::Unsecured(_, _) => "ConnectionFuture::Unsecured",
+                ConnectionFuture::Secured(_, _) => "ConnectionFuture::Secured",
+                ConnectionFuture::Mock(_) => "ConnectionFuture::Mock",
+            },
+            match *self {
+                ConnectionFuture::Unsecured(cfg, _) |
+                ConnectionFuture::Secured(cfg, _) |
+                ConnectionFuture::Mock(cfg) => cfg,
+            }
+        )
+    }
+}
+
 impl<'a> Future for ConnectionFuture<'a> {
     type Item = Connection;
     type Error = error::Error;
