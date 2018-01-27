@@ -1,6 +1,6 @@
 //! A system for creating and managing IRC server connections.
 
-use futures::{Future, Stream};
+use futures::{Future, IntoFuture, Stream};
 use futures::future;
 use tokio_core::reactor::{Core, Handle};
 
@@ -46,9 +46,10 @@ impl IrcReactor {
     /// setup until the next call to run, where it will be used to process new messages over the
     /// connection indefinitely (or until failure). As registration is consumed by `run`, subsequent
     /// calls to run will require new registration.
-    pub fn register_server_with_handler<F>(
+    pub fn register_server_with_handler<F, U>(
         &mut self, server: IrcServer, handler: F
-    ) where F: Fn(&IrcServer, Message) -> error::Result<()> + 'static  {
+    ) where F: Fn(&IrcServer, Message) -> U + 'static,
+            U: IntoFuture<Item = (), Error = error::Error> + 'static {
         self.handlers.push(Box::new(server.stream().for_each(move |message| {
             handler(&server, message)
         })));
@@ -60,8 +61,8 @@ impl IrcReactor {
     /// be sufficient for most use cases.
     pub fn register_future<F>(
         &mut self, future: F
-    ) where F: Future<Item = (), Error = error::Error> + 'static {
-        self.handlers.push(Box::new(future))
+    ) where F: IntoFuture<Item = (), Error = error::Error> + 'static {
+        self.handlers.push(Box::new(future.into_future()))
     }
 
     /// Returns a handle to the internal event loop. This is a sort of escape hatch that allows you
