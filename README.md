@@ -130,5 +130,4 @@ tool should make it easy for users to migrate their old configurations to TOML.
 Contributions to this library would be immensely appreciated. Prior to version 0.12.0, this
 library was public domain. As of 0.12.0, this library is offered under the Mozilla Public License
 2.0 whose text can be found in `LICENSE.md`. Fostering an inclusive community around `irc` is
-important, and to that end, we've adopted the
-[Contributor Convenant](https://www.contributor-covenant.org).
+important, and to that end, we've adopted an explicit Code of Conduct found in `CODE_OF_CONDUCT.md`.
