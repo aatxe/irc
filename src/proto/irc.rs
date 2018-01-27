@@ -20,7 +20,7 @@ impl IrcCodec {
 
 impl Decoder for IrcCodec {
     type Item = Message;
-    type Error = error::Error;
+    type Error = error::IrcError;
 
     fn decode(&mut self, src: &mut BytesMut) -> error::Result<Option<Message>> {
         self.inner.decode(src).and_then(|res| {
@@ -31,7 +31,7 @@ impl Decoder for IrcCodec {
 
 impl Encoder for IrcCodec {
     type Item = Message;
-    type Error = error::Error;
+    type Error = error::IrcError;
 
 
     fn encode(&mut self, msg: Message, dst: &mut BytesMut) -> error::Result<()> {

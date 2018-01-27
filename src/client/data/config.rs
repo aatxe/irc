@@ -3,9 +3,8 @@ use std::borrow::ToOwned;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::{Error, ErrorKind};
 use std::net::{SocketAddr, ToSocketAddrs};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[cfg(feature = "json")]
 use serde_json;
@@ -14,8 +13,10 @@ use serde_yaml;
 #[cfg(feature = "toml")]
 use toml;
 
-use error;
-use error::{Result, ResultExt};
+#[cfg(feature = "toml")]
+use error::TomlError;
+use error::{ConfigError, Result};
+use error::IrcError::InvalidConfig;
 
 /// Configuration data.
 #[derive(Clone, Deserialize, Serialize, Default, PartialEq, Debug)]
@@ -88,9 +89,25 @@ pub struct Config {
     pub channel_keys: Option<HashMap<String, String>>,
     /// A map of additional options to be stored in config.
     pub options: Option<HashMap<String, String>>,
+
+    /// The path that this configuration was loaded from.
+    ///
+    /// This should not be specified in any configuration. It will automatically be handled by the library.
+    pub path: Option<PathBuf>,
 }
 
 impl Config {
+    fn with_path<P: AsRef<Path>>(mut self, path: P) -> Config {
+        self.path = Some(path.as_ref().to_owned());
+        self
+    }
+
+    fn path(&self) -> String {
+        self.path.as_ref().map(|buf| buf.to_string_lossy().into_owned()).unwrap_or_else(|| {
+            "<none>".to_owned()
+        })
+    }
+
     /// Loads a configuration from the desired path. This will use the file extension to detect
     /// which format to parse the file as (json, toml, or yaml). Using each format requires having
     /// its respective crate feature enabled. Only json is available by default.
@@ -99,155 +116,171 @@ impl Config {
         let mut data = String::new();
         file.read_to_string(&mut data)?;
 
-        match path.as_ref().extension().and_then(|s| s.to_str()) {
-            Some("json") => Config::load_json(&data),
-            Some("toml") => Config::load_toml(&data),
-            Some("yaml") | Some("yml") => Config::load_yaml(&data),
-            Some(ext) => Err(Error::new(
-                ErrorKind::InvalidInput,
-                format!("Failed to decode configuration of unknown format {}", ext),
-            ).into()),
-            None => Err(Error::new(
-                ErrorKind::InvalidInput,
-                "Failed to decode configuration of missing or non-unicode format.",
-            ).into()),
-        }
+        let res = match path.as_ref().extension().and_then(|s| s.to_str()) {
+            Some("json") => Config::load_json(&path, &data),
+            Some("toml") => Config::load_toml(&path, &data),
+            Some("yaml") | Some("yml") => Config::load_yaml(&path, &data),
+            Some(ext) => Err(InvalidConfig {
+                path: path.as_ref().to_string_lossy().into_owned(),
+                cause: ConfigError::UnknownConfigFormat {
+                    format: ext.to_owned(),
+                },
+            }),
+            None => Err(InvalidConfig {
+                path: path.as_ref().to_string_lossy().into_owned(),
+                cause: ConfigError::MissingExtension,
+            }),
+        };
+
+        res.map(|config| {
+            config.with_path(path)
+        })
     }
 
     #[cfg(feature = "json")]
-    fn load_json(data: &str) -> Result<Config> {
-        serde_json::from_str(&data[..]).chain_err(|| {
-            let e: error::Error = Error::new(
-                ErrorKind::InvalidInput,
-                "Failed to decode JSON configuration file.",
-            ).into();
-            e
+    fn load_json<P: AsRef<Path>>(path: &P, data: &str) -> Result<Config> {
+        serde_json::from_str(&data[..]).map_err(|e| {
+            InvalidConfig {
+                path: path.as_ref().to_string_lossy().into_owned(),
+                cause: ConfigError::InvalidJson(e),
+            }
         })
     }
 
     #[cfg(not(feature = "json"))]
-    fn load_json(_: &str) -> Result<Config> {
-        Err(Error::new(
-            ErrorKind::InvalidInput,
-            "JSON file decoding is disabled.",
-        ).into())
+    fn load_json<P: AsRef<Path>>(path: &P, _: &str) -> Result<Config> {
+        Err(InvalidConfig {
+            path: path.as_ref().to_string_lossy().into_owned(),
+            cause: ConfigError::ConfigFormatDisabled {
+                format: "JSON"
+            }
+        })
     }
 
     #[cfg(feature = "toml")]
-    fn load_toml(data: &str) -> Result<Config> {
-        toml::from_str(&data[..]).chain_err(|| {
-            let e: error::Error = Error::new(
-                ErrorKind::InvalidInput,
-                "Failed to decode TOML configuration file.",
-            ).into();
-            e
+    fn load_toml<P: AsRef<Path>>(path: &P, data: &str) -> Result<Config> {
+        toml::from_str(&data[..]).map_err(|e| {
+            InvalidConfig {
+                path: path.as_ref().to_string_lossy().into_owned(),
+                cause: ConfigError::InvalidToml(TomlError::Read(e)),
+            }
         })
     }
 
     #[cfg(not(feature = "toml"))]
-    fn load_toml(_: &str) -> Result<Config> {
-        Err(Error::new(
-            ErrorKind::InvalidInput,
-            "TOML file decoding is disabled.",
-        ).into())
+    fn load_toml<P: AsRef<Path>>(path: &P, _: &str) -> Result<Config> {
+        Err(InvalidConfig {
+            path: path.as_ref().to_string_lossy().into_owned(),
+            cause: ConfigError::ConfigFormatDisabled {
+                format: "TOML"
+            }
+        })
     }
 
     #[cfg(feature = "yaml")]
-    fn load_yaml(data: &str) -> Result<Config> {
-        serde_yaml::from_str(&data[..]).chain_err(|| {
-            let e: error::Error = Error::new(
-                ErrorKind::InvalidInput,
-                "Failed to decode YAML configuration file.",
-            ).into();
-            e
+    fn load_yaml<P: AsRef<Path>>(path: &P, data: &str) -> Result<Config> {
+        serde_yaml::from_str(&data[..]).map_err(|e| {
+            InvalidConfig {
+                path: path.as_ref().to_string_lossy().into_owned(),
+                cause: ConfigError::InvalidYaml(e),
+            }
         })
     }
 
     #[cfg(not(feature = "yaml"))]
-    fn load_yaml(_: &str) -> Result<Config> {
-        Err(Error::new(
-            ErrorKind::InvalidInput,
-            "YAML file decoding is disabled.",
-        ).into())
+    fn load_yaml<P: AsRef<Path>>(path: &P, _: &str) -> Result<Config> {
+        Err(InvalidConfig {
+            path: path.as_ref().to_string_lossy().into_owned(),
+            cause: ConfigError::ConfigFormatDisabled {
+                format: "YAML"
+            }
+        })
     }
 
     /// Saves a configuration to the desired path. This will use the file extension to detect
     /// which format to parse the file as (json, toml, or yaml). Using each format requires having
     /// its respective crate feature enabled. Only json is available by default.
-    pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+    pub fn save<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
+        let _ = self.path.take();
         let mut file = File::create(&path)?;
         let data = match path.as_ref().extension().and_then(|s| s.to_str()) {
-            Some("json") => self.save_json()?,
-            Some("toml") => self.save_toml()?,
-            Some("yaml") | Some("yml") => self.save_yaml()?,
-            Some(ext) => return Err(Error::new(
-                ErrorKind::InvalidInput,
-                format!("Failed to encode configuration of unknown format {}", ext),
-            ).into()),
-            None => return Err(Error::new(
-                ErrorKind::InvalidInput,
-                "Failed to encode configuration of missing or non-unicode format.",
-            ).into()),
+            Some("json") => self.save_json(&path)?,
+            Some("toml") => self.save_toml(&path)?,
+            Some("yaml") | Some("yml") => self.save_yaml(&path)?,
+            Some(ext) => return Err(InvalidConfig {
+                path: path.as_ref().to_string_lossy().into_owned(),
+                cause: ConfigError::UnknownConfigFormat {
+                    format: ext.to_owned(),
+                },
+            }),
+            None => return Err(InvalidConfig {
+                path: path.as_ref().to_string_lossy().into_owned(),
+                cause: ConfigError::MissingExtension,
+            }),
         };
         file.write_all(data.as_bytes())?;
+        self.path = Some(path.as_ref().to_owned());
         Ok(())
     }
 
     #[cfg(feature = "json")]
-    fn save_json(&self) -> Result<String> {
-        serde_json::to_string(self).chain_err(|| {
-            let e: error::Error = Error::new(
-                ErrorKind::InvalidInput,
-                "Failed to encode JSON configuration file.",
-            ).into();
-            e
+    fn save_json<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
+        serde_json::to_string(self).map_err(|e| {
+            InvalidConfig {
+                path: path.as_ref().to_string_lossy().into_owned(),
+                cause: ConfigError::InvalidJson(e),
+            }
         })
     }
 
     #[cfg(not(feature = "json"))]
-    fn save_json(&self) -> Result<String> {
-        Err(Error::new(
-            ErrorKind::InvalidInput,
-            "JSON file encoding is disabled.",
-        ).into())
+    fn save_json<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
+        Err(InvalidConfig {
+            path: path.as_ref().to_string_lossy().into_owned(),
+            cause: ConfigError::ConfigFormatDisabled {
+                format: "JSON"
+            }
+        })
     }
 
     #[cfg(feature = "toml")]
-    fn save_toml(&self) -> Result<String> {
-        toml::to_string(self).chain_err(|| {
-            let e: error::Error = Error::new(
-                ErrorKind::InvalidInput,
-                "Failed to encode TOML configuration file.",
-            ).into();
-            e
+    fn save_toml<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
+        toml::to_string(self).map_err(|e| {
+            InvalidConfig {
+                path: path.as_ref().to_string_lossy().into_owned(),
+                cause: ConfigError::InvalidToml(TomlError::Write(e)),
+            }
         })
     }
 
     #[cfg(not(feature = "toml"))]
-    fn save_toml(&self) -> Result<String> {
-        Err(Error::new(
-            ErrorKind::InvalidInput,
-            "TOML file encoding is disabled.",
-        ).into())
+    fn save_toml<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
+        Err(InvalidConfig {
+            path: path.as_ref().to_string_lossy().into_owned(),
+            cause: ConfigError::ConfigFormatDisabled {
+                format: "TOML"
+            }
+        })
     }
 
     #[cfg(feature = "yaml")]
-    fn save_yaml(&self) -> Result<String> {
-        serde_yaml::to_string(self).chain_err(|| {
-            let e: error::Error = Error::new(
-                ErrorKind::InvalidInput,
-                "Failed to encode YAML configuration file.",
-            ).into();
-            e
+    fn save_yaml<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
+        serde_yaml::to_string(self).map_err(|e| {
+            InvalidConfig {
+                path: path.as_ref().to_string_lossy().into_owned(),
+                cause: ConfigError::InvalidYaml(e),
+            }
         })
     }
 
     #[cfg(not(feature = "yaml"))]
-    fn save_yaml(&self) -> Result<String> {
-        Err(Error::new(
-            ErrorKind::InvalidInput,
-            "YAML file encoding is disabled.",
-        ).into())
+    fn save_yaml<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
+        Err(InvalidConfig {
+            path: path.as_ref().to_string_lossy().into_owned(),
+            cause: ConfigError::ConfigFormatDisabled {
+                format: "YAML"
+            }
+        })
     }
 
     /// Determines whether or not the nickname provided is the owner of the bot.
@@ -260,7 +293,12 @@ impl Config {
 
     /// Gets the nickname specified in the configuration.
     pub fn nickname(&self) -> Result<&str> {
-        self.nickname.as_ref().map(|s| &s[..]).ok_or(error::ErrorKind::NicknameNotSpecified.into())
+        self.nickname.as_ref().map(|s| &s[..]).ok_or_else(|| {
+            InvalidConfig {
+                path: self.path(),
+                cause: ConfigError::NicknameNotSpecified,
+            }
+        })
     }
 
     /// Gets the bot's nickserv password specified in the configuration.
@@ -292,8 +330,12 @@ impl Config {
 
     /// Gets the address of the server specified in the configuration.
     pub fn server(&self) -> Result<&str> {
-        self.server.as_ref().map(|s| &s[..]).ok_or(error::ErrorKind::NicknameNotSpecified.into())
-
+        self.server.as_ref().map(|s| &s[..]).ok_or_else(|| {
+            InvalidConfig {
+                path: self.path(),
+                cause: ConfigError::ServerNotSpecified,
+            }
+        })
     }
 
     /// Gets the port of the server specified in the configuration.
@@ -487,31 +529,27 @@ mod test {
             options: Some(HashMap::new()),
             use_mock_connection: None,
             mock_initial_value: None,
+
+            ..Default::default()
         }
     }
 
     #[test]
     #[cfg(feature = "json")]
-    fn load() {
-        assert_eq!(Config::load(Path::new("client_config.json")).unwrap(), test_config());
-    }
-
-    #[test]
-    #[cfg(feature = "json")]
-    fn load_from_str() {
-        assert_eq!(Config::load("client_config.json").unwrap(), test_config());
+    fn load_from_json() {
+        assert_eq!(Config::load("client_config.json").unwrap(), test_config().with_path("client_config.json"));
     }
 
     #[test]
     #[cfg(feature = "toml")]
     fn load_from_toml() {
-        assert_eq!(Config::load("client_config.toml").unwrap(), test_config());
+        assert_eq!(Config::load("client_config.toml").unwrap(), test_config().with_path("client_config.toml"));
     }
 
     #[test]
     #[cfg(feature = "yaml")]
     fn load_from_yaml() {
-        assert_eq!(Config::load("client_config.yaml").unwrap(), test_config());
+        assert_eq!(Config::load("client_config.yaml").unwrap(), test_config().with_path("client_config.yaml"));
     }
 
     #[test]

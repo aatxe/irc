@@ -2,7 +2,7 @@
 use std::ascii::AsciiExt;
 use std::str::FromStr;
 
-use error;
+use error::MessageParseError;
 use proto::{ChannelExt, ChannelMode, Mode, Response, UserMode};
 
 /// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This
@@ -446,7 +446,7 @@ impl<'a> From<&'a Command> for String {
 
 impl Command {
     /// Constructs a new Command.
-    pub fn new(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> error::Result<Command> {
+    pub fn new(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> Result<Command, MessageParseError> {
         Ok(if cmd.eq_ignore_ascii_case("PASS") {
             match suffix {
                 Some(suffix) => {
@@ -1653,8 +1653,9 @@ impl CapSubCommand {
 }
 
 impl FromStr for CapSubCommand {
-    type Err = error::Error;
-    fn from_str(s: &str) -> error::Result<CapSubCommand> {
+    type Err = MessageParseError;
+
+    fn from_str(s: &str) -> Result<CapSubCommand, Self::Err> {
         if s.eq_ignore_ascii_case("LS") {
             Ok(CapSubCommand::LS)
         } else if s.eq_ignore_ascii_case("LIST") {
@@ -1672,7 +1673,10 @@ impl FromStr for CapSubCommand {
         } else if s.eq_ignore_ascii_case("DEL") {
             Ok(CapSubCommand::DEL)
         } else {
-            Err(error::ErrorKind::SubCommandParsingFailed.into())
+            Err(MessageParseError::InvalidSubcommand {
+                cmd: "CAP",
+                sub: s.to_owned(),
+            })
         }
     }
 }
@@ -1704,8 +1708,9 @@ impl MetadataSubCommand {
 }
 
 impl FromStr for MetadataSubCommand {
-    type Err = error::Error;
-    fn from_str(s: &str) -> error::Result<MetadataSubCommand> {
+    type Err = MessageParseError;
+
+    fn from_str(s: &str) -> Result<MetadataSubCommand, Self::Err> {
         if s.eq_ignore_ascii_case("GET") {
             Ok(MetadataSubCommand::GET)
         } else if s.eq_ignore_ascii_case("LIST") {
@@ -1715,7 +1720,10 @@ impl FromStr for MetadataSubCommand {
         } else if s.eq_ignore_ascii_case("CLEAR") {
             Ok(MetadataSubCommand::CLEAR)
         } else {
-            Err(error::ErrorKind::SubCommandParsingFailed.into())
+            Err(MessageParseError::InvalidSubcommand {
+                cmd: "METADATA",
+                sub: s.to_owned(),
+            })
         }
     }
 }
@@ -1743,8 +1751,9 @@ impl BatchSubCommand {
 }
 
 impl FromStr for BatchSubCommand {
-    type Err = error::Error;
-    fn from_str(s: &str) -> error::Result<BatchSubCommand> {
+    type Err = MessageParseError;
+
+    fn from_str(s: &str) -> Result<BatchSubCommand, Self::Err> {
         if s.eq_ignore_ascii_case("NETSPLIT") {
             Ok(BatchSubCommand::NETSPLIT)
         } else if s.eq_ignore_ascii_case("NETJOIN") {

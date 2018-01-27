@@ -1,7 +1,9 @@
 //! A module defining an API for IRC user and channel modes.
 use std::fmt;
 
-use error;
+use error::MessageParseError;
+use error::MessageParseError::InvalidModeString;
+use error::ModeParseError::*;
 use proto::Command;
 
 /// A marker trait for different kinds of Modes.
@@ -48,10 +50,10 @@ impl ModeType for UserMode {
 }
 
 impl UserMode {
-    fn from_char(c: char) -> error::Result<UserMode> {
+    fn from_char(c: char) -> UserMode {
         use self::UserMode::*;
 
-        Ok(match c {
+        match c {
             'a' => Away,
             'i' => Invisible,
             'w' => Wallops,
@@ -61,7 +63,7 @@ impl UserMode {
             's' => ServerNotices,
             'x' => MaskedHost,
             _ => Unknown(c),
-        })
+        }
     }
 }
 
@@ -141,10 +143,10 @@ impl ModeType for ChannelMode {
 }
 
 impl ChannelMode {
-    fn from_char(c: char) -> error::Result<ChannelMode> {
+    fn from_char(c: char) -> ChannelMode {
         use self::ChannelMode::*;
 
-        Ok(match c {
+        match c {
             'b' => Ban,
             'e' => Exception,
             'l' => Limit,
@@ -162,7 +164,7 @@ impl ChannelMode {
             'h' => Halfop,
             'v' => Voice,
             _ => Unknown(c),
-        })
+        }
     }
 }
 
@@ -242,7 +244,7 @@ enum PlusMinus {
 impl Mode<UserMode> {
     // TODO: turning more edge cases into errors.
     /// Parses the specified mode string as user modes.
-    pub fn as_user_modes(s: &str) -> error::Result<Vec<Mode<UserMode>>> {
+    pub fn as_user_modes(s: &str) -> Result<Vec<Mode<UserMode>>, MessageParseError> {
         use self::PlusMinus::*;
 
         let mut res = vec![];
@@ -255,11 +257,18 @@ impl Mode<UserMode> {
                 let init = match chars.next() {
                     Some('+') => Plus,
                     Some('-') => Minus,
-                    _ => return Err(error::ErrorKind::ModeParsingFailed.into()),
+                    Some(c) => return Err(InvalidModeString {
+                        string: s.to_owned(),
+                        cause: InvalidModeModifier { modifier: c },
+                    }),
+                    None => return Err(InvalidModeString {
+                        string: s.to_owned(),
+                        cause: MissingModeModifier,
+                    }),
                 };
 
                 for c in chars {
-                    let mode = UserMode::from_char(c)?;
+                    let mode = UserMode::from_char(c);
                     let arg = if mode.takes_arg() {
                         pieces.next()
                     } else {
@@ -281,7 +290,7 @@ impl Mode<UserMode> {
 impl Mode<ChannelMode> {
     // TODO: turning more edge cases into errors.
     /// Parses the specified mode string as channel modes.
-    pub fn as_channel_modes(s: &str) -> error::Result<Vec<Mode<ChannelMode>>> {
+    pub fn as_channel_modes(s: &str) -> Result<Vec<Mode<ChannelMode>>, MessageParseError> {
         use self::PlusMinus::*;
 
         let mut res = vec![];
@@ -294,11 +303,18 @@ impl Mode<ChannelMode> {
                 let init = match chars.next() {
                     Some('+') => Plus,
                     Some('-') => Minus,
-                    _ => return Err(error::ErrorKind::ModeParsingFailed.into()),
+                    Some(c) => return Err(InvalidModeString {
+                        string: s.to_owned(),
+                        cause: InvalidModeModifier { modifier: c },
+                    }),
+                    None => return Err(InvalidModeString {
+                        string: s.to_owned(),
+                        cause: MissingModeModifier,
+                    }),
                 };
 
                 for c in chars {
-                    let mode = ChannelMode::from_char(c)?;
+                    let mode = ChannelMode::from_char(c);
                     let arg = if mode.takes_arg() {
                         pieces.next()
                     } else {

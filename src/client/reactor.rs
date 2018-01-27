@@ -41,7 +41,7 @@ use proto::Message;
 /// For a full example usage, see [irc::client::reactor](./index.html).
 pub struct IrcReactor {
     inner: Core,
-    handlers: Vec<Box<Future<Item = (), Error = error::Error>>>,
+    handlers: Vec<Box<Future<Item = (), Error = error::IrcError>>>,
 }
 
 impl IrcReactor {
@@ -139,7 +139,7 @@ impl IrcReactor {
     pub fn register_server_with_handler<F, U>(
         &mut self, server: IrcServer, handler: F
     ) where F: Fn(&IrcServer, Message) -> U + 'static,
-            U: IntoFuture<Item = (), Error = error::Error> + 'static {
+            U: IntoFuture<Item = (), Error = error::IrcError> + 'static {
         self.handlers.push(Box::new(server.stream().for_each(move |message| {
             handler(&server, message)
         })));
@@ -151,7 +151,7 @@ impl IrcReactor {
     /// be sufficient for most use cases.
     pub fn register_future<F>(
         &mut self, future: F
-    ) where F: IntoFuture<Item = (), Error = error::Error> + 'static {
+    ) where F: IntoFuture<Item = (), Error = error::IrcError> + 'static {
         self.handlers.push(Box::new(future.into_future()))
     }
 
