@@ -2,7 +2,7 @@
 
 use futures::{Future, Stream};
 use futures::future;
-use tokio_core::reactor::Core;
+use tokio_core::reactor::{Core, Handle};
 
 use client::data::Config;
 use client::server::{IrcServer, IrcServerFuture, Server};
@@ -62,6 +62,13 @@ impl IrcReactor {
         &mut self, future: F
     ) where F: Future<Item = (), Error = error::Error> + 'static {
         self.handlers.push(Box::new(future))
+    }
+
+    /// Returns a handle to the internal event loop. This is a sort of escape hatch that allows you
+    /// to take more control over what runs on the reactor using `tokio`. This can be used for
+    /// sharing this reactor with some elements of other libraries.
+    pub fn inner_handle(&self) -> Handle {
+        self.inner.handle()
     }
 
     /// Consumes all registered handlers and futures, and runs them. When using
