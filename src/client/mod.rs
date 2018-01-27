@@ -2,6 +2,7 @@
 
 pub mod conn;
 pub mod data;
+pub mod reactor;
 pub mod server;
 pub mod transport;
 
@@ -16,7 +17,8 @@ pub mod prelude {
     //! method to send `Commands` because it makes it easy to see the whole set of possible
     //! interactions with a server. The `ServerExt` trait addresses this deficiency by defining a
     //! number of methods that provide a more clear and succinct interface for sending various
-    //! common IRC commands to the server.
+    //! common IRC commands to the server. An `IrcReactor` can be used to create and manage multiple
+    //! `IrcServers` with more fine-grained control over error management.
     //!
     //! The various `proto` types capture details of the IRC protocol that are used throughout the
     //! client API. `Message`, `Command`, and `Response` are used to send and receive messages along
@@ -29,6 +31,7 @@ pub mod prelude {
     //! as well as in the parsed form of received mode commands.
 
     pub use client::data::Config;
+    pub use client::reactor::IrcReactor;
     pub use client::server::{EachIncomingExt, IrcServer, Server};
     pub use client::server::utils::ServerExt;
     pub use proto::{Capability, ChannelExt, Command, Message, NegotiationVersion, Response};

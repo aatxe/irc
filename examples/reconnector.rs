@@ -23,18 +23,25 @@ fn main() {
 
     let mut reactor = IrcReactor::new().unwrap();
 
-    for config in configs {
-        // Immediate errors like failure to resolve the server's name or to establish any connection will
-        // manifest here in the result of prepare_server_and_connect.
-        let server = reactor.prepare_server_and_connect(&config).unwrap();
-        server.identify().unwrap();
-        // Here, we tell the reactor to setup this server for future handling (in run) using the specified
-        // handler function process_msg.
-        reactor.register_server_with_handler(server, process_msg);
-    }
+    loop {
+        let res = configs.iter().fold(Ok(()), |acc, config| {
+            acc.and(
+                reactor.prepare_server_and_connect(config).and_then(|server| {
+                    server.identify().and(Ok(server))
+                }).and_then(|server| {
+                    reactor.register_server_with_handler(server, process_msg);
+                    Ok(())
+                })
+            )
+        }).and_then(|()| reactor.run());
 
-    // Runtime errors like a dropped connection will manifest here in the result of run.
-    reactor.run().unwrap();
+        match res {
+            // The connections ended normally (for example, they sent a QUIT message to the server).
+            Ok(_) => break,
+            // Something went wrong! We'll print the error, and restart the connections.
+            Err(e) => eprintln!("{}", e),
+        }
+    }
 }
 
 fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> {
@@ -43,6 +50,8 @@ fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> {
         Command::PRIVMSG(ref target, ref msg) => {
             if msg.contains("pickles") {
                 server.send_privmsg(target, "Hi!")?;
+            } else if msg.contains("quit") {
+                server.send_quit("bye")?;
             }
         }
         _ => (),
