@@ -1,11 +1,11 @@
 //! The primary API for communicating with an IRC server.
 //!
 //! This API provides the ability to connect to an IRC server via the
-//! [IrcServer](struct.IrcServer.html) type. The [Server](trait.Server.html) trait that
-//! [IrcServer](struct.IrcServer.html) implements provides methods for communicating with this
-//! server. An extension trait, [ServerExt](./utils/trait.ServerExt.html), provides short-hand for
+//! [`IrcServer`](struct.IrcServer.html) type. The [`Server`](trait.Server.html) trait that
+//! [`IrcServer`](struct.IrcServer.html) implements provides methods for communicating with this
+//! server. An extension trait, [`ServerExt`](./utils/trait.ServerExt.html), provides short-hand for
 //! sending a variety of important messages without referring to their entries in
-//! [proto::command](../../proto/command/enum.Command.html).
+//! [`proto::command`](../../proto/command/enum.Command.html).
 //!
 //! # Examples
 //!
@@ -45,8 +45,6 @@
 //! }).unwrap();
 //! # }
 //! ```
-#[cfg(feature = "ctcp")]
-use std::ascii::AsciiExt;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
@@ -73,9 +71,9 @@ pub mod utils;
 
 /// Trait extending all IRC streams with `for_each_incoming` convenience function.
 ///
-/// This is typically used in conjunction with [Server::stream](trait.Server.html#tymethod.stream)
+/// This is typically used in conjunction with [`Server::stream`](trait.Server.html#tymethod.stream)
 /// in order to use an API akin to
-/// [Server::for_each_incoming](trait.Server.html#method.for_each_incoming).
+/// [`Server::for_each_incoming`](trait.Server.html#method.for_each_incoming).
 ///
 /// # Example
 ///
@@ -352,7 +350,6 @@ impl ServerState {
         trace!("[RECV] {}", msg.to_string());
         match msg.command {
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
-            /// This will panic if not specified.
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
             QUIT(_) => self.handle_quit(msg.source_nickname().unwrap_or("")),
             NICK(ref new_nick) => {
@@ -595,12 +592,12 @@ impl ServerState {
 ///
 /// The type itself provides a number of methods to create new connections, but most of the API
 /// surface is in the form of the [Server](trait.Server.html) and
-/// [ServerExt](./utils/trait.ServerExt.html) traits that provide methods of communicating with the
-/// server after connection. Cloning an `IrcServer` is relatively cheap, as it's equivalent to
+/// [`ServerExt`](./utils/trait.ServerExt.html) traits that provide methods of communicating with
+/// the server after connection. Cloning an `IrcServer` is relatively cheap, as it's equivalent to
 /// cloning a single `Arc`. This may be useful for setting up multiple threads with access to one
 /// connection.
 ///
-/// For a full example usage, see [irc::client::server](./index.html).
+/// For a full example usage, see [`irc::client::server`](./index.html).
 #[derive(Clone, Debug)]
 pub struct IrcServer {
     /// The internal, thread-safe server state.
@@ -748,7 +745,7 @@ impl IrcServer {
     /// [futures](http://docs.rs/futures). Additionally, you can find detailed tutorials on using
     /// both libraries on the [tokio website](https://tokio.rs/docs/getting-started/tokio/). An easy
     /// to use abstraction that does not require this knowledge is available via
-    /// [IrcReactors](../reactor/struct.IrcReactor.html).
+    /// [`IrcReactors`](../reactor/struct.IrcReactor.html).
     ///
     /// # Example
     /// ```no_run
@@ -809,7 +806,7 @@ impl IrcServer {
 /// use cases. To learn more, you can view the documentation for the
 /// [futures](https://docs.rs/futures/) crate, or the tutorials for
 /// [tokio](https://tokio.rs/docs/getting-started/futures/). An easy to use abstraction that does
-/// not require this knowledge is available via [IrcReactors](../reactor/struct.IrcReactor.html).
+/// not require this knowledge is available via [`IrcReactors`](../reactor/struct.IrcReactor.html).
     #[derive(Debug)]
 pub struct IrcServerFuture<'a> {
     conn: ConnectionFuture<'a>,
@@ -849,7 +846,7 @@ impl<'a> Future for IrcServerFuture<'a> {
 ///
 /// This type should only be used by advanced users who are familiar with the implementation of this
 /// crate. An easy to use abstraction that does not require this knowledge is available via
-/// [IrcReactors](../reactor/struct.IrcReactor.html).
+/// [`IrcReactors`](../reactor/struct.IrcReactor.html).
 pub struct PackedIrcServer(pub IrcServer, pub Box<Future<Item = (), Error = error::Error>>);
 
 #[cfg(test)]

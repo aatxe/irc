@@ -80,19 +80,19 @@ impl<'a> Future for ConnectionFuture<'a> {
 
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
         match *self {
-            ConnectionFuture::Unsecured(ref config, ref mut inner) => {
+            ConnectionFuture::Unsecured(config, ref mut inner) => {
                 let framed = try_ready!(inner.poll()).framed(IrcCodec::new(config.encoding())?);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Unsecured(transport)))
             }
-            ConnectionFuture::Secured(ref config, ref mut inner) => {
+            ConnectionFuture::Secured(config, ref mut inner) => {
                 let framed = try_ready!(inner.poll()).framed(IrcCodec::new(config.encoding())?);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Secured(transport)))
             }
-            ConnectionFuture::Mock(ref config) => {
+            ConnectionFuture::Mock(config) => {
                 let enc: error::Result<_> = encoding_from_whatwg_label(
                     config.encoding()
                 ).ok_or_else(|| io::Error::new(

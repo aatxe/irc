@@ -38,7 +38,7 @@ use proto::Message;
 /// all connected servers as the application runs. It can be used to run multiple servers on the
 /// same thread, as well as to get better control over error management in an IRC client.
 ///
-/// For a full example usage, see [irc::client::reactor](./index.html).
+/// For a full example usage, see [`irc::client::reactor`](./index.html).
 pub struct IrcReactor {
     inner: Core,
     handlers: Vec<Box<Future<Item = (), Error = error::Error>>>,

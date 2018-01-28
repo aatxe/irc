@@ -1,7 +1,7 @@
 //! A simple, thread-safe, and async-friendly library for IRC clients.
 //!
 //! # Quick Start
-//! The main public API is entirely exported in [client::prelude](./client/prelude/index.html). This
+//! The main public API is entirely exported in [`client::prelude`](./client/prelude/index.html). This
 //! should include everything necessary to write an IRC client or bot.
 //! 
 //! # A Whirlwind Tour
@@ -11,7 +11,7 @@
 //! implementation that could in principle be used in either client or server software. Both modules
 //! feature a number of components that are low-level and can be used to build alternative APIs for
 //! the IRC protocol. For the average user, the higher-level components for an IRC client are all
-//! re-exported in [client::prelude](./client/prelude/index.html). That module serves as the best
+//! re-exported in [`client::prelude`](./client/prelude/index.html). That module serves as the best
 //! starting point for a new user trying to understand the high-level API.
 //!
 //! # Example
@@ -72,7 +72,7 @@ pub mod client;
 pub mod error;
 pub mod proto;
 
-const VERSION_STR: &'static str = concat!(
+const VERSION_STR: &str = concat!(
     env!("CARGO_PKG_NAME"),
     ":",
     env!("CARGO_PKG_VERSION"),

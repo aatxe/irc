@@ -1,12 +1,12 @@
 //! Utilities and shortcuts for working with IRC servers.
 //!
-//! This module provides the [ServerExt](trait.ServerExt.html) trait which is the idiomatic way of
+//! This module provides the [`ServerExt`](trait.ServerExt.html) trait which is the idiomatic way of
 //! sending messages to an IRC server. This trait is automatically implemented for everything that
-//! implements [Server](../trait.Server.html) and is designed to provide important functionality
+//! implements [`Server`](../trait.Server.html) and is designed to provide important functionality
 //! without clutter.
 //!
 //! # Examples
-//! 
+//!
 //! Using these APIs, we can connect to a server and send a one-off message (in this case,
 //! identifying with the server).
 //!
@@ -15,7 +15,7 @@
 //! use irc::client::prelude::{IrcServer, ServerExt};
 //!
 //! # fn main() {
-//! let server = IrcServer::new("config.toml").unwrap(); 
+//! let server = IrcServer::new("config.toml").unwrap();
 //! // identify and send_privmsg both come from `ServerExt`
 //! server.identify().unwrap();
 //! server.send_privmsg("#example", "Hello, world!").unwrap();

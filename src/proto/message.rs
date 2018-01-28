@@ -85,7 +85,7 @@ impl Message {
             s.find('@'),
             s.find('.'),
         ) {
-            (Some(i), _, _) => Some(&s[..i]), // <nick> '!' <user> [ '@' <host> ]
+            (Some(i), _, _) | // <nick> '!' <user> [ '@' <host> ]
             (None, Some(i), _) => Some(&s[..i]), // <nick> '@' <host>
             (None, None, None) => Some(s), // <nick>
             _ => None, // <servername>
@@ -223,7 +223,7 @@ impl FromStr for Message {
                 cmd
             }
             // If there's no arguments but the "command" starts with colon, it's not a command.
-            None if state.starts_with(":") => return Err(ErrorKind::InvalidCommand.into()),
+            None if state.starts_with(':') => return Err(ErrorKind::InvalidCommand.into()),
             // If there's no arguments following the command, the rest of the state is the command.
             None => {
                 let cmd = state;
