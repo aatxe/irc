@@ -12,15 +12,15 @@ fn main() {
         channels: Some(vec!["#irc-crate".to_owned()]),
         ..Default::default()
     };
-    let server = IrcServer::from_config(config).unwrap();
-    server.identify().unwrap();
-    let server2 = server.clone();
+    let client = IrcClient::from_config(config).unwrap();
+    client.identify().unwrap();
+    let client2 = client.clone();
     // Let's set up a loop that just prints the messages.
     thread::spawn(move || {
-        server2.stream().map(|m| print!("{}", m)).wait().count();
+        client2.stream().map(|m| print!("{}", m)).wait().count();
     });
     loop {
-        server.send_privmsg("#irc-crate", "TWEET TWEET").unwrap();
+        client.send_privmsg("#irc-crate", "TWEET TWEET").unwrap();
         thread::sleep(Duration::new(10, 0));
     }
 }

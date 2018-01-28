@@ -1,6 +1,6 @@
 # irc [![Build Status][ci-badge]][ci] [![Crates.io][cr-badge]][cr] [![Docs][doc-badge]][doc] [![Built with Spacemacs][bws]][sm]
 
-[ci-badge]: https://travis-ci.org/aatxe/irc.svg?branch=master
+[ci-badge]: https://travis-ci.org/aatxe/irc.svg?branch=stable
 [ci]: https://travis-ci.org/aatxe/irc
 [cr-badge]: https://img.shields.io/crates/v/irc.svg
 [cr]: https://crates.io/crates/irc
@@ -19,7 +19,7 @@ can be disabled accordingly.
 
 ## Getting Started ##
 
-To start using this library with cargo, you can simply add `irc = "0.12"` to your dependencies in
+To start using this library with cargo, you can simply add `irc = "0.13"` to your dependencies in
 your Cargo.toml file. You'll likely want to take a look at some of the examples, as well as the
 documentation. You'll also be able to find below a small template to get a feel for the library.
 
@@ -74,12 +74,11 @@ fn main() {
 Like the rest of the IRC crate, configuration is built with flexibility in mind. You can easily
 create `Config` objects programmatically and choose your own methods for handling any saving or
 loading of configuration required. However, for convenience, we've also included the option of
-loading files with `serde` to write configurations. By default, we support JSON and TOML. As of
-0.12.4, TOML is the preferred configuration format. We have bundled a conversion tool as
-`convertconf` in the examples. In a future version, we will likely disable JSON by default.
-Additionally, you can enable the optional `yaml` feature to get support for YAML as well. All the
-configuration fields are optional, and thus any of them can be omitted (though, omitting a
-nickname or server will cause the program to fail for obvious reasons).
+loading files with `serde` to write configurations. The default configuration format is TOML,
+though there is optional support for JSON and YAML via the optional `json` and `yaml` features. All
+the configuration fields are optional, and can thus be omitted, but a working configuration requires
+at least a `server` and `nickname`. You can find detailed explanations of the configuration format
+[here](https://docs.rs/irc/0.12.8/irc/client/data/config/struct.Config.html#fields).
 
 Here's an example of a complete configuration in TOML:
 
@@ -130,5 +129,4 @@ tool should make it easy for users to migrate their old configurations to TOML.
 Contributions to this library would be immensely appreciated. Prior to version 0.12.0, this
 library was public domain. As of 0.12.0, this library is offered under the Mozilla Public License
 2.0 whose text can be found in `LICENSE.md`. Fostering an inclusive community around `irc` is
-important, and to that end, we've adopted the
-[Contributor Convenant](https://www.contributor-covenant.org).
+important, and to that end, we've adopted an explicit Code of Conduct found in `CODE_OF_CONDUCT.md`.

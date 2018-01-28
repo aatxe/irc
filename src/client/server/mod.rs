@@ -1,11 +1,11 @@
 //! The primary API for communicating with an IRC server.
 //!
 //! This API provides the ability to connect to an IRC server via the
-//! [IrcServer](struct.IrcServer.html) type. The [Server](trait.Server.html) trait that
-//! [IrcServer](struct.IrcServer.html) implements provides methods for communicating with this
-//! server. An extension trait, [ServerExt](./utils/trait.ServerExt.html), provides short-hand for
+//! [`IrcServer`](struct.IrcServer.html) type. The [`Server`](trait.Server.html) trait that
+//! [`IrcServer`](struct.IrcServer.html) implements provides methods for communicating with this
+//! server. An extension trait, [`ServerExt`](./utils/trait.ServerExt.html), provides short-hand for
 //! sending a variety of important messages without referring to their entries in
-//! [proto::command](../../proto/command/enum.Command.html).
+//! [`proto::command`](../../proto/command/enum.Command.html).
 //!
 //! # Examples
 //!
@@ -17,7 +17,7 @@
 //! use irc::client::prelude::{IrcServer, ServerExt};
 //!
 //! # fn main() {
-//! let server = IrcServer::new("config.toml").unwrap(); 
+//! let server = IrcServer::new("config.toml").unwrap();
 //! // identify comes from `ServerExt`
 //! server.identify().unwrap();
 //! # }
@@ -73,9 +73,9 @@ pub mod utils;
 
 /// Trait extending all IRC streams with `for_each_incoming` convenience function.
 ///
-/// This is typically used in conjunction with [Server::stream](trait.Server.html#tymethod.stream)
+/// This is typically used in conjunction with [`Server::stream`](trait.Server.html#tymethod.stream)
 /// in order to use an API akin to
-/// [Server::for_each_incoming](trait.Server.html#method.for_each_incoming).
+/// [`Server::for_each_incoming`](trait.Server.html#method.for_each_incoming).
 ///
 /// # Example
 ///
@@ -85,7 +85,7 @@ pub mod utils;
 /// use irc::client::prelude::EachIncomingExt;
 ///
 /// # fn main() {
-/// # let server = IrcServer::new("config.toml").unwrap(); 
+/// # let server = IrcServer::new("config.toml").unwrap();
 /// # server.identify().unwrap();
 /// server.stream().for_each_incoming(|irc_msg| {
 ///   match irc_msg.command {
@@ -97,7 +97,7 @@ pub mod utils;
 /// }).unwrap();
 /// # }
 /// ```
-pub trait EachIncomingExt: Stream<Item=Message, Error=error::Error> {
+pub trait EachIncomingExt: Stream<Item=Message, Error=error::IrcError> {
     /// Blocks on the stream, running the given function on each incoming message as they arrive.
     fn for_each_incoming<F>(self, mut f: F) -> error::Result<()>
         where
@@ -111,7 +111,7 @@ pub trait EachIncomingExt: Stream<Item=Message, Error=error::Error> {
     }
 }
 
-impl<T> EachIncomingExt for T where T: Stream<Item=Message, Error=error::Error> {}
+impl<T> EachIncomingExt for T where T: Stream<Item=Message, Error=error::IrcError> {}
 
 /// An interface for communicating with an IRC server.
 pub trait Server {
@@ -128,7 +128,7 @@ pub trait Server {
     /// # extern crate irc;
     /// # use irc::client::prelude::*;
     /// # fn main() {
-    /// # let server = IrcServer::new("config.toml").unwrap(); 
+    /// # let server = IrcServer::new("config.toml").unwrap();
     /// server.send(Command::NICK("example".to_owned())).unwrap();
     /// server.send(Command::USER("user".to_owned(), "0".to_owned(), "name".to_owned())).unwrap();
     /// # }
@@ -153,7 +153,7 @@ pub trait Server {
     /// # extern crate irc;
     /// # use irc::client::prelude::{IrcServer, ServerExt, Server, Command};
     /// # fn main() {
-    /// # let server = IrcServer::new("config.toml").unwrap(); 
+    /// # let server = IrcServer::new("config.toml").unwrap();
     /// # server.identify().unwrap();
     /// server.for_each_incoming(|irc_msg| {
     ///   match irc_msg.command {
@@ -189,7 +189,7 @@ pub trait Server {
     /// use irc::proto::caps::Capability;
     ///
     /// # fn main() {
-    /// # let server = IrcServer::new("config.toml").unwrap(); 
+    /// # let server = IrcServer::new("config.toml").unwrap();
     /// server.send_cap_req(&[Capability::MultiPrefix]).unwrap();
     /// server.identify().unwrap();
     /// # }
@@ -203,6 +203,7 @@ pub trait Server {
 /// traditional use cases. To learn more, you can view the documentation for the
 /// [futures](https://docs.rs/futures/) crate, or the tutorials for
 /// [tokio](https://tokio.rs/docs/getting-started/futures/).
+#[derive(Debug)]
 pub struct ServerStream {
     state: Arc<ServerState>,
     stream: SplitStream<Connection>,
@@ -210,7 +211,7 @@ pub struct ServerStream {
 
 impl Stream for ServerStream {
     type Item = Message;
-    type Error = error::Error;
+    type Error = error::IrcError;
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
         match try_ready!(self.stream.poll()) {
@@ -224,6 +225,7 @@ impl Stream for ServerStream {
 }
 
 /// Thread-safe internal state for an IRC server connection.
+#[derive(Debug)]
 struct ServerState {
     /// The configuration used with this connection.
     config: Config,
@@ -326,7 +328,9 @@ impl ServerState {
         let alt_nicks = self.config().alternate_nicknames();
         let index = self.alt_nick_index.read().unwrap();
         match *index {
-            0 => self.config().nickname(),
+            0 => self.config().nickname().expect(
+                "current_nickname should not be callable if nickname is not defined."
+            ),
             i => alt_nicks[i - 1],
         }
     }
@@ -420,12 +424,12 @@ impl ServerState {
                     self.send(NICKSERV(format!(
                         "{} {} {}",
                         seq,
-                        self.config().nickname(),
+                        self.config().nickname()?,
                         self.config().nick_password()
                     )))?;
                 }
                 *index = 0;
-                self.send(NICK(self.config().nickname().to_owned()))?
+                self.send(NICK(self.config().nickname()?.to_owned()))?
             }
             self.send(NICKSERV(
                 format!("IDENTIFY {}", self.config().nick_password()),
@@ -437,7 +441,16 @@ impl ServerState {
         if self.config().umodes().is_empty() {
             Ok(())
         } else {
-            self.send_mode(self.current_nickname(), &Mode::as_user_modes(self.config().umodes())?)
+            self.send_mode(
+                self.current_nickname(), &Mode::as_user_modes(self.config().umodes()).map_err(|e| {
+                    error::IrcError::InvalidMessage {
+                        string: format!(
+                            "MODE {} {}", self.current_nickname(), self.config().umodes()
+                        ),
+                        cause: e,
+                    }
+                })?
+            )
         }
     }
 
@@ -590,11 +603,13 @@ impl ServerState {
 ///
 /// The type itself provides a number of methods to create new connections, but most of the API
 /// surface is in the form of the [Server](trait.Server.html) and
-/// [ServerExt](./utils/trait.ServerExt.html) traits that provide methods of communicating with the
-/// server after connection. Cloning an `IrcServer` is relatively cheap, as it's equivalent to
+/// [`ServerExt`](./utils/trait.ServerExt.html) traits that provide methods of communicating with
+/// the server after connection. Cloning an `IrcServer` is relatively cheap, as it's equivalent to
 /// cloning a single `Arc`. This may be useful for setting up multiple threads with access to one
 /// connection.
-#[derive(Clone)]
+///
+/// For a full example usage, see [`irc::client::server`](./index.html).
+#[derive(Clone, Debug)]
 pub struct IrcServer {
     /// The internal, thread-safe server state.
     state: Arc<ServerState>,
@@ -667,7 +682,7 @@ impl IrcServer {
     /// # extern crate irc;
     /// # use irc::client::prelude::*;
     /// # fn main() {
-    /// let server = IrcServer::new("config.toml").unwrap(); 
+    /// let server = IrcServer::new("config.toml").unwrap();
     /// # }
     /// ```
     pub fn new<P: AsRef<Path>>(config: P) -> error::Result<IrcServer> {
@@ -678,7 +693,8 @@ impl IrcServer {
     /// immediately. Due to current design limitations, error handling here is somewhat limited. In
     /// particular, failed connections will cause the program to panic because the connection
     /// attempt is made on a freshly created thread. If you need to avoid this behavior and handle
-    /// errors more gracefully, it is recommended that you use `IrcServer::new_future` instead.
+    /// errors more gracefully, it is recommended that you use an
+    /// [IrcReactor](../reactor/struct.IrcReactor.html) instead.
     ///
     /// # Example
     /// ```no_run
@@ -691,7 +707,7 @@ impl IrcServer {
     ///   server: Some("irc.example.com".to_owned()),
     ///   .. Default::default()
     /// };
-    /// let server = IrcServer::from_config(config).unwrap(); 
+    /// let server = IrcServer::from_config(config).unwrap();
     /// # }
     /// ```
     pub fn from_config(config: Config) -> error::Result<IrcServer> {
@@ -700,22 +716,21 @@ impl IrcServer {
         let (tx_incoming, rx_incoming) = oneshot::channel();
         let (tx_view, rx_view) = oneshot::channel();
 
-        let cfg = config.clone();
+        let mut reactor = Core::new()?;
+        let handle = reactor.handle();
+        // Attempting to connect here (as opposed to on the thread) allows more errors to happen
+        // immediately, rather than to occur as panics on the thread. In particular, non-resolving
+        // server names, and failed SSL setups will appear here.
+        let conn = reactor.run(Connection::new(&config, &handle)?)?;
+
         let _ = thread::spawn(move || {
             let mut reactor = Core::new().unwrap();
-
-            // Setting up internal processing stuffs.
-            let handle = reactor.handle();
-            let conn = reactor
-                .run(Connection::new(&cfg, &handle).unwrap())
-                .unwrap();
 
             tx_view.send(conn.log_view()).unwrap();
             let (sink, stream) = conn.split();
 
-            let outgoing_future = sink.send_all(rx_outgoing.map_err(|_| {
-                let res: error::Error = error::ErrorKind::ChannelError.into();
-                res
+            let outgoing_future = sink.send_all(rx_outgoing.map_err::<error::IrcError, _>(|_| {
+                unreachable!("futures::sync::mpsc::Receiver should never return Err");
             })).map(|_| ()).map_err(|e| panic!("{}", e));
 
             // Send the stream half back to the original thread.
@@ -738,7 +753,9 @@ impl IrcServer {
     /// Proper usage requires familiarity with `tokio` and `futures`. You can find more information
     /// in the crate documentation for [tokio-core](http://docs.rs/tokio-core) or
     /// [futures](http://docs.rs/futures). Additionally, you can find detailed tutorials on using
-    /// both libraries on the [tokio website](https://tokio.rs/docs/getting-started/tokio/).
+    /// both libraries on the [tokio website](https://tokio.rs/docs/getting-started/tokio/). An easy
+    /// to use abstraction that does not require this knowledge is available via
+    /// [`IrcReactors`](../reactor/struct.IrcReactor.html).
     ///
     /// # Example
     /// ```no_run
@@ -746,6 +763,7 @@ impl IrcServer {
     /// # extern crate tokio_core;
     /// # use std::default::Default;
     /// # use irc::client::prelude::*;
+    /// # use irc::client::server::PackedIrcServer;
     /// # use irc::error;
     /// # use tokio_core::reactor::Core;
     /// # fn main() {
@@ -755,14 +773,14 @@ impl IrcServer {
     /// #  .. Default::default()
     /// # };
     /// let mut reactor = Core::new().unwrap();
-    /// let future = IrcServer::new_future(reactor.handle(), &config).unwrap(); 
+    /// let future = IrcServer::new_future(reactor.handle(), &config).unwrap();
     /// // immediate connection errors (like no internet) will turn up here...
-    /// let server = reactor.run(future).unwrap();
+    /// let PackedIrcServer(server, future) = reactor.run(future).unwrap();
     /// // runtime errors (like disconnections and so forth) will turn up here...
     /// reactor.run(server.stream().for_each(move |irc_msg| {
     ///   // processing messages works like usual
     ///   process_msg(&server, irc_msg)
-    /// })).unwrap();
+    /// }).join(future)).unwrap();
     /// # }
     /// # fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> { Ok(()) }
     /// ```
@@ -771,7 +789,7 @@ impl IrcServer {
 
         Ok(IrcServerFuture {
             conn: Connection::new(config, &handle)?,
-            handle: handle,
+            _handle: handle,
             config: config,
             tx_outgoing: Some(tx_outgoing),
             rx_outgoing: Some(rx_outgoing),
@@ -797,18 +815,20 @@ impl IrcServer {
 /// Interaction with this future relies on the `futures` API, but is only expected for more advanced
 /// use cases. To learn more, you can view the documentation for the
 /// [futures](https://docs.rs/futures/) crate, or the tutorials for
-/// [tokio](https://tokio.rs/docs/getting-started/futures/).
+/// [tokio](https://tokio.rs/docs/getting-started/futures/). An easy to use abstraction that does
+/// not require this knowledge is available via [`IrcReactors`](../reactor/struct.IrcReactor.html).
+    #[derive(Debug)]
 pub struct IrcServerFuture<'a> {
     conn: ConnectionFuture<'a>,
-    handle: Handle,
+    _handle: Handle,
     config: &'a Config,
     tx_outgoing: Option<UnboundedSender<Message>>,
     rx_outgoing: Option<UnboundedReceiver<Message>>,
 }
 
 impl<'a> Future for IrcServerFuture<'a> {
-    type Item = IrcServer;
-    type Error = error::Error;
+    type Item = PackedIrcServer;
+    type Error = error::IrcError;
 
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
         let conn = try_ready!(self.conn.poll());
@@ -816,22 +836,29 @@ impl<'a> Future for IrcServerFuture<'a> {
         let view = conn.log_view();
         let (sink, stream) = conn.split();
 
-        let outgoing_future = sink.send_all(self.rx_outgoing.take().unwrap().map_err(|()| {
-            let res: error::Error = error::ErrorKind::ChannelError.into();
-            res
-        })).map(|_| ()).map_err(|e| panic!(e));
+        let outgoing_future = sink.send_all(
+            self.rx_outgoing.take().unwrap().map_err::<error::IrcError, _>(|()| {
+                unreachable!("futures::sync::mpsc::Receiver should never return Err");
+            })
+        ).map(|_| ());
 
-        self.handle.spawn(outgoing_future);
-
-        Ok(Async::Ready(IrcServer {
+        let server = IrcServer {
             state: Arc::new(ServerState::new(
                 stream, self.tx_outgoing.take().unwrap(), self.config.clone()
             )),
             view: view,
-        }))
+        };
+        Ok(Async::Ready(PackedIrcServer(server, Box::new(outgoing_future))))
     }
 }
 
+/// An `IrcServer` packaged with a future that drives its message sending. In order for the server
+/// to actually work properly, this future _must_ be running.
+///
+/// This type should only be used by advanced users who are familiar with the implementation of this
+/// crate. An easy to use abstraction that does not require this knowledge is available via
+/// [`IrcReactors`](../reactor/struct.IrcReactor.html).
+pub struct PackedIrcServer(pub IrcServer, pub Box<Future<Item = (), Error = error::IrcError>>);
 
 #[cfg(test)]
 mod test {

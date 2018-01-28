@@ -1,4 +1,4 @@
-# Contributor Covenant Code of Conduct
+# Code of Conduct
 
 ## Our Pledge
 
@@ -50,13 +50,15 @@ when an individual is representing the project or its community. Examples of
 representing a project or community include using an official project e-mail
 address, posting via an official social media account, or acting as an appointed
 representative at an online or offline event. Representation of a project may be
-further defined and clarified by project maintainers.
+further defined and clarified by project maintainers. In general, non-maintainer
+contributors will not be considered representing the project in public spaces
+except when explicitly stating such.
 
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at [awe@pdgn.co](mailto:awe@pdgn.co). All
-complaints will be reviewed and investigated and will result in a response that
+reported by contacting the lead project maintainer at [awe@pdgn.co](mailto:awe@pdgn.co).
+All complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.
 Further details of specific enforcement policies may be posted separately.

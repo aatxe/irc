@@ -44,11 +44,11 @@ where
             inner: inner,
             burst_timer: tokio_timer::wheel().build(),
             rolling_burst_window: VecDeque::new(),
-            burst_window_length: config.burst_window_length() as u64,
-            max_burst_messages: config.max_messages_in_burst() as u64,
+            burst_window_length: u64::from(config.burst_window_length()),
+            max_burst_messages: u64::from(config.max_messages_in_burst()),
             current_burst_messages: 0,
-            ping_timer: timer.interval(Duration::from_secs(config.ping_time() as u64)),
-            ping_timeout: config.ping_timeout() as u64,
+            ping_timer: timer.interval(Duration::from_secs(u64::from(config.ping_time()))),
+            ping_timeout: u64::from(config.ping_timeout()),
             last_ping_data: String::new(),
             last_ping_sent: Instant::now(),
             last_pong_received: Instant::now(),
@@ -88,12 +88,12 @@ where
     T: AsyncRead + AsyncWrite,
 {
     type Item = Message;
-    type Error = error::Error;
+    type Error = error::IrcError;
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
         if self.ping_timed_out() {
             self.close()?;
-            return Err(error::ErrorKind::PingTimeout.into())
+            return Err(error::IrcError::PingTimeout)
         }
 
         let timer_poll = self.ping_timer.poll()?;
@@ -144,12 +144,12 @@ where
     T: AsyncRead + AsyncWrite,
 {
     type SinkItem = Message;
-    type SinkError = error::Error;
+    type SinkError = error::IrcError;
 
     fn start_send(&mut self, item: Self::SinkItem) -> StartSend<Self::SinkItem, Self::SinkError> {
         if self.ping_timed_out() {
             self.close()?;
-            Err(error::ErrorKind::PingTimeout.into())
+            Err(error::IrcError::PingTimeout)
         } else {
             // Check if the oldest message in the rolling window is discounted.
             if let Async::Ready(()) = self.rolling_burst_window_front()? {
@@ -180,7 +180,7 @@ where
     fn poll_complete(&mut self) -> Poll<(), Self::SinkError> {
         if self.ping_timed_out() {
             self.close()?;
-            Err(error::ErrorKind::PingTimeout.into())
+            Err(error::IrcError::PingTimeout)
         } else {
             Ok(self.inner.poll_complete()?)
         }
@@ -201,16 +201,12 @@ pub struct LogView {
 impl LogView {
     /// Gets a read guard for all the messages sent on the transport.
     pub fn sent(&self) -> error::Result<RwLockReadGuard<Vec<Message>>> {
-        self.sent.read().map_err(
-            |_| error::ErrorKind::PoisonedLog.into(),
-        )
+        self.sent.read().map_err(|_| error::IrcError::PoisonedLog)
     }
 
     /// Gets a read guard for all the messages received on the transport.
     pub fn received(&self) -> error::Result<RwLockReadGuard<Vec<Message>>> {
-        self.received.read().map_err(
-            |_| error::ErrorKind::PoisonedLog.into(),
-        )
+        self.received.read().map_err(|_| error::IrcError::PoisonedLog)
     }
 }
 
@@ -250,13 +246,13 @@ where
     T: AsyncRead + AsyncWrite,
 {
     type Item = Message;
-    type Error = error::Error;
+    type Error = error::IrcError;
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
         match try_ready!(self.inner.poll()) {
             Some(msg) => {
                 let recv: error::Result<_> = self.view.received.write().map_err(|_| {
-                    error::ErrorKind::PoisonedLog.into()
+                    error::IrcError::PoisonedLog
                 });
                 recv?.push(msg.clone());
                 Ok(Async::Ready(Some(msg)))
@@ -271,12 +267,12 @@ where
     T: AsyncRead + AsyncWrite,
 {
     type SinkItem = Message;
-    type SinkError = error::Error;
+    type SinkError = error::IrcError;
 
     fn start_send(&mut self, item: Self::SinkItem) -> StartSend<Self::SinkItem, Self::SinkError> {
         let res = self.inner.start_send(item.clone())?;
         let sent: error::Result<_> = self.view.sent.write().map_err(|_| {
-            error::ErrorKind::PoisonedLog.into()
+            error::IrcError::PoisonedLog
         });
         sent?.push(item);
         Ok(res)

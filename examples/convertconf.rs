@@ -16,7 +16,7 @@ fn main() {
     let args: Vec<_> = env::args().collect();
     match parse(&args) {
         Ok(Some((ref input, ref output))) => {
-            let cfg = Config::load(input).unwrap();
+            let mut cfg = Config::load(input).unwrap();
             cfg.save(output).unwrap();
             println!("Converted {} to {}.", input, output);
         }

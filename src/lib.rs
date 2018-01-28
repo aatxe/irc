@@ -1,18 +1,18 @@
 //! A simple, thread-safe, and async-friendly library for IRC clients.
 //!
 //! # Quick Start
-//! The main public API is entirely exported in [client::prelude](./client/prelude/index.html). This
-//! should include everything necessary to write an IRC client or bot.
-//! 
+//! The main public API is entirely exported in [`client::prelude`](./client/prelude/index.html).
+//! This should include everything necessary to write an IRC client or bot.
+//!
 //! # A Whirlwind Tour
-//! The irc crate is divided into two main modules: [client](./client/index.html) and
-//! [proto](./proto/index.html). As the names suggest, the client module captures the whole of the
-//! client-side functionality, while the proto module features general components of an IRC protocol
-//! implementation that could in principle be used in either client or server software. Both modules
-//! feature a number of components that are low-level and can be used to build alternative APIs for
-//! the IRC protocol. For the average user, the higher-level components for an IRC client are all
-//! re-exported in [client::prelude](./client/prelude/index.html). That module serves as the best
-//! starting point for a new user trying to understand the high-level API.
+//! The irc crate is divided into two main modules: [`client`](./client/index.html) and
+//! [`proto`](./proto/index.html). As the names suggest, the `client` module captures the whole of
+//! the client-side functionality, while the `proto` module features general components of an IRC
+//! protocol implementation that could in principle be used in either client or server software.
+//! Both modules feature a number of components that are low-level and can be used to build
+//! alternative APIs for the IRC protocol. For the average user, the higher-level components for an
+//! IRC client are all re-exported in [`client::prelude`](./client/prelude/index.html). That module
+//! serves as the best starting point for a new user trying to understand the high-level API.
 //!
 //! # Example
 //!
@@ -22,31 +22,29 @@
 //!
 //! # fn main() {
 //! // configuration is loaded from config.toml into a Config
-//! let server = IrcServer::new("config.toml").unwrap();
-//! // identify comes from ServerExt
-//! server.identify().unwrap();
-//! // for_each_incoming comes from Server
-//! server.for_each_incoming(|irc_msg| {
-//!   // irc_msg is a Message
-//!   match irc_msg.command {
-//!     Command::PRIVMSG(channel, message) => if message.contains(server.current_nickname()) {
-//!       // send_privmsg comes from ServerExt
-//!       server.send_privmsg(&channel, "beep boop").unwrap();
+//! let client = IrcClient::new("config.toml").unwrap();
+//! // identify comes from ClientExt
+//! client.identify().unwrap();
+//! // for_each_incoming comes from Client
+//! client.for_each_incoming(|irc_msg| {
+//!     // irc_msg is a Message
+//!     if let Command::PRIVMSG(channel, message) = irc_msg.command {
+//!         if message.contains(client.current_nickname()) {
+//!             // send_privmsg comes from ClientExt
+//!             client.send_privmsg(&channel, "beep boop").unwrap();
+//!         }
 //!     }
-//!     _ => ()
-//!   }
 //! }).unwrap();
 //! # }
 //! ```
 
 #![warn(missing_docs)]
-#![recursion_limit="128"]
 
 extern crate bufstream;
 extern crate bytes;
 extern crate chrono;
 #[macro_use]
-extern crate error_chain;
+extern crate failure;
 extern crate encoding;
 #[macro_use]
 extern crate futures;
@@ -72,7 +70,7 @@ pub mod client;
 pub mod error;
 pub mod proto;
 
-const VERSION_STR: &'static str = concat!(
+const VERSION_STR: &str = concat!(
     env!("CARGO_PKG_NAME"),
     ":",
     env!("CARGO_PKG_VERSION"),
