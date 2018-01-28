@@ -40,13 +40,12 @@
 //! ```
 
 #![warn(missing_docs)]
-#![recursion_limit="128"]
 
 extern crate bufstream;
 extern crate bytes;
 extern crate chrono;
 #[macro_use]
-extern crate error_chain;
+extern crate failure;
 extern crate encoding;
 #[macro_use]
 extern crate futures;

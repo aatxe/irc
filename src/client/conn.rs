@@ -1,6 +1,6 @@
 //! A module providing IRC connections for use by `IrcServer`s.
 use std::fs::File;
-use std::{fmt, io};
+use std::fmt;
 use std::io::Read;
 
 use encoding::EncoderTrap;
@@ -43,7 +43,7 @@ impl fmt::Debug for Connection {
 }
 
 /// A convenient type alias representing the `TlsStream` future.
-type TlsFuture = Box<Future<Error = error::Error, Item = TlsStream<TcpStream>> + Send>;
+type TlsFuture = Box<Future<Error = error::IrcError, Item = TlsStream<TcpStream>> + Send>;
 
 /// A future representing an eventual `Connection`.
 pub enum ConnectionFuture<'a> {
@@ -76,7 +76,7 @@ impl<'a> fmt::Debug for ConnectionFuture<'a> {
 
 impl<'a> Future for ConnectionFuture<'a> {
     type Item = Connection;
-    type Error = error::Error;
+    type Error = error::IrcError;
 
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
         match *self {
@@ -95,21 +95,18 @@ impl<'a> Future for ConnectionFuture<'a> {
             ConnectionFuture::Mock(config) => {
                 let enc: error::Result<_> = encoding_from_whatwg_label(
                     config.encoding()
-                ).ok_or_else(|| io::Error::new(
-                    io::ErrorKind::InvalidInput,
-                    &format!("Attempted to use unknown codec {}.", config.encoding())[..],
-                ).into());
+                ).ok_or_else(|| error::IrcError::UnknownCodec {
+                    codec: config.encoding().to_owned(),
+                });
                 let encoding = enc?;
                 let init_str = config.mock_initial_value();
                 let initial: error::Result<_> = {
-                    encoding.encode(init_str, EncoderTrap::Replace).map_err(
-                        |data| {
-                            io::Error::new(
-                                io::ErrorKind::InvalidInput,
-                                &format!("Failed to encode {} as {}.", data, encoding.name())[..],
-                            ).into()
-                        },
-                    )
+                    encoding.encode(init_str, EncoderTrap::Replace).map_err(|data| {
+                        error::IrcError::CodecFailed {
+                            codec: encoding.name(),
+                            data: data.into_owned(),
+                        }
+                    })
                 };
 
                 let framed = MockStream::new(&initial?).framed(IrcCodec::new(config.encoding())?);
@@ -139,17 +136,14 @@ impl Connection {
                 info!("Added {} to trusted certificates.", cert_path);
             }
             let connector = builder.build()?;
-            let stream = Box::new(TcpStream::connect(&config.socket_addr()?, handle)
-                .map_err(|e| {
-                    let res: error::Error = e.into();
-                    res
-                })
-                .and_then(move |socket| {
-                    connector.connect_async(&domain, socket).map_err(
-                        |e| e.into(),
-                    )
-                }
-            ));
+            let stream = Box::new(TcpStream::connect(&config.socket_addr()?, handle).map_err(|e| {
+                let res: error::IrcError = e.into();
+                res
+            }).and_then(move |socket| {
+                connector.connect_async(&domain, socket).map_err(
+                    |e| e.into(),
+                )
+            }));
             Ok(ConnectionFuture::Secured(config, stream))
         } else {
             info!("Connecting to {}.", config.server()?);
@@ -172,7 +166,7 @@ impl Connection {
 
 impl Stream for Connection {
     type Item = Message;
-    type Error = error::Error;
+    type Error = error::IrcError;
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
         match *self {
@@ -185,7 +179,7 @@ impl Stream for Connection {
 
 impl Sink for Connection {
     type SinkItem = Message;
-    type SinkError = error::Error;
+    type SinkError = error::IrcError;
 
     fn start_send(&mut self, item: Self::SinkItem) -> StartSend<Self::SinkItem, Self::SinkError> {
         match *self {

@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
 use error;
-use error::{Error, ErrorKind};
+use error::{IrcError, MessageParseError};
 use proto::{Command, ChannelExt};
 
 /// A data structure representing an IRC message according to the protocol specification. It
@@ -43,7 +43,7 @@ impl Message {
         command: &str,
         args: Vec<&str>,
         suffix: Option<&str>,
-    ) -> error::Result<Message> {
+    ) -> Result<Message, MessageParseError> {
         Message::with_tags(None, prefix, command, args, suffix)
     }
 
@@ -56,7 +56,7 @@ impl Message {
         command: &str,
         args: Vec<&str>,
         suffix: Option<&str>,
-    ) -> error::Result<Message> {
+    ) -> Result<Message, error::MessageParseError> {
         Ok(Message {
             tags: tags,
             prefix: prefix.map(|s| s.to_owned()),
@@ -170,13 +170,18 @@ impl From<Command> for Message {
 }
 
 impl FromStr for Message {
-    type Err = Error;
+    type Err = IrcError;
 
     fn from_str(s: &str) -> Result<Message, Self::Err> {
-        let mut state = s;
         if s.is_empty() {
-            return Err(ErrorKind::ParseEmpty.into());
+            return Err(IrcError::InvalidMessage {
+                string: s.to_owned(),
+                cause: MessageParseError::EmptyMessage,
+            })
         }
+
+        let mut state = s;
+
         let tags = if state.starts_with('@') {
             let tags = state.find(' ').map(|i| &state[1..i]);
             state = state.find(' ').map_or("", |i| &state[i + 1..]);
@@ -193,6 +198,7 @@ impl FromStr for Message {
         } else {
             None
         };
+
         let prefix = if state.starts_with(':') {
             let prefix = state.find(' ').map(|i| &state[1..i]);
             state = state.find(' ').map_or("", |i| &state[i + 1..]);
@@ -200,6 +206,7 @@ impl FromStr for Message {
         } else {
             None
         };
+
         let line_ending_len = if state.ends_with("\r\n") {
             "\r\n"
         } else if state.ends_with('\r') {
@@ -209,6 +216,7 @@ impl FromStr for Message {
         } else {
             ""
         }.len();
+
         let suffix = if state.contains(" :") {
             let suffix = state.find(" :").map(|i| &state[i + 2..state.len() - line_ending_len]);
             state = state.find(" :").map_or("", |i| &state[..i + 1]);
@@ -217,24 +225,33 @@ impl FromStr for Message {
             state = &state[..state.len() - line_ending_len];
             None
         };
+
         let command = match state.find(' ').map(|i| &state[..i]) {
             Some(cmd) => {
                 state = state.find(' ').map_or("", |i| &state[i + 1..]);
                 cmd
             }
             // If there's no arguments but the "command" starts with colon, it's not a command.
-            None if state.starts_with(':') => return Err(ErrorKind::InvalidCommand.into()),
+            None if state.starts_with(':') => return Err(IrcError::InvalidMessage {
+                string: s.to_owned(),
+                cause: MessageParseError::InvalidCommand,
+            }),
             // If there's no arguments following the command, the rest of the state is the command.
             None => {
                 let cmd = state;
                 state = "";
                 cmd
             },
-
         };
+
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
-        Message::with_tags(tags, prefix, command, args, suffix)
-            .map_err(|_| ErrorKind::InvalidCommand.into())
+
+        Message::with_tags(tags, prefix, command, args, suffix).map_err(|e| {
+            IrcError::InvalidMessage {
+                string: s.to_owned(),
+                cause: e,
+            }
+        })
     }
 }
 

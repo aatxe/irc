@@ -95,7 +95,7 @@ pub mod utils;
 /// }).unwrap();
 /// # }
 /// ```
-pub trait EachIncomingExt: Stream<Item=Message, Error=error::Error> {
+pub trait EachIncomingExt: Stream<Item=Message, Error=error::IrcError> {
     /// Blocks on the stream, running the given function on each incoming message as they arrive.
     fn for_each_incoming<F>(self, mut f: F) -> error::Result<()>
         where
@@ -109,7 +109,7 @@ pub trait EachIncomingExt: Stream<Item=Message, Error=error::Error> {
     }
 }
 
-impl<T> EachIncomingExt for T where T: Stream<Item=Message, Error=error::Error> {}
+impl<T> EachIncomingExt for T where T: Stream<Item=Message, Error=error::IrcError> {}
 
 /// An interface for communicating with an IRC server.
 pub trait Server {
@@ -209,7 +209,7 @@ pub struct ServerStream {
 
 impl Stream for ServerStream {
     type Item = Message;
-    type Error = error::Error;
+    type Error = error::IrcError;
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
         match try_ready!(self.stream.poll()) {
@@ -439,7 +439,16 @@ impl ServerState {
         if self.config().umodes().is_empty() {
             Ok(())
         } else {
-            self.send_mode(self.current_nickname(), &Mode::as_user_modes(self.config().umodes())?)
+            self.send_mode(
+                self.current_nickname(), &Mode::as_user_modes(self.config().umodes()).map_err(|e| {
+                    error::IrcError::InvalidMessage {
+                        string: format!(
+                            "MODE {} {}", self.current_nickname(), self.config().umodes()
+                        ),
+                        cause: e,
+                    }
+                })?
+            )
         }
     }
 
@@ -718,9 +727,8 @@ impl IrcServer {
             tx_view.send(conn.log_view()).unwrap();
             let (sink, stream) = conn.split();
 
-            let outgoing_future = sink.send_all(rx_outgoing.map_err(|_| {
-                let res: error::Error = error::ErrorKind::ChannelError.into();
-                res
+            let outgoing_future = sink.send_all(rx_outgoing.map_err::<error::IrcError, _>(|_| {
+                unreachable!("futures::sync::mpsc::Receiver should never return Err");
             })).map(|_| ()).map_err(|e| panic!("{}", e));
 
             // Send the stream half back to the original thread.
@@ -818,7 +826,7 @@ pub struct IrcServerFuture<'a> {
 
 impl<'a> Future for IrcServerFuture<'a> {
     type Item = PackedIrcServer;
-    type Error = error::Error;
+    type Error = error::IrcError;
 
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
         let conn = try_ready!(self.conn.poll());
@@ -826,10 +834,11 @@ impl<'a> Future for IrcServerFuture<'a> {
         let view = conn.log_view();
         let (sink, stream) = conn.split();
 
-        let outgoing_future = sink.send_all(self.rx_outgoing.take().unwrap().map_err(|()| {
-            let res: error::Error = error::ErrorKind::ChannelError.into();
-            res
-        })).map(|_| ());
+        let outgoing_future = sink.send_all(
+            self.rx_outgoing.take().unwrap().map_err::<error::IrcError, _>(|()| {
+                unreachable!("futures::sync::mpsc::Receiver should never return Err");
+            })
+        ).map(|_| ());
 
         let server = IrcServer {
             state: Arc::new(ServerState::new(
@@ -847,7 +856,7 @@ impl<'a> Future for IrcServerFuture<'a> {
 /// This type should only be used by advanced users who are familiar with the implementation of this
 /// crate. An easy to use abstraction that does not require this knowledge is available via
 /// [`IrcReactors`](../reactor/struct.IrcReactor.html).
-pub struct PackedIrcServer(pub IrcServer, pub Box<Future<Item = (), Error = error::Error>>);
+pub struct PackedIrcServer(pub IrcServer, pub Box<Future<Item = (), Error = error::IrcError>>);
 
 #[cfg(test)]
 mod test {
