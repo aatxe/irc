@@ -1,8 +1,6 @@
-extern crate futures;
 extern crate irc;
 
 use std::default::Default;
-use futures::stream::MergedItem;
 use irc::error;
 use irc::client::prelude::*;
 
@@ -13,27 +11,30 @@ fn main() {
         channels: Some(vec!["#irc-crate".to_owned()]),
         ..Default::default()
     };
+
     let cfg2 = Config {
-        nickname: Some("pickles".to_owned()),
-        server: Some("irc.pdgn.co".to_owned()),
+        nickname: Some("bananas".to_owned()),
+        server: Some("irc.fyrechat.net".to_owned()),
         channels: Some(vec!["#irc-crate".to_owned()]),
-        use_ssl: Some(true),
         ..Default::default()
     };
 
-    let server1 = IrcServer::from_config(cfg1).unwrap();
-    let server2 = IrcServer::from_config(cfg2).unwrap();
-    server1.identify().unwrap();
-    server2.identify().unwrap();
+    let configs = vec![cfg1, cfg2];
 
-    server1.stream().merge(server2.stream()).for_each(|pair| match pair {
-        MergedItem::First(message) => process_msg(&server1, message),
-        MergedItem::Second(message) => process_msg(&server2, message),
-        MergedItem::Both(msg1, msg2) => {
-            process_msg(&server1, msg1).unwrap();
-            process_msg(&server2, msg2)
-        }
-    }).wait().unwrap()
+    let mut reactor = IrcReactor::new().unwrap();
+
+    for config in configs {
+        // Immediate errors like failure to resolve the server's name or to establish any connection will
+        // manifest here in the result of prepare_server_and_connect.
+        let server = reactor.prepare_server_and_connect(&config).unwrap();
+        server.identify().unwrap();
+        // Here, we tell the reactor to setup this server for future handling (in run) using the specified
+        // handler function process_msg.
+        reactor.register_server_with_handler(server, process_msg);
+    }
+
+    // Runtime errors like a dropped connection will manifest here in the result of run.
+    reactor.run().unwrap();
 }
 
 fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> {
