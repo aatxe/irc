@@ -26,17 +26,17 @@ fn main() {
     loop {
         let res = configs.iter().fold(Ok(()), |acc, config| {
             acc.and(
-                reactor.prepare_server_and_connect(config).and_then(|server| {
-                    server.identify().and(Ok(server))
-                }).and_then(|server| {
-                    reactor.register_server_with_handler(server, process_msg);
+                reactor.prepare_client_and_connect(config).and_then(|client| {
+                    client.identify().and(Ok(client))
+                }).and_then(|client| {
+                    reactor.register_client_with_handler(client, process_msg);
                     Ok(())
                 })
             )
         }).and_then(|()| reactor.run());
 
         match res {
-            // The connections ended normally (for example, they sent a QUIT message to the server).
+            // The connections ended normally (for example, they sent a QUIT message to the client).
             Ok(_) => break,
             // Something went wrong! We'll print the error, and restart the connections.
             Err(e) => eprintln!("{}", e),
@@ -44,13 +44,13 @@ fn main() {
     }
 }
 
-fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> {
+fn process_msg(client: &IrcClient, message: Message) -> error::Result<()> {
     print!("{}", message);
     if let Command::PRIVMSG(ref target, ref msg) = message.command {
         if msg.contains("pickles") {
-            server.send_privmsg(target, "Hi!")?;
+            client.send_privmsg(target, "Hi!")?;
         } else if msg.contains("quit") {
-            server.send_quit("bye")?;
+            client.send_quit("bye")?;
         }
     }
     Ok(())

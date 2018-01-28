@@ -24,25 +24,25 @@ fn main() {
     let mut reactor = IrcReactor::new().unwrap();
 
     for config in configs {
-        // Immediate errors like failure to resolve the server's name or to establish any connection will
-        // manifest here in the result of prepare_server_and_connect.
-        let server = reactor.prepare_server_and_connect(&config).unwrap();
-        server.identify().unwrap();
-        // Here, we tell the reactor to setup this server for future handling (in run) using the specified
+        // Immediate errors like failure to resolve the client's name or to establish any connection will
+        // manifest here in the result of prepare_client_and_connect.
+        let client = reactor.prepare_client_and_connect(&config).unwrap();
+        client.identify().unwrap();
+        // Here, we tell the reactor to setup this client for future handling (in run) using the specified
         // handler function process_msg.
-        reactor.register_server_with_handler(server, process_msg);
+        reactor.register_client_with_handler(client, process_msg);
     }
 
     // Runtime errors like a dropped connection will manifest here in the result of run.
     reactor.run().unwrap();
 }
 
-fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> {
+fn process_msg(client: &IrcClient, message: Message) -> error::Result<()> {
     print!("{}", message);
     match message.command {
         Command::PRIVMSG(ref target, ref msg) => {
             if msg.contains("pickles") {
-                server.send_privmsg(target, "Hi!")?;
+                client.send_privmsg(target, "Hi!")?;
             }
         }
         _ => (),

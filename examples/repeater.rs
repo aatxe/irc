@@ -15,19 +15,19 @@ fn main() {
         ..Default::default()
     };
 
-    let server = IrcServer::from_config(config).unwrap();
-    server.identify().unwrap();
+    let client = IrcClient::from_config(config).unwrap();
+    client.identify().unwrap();
 
-    server.for_each_incoming(|message| {
+    client.for_each_incoming(|message| {
         print!("{}", message);
         if let Command::PRIVMSG(ref target, ref msg) = message.command {
-            if msg.starts_with(server.current_nickname()) {
+            if msg.starts_with(client.current_nickname()) {
                 let tokens: Vec<_> = msg.split(' ').collect();
                 if tokens.len() > 2 {
                     let n = tokens[0].len() + tokens[1].len() + 2;
                     if let Ok(count) = tokens[1].parse::<u8>() {
                         for _ in 0..count {
-                            server.send_privmsg(
+                            client.send_privmsg(
                                 message.response_target().unwrap_or(target),
                                 &msg[n..]
                             ).unwrap();

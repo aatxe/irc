@@ -12,14 +12,14 @@ fn main() {
         ..Default::default()
     };
 
-    let server = IrcServer::from_config(config).unwrap();
-    server.identify().unwrap();
+    let client = IrcClient::from_config(config).unwrap();
+    client.identify().unwrap();
 
-    server.for_each_incoming(|message| {
+    client.for_each_incoming(|message| {
         print!("{}", message);
         if let Command::PRIVMSG(ref target, ref msg) = message.command {
             if msg.contains("pickles") {
-                server.send_privmsg(target, "Hi!").unwrap();
+                client.send_privmsg(target, "Hi!").unwrap();
             }
         }
     }).unwrap();

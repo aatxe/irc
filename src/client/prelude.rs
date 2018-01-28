@@ -23,8 +23,8 @@
 
 pub use client::data::Config;
 pub use client::reactor::IrcReactor;
-pub use client::server::{EachIncomingExt, IrcServer, Server};
-pub use client::server::utils::ServerExt;
+pub use client::{EachIncomingExt, IrcClient, Client};
+pub use client::ext::ClientExt;
 pub use proto::{Capability, ChannelExt, Command, Message, NegotiationVersion, Response};
 pub use proto::{ChannelMode, Mode, UserMode};
 
