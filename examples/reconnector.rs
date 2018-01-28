@@ -36,7 +36,7 @@ fn main() {
         }).and_then(|()| reactor.run());
 
         match res {
-            // The connections ended normally (for example, they sent a QUIT message to the client).
+            // The connections ended normally (for example, they sent a QUIT message to the server).
             Ok(_) => break,
             // Something went wrong! We'll print the error, and restart the connections.
             Err(e) => eprintln!("{}", e),

@@ -5,7 +5,7 @@
 //! on `tokio` and `futures` in the use of `IrcClient::new_future`. This means that knowledge of
 //! those libraries should be unnecessary for the average user. Nevertheless, this API also provides
 //! some escape hatches that let advanced users take further advantage of these dependencies.
-//! 
+//!
 //! # Example
 //! ```no_run
 //! # extern crate irc;
@@ -34,9 +34,9 @@ use proto::Message;
 
 /// A thin wrapper over an event loop.
 ///
-/// An IRC reactor is used to create new connections to IRC clients and to drive the management of
-/// all connected clients as the application runs. It can be used to run multiple clients on the
-/// same thread, as well as to get better control over error management in an IRC client.
+/// An IRC reactor is used to create new IRC clients and to drive the management of all connected
+/// clients as the application runs. It can be used to run multiple clients on the same thread, as
+/// well as to get better control over error management in an IRC client.
 ///
 /// For a full example usage, see [`irc::client::reactor`](./index.html).
 pub struct IrcReactor {
@@ -54,8 +54,8 @@ impl IrcReactor {
     }
 
     /// Creates a representation of an IRC client that has not yet attempted to connect. In
-    /// particular, this representation is as a Future that when run will produce a connected
-    /// [IrcClient](./client/struct.IrcClient.html).
+    /// particular, this representation is as a `Future` that when run will produce a connected
+    /// [`IrcClient`](../struct.IrcClient.html).
     ///
     /// # Example
     /// ```no_run
@@ -73,8 +73,8 @@ impl IrcReactor {
         IrcClient::new_future(self.inner_handle(), config)
     }
 
-    /// Runs an [IrcClientFuture](./client/struct.IrcClientFuture.html), such as one from
-    /// `prepare_client` to completion, yielding an [IrcClient](./client/struct.IrcClient.html).
+    /// Runs an [`IrcClientFuture`](../struct.IrcClientFuture.html), such as one from
+    /// `prepare_client` to completion, yielding an [`IrcClient`](../struct.IrcClient.html).
     ///
     /// # Example
     /// ```no_run
@@ -97,8 +97,9 @@ impl IrcReactor {
         })
     }
 
-    /// Creates a new IRC client from the specified configuration, connecting immediately. This is
-    /// guaranteed to be the composition of prepare_client and connect_client.
+    /// Creates a new [`IrcClient`](../struct.IrcClient.html) from the specified configuration,
+    /// connecting immediately. This is guaranteed to be the composition of `prepare_client` and
+    /// `connect_client`.
     ///
     /// # Example
     /// ```no_run

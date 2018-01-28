@@ -31,7 +31,7 @@
 //! # extern crate irc;
 //! # use irc::client::prelude::*;
 //! # fn main() {
-//! # let server = IrcClient::new("config.toml").unwrap(); 
+//! # let server = IrcClient::new("config.toml").unwrap();
 //! server.send_cap_req(&[Capability::MultiPrefix, Capability::UserhostInNames]).unwrap();
 //! server.identify().unwrap();
 //! # }
@@ -48,7 +48,7 @@ use proto::command::Command::*;
 use proto::mode::ModeType;
 use client::Client;
 
-/// Idiomatic extensions for sending messages to an IRC server.
+/// Idiomatic extensions for sending messages to an IRC server as a [`Client`](../trait.Client.html).
 pub trait ClientExt: Client {
     /// Sends a request for a list of server capabilities for a specific IRCv3 version.
     fn send_cap_ls(&self, version: NegotiationVersion) -> Result<()>
@@ -377,26 +377,22 @@ pub trait ClientExt: Client {
     }
 }
 
-impl<S> ClientExt for S
-where
-    S: Client,
-{
-}
+impl<C> ClientExt for C where C: Client {}
 
 #[cfg(test)]
 mod test {
     use super::ClientExt;
     use client::data::Config;
     use client::IrcClient;
-    use client::test::{get_server_value, test_config};
+    use client::test::{get_client_value, test_config};
     use proto::{ChannelMode, Mode};
 
     #[test]
     fn identify() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.identify().unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.identify().unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "CAP END\r\nNICK :test\r\n\
              USER test 0 * :test\r\n"
         );
@@ -404,14 +400,14 @@ mod test {
 
     #[test]
     fn identify_with_password() {
-        let server = IrcClient::from_config(Config {
+        let client = IrcClient::from_config(Config {
             nickname: Some(format!("test")),
             password: Some(format!("password")),
             ..test_config()
         }).unwrap();
-        server.identify().unwrap();
+        client.identify().unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "CAP END\r\nPASS :password\r\nNICK :test\r\n\
              USER test 0 * :test\r\n"
         );
@@ -419,149 +415,149 @@ mod test {
 
     #[test]
     fn send_pong() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_pong("irc.test.net").unwrap();
-        assert_eq!(&get_server_value(server)[..], "PONG :irc.test.net\r\n");
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_pong("irc.test.net").unwrap();
+        assert_eq!(&get_client_value(client)[..], "PONG :irc.test.net\r\n");
     }
 
     #[test]
     fn send_join() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_join("#test,#test2,#test3").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_join("#test,#test2,#test3").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "JOIN #test,#test2,#test3\r\n"
         );
     }
 
     #[test]
     fn send_part() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_part("#test").unwrap();
-        assert_eq!(&get_server_value(server)[..], "PART #test\r\n");
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_part("#test").unwrap();
+        assert_eq!(&get_client_value(client)[..], "PART #test\r\n");
     }
 
     #[test]
     fn send_oper() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_oper("test", "test").unwrap();
-        assert_eq!(&get_server_value(server)[..], "OPER test :test\r\n");
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_oper("test", "test").unwrap();
+        assert_eq!(&get_client_value(client)[..], "OPER test :test\r\n");
     }
 
     #[test]
     fn send_privmsg() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_privmsg("#test", "Hi, everybody!").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_privmsg("#test", "Hi, everybody!").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "PRIVMSG #test :Hi, everybody!\r\n"
         );
     }
 
     #[test]
     fn send_notice() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_notice("#test", "Hi, everybody!").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_notice("#test", "Hi, everybody!").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "NOTICE #test :Hi, everybody!\r\n"
         );
     }
 
     #[test]
     fn send_topic_no_topic() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_topic("#test", "").unwrap();
-        assert_eq!(&get_server_value(server)[..], "TOPIC #test\r\n");
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_topic("#test", "").unwrap();
+        assert_eq!(&get_client_value(client)[..], "TOPIC #test\r\n");
     }
 
     #[test]
     fn send_topic() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_topic("#test", "Testing stuff.").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_topic("#test", "Testing stuff.").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "TOPIC #test :Testing stuff.\r\n"
         );
     }
 
     #[test]
     fn send_kill() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_kill("test", "Testing kills.").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_kill("test", "Testing kills.").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "KILL test :Testing kills.\r\n"
         );
     }
 
     #[test]
     fn send_kick_no_message() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_kick("#test", "test", "").unwrap();
-        assert_eq!(&get_server_value(server)[..], "KICK #test test\r\n");
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_kick("#test", "test", "").unwrap();
+        assert_eq!(&get_client_value(client)[..], "KICK #test test\r\n");
     }
 
     #[test]
     fn send_kick() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_kick("#test", "test", "Testing kicks.").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_kick("#test", "test", "Testing kicks.").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "KICK #test test :Testing kicks.\r\n"
         );
     }
 
     #[test]
     fn send_mode_no_modeparams() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_mode("#test", &[Mode::Plus(ChannelMode::InviteOnly, None)]).unwrap();
-        assert_eq!(&get_server_value(server)[..], "MODE #test +i\r\n");
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_mode("#test", &[Mode::Plus(ChannelMode::InviteOnly, None)]).unwrap();
+        assert_eq!(&get_client_value(client)[..], "MODE #test +i\r\n");
     }
 
     #[test]
     fn send_mode() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_mode("#test", &[Mode::Plus(ChannelMode::Oper, Some("test".to_owned()))])
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_mode("#test", &[Mode::Plus(ChannelMode::Oper, Some("test".to_owned()))])
               .unwrap();
-        assert_eq!(&get_server_value(server)[..], "MODE #test +o test\r\n");
+        assert_eq!(&get_client_value(client)[..], "MODE #test +o test\r\n");
     }
 
     #[test]
     fn send_samode_no_modeparams() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_samode("#test", "+i", "").unwrap();
-        assert_eq!(&get_server_value(server)[..], "SAMODE #test +i\r\n");
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_samode("#test", "+i", "").unwrap();
+        assert_eq!(&get_client_value(client)[..], "SAMODE #test +i\r\n");
     }
 
     #[test]
     fn send_samode() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_samode("#test", "+o", "test").unwrap();
-        assert_eq!(&get_server_value(server)[..], "SAMODE #test +o test\r\n");
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_samode("#test", "+o", "test").unwrap();
+        assert_eq!(&get_client_value(client)[..], "SAMODE #test +o test\r\n");
     }
 
     #[test]
     fn send_sanick() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_sanick("test", "test2").unwrap();
-        assert_eq!(&get_server_value(server)[..], "SANICK test test2\r\n");
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_sanick("test", "test2").unwrap();
+        assert_eq!(&get_client_value(client)[..], "SANICK test test2\r\n");
     }
 
     #[test]
     fn send_invite() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_invite("test", "#test").unwrap();
-        assert_eq!(&get_server_value(server)[..], "INVITE test #test\r\n");
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_invite("test", "#test").unwrap();
+        assert_eq!(&get_client_value(client)[..], "INVITE test #test\r\n");
     }
 
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_ctcp() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_ctcp("test", "MESSAGE").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_ctcp("test", "MESSAGE").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "PRIVMSG test :\u{001}MESSAGE\u{001}\r\n"
         );
     }
@@ -569,10 +565,10 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_action() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_action("test", "tests.").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_action("test", "tests.").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "PRIVMSG test :\u{001}ACTION tests.\u{001}\r\n"
         );
     }
@@ -580,10 +576,10 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_finger() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_finger("test").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_finger("test").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "PRIVMSG test :\u{001}FINGER\u{001}\r\n"
         );
     }
@@ -591,10 +587,10 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_version() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_version("test").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_version("test").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "PRIVMSG test :\u{001}VERSION\u{001}\r\n"
         );
     }
@@ -602,10 +598,10 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_source() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_source("test").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_source("test").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "PRIVMSG test :\u{001}SOURCE\u{001}\r\n"
         );
     }
@@ -613,10 +609,10 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_user_info() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_user_info("test").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_user_info("test").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "PRIVMSG test :\u{001}USERINFO\u{001}\r\n"
         );
     }
@@ -624,9 +620,9 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_ctcp_ping() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_ctcp_ping("test").unwrap();
-        let val = get_server_value(server);
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_ctcp_ping("test").unwrap();
+        let val = get_client_value(client);
         println!("{}", val);
         assert!(val.starts_with("PRIVMSG test :\u{001}PING "));
         assert!(val.ends_with("\u{001}\r\n"));
@@ -635,10 +631,10 @@ mod test {
     #[test]
     #[cfg(feature = "ctcp")]
     fn send_time() {
-        let server = IrcClient::from_config(test_config()).unwrap();
-        server.send_time("test").unwrap();
+        let client = IrcClient::from_config(test_config()).unwrap();
+        client.send_time("test").unwrap();
         assert_eq!(
-            &get_server_value(server)[..],
+            &get_client_value(client)[..],
             "PRIVMSG test :\u{001}TIME\u{001}\r\n"
         );
     }

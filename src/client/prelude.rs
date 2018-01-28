@@ -1,15 +1,15 @@
 //! A client-side IRC prelude, re-exporting the complete high-level IRC client API.
 //!
 //! # Structure
-//! A connection to an IRC server is represented by an `IrcServer` which is configured using a
+//! A connection to an IRC server is created via an `IrcClient` which is configured using a
 //! `Config` struct that defines data such as which server to connect to, on what port, and
-//! using what nickname. The `Server` trait provides an API for actually interacting with the
+//! using what nickname. The `Client` trait provides an API for actually interacting with the
 //! server once a connection has been established. This API intentionally offers only a single
 //! method to send `Commands` because it makes it easy to see the whole set of possible
-//! interactions with a server. The `ServerExt` trait addresses this deficiency by defining a
+//! interactions with a server. The `ClientExt` trait addresses this deficiency by defining a
 //! number of methods that provide a more clear and succinct interface for sending various
 //! common IRC commands to the server. An `IrcReactor` can be used to create and manage multiple
-//! `IrcServers` with more fine-grained control over error management.
+//! `IrcClients` with more fine-grained control over error management.
 //!
 //! The various `proto` types capture details of the IRC protocol that are used throughout the
 //! client API. `Message`, `Command`, and `Response` are used to send and receive messages along
