@@ -177,7 +177,8 @@ impl IrcReactor {
     /// # let config = Config::default();
     /// let mut reactor = IrcReactor::new().unwrap();
     /// let client = reactor.prepare_client_and_connect(&config).unwrap();
-    /// reactor.register_client_with_handler(client, process_msg)
+    /// reactor.register_client_with_handler(client, process_msg);
+    /// reactor.run().unwrap();
     /// # }
     /// # fn process_msg(client: &IrcClient, message: Message) -> error::Result<()> { Ok(()) }
     /// ```
