@@ -13,19 +13,16 @@ fn main() {
         ..Default::default()
     };
 
-    let reactor = IrcReactor::new().unwrap();
+    let mut reactor = IrcReactor::new().unwrap();
     let server = reactor.prepare_server_and_connect(&config).unwrap();
     server.identify().unwrap();
 
-    reactor.register_server_with_handler(server, |message| {
+    reactor.register_server_with_handler(server, |server, message| {
         print!("{}", message);
-        match message.command {
-            Command::PRIVMSG(ref target, ref msg) => {
-                if msg.contains("pickles") {
-                    server.send_privmsg(target, "Hi!").unwrap();
-                }
+        if let Command::PRIVMSG(ref target, ref msg) = message.command {
+            if msg.contains("pickles") {
+                server.send_privmsg(target, "Hi!")?;
             }
-            _ => (),
         }
         Ok(())
     });

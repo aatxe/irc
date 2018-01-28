@@ -46,15 +46,12 @@ fn main() {
 
 fn process_msg(server: &IrcServer, message: Message) -> error::Result<()> {
     print!("{}", message);
-    match message.command {
-        Command::PRIVMSG(ref target, ref msg) => {
-            if msg.contains("pickles") {
-                server.send_privmsg(target, "Hi!")?;
-            } else if msg.contains("quit") {
-                server.send_quit("bye")?;
-            }
+    if let Command::PRIVMSG(ref target, ref msg) = message.command {
+        if msg.contains("pickles") {
+            server.send_privmsg(target, "Hi!")?;
+        } else if msg.contains("quit") {
+            server.send_quit("bye")?;
         }
-        _ => (),
     }
     Ok(())
 }

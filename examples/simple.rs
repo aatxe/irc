@@ -17,13 +17,10 @@ fn main() {
 
     server.for_each_incoming(|message| {
         print!("{}", message);
-        match message.command {
-            Command::PRIVMSG(ref target, ref msg) => {
-                if msg.contains("pickles") {
-                    server.send_privmsg(target, "Hi!").unwrap();
-                }
+        if let Command::PRIVMSG(ref target, ref msg) = message.command {
+            if msg.contains("pickles") {
+                server.send_privmsg(target, "Hi!").unwrap();
             }
-            _ => (),
         }
-    }).unwrap()
+    }).unwrap();
 }
