@@ -34,13 +34,13 @@ use irc::client::prelude::*;
 fn main() {
     let cfg = Config {
         nickname: Some(format!("irc-rs")),
-        server: Some(format!("irc.example.com")),
+        client: Some(format!("irc.example.com")),
         channels: Some(vec![format!("#test")]),
         .. Default::default()
     };
-    let server = IrcServer::from_config(cfg).unwrap();
-    server.identify().unwrap();
-    server.for_each_incoming(|message| {
+    let client = IrcClient::from_config(cfg).unwrap();
+    client.identify().unwrap();
+    client.for_each_incoming(|message| {
         // Do message processing.
     }).unwrap()
 }
@@ -61,9 +61,9 @@ extern crate irc;
 use irc::client::prelude::*;
 
 fn main() {
-    let server = IrcServer::new("config.toml").unwrap();
-    server.identify().unwrap();
-    server.for_each_incoming(|message| {
+    let client = IrcClient::new("config.toml").unwrap();
+    client.identify().unwrap();
+    client.for_each_incoming(|message| {
         // Do message processing.
     }).unwrap()
 }
