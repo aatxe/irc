@@ -711,15 +711,13 @@ impl IrcClient {
         let (tx_incoming, rx_incoming) = oneshot::channel();
         let (tx_view, rx_view) = oneshot::channel();
 
-        let mut reactor = Core::new()?;
-        let handle = reactor.handle();
-        // Attempting to connect here (as opposed to on the thread) allows more errors to happen
-        // immediately, rather than to occur as panics on the thread. In particular, non-resolving
-        // server names, and failed SSL setups will appear here.
-        let conn = reactor.run(Connection::new(&config, &handle)?)?;
+        let cfg = config.clone();
 
         let _ = thread::spawn(move || {
             let mut reactor = Core::new().unwrap();
+            // Setting up internal processing stuffs.
+            let handle = reactor.handle();
+            let conn = reactor.run(Connection::new(&cfg, &handle).unwrap()).unwrap();
 
             tx_view.send(conn.log_view()).unwrap();
             let (sink, stream) = conn.split();
