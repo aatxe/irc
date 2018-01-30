@@ -18,6 +18,24 @@ compliant with [RFC 2812][rfc2812], [IRCv3.1][ircv3.1], [IRCv3.2][ircv3.2], and 
 additional, common features from popular IRCds. You can find up-to-date, ready-to-use documentation
 online [on docs.rs][doc].
 
+## Built with the irc crate ##
+
+the irc crate is being used to build new IRC software in Rust. Here are some of our favorite
+projects:
+
+- [alectro][alectro] — a terminal IRC client
+- [spilo][spilo] — a minimalistic IRC bouncer
+- [irc-bot.rs][ircbot] — a library for writing IRC bots
+- [bunnybutt-rs][bunnybutt] — an IRC bot for the [Feed The Beast Wiki][ftb-wiki]
+
+[alectro]: https://github.com/aatxe/alectro
+[spilo]: https://github.com/aatxe/spilo
+[ircbot]: https://github.com/8573/irc-bot.rs
+[bunnybutt]: https://github.com/FTB-Gamepedia/bunnybutt-rs
+[ftb-wiki]: https://ftb.gamepedia.com/FTB_Wiki
+
+Making your own project? [Submit a pull request](https://github.com/aatxe/irc/pulls) to add it!
+
 ## Getting Started ##
 
 To start using the irc crate with cargo, you can simply add `irc = "0.13"` to your dependencies in
