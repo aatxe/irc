@@ -9,78 +9,105 @@
 [bws]: https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg
 [sm]: http://spacemacs.org
 
-A robust, thread-safe and async-friendly library for IRC clients in Rust. It's compliant with
-[RFC 2812](http://tools.ietf.org/html/rfc2812), [IRCv3.1](http://ircv3.net/irc/3.1.html),
-[IRCv3.2](http://ircv3.net/irc/3.2.html), and includes some additional, common features. It also
-includes a number of useful built-in features to faciliate rapid development of clients. You can
-find up-to-date, ready-to-use documentation online [here](https://docs.rs/irc/). The
-documentation is generated with the default features. These are, however, strictly optional and
-can be disabled accordingly.
+[rfc2812]: http://tools.ietf.org/html/rfc2812
+[ircv3.1]: http://ircv3.net/irc/3.1.html 
+[ircv3.2]: http://ircv3.net/irc/3.2.html
+
+"the irc crate" is a thread-safe and async-friendly IRC client library written in Rust. It's
+compliant with [RFC 2812][rfc2812], [IRCv3.1][ircv3.1], [IRCv3.2][ircv3.2], and includes some
+additional, common features from popular IRCds. You can find up-to-date, ready-to-use documentation
+online [on docs.rs][doc].
 
 ## Getting Started ##
 
-To start using this library with cargo, you can simply add `irc = "0.13"` to your dependencies in
-your Cargo.toml file. You'll likely want to take a look at some of the examples, as well as the
-documentation. You'll also be able to find below a small template to get a feel for the library.
+To start using the irc crate with cargo, you can simply add `irc = "0.13"` to your dependencies in
+your Cargo.toml file. The high-level API can be found `irc::client::prelude` linked to from the
+[doc root][doc]. You'll find a number of examples in `examples/`, throughout the documentation, and
+below.
 
-## Getting Started by Example ##
+## A Tale of Two APIs ##
 
-```rust
+### Reactors (The "New" API) ###
+
+The release of v0.13 brought with it a new API called `IrcReactor` that enables easier multiserver
+support and more graceful error handling. The general model is that you use the reactor to create
+new `IrcClients`, register message handler functions, and finally block the thread to run the
+clients with their respective handlers. Here's an example:
+
+```rust,no_run
+extern crate irc;
+
+use irc::client::prelude::*;
+
+fn main() {
+    // We can also load the Config at runtime via Config::load("path/to/config.toml")
+    let config = Config {
+        nickname: Some("the-irc-crate".to_owned()),
+        server: Some("irc.pdgn.co".to_owned()),
+        channels: Some(vec!["#test".to_owned()]),
+        ..Config::default()
+    };
+
+    let mut reactor = IrcReactor::new().unwrap();
+    let client = reactor.prepare_client_and_connect(&config).unwrap();
+    client.identify().unwrap();
+    
+    reactor.register_client_with_handler(client, |client, message| {
+        print!("{}", message);
+        // And here we can do whatever we want with the messages.
+        Ok(())
+    });
+
+    reactor.run().unwrap();
+}
+```
+
+
+### Direct Style (The "Old" API) ###
+
+The old API for connecting to an IRC server is still supported through the `IrcClient` type. It's
+simpler for the most basic use case, but will panic upon encountering any sort of connection issues.
+In general, it's recommended that users switch to the new API if possible. Nevertheless, here is an
+example:
+
+```rust,no_run
 extern crate irc;
 
 use std::default::Default;
 use irc::client::prelude::*;
 
 fn main() {
+    // We can also load the Config at runtime via Config::load("path/to/config.toml")
     let cfg = Config {
         nickname: Some(format!("the-irc-crate")),
-        client: Some(format!("irc.example.com")),
+        server: Some(format!("irc.example.com")),
         channels: Some(vec![format!("#test")]),
         .. Default::default()
     };
+
     let client = IrcClient::from_config(cfg).unwrap();
     client.identify().unwrap();
+
     client.for_each_incoming(|message| {
-        // Do message processing.
+        print!("{}", message);
+        // And here we can do whatever we want with the messages.
     }).unwrap()
 }
 ```
 
-It may not seem like much, but all it takes to get started with an IRC connection is the stub
-above. In just a few lines, you can be connected to a server and processing IRC messages as you
-wish. The library is built with flexibility in mind. If you need to work on multiple threads,
-simply clone the server and have at it. We'll take care of the rest.
+## Configuring IRC Clients ##
 
-You'll probably find that programmatic configuration is a bit of a chore, and you'll often want to
-be able to change the configuration between runs of the program (for example, to change the server
-that you're connecting to). Fortunately, runtime configuration loading is straightforward.
+As seen above, there are two techniques for configuring the irc crate: runtime loading and
+programmatic configuration. Runtime loading is done via the function `Config::load`, and is likely
+sufficient for most IRC bots. Programmatic configuration is convenient for writing tests, but can
+also be useful when defining your own custom configuration format that can be converted to `Config`.
+The primary configuration format is TOML, but if you are so inclined, you can use JSON and/or YAML
+via the optional `json` and `yaml` features respectively. At the minimum, a configuration requires
+`nickname` and `server` to be defined, and all other fields are optional. You can find detailed
+explanations of the various fields on
+[docs.rs](https://docs.rs/irc/0.13.2/irc/client/data/config/struct.Config.html#fields).
 
-```rust
-extern crate irc;
-
-use irc::client::prelude::*;
-
-fn main() {
-    let client = IrcClient::new("config.toml").unwrap();
-    client.identify().unwrap();
-    client.for_each_incoming(|message| {
-        // Do message processing.
-    }).unwrap()
-}
-```
-
-## Configuration ##
-
-Like the rest of the irc crate, configuration is built with flexibility in mind. You can easily
-create `Config` objects programmatically and choose your own methods for handling any saving or
-loading of configuration required. However, for convenience, we've also included the option of
-loading files with `serde` to write configurations. The default configuration format is TOML,
-though there is optional support for JSON and YAML via the optional `json` and `yaml` features. All
-the configuration fields are optional, and can thus be omitted, but a working configuration requires
-at least a `server` and `nickname`. You can find detailed explanations of the configuration format
-[here](https://docs.rs/irc/0.12.8/irc/client/data/config/struct.Config.html#fields).
-
-Here's an example of a complete configuration in TOML:
+Alternatively, you can look at the example below of a TOML configuration with all the fields:
 
 ```toml
 owners = []
@@ -118,7 +145,7 @@ key = "value"
 
 You can convert between different configuration formats with `convertconf` like so:
 
-```
+```shell
 cargo run --example convertconf -- -i client_config.json -o client_config.toml
 ```
 
@@ -126,7 +153,8 @@ Note that the formats are automatically determined based on the selected file ex
 tool should make it easy for users to migrate their old configurations to TOML.
 
 ## Contributing ##
-Contributions to this library would be immensely appreciated. Prior to version 0.12.0, this
-library was public domain. As of 0.12.0, this library is offered under the Mozilla Public License
-2.0 whose text can be found in `LICENSE.md`. Fostering an inclusive community around `irc` is
-important, and to that end, we've adopted an explicit Code of Conduct found in `CODE_OF_CONDUCT.md`.
+the irc crate is an free, open source library that relies on contributions from its maintainers,
+Aaron Weiss (@aatxe) and Peter Atashian (@retep998), as well as the broader Rust community. It's
+licensed under the Mozilla Public License 2.0 whose text can be found in `LICENSE.md`. To foster an
+inclusive community around the irc crate, we have adopted a Code of Conduct whose text can be found
+in `CODE_OF_CONDUCT.md`.
