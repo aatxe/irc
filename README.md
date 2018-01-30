@@ -154,7 +154,10 @@ tool should make it easy for users to migrate their old configurations to TOML.
 
 ## Contributing ##
 the irc crate is an free, open source library that relies on contributions from its maintainers,
-Aaron Weiss (@aatxe) and Peter Atashian (@retep998), as well as the broader Rust community. It's
-licensed under the Mozilla Public License 2.0 whose text can be found in `LICENSE.md`. To foster an
-inclusive community around the irc crate, we have adopted a Code of Conduct whose text can be found
-in `CODE_OF_CONDUCT.md`.
+Aaron Weiss ([@aatxe][awe]) and Peter Atashian ([@retep998][bun]), as well as the broader Rust
+community. It's licensed under the Mozilla Public License 2.0 whose text can be found in
+`LICENSE.md`. To foster an inclusive community around the irc crate, we have adopted a Code of
+Conduct whose text can be found in `CODE_OF_CONDUCT.md`.
+
+[awe]: https://github.com/aatxe/
+[bun]: https://github.com/retep998/
