@@ -1,4 +1,4 @@
-# irc [![Build Status][ci-badge]][ci] [![Crates.io][cr-badge]][cr] [![Docs][doc-badge]][doc] [![Built with Spacemacs][bws]][sm]
+# the irc crate [![Build Status][ci-badge]][ci] [![Crates.io][cr-badge]][cr] [![Docs][doc-badge]][doc] [![Built with Spacemacs][bws]][sm]
 
 [ci-badge]: https://travis-ci.org/aatxe/irc.svg?branch=stable
 [ci]: https://travis-ci.org/aatxe/irc
@@ -33,7 +33,7 @@ use irc::client::prelude::*;
 
 fn main() {
     let cfg = Config {
-        nickname: Some(format!("irc-rs")),
+        nickname: Some(format!("the-irc-crate")),
         client: Some(format!("irc.example.com")),
         channels: Some(vec![format!("#test")]),
         .. Default::default()
@@ -71,7 +71,7 @@ fn main() {
 
 ## Configuration ##
 
-Like the rest of the IRC crate, configuration is built with flexibility in mind. You can easily
+Like the rest of the irc crate, configuration is built with flexibility in mind. You can easily
 create `Config` objects programmatically and choose your own methods for handling any saving or
 loading of configuration required. However, for convenience, we've also included the option of
 loading files with `serde` to write configurations. The default configuration format is TOML,
@@ -97,7 +97,7 @@ cert_path = "cert.der"
 encoding = "UTF-8"
 channels = ["#rust", "#haskell", "#fake"]
 umodes = "+RB-x"
-user_info = "I'm a test user for the Rust IRC crate."
+user_info = "I'm a test user for the irc crate."
 version = "irc:git:Rust"
 source = "https://github.com/aatxe/irc"
 ping_time = 180
