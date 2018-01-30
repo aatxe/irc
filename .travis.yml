@@ -4,9 +4,8 @@ sudo: false
 script:
   - chmod +x mktestconfig.sh
   - ./mktestconfig.sh
-  - cargo clean
   - cargo build --verbose
-  - rustdoc --test README.md -L target/debug/deps
+  - rustdoc --test README.md --extern irc=target/debug/libirc.rlib -L target/debug/deps
   - cargo test --verbose --features "toml yaml"
   - cargo test --doc
   - cargo test --verbose --no-default-features
