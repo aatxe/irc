@@ -108,12 +108,9 @@ where
             }
             (Async::Ready(None), _) => Ok(Async::Ready(None)),
             (Async::Ready(Some(msg)), _) => {
-                match timer_poll {
-                    Async::Ready(msg) => {
-                        assert!(msg.is_some());
-                        self.send_ping()?;
-                    }
-                    Async::NotReady => (),
+                if let Async::Ready(msg) = timer_poll {
+                    assert!(msg.is_some());
+                    self.send_ping()?;
                 }
 
                 match msg.command {
@@ -182,6 +179,13 @@ where
             self.close()?;
             Err(error::IrcError::PingTimeout)
         } else {
+            // If it's time to send a ping, we should do it! This is necessary to ensure that the
+            // sink half will close even if the stream half closed without a ping timeout.
+            if let Async::Ready(msg) = self.ping_timer.poll()? {
+                assert!(msg.is_some());
+                self.send_ping()?;
+            }
+
             Ok(self.inner.poll_complete()?)
         }
     }
