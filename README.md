@@ -34,7 +34,7 @@ use irc::client::prelude::*;
 fn main() {
     let cfg = Config {
         nickname: Some(format!("irc-rs")),
-        client: Some(format!("irc.example.com")),
+        server: Some(format!("irc.example.com")),
         channels: Some(vec![format!("#test")]),
         .. Default::default()
     };
