@@ -845,7 +845,7 @@ impl<'a> Future for IrcClientFuture<'a> {
     }
 }
 
-/// An `IrcClient` packaged with a future that drives its message sending. In order for the client 
+/// An `IrcClient` packaged with a future that drives its message sending. In order for the client
 /// to actually work properly, this future _must_ be running.
 ///
 /// This type should only be used by advanced users who are familiar with the implementation of this
@@ -861,6 +861,7 @@ mod test {
     use std::time::Duration;
 
     use super::{IrcClient, Client};
+    use error::IrcError;
     use client::data::Config;
     #[cfg(not(feature = "nochanlists"))]
     use client::data::User;
@@ -1054,11 +1055,11 @@ mod test {
         let res = client.for_each_incoming(|message| {
             println!("{:?}", message);
         });
-        use error::IrcError;
-        match res.expect_err("returned no error when no valid nicks were specified") {
-            IrcError::NoUsableNick => (),
-            _ => panic!("expected {} error when no valid nicks are specified"),
-
+       
+        if let Err(IrcError::NoUsableNick) = res {
+            ()
+        } else {
+            panic!("expected error when no valid nicks were specified")
         }
     }
 
@@ -1268,7 +1269,7 @@ mod test {
         assert_eq!(
             &get_client_value(client)[..],
             "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n\
-         NOTICE test :\u{001}SOURCE\u{001}\r\n"
+             NOTICE test :\u{001}SOURCE\u{001}\r\n"
         );
     }
 
