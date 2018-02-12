@@ -398,7 +398,7 @@ impl ClientState {
                 let alt_nicks = self.config().alternate_nicknames();
                 let mut index = self.alt_nick_index.write().unwrap();
                 if *index >= alt_nicks.len() {
-                    panic!("All specified nicknames were in use or disallowed.")
+                    return Err(error::IrcError::NoUsableNick);
                 } else {
                     self.send(NICK(alt_nicks[*index].to_owned()))?;
                     *index += 1;
@@ -1044,7 +1044,6 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "All specified nicknames were in use or disallowed.")]
     fn ran_out_of_nicknames() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
@@ -1052,9 +1051,15 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        client.for_each_incoming(|message| {
+        let res = client.for_each_incoming(|message| {
             println!("{:?}", message);
-        }).unwrap();
+        });
+        use error::IrcError;
+        match res.expect_err("returned no error when no valid nicks were specified") {
+            IrcError::NoUsableNick => (),
+            _ => panic!("expected {} error when no valid nicks are specified"),
+
+        }
     }
 
     #[test]

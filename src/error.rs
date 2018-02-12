@@ -91,6 +91,10 @@ pub enum IrcError {
         /// The data that failed to encode or decode.
         data: String,
     },
+
+    /// All specified nicks were in use or unusable.
+    #[fail(display = "no usable nicks")]
+    NoUsableNick
 }
 
 /// Errors that occur when parsing messages.
