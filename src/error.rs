@@ -92,8 +92,8 @@ pub enum IrcError {
         data: String,
     },
 
-    /// All specified nicks were in use or unusable.
-    #[fail(display = "no usable nicks")]
+    /// All specified nicknames were in use or unusable.
+    #[fail(display = "none of the specified nicknames were usable")]
     NoUsableNick
 }
 
