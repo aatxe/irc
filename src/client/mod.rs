@@ -398,7 +398,7 @@ impl ClientState {
                 let alt_nicks = self.config().alternate_nicknames();
                 let mut index = self.alt_nick_index.write().unwrap();
                 if *index >= alt_nicks.len() {
-                    panic!("All specified nicknames were in use or disallowed.")
+                    return Err(error::IrcError::NoUsableNick);
                 } else {
                     self.send(NICK(alt_nicks[*index].to_owned()))?;
                     *index += 1;
@@ -845,7 +845,7 @@ impl<'a> Future for IrcClientFuture<'a> {
     }
 }
 
-/// An `IrcClient` packaged with a future that drives its message sending. In order for the client 
+/// An `IrcClient` packaged with a future that drives its message sending. In order for the client
 /// to actually work properly, this future _must_ be running.
 ///
 /// This type should only be used by advanced users who are familiar with the implementation of this
@@ -861,6 +861,7 @@ mod test {
     use std::time::Duration;
 
     use super::{IrcClient, Client};
+    use error::IrcError;
     use client::data::Config;
     #[cfg(not(feature = "nochanlists"))]
     use client::data::User;
@@ -1044,7 +1045,6 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "All specified nicknames were in use or disallowed.")]
     fn ran_out_of_nicknames() {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
@@ -1052,9 +1052,15 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
         }).unwrap();
-        client.for_each_incoming(|message| {
+        let res = client.for_each_incoming(|message| {
             println!("{:?}", message);
-        }).unwrap();
+        });
+       
+        if let Err(IrcError::NoUsableNick) = res {
+            ()
+        } else {
+            panic!("expected error when no valid nicks were specified")
+        }
     }
 
     #[test]
@@ -1263,7 +1269,7 @@ mod test {
         assert_eq!(
             &get_client_value(client)[..],
             "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n\
-         NOTICE test :\u{001}SOURCE\u{001}\r\n"
+             NOTICE test :\u{001}SOURCE\u{001}\r\n"
         );
     }
 
