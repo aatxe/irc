@@ -18,7 +18,7 @@ possible for everyone, there are a few guidelines that we need contributors to f
     branch.
   * To quickly create a topic branch based on develop, run `git checkout -b
     fix/develop/my_contribution develop`. Please avoid working directly on the
-    `stable` branch, and keep direct work on `develop` only to small changes.
+    `stable` branch, and keep direct work on `develop` minor.
 * Make commits of logical and atomic units.
 * Check for unnecessary whitespace with `git diff --check` before committing.
 * Make sure you have added the necessary tests for your changes.
@@ -38,7 +38,7 @@ possible for everyone, there are a few guidelines that we need contributors to f
 
 * [Code of Conduct](https://github.com/aatxe/irc/blob/develop/CODE_OF_CONDUCT.md)
 * [the irc crate docs](https://docs.rs/irc)
-* #irc IRC channel on irc.mozilla.org
+* #rust-irc IRC channel on irc.mozilla.org
 
 ## Credits
 
