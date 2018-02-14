@@ -175,7 +175,8 @@ the irc crate is an free, open source library that relies on contributions from 
 Aaron Weiss ([@aatxe][awe]) and Peter Atashian ([@retep998][bun]), as well as the broader Rust
 community. It's licensed under the Mozilla Public License 2.0 whose text can be found in
 `LICENSE.md`. To foster an inclusive community around the irc crate, we have adopted a Code of
-Conduct whose text can be found in `CODE_OF_CONDUCT.md`.
+Conduct whose text can be found in `CODE_OF_CONDUCT.md`. You can find details about how to
+contribute in `CONTRIBUTING.md`.
 
 [awe]: https://github.com/aatxe/
 [bun]: https://github.com/retep998/
