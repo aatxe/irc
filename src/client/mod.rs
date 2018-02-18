@@ -381,7 +381,7 @@ impl ClientState {
                 let config_chans = self.config().channels();
                 for chan in &config_chans {
                     match self.config().channel_key(chan) {
-                        Some(key) => self.send_join_with_keys(chan, key)?,
+                        Some(key) => self.send_join_with_keys::<&str, &str>(chan, key)?,
                         None => self.send_join(chan)?,
                     }
                 }

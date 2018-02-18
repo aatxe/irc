@@ -36,7 +36,7 @@
 //! server.identify().unwrap();
 //! # }
 //! ```
-use std::borrow::ToOwned;
+use std::string::ToString;
 
 #[cfg(feature = "ctcp")]
 use chrono::prelude::*;
@@ -105,11 +105,11 @@ pub trait ClientExt: Client {
     }
 
     /// Sends a SASL AUTHENTICATE message with the specified data.
-    fn send_sasl(&self, data: &str) -> Result<()>
+    fn send_sasl<S: ToString>(&self, data: S) -> Result<()>
     where
         Self: Sized,
     {
-        self.send(AUTHENTICATE(data.to_owned()))
+        self.send(AUTHENTICATE(data.to_string()))
     }
 
     /// Sends a SASL AUTHENTICATE request to use the PLAIN mechanism.
@@ -138,189 +138,227 @@ pub trait ClientExt: Client {
     }
 
     /// Sends a PONG with the specified message.
-    fn send_pong(&self, msg: &str) -> Result<()>
+    fn send_pong<S>(&self, msg: S) -> Result<()>
     where
         Self: Sized,
+        S: ToString,
     {
-        self.send(PONG(msg.to_owned(), None))
+        self.send(PONG(msg.to_string(), None))
     }
 
     /// Joins the specified channel or chanlist.
-    fn send_join(&self, chanlist: &str) -> Result<()>
+    fn send_join<S>(&self, chanlist: S) -> Result<()>
     where
         Self: Sized,
+        S: ToString,
     {
-        self.send(JOIN(chanlist.to_owned(), None, None))
+        self.send(JOIN(chanlist.to_string(), None, None))
     }
 
     /// Joins the specified channel or chanlist using the specified key or keylist.
-    fn send_join_with_keys(&self, chanlist: &str, keylist: &str) -> Result<()>
+    fn send_join_with_keys<S1, S2>(&self, chanlist: &str, keylist: &str) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
     {
-        self.send(JOIN(chanlist.to_owned(), Some(keylist.to_owned()), None))
+        self.send(JOIN(chanlist.to_string(), Some(keylist.to_string()), None))
     }
 
     /// Parts the specified channel or chanlist.
-    fn send_part(&self, chanlist: &str) -> Result<()>
+    fn send_part<S>(&self, chanlist: S) -> Result<()>
     where
         Self: Sized,
+        S: ToString,
     {
-        self.send(PART(chanlist.to_owned(), None))
+        self.send(PART(chanlist.to_string(), None))
     }
 
     /// Attempts to oper up using the specified username and password.
-    fn send_oper(&self, username: &str, password: &str) -> Result<()>
+    fn send_oper<S1, S2>(&self, username: S1, password: S2) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
     {
-        self.send(OPER(username.to_owned(), password.to_owned()))
+        self.send(OPER(username.to_string(), password.to_string()))
     }
 
     /// Sends a message to the specified target.
-    fn send_privmsg(&self, target: &str, message: &str) -> Result<()>
+    fn send_privmsg<S1, S2>(&self, target: S1, message: S2) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
     {
+        let message = message.to_string();
         for line in message.split("\r\n") {
-            self.send(PRIVMSG(target.to_owned(), line.to_owned()))?
+            self.send(PRIVMSG(target.to_string(), line.to_string()))?
         }
         Ok(())
     }
 
     /// Sends a notice to the specified target.
-    fn send_notice(&self, target: &str, message: &str) -> Result<()>
+    fn send_notice<S1, S2>(&self, target: S1, message: S2) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
     {
+        let message = message.to_string();
         for line in message.split("\r\n") {
-            self.send(NOTICE(target.to_owned(), line.to_owned()))?
+            self.send(NOTICE(target.to_string(), line.to_string()))?
         }
         Ok(())
     }
 
     /// Sets the topic of a channel or requests the current one.
     /// If `topic` is an empty string, it won't be included in the message.
-    fn send_topic(&self, channel: &str, topic: &str) -> Result<()>
+    fn send_topic<S1, S2>(&self, channel: S1, topic: S2) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
     {
+        let topic = topic.to_string();
         self.send(TOPIC(
-            channel.to_owned(),
+            channel.to_string(),
             if topic.is_empty() {
                 None
             } else {
-                Some(topic.to_owned())
+                Some(topic)
             },
         ))
     }
 
     /// Kills the target with the provided message.
-    fn send_kill(&self, target: &str, message: &str) -> Result<()>
+    fn send_kill<S1, S2>(&self, target: S1, message: S2) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
     {
-        self.send(KILL(target.to_owned(), message.to_owned()))
+        self.send(KILL(target.to_string(), message.to_string()))
     }
 
     /// Kicks the listed nicknames from the listed channels with a comment.
     /// If `message` is an empty string, it won't be included in the message.
-    fn send_kick(&self, chanlist: &str, nicklist: &str, message: &str) -> Result<()>
+    fn send_kick<S1, S2, S3>(&self, chanlist: S1, nicklist: S2, message: S3) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
+        S3: ToString,
     {
+        let message = message.to_string();
         self.send(KICK(
-            chanlist.to_owned(),
-            nicklist.to_owned(),
+            chanlist.to_string(),
+            nicklist.to_string(),
             if message.is_empty() {
                 None
             } else {
-                Some(message.to_owned())
+                Some(message)
             },
         ))
     }
 
     /// Changes the modes for the specified target.
-    fn send_mode<T>(&self, target: &str, modes: &[Mode<T>]) -> Result<()>
+    fn send_mode<S, T>(&self, target: S, modes: &[Mode<T>]) -> Result<()>
     where
         Self: Sized,
+        S: ToString,
         T: ModeType,
     {
-        self.send(T::mode(target, modes))
+        self.send(T::mode(&target.to_string(), modes))
     }
 
     /// Changes the mode of the target by force.
     /// If `modeparams` is an empty string, it won't be included in the message.
-    fn send_samode(&self, target: &str, mode: &str, modeparams: &str) -> Result<()>
+    fn send_samode<S1, S2, S3>(&self, target: S1, mode: S2, modeparams: S3) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
+        S3: ToString,
     {
+        let modeparams = modeparams.to_string();
         self.send(SAMODE(
-            target.to_owned(),
-            mode.to_owned(),
+            target.to_string(),
+            mode.to_string(),
             if modeparams.is_empty() {
                 None
             } else {
-                Some(modeparams.to_owned())
+                Some(modeparams)
             },
         ))
     }
 
     /// Forces a user to change from the old nickname to the new nickname.
-    fn send_sanick(&self, old_nick: &str, new_nick: &str) -> Result<()>
+    fn send_sanick<S1, S2>(&self, old_nick: S1, new_nick: S2) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
     {
-        self.send(SANICK(old_nick.to_owned(), new_nick.to_owned()))
+        self.send(SANICK(old_nick.to_string(), new_nick.to_string()))
     }
 
     /// Invites a user to the specified channel.
-    fn send_invite(&self, nick: &str, chan: &str) -> Result<()>
+    fn send_invite<S1, S2>(&self, nick: S1, chan: S2) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
     {
-        self.send(INVITE(nick.to_owned(), chan.to_owned()))
+        self.send(INVITE(nick.to_string(), chan.to_string()))
     }
 
     /// Quits the server entirely with a message.
     /// This defaults to `Powered by Rust.` if none is specified.
-    fn send_quit(&self, msg: &str) -> Result<()>
+    fn send_quit<S>(&self, msg: S) -> Result<()>
     where
         Self: Sized,
+        S: ToString,
     {
+        let msg = msg.to_string();
         self.send(QUIT(Some(if msg.is_empty() {
-            "Powered by Rust.".to_owned()
+            "Powered by Rust.".to_string()
         } else {
-            msg.to_owned()
+            msg
         })))
     }
 
     /// Sends a CTCP-escaped message to the specified target.
     /// This requires the CTCP feature to be enabled.
     #[cfg(feature = "ctcp")]
-    fn send_ctcp(&self, target: &str, msg: &str) -> Result<()>
+    fn send_ctcp<S1, S2>(&self, target: S1, msg: S2) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
     {
-        self.send_privmsg(target, &format!("\u{001}{}\u{001}", msg)[..])
+        self.send_privmsg(target, &format!("\u{001}{}\u{001}", msg.to_string())[..])
     }
 
     /// Sends an action command to the specified target.
     /// This requires the CTCP feature to be enabled.
     #[cfg(feature = "ctcp")]
-    fn send_action(&self, target: &str, msg: &str) -> Result<()>
+    fn send_action<S1, S2>(&self, target: S1, msg: S2) -> Result<()>
     where
         Self: Sized,
+        S1: ToString,
+        S2: ToString,
     {
-        self.send_ctcp(target, &format!("ACTION {}", msg)[..])
+        self.send_ctcp(target, &format!("ACTION {}", msg.to_string())[..])
     }
 
     /// Sends a finger request to the specified target.
     /// This requires the CTCP feature to be enabled.
     #[cfg(feature = "ctcp")]
-    fn send_finger(&self, target: &str) -> Result<()>
+    fn send_finger<S: ToString>(&self, target: S) -> Result<()>
     where
         Self: Sized,
+        S: ToString,
     {
         self.send_ctcp(target, "FINGER")
     }
@@ -328,9 +366,10 @@ pub trait ClientExt: Client {
     /// Sends a version request to the specified target.
     /// This requires the CTCP feature to be enabled.
     #[cfg(feature = "ctcp")]
-    fn send_version(&self, target: &str) -> Result<()>
+    fn send_version<S>(&self, target: S) -> Result<()>
     where
         Self: Sized,
+        S: ToString,
     {
         self.send_ctcp(target, "VERSION")
     }
@@ -338,9 +377,10 @@ pub trait ClientExt: Client {
     /// Sends a source request to the specified target.
     /// This requires the CTCP feature to be enabled.
     #[cfg(feature = "ctcp")]
-    fn send_source(&self, target: &str) -> Result<()>
+    fn send_source<S>(&self, target: S) -> Result<()>
     where
         Self: Sized,
+        S: ToString,
     {
         self.send_ctcp(target, "SOURCE")
     }
@@ -348,9 +388,10 @@ pub trait ClientExt: Client {
     /// Sends a user info request to the specified target.
     /// This requires the CTCP feature to be enabled.
     #[cfg(feature = "ctcp")]
-    fn send_user_info(&self, target: &str) -> Result<()>
+    fn send_user_info<S>(&self, target: S) -> Result<()>
     where
         Self: Sized,
+        S: ToString,
     {
         self.send_ctcp(target, "USERINFO")
     }
@@ -358,9 +399,10 @@ pub trait ClientExt: Client {
     /// Sends a finger request to the specified target.
     /// This requires the CTCP feature to be enabled.
     #[cfg(feature = "ctcp")]
-    fn send_ctcp_ping(&self, target: &str) -> Result<()>
+    fn send_ctcp_ping<S>(&self, target: S) -> Result<()>
     where
         Self: Sized,
+        S: ToString,
     {
         let time = Local::now();
         self.send_ctcp(target, &format!("PING {}", time.timestamp())[..])
@@ -369,9 +411,10 @@ pub trait ClientExt: Client {
     /// Sends a time request to the specified target.
     /// This requires the CTCP feature to be enabled.
     #[cfg(feature = "ctcp")]
-    fn send_time(&self, target: &str) -> Result<()>
+    fn send_time<S>(&self, target: S) -> Result<()>
     where
         Self: Sized,
+        S: ToString,
     {
         self.send_ctcp(target, "TIME")
     }
