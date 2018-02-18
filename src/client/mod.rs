@@ -462,7 +462,7 @@ impl ClientState {
     }
 
     #[cfg(feature = "nochanlists")]
-    fn handle_part(&self, src: &str, chan: &str) {}
+    fn handle_part(&self, _: &str, _: &str) {}
 
     #[cfg(not(feature = "nochanlists"))]
     fn handle_part(&self, src: &str, chan: &str) {
@@ -513,7 +513,7 @@ impl ClientState {
     }
 
     #[cfg(feature = "nochanlists")]
-    fn handle_mode(&self, _: &str, _: &[Mode<ChannelMODE>]) {}
+    fn handle_mode(&self, _: &str, _: &[Mode<ChannelMode>]) {}
 
     #[cfg(not(feature = "nochanlists"))]
     fn handle_mode(&self, chan: &str, modes: &[Mode<ChannelMode>]) {
