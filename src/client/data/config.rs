@@ -93,6 +93,7 @@ pub struct Config {
     /// The path that this configuration was loaded from.
     ///
     /// This should not be specified in any configuration. It will automatically be handled by the library.
+    #[serde(skip_serializing)]
     pub path: Option<PathBuf>,
 }
 
