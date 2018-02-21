@@ -571,6 +571,7 @@ mod test {
             },
             ..Default::default()
         };
-        assert_eq!(cfg.get_option("testing"), "test");
+        assert_eq!(cfg.get_option("testing"), Some("test"));
+        assert_eq!(cfg.get_option("not"), None);
     }
 }
