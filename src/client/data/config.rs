@@ -469,13 +469,10 @@ impl Config {
     }
 
     /// Looks up the specified string in the options map.
-    /// This uses indexing, and thus panics when the string is not present.
-    /// This will also panic if used and there are no options.
-    pub fn get_option(&self, option: &str) -> &str {
-        self.options
-            .as_ref()
-            .map(|o| &o[&option.to_owned()][..])
-            .unwrap()
+    pub fn get_option(&self, option: &str) -> Option<&str> {
+        self.options.as_ref().and_then(|o| {
+            o.get(&option.to_owned()).map(|s| &s[..])
+        })
     }
 
     /// Gets whether or not to use a mock connection for testing.
