@@ -69,12 +69,14 @@ where
     }
 
     fn send_ping(&mut self) -> error::Result<()> {
-        self.last_ping_sent = Instant::now();
-        self.last_ping_data = format!("{}", Local::now().timestamp());
-        let data = self.last_ping_data.clone();
+        let last_ping_data = format!("{}", Local::now().timestamp());
+        let data = last_ping_data.clone();
         let result = self.start_send(Command::PING(data, None).into())?;
-        assert!(result.is_ready());
-        self.poll_complete()?;
+        if let AsyncSink::Ready = result {
+            self.poll_complete()?;
+            self.last_ping_sent = Instant::now();
+            self.last_ping_data = last_ping_data;
+        }
         Ok(())
     }
 
