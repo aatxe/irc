@@ -1,7 +1,16 @@
 [package]
 name = "irc-proto"
-version = "0.1.0"
+version = "0.0.0"
+description = "The IRC protocol distilled."
 authors = ["Aaron Weiss <awe@pdgn.co>"]
+license = "MPL-2.0"
+keywords = ["irc", "protocol", "tokio"]
+categroies = ["network-programming"]
+documentation = "https://docs.rs/irc-proto/"
+repository = "https://github.com/aatxe/irc"
+
+[badges]
+travis-ci = { repository = "aatxe/irc" }
 
 [dependencies]
 bytes = "0.4"
