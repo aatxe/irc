@@ -68,7 +68,6 @@ extern crate toml;
 
 pub mod client;
 pub mod error;
-pub mod proto;
 
 const VERSION_STR: &str = concat!(
     env!("CARGO_PKG_NAME"),

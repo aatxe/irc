@@ -15,6 +15,9 @@ travis-ci = { repository = "aatxe/irc" }
 is-it-maintained-issue-resolution = { repository = "aatxe/irc" }
 is-it-maintained-open-issues = { repository = "aatxe/irc" }
 
+[workspace]
+members = [ "./", "irc-proto" ]
+
 [features]
 default = ["ctcp", "toml"]
 ctcp = []
@@ -29,6 +32,7 @@ chrono = "0.4"
 encoding = "0.2"
 failure = "0.1"
 futures = "0.1"
+irc-proto = { version = "*", path = "irc-proto" }
 log = "0.3"
 native-tls = "0.1"
 serde = "1.0"
