@@ -193,7 +193,7 @@ where
     }
 
     fn close(&mut self) -> Poll<(), Self::SinkError> {
-        self.inner.close()
+        self.inner.close().map_err(|e| e.into())
     }
 }
 

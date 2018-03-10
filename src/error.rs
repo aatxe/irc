@@ -18,6 +18,7 @@ use toml::de::Error as TomlReadError;
 use toml::ser::Error as TomlWriteError;
 
 use proto::Message;
+use proto::error::{ProtocolError, MessageParseError};
 
 /// A specialized `Result` type for the `irc` crate.
 pub type Result<T> = ::std::result::Result<T, IrcError>;
@@ -107,52 +108,6 @@ pub enum IrcError {
     },
 }
 
-/// Errors that occur when parsing messages.
-#[derive(Debug, Fail)]
-pub enum MessageParseError {
-    /// The message was empty.
-    #[fail(display = "empty message")]
-    EmptyMessage,
-
-    /// The command was invalid (i.e. missing).
-    #[fail(display = "invalid command")]
-    InvalidCommand,
-
-    /// The mode string was malformed.
-    #[fail(display = "invalid mode string: {}", string)]
-    InvalidModeString {
-        /// The invalid mode string.
-        string: String,
-        /// The detailed mode parsing error.
-        #[cause]
-        cause: ModeParseError,
-    },
-
-    /// The subcommand used was invalid.
-    #[fail(display = "invalid {} subcommand: {}", cmd, sub)]
-    InvalidSubcommand {
-        /// The command whose invalid subcommand was referenced.
-        cmd: &'static str,
-        /// The invalid subcommand.
-        sub: String,
-    }
-}
-
-/// Errors that occur while parsing mode strings.
-#[derive(Debug, Fail)]
-pub enum ModeParseError {
-    /// Invalid modifier used in a mode string (only + and - are valid).
-    #[fail(display = "invalid mode modifier: {}", modifier)]
-    InvalidModeModifier {
-        /// The invalid mode modifier.
-        modifier: char,
-    },
-
-    /// Missing modifier used in a mode string.
-    #[fail(display = "missing mode modifier")]
-    MissingModeModifier,
-}
-
 /// Errors that occur with configurations.
 #[derive(Debug, Fail)]
 pub enum ConfigError {
@@ -208,6 +163,17 @@ pub enum TomlError {
     /// A TOML serialization error.
     #[fail(display = "serialization failed")]
     Write(#[cause] TomlWriteError),
+}
+
+impl From<ProtocolError> for IrcError {
+    fn from(e: ProtocolError) -> IrcError {
+        match e {
+            ProtocolError::Io(e) => IrcError::Io(e),
+            ProtocolError::InvalidMessage { string, cause } => IrcError::InvalidMessage {
+                string, cause
+            },
+        }
+    }
 }
 
 impl From<IoError> for IrcError {
