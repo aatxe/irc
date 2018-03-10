@@ -48,6 +48,7 @@ extern crate failure;
 extern crate encoding;
 #[macro_use]
 extern crate futures;
+pub extern crate irc_proto as proto;
 #[macro_use]
 extern crate log;
 extern crate native_tls;
