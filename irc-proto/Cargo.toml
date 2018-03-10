@@ -12,8 +12,12 @@ repository = "https://github.com/aatxe/irc"
 [badges]
 travis-ci = { repository = "aatxe/irc" }
 
+[features]
+default = ["tokio"]
+tokio = ["tokio-io", "bytes"]
+
 [dependencies]
-bytes = "0.4"
+bytes = { version = "0.4", optional = true }
 encoding = "0.2"
 failure = "0.1"
-tokio-io = "0.1"
+tokio-io = { version = "0.1", optional = true }
