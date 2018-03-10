@@ -28,7 +28,7 @@ impl LineCodec {
 
 impl Decoder for LineCodec {
     type Item = String;
-    type Error = error::IrcError;
+    type Error = error::ProtocolError;
 
     fn decode(&mut self, src: &mut BytesMut) -> error::Result<Option<String>> {
         if let Some(n) = src.as_ref().iter().position(|b| *b == b'\n') {
@@ -53,7 +53,7 @@ impl Decoder for LineCodec {
 
 impl Encoder for LineCodec {
     type Item = String;
-    type Error = error::IrcError;
+    type Error = error::ProtocolError;
 
     fn encode(&mut self, msg: String, dst: &mut BytesMut) -> error::Result<()> {
         // Encode the message using the codec's encoding.

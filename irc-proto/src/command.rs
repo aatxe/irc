@@ -3,7 +3,9 @@ use std::ascii::AsciiExt;
 use std::str::FromStr;
 
 use error::MessageParseError;
-use proto::{ChannelExt, ChannelMode, Mode, Response, UserMode};
+use chan::ChannelExt;
+use mode::{ChannelMode, Mode, UserMode};
+use response::Response;
 
 /// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This
 /// also includes commands from the
