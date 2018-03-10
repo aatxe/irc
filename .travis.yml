@@ -4,6 +4,9 @@ sudo: false
 script:
   - chmod +x mktestconfig.sh
   - ./mktestconfig.sh
+  - pushd irc-proto
+  - cargo test --verbose
+  - popd
   - cargo build --verbose
   - rustdoc --test README.md --extern irc=target/debug/libirc.rlib -L target/debug/deps
   - cargo test --verbose --features "toml yaml"
