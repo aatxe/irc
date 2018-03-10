@@ -3,8 +3,8 @@ use bytes::BytesMut;
 use tokio_io::codec::{Decoder, Encoder};
 
 use error;
-use proto::line::LineCodec;
-use proto::message::Message;
+use line::LineCodec;
+use message::Message;
 
 /// An IRC codec built around an inner codec.
 pub struct IrcCodec {
@@ -20,7 +20,7 @@ impl IrcCodec {
 
 impl Decoder for IrcCodec {
     type Item = Message;
-    type Error = error::IrcError;
+    type Error = error::ProtocolError;
 
     fn decode(&mut self, src: &mut BytesMut) -> error::Result<Option<Message>> {
         self.inner.decode(src).and_then(|res| {
@@ -31,7 +31,7 @@ impl Decoder for IrcCodec {
 
 impl Encoder for IrcCodec {
     type Item = Message;
-    type Error = error::IrcError;
+    type Error = error::ProtocolError;
 
 
     fn encode(&mut self, msg: Message, dst: &mut BytesMut) -> error::Result<()> {

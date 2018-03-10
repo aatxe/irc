@@ -11,6 +11,7 @@ extern crate tokio_io;
 pub mod caps;
 pub mod chan;
 pub mod command;
+pub mod error;
 pub mod irc;
 pub mod line;
 pub mod message;

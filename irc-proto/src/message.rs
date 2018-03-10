@@ -4,8 +4,9 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::FromStr;
 
 use error;
-use error::{IrcError, MessageParseError};
-use proto::{Command, ChannelExt};
+use error::{ProtocolError, MessageParseError};
+use chan::ChannelExt;
+use command::Command;
 
 /// A data structure representing an IRC message according to the protocol specification. It
 /// consists of a collection of IRCv3 tags, a prefix (describing the source of the message), and
@@ -170,11 +171,11 @@ impl From<Command> for Message {
 }
 
 impl FromStr for Message {
-    type Err = IrcError;
+    type Err = ProtocolError;
 
     fn from_str(s: &str) -> Result<Message, Self::Err> {
         if s.is_empty() {
-            return Err(IrcError::InvalidMessage {
+            return Err(ProtocolError::InvalidMessage {
                 string: s.to_owned(),
                 cause: MessageParseError::EmptyMessage,
             })
@@ -232,7 +233,7 @@ impl FromStr for Message {
                 cmd
             }
             // If there's no arguments but the "command" starts with colon, it's not a command.
-            None if state.starts_with(':') => return Err(IrcError::InvalidMessage {
+            None if state.starts_with(':') => return Err(ProtocolError::InvalidMessage {
                 string: s.to_owned(),
                 cause: MessageParseError::InvalidCommand,
             }),
@@ -247,7 +248,7 @@ impl FromStr for Message {
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
 
         Message::with_tags(tags, prefix, command, args, suffix).map_err(|e| {
-            IrcError::InvalidMessage {
+            ProtocolError::InvalidMessage {
                 string: s.to_owned(),
                 cause: e,
             }

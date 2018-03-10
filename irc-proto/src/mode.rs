@@ -4,7 +4,7 @@ use std::fmt;
 use error::MessageParseError;
 use error::MessageParseError::InvalidModeString;
 use error::ModeParseError::*;
-use proto::Command;
+use command::Command;
 
 /// A marker trait for different kinds of Modes.
 pub trait ModeType: fmt::Display + fmt::Debug + Clone + PartialEq {
