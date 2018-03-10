@@ -5,7 +5,7 @@ description = "The IRC protocol distilled."
 authors = ["Aaron Weiss <awe@pdgn.co>"]
 license = "MPL-2.0"
 keywords = ["irc", "protocol", "tokio"]
-categroies = ["network-programming"]
+categories = ["network-programming"]
 documentation = "https://docs.rs/irc-proto/"
 repository = "https://github.com/aatxe/irc"
 

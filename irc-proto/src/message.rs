@@ -31,8 +31,8 @@ impl Message {
     ///
     /// # Example
     /// ```
-    /// # extern crate irc;
-    /// # use irc::client::prelude::*;
+    /// # extern crate irc_proto;
+    /// # use irc_proto::Message;
     /// # fn main() {
     /// let message = Message::new(
     ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"], None
@@ -69,8 +69,8 @@ impl Message {
     ///
     /// # Example
     /// ```
-    /// # extern crate irc;
-    /// # use irc::client::prelude::*;
+    /// # extern crate irc_proto;
+    /// # use irc_proto::Message;
     /// # fn main() {
     /// let message = Message::new(
     ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"], None
@@ -99,8 +99,8 @@ impl Message {
     ///
     /// # Example
     /// ```
-    /// # extern crate irc;
-    /// # use irc::client::prelude::*;
+    /// # extern crate irc_proto;
+    /// # use irc_proto::Message;
     /// # fn main() {
     /// let msg1 = Message::new(
     ///     Some("ada"), "PRIVMSG", vec!["#channel"], Some("Hi, everyone!")
@@ -124,8 +124,8 @@ impl Message {
     ///
     /// # Example
     /// ```
-    /// # extern crate irc;
-    /// # use irc::client::prelude::*;
+    /// # extern crate irc_proto;
+    /// # use irc_proto::Message;
     /// # fn main() {
     /// let msg = Message::new(
     ///     Some("ada"), "PRIVMSG", vec!["#channel"], Some("Hi, everyone!")
@@ -278,7 +278,7 @@ pub struct Tag(pub String, pub Option<String>);
 #[cfg(test)]
 mod test {
     use super::{Message, Tag};
-    use proto::Command::{PRIVMSG, QUIT, Raw};
+    use command::Command::{PRIVMSG, QUIT, Raw};
 
     #[test]
     fn new() {
