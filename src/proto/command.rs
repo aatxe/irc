@@ -421,18 +421,14 @@ impl<'a> From<&'a Command> for String {
             Command::CHGHOST(ref u, ref h) => stringify("CHGHOST", &[u, h], None),
 
             Command::Response(ref resp, ref a, Some(ref s)) => {
-                stringify(
-                    &format!("{}", *resp as u16),
-                    &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
-                    Some(s),
-                )
+                stringify(&format!("{:03}", *resp as u16),
+                          &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
+                          Some(s))
             }
             Command::Response(ref resp, ref a, None) => {
-                stringify(
-                    &format!("{}", *resp as u16),
-                    &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
-                    None,
-                )
+                stringify(&format!("{:03}", *resp as u16),
+                          &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
+                          None)
             }
             Command::Raw(ref c, ref a, Some(ref s)) => {
                 stringify(c, &a.iter().map(|s| &s[..]).collect::<Vec<_>>(), Some(s))
@@ -1761,5 +1757,18 @@ impl FromStr for BatchSubCommand {
         } else {
             Ok(BatchSubCommand::CUSTOM(s.to_uppercase()))
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Response;
+    use super::Command;
+
+    #[test]
+    fn format_response() {
+        assert!(String::from(&Command::Response(Response::RPL_WELCOME,
+                                                vec!["foo".into()],
+                                                None)) == "001 foo");
     }
 }
