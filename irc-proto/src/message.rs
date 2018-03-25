@@ -18,7 +18,7 @@ pub struct OwnedMessage {
     /// Message tags as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
     /// These tags are used to add extended information to the given message, and are commonly used
     /// in IRCv3 extensions to the IRC protocol.
-    pub tags: Option<Vec<Tag>>,
+    pub tags: Option<Vec<OwnedTag>>,
     /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
     pub prefix: Option<String>,
     /// The IRC command, parsed according to the known specifications. The command itself and its
@@ -52,7 +52,7 @@ impl OwnedMessage {
     /// are used to add extended information to the given message, and are commonly used in IRCv3
     /// extensions to the IRC protocol.
     pub fn with_tags(
-        tags: Option<Vec<Tag>>,
+        tags: Option<Vec<OwnedTag>>,
         prefix: Option<&str>,
         command: &str,
         args: Vec<&str>,
@@ -192,7 +192,7 @@ impl FromStr for OwnedMessage {
                     .map(|s: &str| {
                         let mut iter = s.splitn(2, '=');
                         let (fst, snd) = (iter.next(), iter.next());
-                        Tag(fst.unwrap_or("").to_owned(), snd.map(|s| s.to_owned()))
+                        OwnedTag(fst.unwrap_or("").to_owned(), snd.map(|s| s.to_owned()))
                     })
                     .collect::<Vec<_>>()
             })
@@ -270,14 +270,14 @@ impl Display for OwnedMessage {
 
 /// A message tag as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
 /// It consists of a tag key, and an optional value for the tag. Each message can contain a number
-/// of tags (in the string format, they are separated by semicolons). Tags are used to add extended
+/// of tags (in the string format, they are separated by semicolons). OwnedTags are used to add extended
 /// information to a message under IRCv3.
 #[derive(Clone, PartialEq, Debug)]
-pub struct Tag(pub String, pub Option<String>);
+pub struct OwnedTag(pub String, pub Option<String>);
 
 #[cfg(test)]
 mod test {
-    use super::{OwnedMessage, Tag};
+    use super::{OwnedMessage, OwnedTag};
     use command::Command::{PRIVMSG, QUIT, Raw};
 
     #[test]
@@ -395,9 +395,9 @@ mod test {
         );
         let message = OwnedMessage {
             tags: Some(vec![
-                Tag(format!("aaa"), Some(format!("bbb"))),
-                Tag(format!("ccc"), None),
-                Tag(format!("example.com/ddd"), Some(format!("eee"))),
+                OwnedTag(format!("aaa"), Some(format!("bbb"))),
+                OwnedTag(format!("ccc"), None),
+                OwnedTag(format!("example.com/ddd"), Some(format!("eee"))),
             ]),
             prefix: Some(format!("test!test@test")),
             command: PRIVMSG(format!("test"), format!("Testing with tags!")),
