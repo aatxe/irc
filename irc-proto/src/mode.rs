@@ -9,7 +9,7 @@ use command::Command;
 /// A marker trait for different kinds of Modes.
 pub trait ModeType: fmt::Display + fmt::Debug + Clone + PartialEq {
     /// Creates a command of this kind.
-    fn mode(target: &str, modes: &[Mode<Self>]) -> Command;
+    fn mode<'a>(target: &'a str, modes: &[Mode<Self>]) -> Command<'a>;
 
     /// Returns true if this mode takes an argument, and false otherwise.
     fn takes_arg(&self) -> bool;
@@ -40,8 +40,8 @@ pub enum UserMode {
 }
 
 impl ModeType for UserMode {
-    fn mode(target: &str, modes: &[Mode<Self>]) -> Command {
-        Command::UserMODE(target.to_owned(), modes.to_owned())
+    fn mode<'a>(target: &'a str, modes: &[Mode<Self>]) -> Command<'a> {
+        Command::UserMODE(target, modes.to_owned())
     }
 
     fn takes_arg(&self) -> bool {
@@ -127,8 +127,8 @@ pub enum ChannelMode {
 }
 
 impl ModeType for ChannelMode {
-    fn mode(target: &str, modes: &[Mode<Self>]) -> Command {
-        Command::ChannelMODE(target.to_owned(), modes.to_owned())
+    fn mode<'a>(target: &'a str, modes: &[Mode<Self>]) -> Command<'a> {
+        Command::ChannelMODE(target, modes.to_owned())
     }
 
     fn takes_arg(&self) -> bool {

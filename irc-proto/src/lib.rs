@@ -24,9 +24,9 @@ pub mod response;
 
 pub use self::caps::{Capability, NegotiationVersion};
 pub use self::chan::ChannelExt;
-pub use self::command::{BatchSubCommand, CapSubCommand, Command};
+pub use self::command::{BatchSubCommand, CapSubCommand, Command, OwnedCommand};
 #[cfg(feature = "tokio")]
 pub use self::irc::IrcCodec;
-pub use self::message::OwnedMessage;
+pub use self::message::{Message, OwnedMessage};
 pub use self::mode::{ChannelMode, Mode, UserMode};
 pub use self::response::Response;
