@@ -27,6 +27,6 @@ pub use self::chan::ChannelExt;
 pub use self::command::{BatchSubCommand, CapSubCommand, Command};
 #[cfg(feature = "tokio")]
 pub use self::irc::IrcCodec;
-pub use self::message::Message;
+pub use self::message::OwnedMessage;
 pub use self::mode::{ChannelMode, Mode, UserMode};
 pub use self::response::Response;

@@ -4,7 +4,7 @@ use tokio_io::codec::{Decoder, Encoder};
 
 use error;
 use line::LineCodec;
-use message::Message;
+use message::OwnedMessage;
 
 /// An IRC codec built around an inner codec.
 pub struct IrcCodec {
@@ -19,22 +19,22 @@ impl IrcCodec {
 }
 
 impl Decoder for IrcCodec {
-    type Item = Message;
+    type Item = OwnedMessage;
     type Error = error::ProtocolError;
 
-    fn decode(&mut self, src: &mut BytesMut) -> error::Result<Option<Message>> {
+    fn decode(&mut self, src: &mut BytesMut) -> error::Result<Option<OwnedMessage>> {
         self.inner.decode(src).and_then(|res| {
-            res.map_or(Ok(None), |msg| msg.parse::<Message>().map(Some))
+            res.map_or(Ok(None), |msg| msg.parse::<OwnedMessage>().map(Some))
         })
     }
 }
 
 impl Encoder for IrcCodec {
-    type Item = Message;
+    type Item = OwnedMessage;
     type Error = error::ProtocolError;
 
 
-    fn encode(&mut self, msg: Message, dst: &mut BytesMut) -> error::Result<()> {
+    fn encode(&mut self, msg: OwnedMessage, dst: &mut BytesMut) -> error::Result<()> {
         self.inner.encode(msg.to_string(), dst)
     }
 }

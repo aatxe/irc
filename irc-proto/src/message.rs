@@ -14,7 +14,7 @@ use command::Command;
 /// consists of a collection of arguments and the special suffix argument. Otherwise, the command
 /// is parsed into a more useful form as described in [Command](../command/enum.Command.html).
 #[derive(Clone, PartialEq, Debug)]
-pub struct Message {
+pub struct OwnedMessage {
     /// Message tags as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
     /// These tags are used to add extended information to the given message, and are commonly used
     /// in IRCv3 extensions to the IRC protocol.
@@ -26,15 +26,15 @@ pub struct Message {
     pub command: Command,
 }
 
-impl Message {
+impl OwnedMessage {
     /// Creates a new message from the given components.
     ///
     /// # Example
     /// ```
     /// # extern crate irc_proto;
-    /// # use irc_proto::Message;
+    /// # use irc_proto::OwnedMessage;
     /// # fn main() {
-    /// let message = Message::new(
+    /// let message = OwnedMessage::new(
     ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"], None
     /// ).unwrap();
     /// # }
@@ -44,8 +44,8 @@ impl Message {
         command: &str,
         args: Vec<&str>,
         suffix: Option<&str>,
-    ) -> Result<Message, MessageParseError> {
-        Message::with_tags(None, prefix, command, args, suffix)
+    ) -> Result<OwnedMessage, MessageParseError> {
+        OwnedMessage::with_tags(None, prefix, command, args, suffix)
     }
 
     /// Creates a new IRCv3.2 message from the given components, including message tags. These tags
@@ -57,8 +57,8 @@ impl Message {
         command: &str,
         args: Vec<&str>,
         suffix: Option<&str>,
-    ) -> Result<Message, error::MessageParseError> {
-        Ok(Message {
+    ) -> Result<OwnedMessage, error::MessageParseError> {
+        Ok(OwnedMessage {
             tags: tags,
             prefix: prefix.map(|s| s.to_owned()),
             command: Command::new(command, args, suffix)?,
@@ -70,9 +70,9 @@ impl Message {
     /// # Example
     /// ```
     /// # extern crate irc_proto;
-    /// # use irc_proto::Message;
+    /// # use irc_proto::OwnedMessage;
     /// # fn main() {
-    /// let message = Message::new(
+    /// let message = OwnedMessage::new(
     ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"], None
     /// ).unwrap();
     /// assert_eq!(message.source_nickname(), Some("nickname"));
@@ -100,13 +100,13 @@ impl Message {
     /// # Example
     /// ```
     /// # extern crate irc_proto;
-    /// # use irc_proto::Message;
+    /// # use irc_proto::OwnedMessage;
     /// # fn main() {
-    /// let msg1 = Message::new(
+    /// let msg1 = OwnedMessage::new(
     ///     Some("ada"), "PRIVMSG", vec!["#channel"], Some("Hi, everyone!")
     /// ).unwrap();
     /// assert_eq!(msg1.response_target(), Some("#channel"));
-    /// let msg2 = Message::new(
+    /// let msg2 = OwnedMessage::new(
     ///     Some("ada"), "PRIVMSG", vec!["betsy"], Some("betsy: hi")
     /// ).unwrap();
     /// assert_eq!(msg2.response_target(), Some("ada"));
@@ -120,14 +120,14 @@ impl Message {
         }
     }
 
-    /// Converts a Message into a String according to the IRC protocol.
+    /// Converts a OwnedMessage into a String according to the IRC protocol.
     ///
     /// # Example
     /// ```
     /// # extern crate irc_proto;
-    /// # use irc_proto::Message;
+    /// # use irc_proto::OwnedMessage;
     /// # fn main() {
-    /// let msg = Message::new(
+    /// let msg = OwnedMessage::new(
     ///     Some("ada"), "PRIVMSG", vec!["#channel"], Some("Hi, everyone!")
     /// ).unwrap();
     /// assert_eq!(msg.to_string(), ":ada PRIVMSG #channel :Hi, everyone!\r\n");
@@ -160,9 +160,9 @@ impl Message {
     }
 }
 
-impl From<Command> for Message {
-    fn from(cmd: Command) -> Message {
-        Message {
+impl From<Command> for OwnedMessage {
+    fn from(cmd: Command) -> OwnedMessage {
+        OwnedMessage {
             tags: None,
             prefix: None,
             command: cmd,
@@ -170,10 +170,10 @@ impl From<Command> for Message {
     }
 }
 
-impl FromStr for Message {
+impl FromStr for OwnedMessage {
     type Err = ProtocolError;
 
-    fn from_str(s: &str) -> Result<Message, Self::Err> {
+    fn from_str(s: &str) -> Result<OwnedMessage, Self::Err> {
         if s.is_empty() {
             return Err(ProtocolError::InvalidMessage {
                 string: s.to_owned(),
@@ -247,7 +247,7 @@ impl FromStr for Message {
 
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
 
-        Message::with_tags(tags, prefix, command, args, suffix).map_err(|e| {
+        OwnedMessage::with_tags(tags, prefix, command, args, suffix).map_err(|e| {
             ProtocolError::InvalidMessage {
                 string: s.to_owned(),
                 cause: e,
@@ -256,13 +256,13 @@ impl FromStr for Message {
     }
 }
 
-impl<'a> From<&'a str> for Message {
-    fn from(s: &'a str) -> Message {
+impl<'a> From<&'a str> for OwnedMessage {
+    fn from(s: &'a str) -> OwnedMessage {
         s.parse().unwrap()
     }
 }
 
-impl Display for Message {
+impl Display for OwnedMessage {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "{}", self.to_string())
     }
@@ -277,18 +277,18 @@ pub struct Tag(pub String, pub Option<String>);
 
 #[cfg(test)]
 mod test {
-    use super::{Message, Tag};
+    use super::{OwnedMessage, Tag};
     use command::Command::{PRIVMSG, QUIT, Raw};
 
     #[test]
     fn new() {
-        let message = Message {
+        let message = OwnedMessage {
             tags: None,
             prefix: None,
             command: PRIVMSG(format!("test"), format!("Testing!")),
         };
         assert_eq!(
-            Message::new(None, "PRIVMSG", vec!["test"], Some("Testing!")).unwrap(),
+            OwnedMessage::new(None, "PRIVMSG", vec!["test"], Some("Testing!")).unwrap(),
             message
         )
     }
@@ -296,56 +296,56 @@ mod test {
     #[test]
     fn source_nickname() {
         assert_eq!(
-            Message::new(None, "PING", vec![], Some("data"))
+            OwnedMessage::new(None, "PING", vec![], Some("data"))
                 .unwrap()
                 .source_nickname(),
             None
         );
 
         assert_eq!(
-            Message::new(Some("irc.test.net"), "PING", vec![], Some("data"))
+            OwnedMessage::new(Some("irc.test.net"), "PING", vec![], Some("data"))
                 .unwrap()
                 .source_nickname(),
             None
         );
 
         assert_eq!(
-            Message::new(Some("test!test@test"), "PING", vec![], Some("data"))
+            OwnedMessage::new(Some("test!test@test"), "PING", vec![], Some("data"))
                 .unwrap()
                 .source_nickname(),
             Some("test")
         );
 
         assert_eq!(
-            Message::new(Some("test@test"), "PING", vec![], Some("data"))
+            OwnedMessage::new(Some("test@test"), "PING", vec![], Some("data"))
                 .unwrap()
                 .source_nickname(),
             Some("test")
         );
 
         assert_eq!(
-            Message::new(Some("test!test@irc.test.com"), "PING", vec![], Some("data"))
+            OwnedMessage::new(Some("test!test@irc.test.com"), "PING", vec![], Some("data"))
                 .unwrap()
                 .source_nickname(),
             Some("test")
         );
 
         assert_eq!(
-            Message::new(Some("test!test@127.0.0.1"), "PING", vec![], Some("data"))
+            OwnedMessage::new(Some("test!test@127.0.0.1"), "PING", vec![], Some("data"))
                 .unwrap()
                 .source_nickname(),
             Some("test")
         );
 
         assert_eq!(
-            Message::new(Some("test@test.com"), "PING", vec![], Some("data"))
+            OwnedMessage::new(Some("test@test.com"), "PING", vec![], Some("data"))
                 .unwrap()
                 .source_nickname(),
             Some("test")
         );
 
         assert_eq!(
-            Message::new(Some("test"), "PING", vec![], Some("data"))
+            OwnedMessage::new(Some("test"), "PING", vec![], Some("data"))
                 .unwrap()
                 .source_nickname(),
             Some("test")
@@ -354,13 +354,13 @@ mod test {
 
     #[test]
     fn to_string() {
-        let message = Message {
+        let message = OwnedMessage {
             tags: None,
             prefix: None,
             command: PRIVMSG(format!("test"), format!("Testing!")),
         };
         assert_eq!(&message.to_string()[..], "PRIVMSG test :Testing!\r\n");
-        let message = Message {
+        let message = OwnedMessage {
             tags: None,
             prefix: Some(format!("test!test@test")),
             command: PRIVMSG(format!("test"), format!("Still testing!")),
@@ -373,27 +373,27 @@ mod test {
 
     #[test]
     fn from_string() {
-        let message = Message {
+        let message = OwnedMessage {
             tags: None,
             prefix: None,
             command: PRIVMSG(format!("test"), format!("Testing!")),
         };
         assert_eq!(
-            "PRIVMSG test :Testing!\r\n".parse::<Message>().unwrap(),
+            "PRIVMSG test :Testing!\r\n".parse::<OwnedMessage>().unwrap(),
             message
         );
-        let message = Message {
+        let message = OwnedMessage {
             tags: None,
             prefix: Some(format!("test!test@test")),
             command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
         assert_eq!(
             ":test!test@test PRIVMSG test :Still testing!\r\n"
-                .parse::<Message>()
+                .parse::<OwnedMessage>()
                 .unwrap(),
             message
         );
-        let message = Message {
+        let message = OwnedMessage {
             tags: Some(vec![
                 Tag(format!("aaa"), Some(format!("bbb"))),
                 Tag(format!("ccc"), None),
@@ -405,7 +405,7 @@ mod test {
         assert_eq!(
             "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
                     tags!\r\n"
-                .parse::<Message>()
+                .parse::<OwnedMessage>()
                 .unwrap(),
             message
         )
@@ -413,21 +413,21 @@ mod test {
 
     #[test]
     fn from_string_atypical_endings() {
-        let message = Message {
+        let message = OwnedMessage {
             tags: None,
             prefix: None,
             command: PRIVMSG(format!("test"), format!("Testing!")),
         };
         assert_eq!(
-            "PRIVMSG test :Testing!\r".parse::<Message>().unwrap(),
+            "PRIVMSG test :Testing!\r".parse::<OwnedMessage>().unwrap(),
             message
         );
         assert_eq!(
-            "PRIVMSG test :Testing!\n".parse::<Message>().unwrap(),
+            "PRIVMSG test :Testing!\n".parse::<OwnedMessage>().unwrap(),
             message
         );
         assert_eq!(
-            "PRIVMSG test :Testing!".parse::<Message>().unwrap(),
+            "PRIVMSG test :Testing!".parse::<OwnedMessage>().unwrap(),
             message
         );
     }
@@ -436,24 +436,24 @@ mod test {
     fn from_and_to_string() {
         let message = "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
                        tags!\r\n";
-        assert_eq!(message.parse::<Message>().unwrap().to_string(), message);
+        assert_eq!(message.parse::<OwnedMessage>().unwrap().to_string(), message);
     }
 
     #[test]
     fn to_message() {
-        let message = Message {
+        let message = OwnedMessage {
             tags: None,
             prefix: None,
             command: PRIVMSG(format!("test"), format!("Testing!")),
         };
-        let msg: Message = "PRIVMSG test :Testing!\r\n".into();
+        let msg: OwnedMessage = "PRIVMSG test :Testing!\r\n".into();
         assert_eq!(msg, message);
-        let message = Message {
+        let message = OwnedMessage {
             tags: None,
             prefix: Some(format!("test!test@test")),
             command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
-        let msg: Message = ":test!test@test PRIVMSG test :Still testing!\r\n".into();
+        let msg: OwnedMessage = ":test!test@test PRIVMSG test :Still testing!\r\n".into();
         assert_eq!(msg, message);
     }
 
@@ -461,7 +461,7 @@ mod test {
     fn to_message_with_colon_in_arg() {
         // Apparently, UnrealIRCd (and perhaps some others) send some messages that include
         // colons within individual parameters. So, let's make sure it parses correctly.
-        let message = Message {
+        let message = OwnedMessage {
             tags: None,
             prefix: Some(format!("test!test@test")),
             command: Raw(
@@ -470,24 +470,24 @@ mod test {
                 Some(format!("Testing!")),
             ),
         };
-        let msg: Message = ":test!test@test COMMAND ARG:test :Testing!\r\n".into();
+        let msg: OwnedMessage = ":test!test@test COMMAND ARG:test :Testing!\r\n".into();
         assert_eq!(msg, message);
     }
 
     #[test]
     fn to_message_no_prefix_no_args() {
-        let message = Message {
+        let message = OwnedMessage {
             tags: None,
             prefix: None,
             command: QUIT(None),
         };
-        let msg: Message = "QUIT\r\n".into();
+        let msg: OwnedMessage = "QUIT\r\n".into();
         assert_eq!(msg, message);
     }
 
     #[test]
     #[should_panic]
     fn to_message_invalid_format() {
-        let _: Message = ":invalid :message".into();
+        let _: OwnedMessage = ":invalid :message".into();
     }
 }
