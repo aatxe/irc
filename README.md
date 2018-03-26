@@ -27,12 +27,14 @@ projects:
 - [alectro][alectro] — a terminal IRC client
 - [spilo][spilo] — a minimalistic IRC bouncer
 - [irc-bot.rs][ircbot] — a library for writing IRC bots
+- [playbot_ng][playbot_ng] — a Rust-evaluating IRC bot in Rust
 - [bunnybutt-rs][bunnybutt] — an IRC bot for the [Feed The Beast Wiki][ftb-wiki]
 
 [alectro]: https://github.com/aatxe/alectro
 [spilo]: https://github.com/aatxe/spilo
 [ircbot]: https://github.com/8573/irc-bot.rs
 [bunnybutt]: https://github.com/FTB-Gamepedia/bunnybutt-rs
+[playbot_ng]: https://github.com/panicbit/playbot_ng
 [ftb-wiki]: https://ftb.gamepedia.com/FTB_Wiki
 
 Making your own project? [Submit a pull request](https://github.com/aatxe/irc/pulls) to add it!
