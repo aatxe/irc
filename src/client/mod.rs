@@ -67,7 +67,7 @@ use client::data::{Config, User};
 use client::ext::ClientExt;
 use client::transport::LogView;
 use proto::{ChannelMode, Command, Message, Mode, Response};
-use proto::Command::{JOIN, NICK, NICKSERV, PART, PRIVMSG, ChannelMODE, QUIT};
+use proto::Command::{JOIN, KICK, NICK, NICKSERV, PART, PRIVMSG, ChannelMODE, QUIT};
 
 pub mod conn;
 pub mod data;
@@ -243,12 +243,9 @@ impl<'a> Client for ClientState {
     }
 
     fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> where Self: Sized {
-        let msg = &msg.into();
-        self.handle_sent_message(msg)?;
-        Ok((&self.outgoing).unbounded_send(
-            ClientState::sanitize(&msg.to_string())
-                .into(),
-        )?)
+        let msg = msg.into();
+        self.handle_sent_message(&msg)?;
+        Ok(self.outgoing.unbounded_send(msg)?)
     }
 
     fn stream(&self) -> ClientStream {
@@ -302,22 +299,6 @@ impl ClientState {
         }
     }
 
-    /// Sanitizes the input string by cutting up to (and including) the first occurence of a line
-    /// terminiating phrase (`\r\n`, `\r`, or `\n`). This is used in sending messages back to
-    /// prevent the injection of additional commands.
-    fn sanitize(data: &str) -> &str {
-        // n.b. ordering matters here to prefer "\r\n" over "\r"
-        if let Some((pos, len)) = ["\r\n", "\r", "\n"]
-            .iter()
-            .flat_map(|needle| data.find(needle).map(|pos| (pos, needle.len())))
-            .min_by_key(|&(pos, _)| pos)
-        {
-            data.split_at(pos + len).0
-        } else {
-            data
-        }
-    }
-
     /// Gets the current nickname in use.
     fn current_nickname(&self) -> &str {
         let alt_nicks = self.config().alternate_nicknames();
@@ -348,6 +329,7 @@ impl ClientState {
         match msg.command {
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
+            KICK(ref chan, ref user, _) => self.handle_part(user, chan),
             QUIT(_) => self.handle_quit(msg.source_nickname().unwrap_or("")),
             NICK(ref new_nick) => {
                 self.handle_nick_change(msg.source_nickname().unwrap_or(""), new_nick)
@@ -865,8 +847,8 @@ mod test {
     use client::data::Config;
     #[cfg(not(feature = "nochanlists"))]
     use client::data::User;
-    use proto::{ChannelMode, Mode};
-    use proto::command::Command::{PART, PRIVMSG};
+    use proto::{ChannelMode, IrcCodec, Mode};
+    use proto::command::Command::{PART, PRIVMSG, Raw};
 
     pub fn test_config() -> Config {
         Config {
@@ -886,7 +868,10 @@ mod test {
         // We can't guarantee that everything will have been sent by the time of this call.
         thread::sleep(Duration::from_millis(100));
         client.log_view().sent().unwrap().iter().fold(String::new(), |mut acc, msg| {
-            acc.push_str(&msg.to_string());
+            // NOTE: we have to sanitize here because sanitization happens in IrcCodec after the
+            // messages are converted into strings, but our transport logger catches messages before
+            // they ever reach that point.
+            acc.push_str(&IrcCodec::sanitize(msg.to_string()));
             acc
         })
     }
@@ -1055,7 +1040,7 @@ mod test {
         let res = client.for_each_incoming(|message| {
             println!("{:?}", message);
         });
-       
+
         if let Err(IrcError::NoUsableNick) = res {
             ()
         } else {
@@ -1086,6 +1071,18 @@ mod test {
                 .is_ok()
         );
         assert_eq!(&get_client_value(client)[..], "PRIVMSG #test :Hi there!\r\n");
+    }
+
+    #[test]
+    fn send_raw_is_really_raw() {
+        let client = IrcClient::from_config(test_config()).unwrap();
+        assert!(
+            client.send(Raw("PASS".to_owned(), vec!["password".to_owned()], None)).is_ok()
+        );
+        assert!(
+            client.send(Raw("NICK".to_owned(), vec!["test".to_owned()], None)).is_ok()
+        );
+        assert_eq!(&get_client_value(client)[..], "PASS password\r\nNICK test\r\n");
     }
 
     #[test]
@@ -1153,6 +1150,27 @@ mod test {
                 User::new("~owner"),
                 User::new("&admin"),
                 User::new("test2"),
+            ]
+        )
+    }
+
+    #[test]
+    #[cfg(not(feature = "nochanlists"))]
+    fn user_tracking_names_kick() {
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
+                     :owner!test@test KICK #test test\r\n";
+        let client = IrcClient::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        client.for_each_incoming(|message| {
+            println!("{:?}", message);
+        }).unwrap();
+        assert_eq!(
+            client.list_users("#test").unwrap(),
+            vec![
+                User::new("&admin"),
+                User::new("~owner"),
             ]
         )
     }
