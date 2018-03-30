@@ -67,7 +67,7 @@ use client::data::{Config, User};
 use client::ext::ClientExt;
 use client::transport::LogView;
 use proto::{ChannelMode, Command, Message, Mode, Response};
-use proto::Command::{JOIN, NICK, NICKSERV, PART, PRIVMSG, ChannelMODE, QUIT};
+use proto::Command::{JOIN, KICK, NICK, NICKSERV, PART, PRIVMSG, ChannelMODE, QUIT};
 
 pub mod conn;
 pub mod data;
@@ -329,6 +329,7 @@ impl ClientState {
         match msg.command {
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
+            KICK(ref chan, ref user, _) => self.handle_part(user, chan),
             QUIT(_) => self.handle_quit(msg.source_nickname().unwrap_or("")),
             NICK(ref new_nick) => {
                 self.handle_nick_change(msg.source_nickname().unwrap_or(""), new_nick)
@@ -1149,6 +1150,27 @@ mod test {
                 User::new("~owner"),
                 User::new("&admin"),
                 User::new("test2"),
+            ]
+        )
+    }
+
+    #[test]
+    #[cfg(not(feature = "nochanlists"))]
+    fn user_tracking_names_kick() {
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
+                     :owner!test@test KICK #test test\r\n";
+        let client = IrcClient::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+        client.for_each_incoming(|message| {
+            println!("{:?}", message);
+        }).unwrap();
+        assert_eq!(
+            client.list_users("#test").unwrap(),
+            vec![
+                User::new("&admin"),
+                User::new("~owner"),
             ]
         )
     }
