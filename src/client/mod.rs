@@ -243,12 +243,9 @@ impl<'a> Client for ClientState {
     }
 
     fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> where Self: Sized {
-        let msg = &msg.into();
-        self.handle_sent_message(msg)?;
-        Ok((&self.outgoing).unbounded_send(
-            ClientState::sanitize(&msg.to_string())
-                .into(),
-        )?)
+        let msg = msg.into();
+        self.handle_sent_message(&msg)?;
+        Ok(self.outgoing.unbounded_send(msg)?)
     }
 
     fn stream(&self) -> ClientStream {
@@ -299,22 +296,6 @@ impl ClientState {
             alt_nick_index: RwLock::new(0),
             incoming: Mutex::new(Some(incoming)),
             outgoing: outgoing,
-        }
-    }
-
-    /// Sanitizes the input string by cutting up to (and including) the first occurence of a line
-    /// terminiating phrase (`\r\n`, `\r`, or `\n`). This is used in sending messages back to
-    /// prevent the injection of additional commands.
-    fn sanitize(data: &str) -> &str {
-        // n.b. ordering matters here to prefer "\r\n" over "\r"
-        if let Some((pos, len)) = ["\r\n", "\r", "\n"]
-            .iter()
-            .flat_map(|needle| data.find(needle).map(|pos| (pos, needle.len())))
-            .min_by_key(|&(pos, _)| pos)
-        {
-            data.split_at(pos + len).0
-        } else {
-            data
         }
     }
 
@@ -865,7 +846,7 @@ mod test {
     use client::data::Config;
     #[cfg(not(feature = "nochanlists"))]
     use client::data::User;
-    use proto::{ChannelMode, Mode};
+    use proto::{ChannelMode, IrcCodec, Mode};
     use proto::command::Command::{PART, PRIVMSG};
 
     pub fn test_config() -> Config {
@@ -886,7 +867,10 @@ mod test {
         // We can't guarantee that everything will have been sent by the time of this call.
         thread::sleep(Duration::from_millis(100));
         client.log_view().sent().unwrap().iter().fold(String::new(), |mut acc, msg| {
-            acc.push_str(&msg.to_string());
+            // NOTE: we have to sanitize here because sanitization happens in IrcCodec after the
+            // messages are converted into strings, but our transport logger catches messages before
+            // they ever reach that point.
+            acc.push_str(&IrcCodec::sanitize(msg.to_string()));
             acc
         })
     }
@@ -1055,7 +1039,7 @@ mod test {
         let res = client.for_each_incoming(|message| {
             println!("{:?}", message);
         });
-       
+
         if let Err(IrcError::NoUsableNick) = res {
             ()
         } else {

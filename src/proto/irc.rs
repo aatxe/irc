@@ -16,6 +16,22 @@ impl IrcCodec {
     pub fn new(label: &str) -> error::Result<IrcCodec> {
         LineCodec::new(label).map(|codec| IrcCodec { inner: codec })
     }
+
+    /// Sanitizes the input string by cutting up to (and including) the first occurence of a line
+    /// terminiating phrase (`\r\n`, `\r`, or `\n`). This is used in sending messages back to
+    /// prevent the injection of additional commands.
+    pub(crate) fn sanitize(mut data: String) -> String {
+        // n.b. ordering matters here to prefer "\r\n" over "\r"
+        if let Some((pos, len)) = ["\r\n", "\r", "\n"]
+            .iter()
+            .flat_map(|needle| data.find(needle).map(|pos| (pos, needle.len())))
+            .min_by_key(|&(pos, _)| pos)
+        {
+            data.truncate(pos + len);
+        }
+        data
+    }
+
 }
 
 impl Decoder for IrcCodec {
@@ -35,6 +51,6 @@ impl Encoder for IrcCodec {
 
 
     fn encode(&mut self, msg: Message, dst: &mut BytesMut) -> error::Result<()> {
-        self.inner.encode(msg.to_string(), dst)
+        self.inner.encode(IrcCodec::sanitize(msg.to_string()), dst)
     }
 }
