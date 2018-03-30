@@ -847,7 +847,7 @@ mod test {
     #[cfg(not(feature = "nochanlists"))]
     use client::data::User;
     use proto::{ChannelMode, IrcCodec, Mode};
-    use proto::command::Command::{PART, PRIVMSG};
+    use proto::command::Command::{PART, PRIVMSG, Raw};
 
     pub fn test_config() -> Config {
         Config {
@@ -1070,6 +1070,18 @@ mod test {
                 .is_ok()
         );
         assert_eq!(&get_client_value(client)[..], "PRIVMSG #test :Hi there!\r\n");
+    }
+
+    #[test]
+    fn send_raw_is_really_raw() {
+        let client = IrcClient::from_config(test_config()).unwrap();
+        assert!(
+            client.send(Raw("PASS".to_owned(), vec!["password".to_owned()], None)).is_ok()
+        );
+        assert!(
+            client.send(Raw("NICK".to_owned(), vec!["test".to_owned()], None)).is_ok()
+        );
+        assert_eq!(&get_client_value(client)[..], "PASS password\r\nNICK test\r\n");
     }
 
     #[test]
