@@ -19,7 +19,7 @@ compliant with [RFC 2812][rfc2812], [IRCv3.1][ircv3.1], [IRCv3.2][ircv3.2], and 
 additional, common features from popular IRCds. You can find up-to-date, ready-to-use documentation
 online [on docs.rs][doc].
 
-## Built with the irc crate ##
+## Built with the irc crate
 
 the irc crate is being used to build new IRC software in Rust. Here are some of our favorite
 projects:
@@ -39,16 +39,18 @@ projects:
 
 Making your own project? [Submit a pull request](https://github.com/aatxe/irc/pulls) to add it!
 
-## Getting Started ##
+## Getting Started
 
 To start using the irc crate with cargo, you can simply add `irc = "0.13"` to your dependencies in
-your Cargo.toml file. The high-level API can be found `irc::client::prelude` linked to from the
-[doc root][doc]. You'll find a number of examples in `examples/`, throughout the documentation, and
-below.
+your Cargo.toml file. The high-level API can be found in [`irc::client::prelude`][irc-prelude].
+You'll find a number of examples to help you get started in `examples/`, throughout the
+documentation, and below.
 
-## A Tale of Two APIs ##
+[irc-prelude]: https://docs.rs/irc/*/irc/client/prelude/index.html
 
-### Reactors (The "New" API) ###
+## A Tale of Two APIs
+
+### Reactors (The "New" API)
 
 The release of v0.13 brought with it a new API called `IrcReactor` that enables easier multiserver
 support and more graceful error handling. The general model is that you use the reactor to create
@@ -84,7 +86,7 @@ fn main() {
 ```
 
 
-### Direct Style (The "Old" API) ###
+### Direct Style (The "Old" API)
 
 The old API for connecting to an IRC server is still supported through the `IrcClient` type. It's
 simpler for the most basic use case, but will panic upon encountering any sort of connection issues.
@@ -116,7 +118,7 @@ fn main() {
 }
 ```
 
-## Configuring IRC Clients ##
+## Configuring IRC Clients
 
 As seen above, there are two techniques for configuring the irc crate: runtime loading and
 programmatic configuration. Runtime loading is done via the function `Config::load`, and is likely
@@ -125,8 +127,9 @@ also be useful when defining your own custom configuration format that can be co
 The primary configuration format is TOML, but if you are so inclined, you can use JSON and/or YAML
 via the optional `json` and `yaml` features respectively. At the minimum, a configuration requires
 `nickname` and `server` to be defined, and all other fields are optional. You can find detailed
-explanations of the various fields on
-[docs.rs](https://docs.rs/irc/0.13.2/irc/client/data/config/struct.Config.html#fields).
+explanations of the various fields on [docs.rs][config-fields].
+
+[config-fields]: https://docs.rs/irc/*/irc/client/data/config/struct.Config.html#fields
 
 Alternatively, you can look at the example below of a TOML configuration with all the fields:
 
@@ -173,7 +176,7 @@ cargo run --example convertconf -- -i client_config.json -o client_config.toml
 Note that the formats are automatically determined based on the selected file extensions. This 
 tool should make it easy for users to migrate their old configurations to TOML.
 
-## Contributing ##
+## Contributing
 the irc crate is a free, open source library that relies on contributions from its maintainers,
 Aaron Weiss ([@aatxe][awe]) and Peter Atashian ([@retep998][bun]), as well as the broader Rust
 community. It's licensed under the Mozilla Public License 2.0 whose text can be found in
