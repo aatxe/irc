@@ -88,6 +88,10 @@ pub struct Config {
     pub use_ssl: Option<bool>,
     /// The path to the SSL certificate for this server in DER format.
     pub cert_path: Option<String>,
+    /// The path to a SSL certificate to use for CertFP client authentication in DER format.
+    pub client_cert_path: Option<String>,
+    /// The password for the certificate to use in CertFP authentication.
+    pub client_cert_pass: Option<String>,
     /// The encoding type used for this connection.
     /// This is typically UTF-8, but could be something else.
     pub encoding: Option<String>,
@@ -419,6 +423,16 @@ impl Config {
         self.cert_path.as_ref().map(|s| &s[..])
     }
 
+    /// Gets the path to the client authentication certificate in DER format if specified.
+    pub fn client_cert_path(&self) -> Option<&str> {
+        self.client_cert_path.as_ref().map(|s| &s[..])
+    }
+
+    /// Gets the password to the client authentication certificate.
+    pub fn client_cert_pass(&self) -> &str {
+        self.client_cert_pass.as_ref().map_or("", |s| &s[..])
+    }
+
     /// Gets the encoding to use for this connection. This requires the encode feature to work.
     /// This defaults to UTF-8 when not specified.
     pub fn encoding(&self) -> &str {
@@ -557,6 +571,8 @@ mod test {
             port: Some(6667),
             use_ssl: Some(false),
             cert_path: None,
+            client_cert_path: None,
+            client_cert_pass: None,
             encoding: Some(format!("UTF-8")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             channel_keys: None,
