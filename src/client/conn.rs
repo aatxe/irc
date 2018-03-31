@@ -6,7 +6,7 @@ use std::io::Read;
 use encoding::EncoderTrap;
 use encoding::label::encoding_from_whatwg_label;
 use futures::{Async, Poll, Future, Sink, StartSend, Stream};
-use native_tls::{Certificate, TlsConnector};
+use native_tls::{Certificate, TlsConnector, Pkcs12};
 use tokio_core::reactor::Handle;
 use tokio_core::net::{TcpStream, TcpStreamNew};
 use tokio_io::AsyncRead;
@@ -134,6 +134,15 @@ impl Connection {
                 let cert = Certificate::from_der(&cert_data)?;
                 builder.add_root_certificate(cert)?;
                 info!("Added {} to trusted certificates.", cert_path);
+            }
+            if let Some(client_cert_path) = config.client_cert_path() {
+                let client_cert_pass = config.client_cert_pass();
+                let mut file = File::open(client_cert_path)?;
+                let mut client_cert_data = vec![];
+                file.read_to_end(&mut client_cert_data)?;
+                let pkcs12_archive = Pkcs12::from_der(&client_cert_data, &client_cert_pass)?;
+                builder.identity(pkcs12_archive)?;
+                info!("Using {} for client certificate authentication.", client_cert_path);
             }
             let connector = builder.build()?;
             let stream = Box::new(TcpStream::connect(&config.socket_addr()?, handle).map_err(|e| {
