@@ -18,7 +18,51 @@ use error::TomlError;
 use error::{ConfigError, Result};
 use error::IrcError::InvalidConfig;
 
-/// Configuration data.
+/// Configuration for IRC clients.
+///
+/// # Building a configuration programmatically
+///
+/// For some use cases, it may be useful to build configurations programmatically. Since `Config` is
+/// an ordinary struct with public fields, this should be rather straightforward. However, it is
+/// important to note that the use of `Config::default()` is important, even when specifying all
+/// visible fields because `Config` keeps track of whether it was loaded from a file or
+/// programmatically defined, in order to produce better error messages. Using `Config::default()`
+/// as below will ensure that this process is handled correctly.
+///
+/// ```
+/// # extern crate irc;
+/// use irc::client::prelude::Config;
+///
+/// # fn main() {
+/// let config = Config {
+///     nickname: Some("test".to_owned()),
+///     server: Some("irc.example.com".to_owned()),
+///     ..Config::default()
+/// };
+/// # }
+/// ```
+///
+/// # Loading a configuration from a file
+///
+/// The standard method of using a configuration is to load it from a TOML file. You can find an
+/// example TOML configuration in the README, as well as a minimal example with code for loading the
+/// configuration below.
+///
+/// ## TOML (`config.toml`)
+/// ```toml
+/// nickname = "test"
+/// server = "irc.example.com"
+/// ```
+///
+/// ## Rust
+/// ```no_run
+/// # extern crate irc;
+/// use irc::client::prelude::Config;
+///
+/// # fn main() {
+/// let config = Config::load("config.toml").unwrap();
+/// # }
+/// ```
 #[derive(Clone, Deserialize, Serialize, Default, PartialEq, Debug)]
 pub struct Config {
     /// A list of the owners of the client by nickname (for bots).
@@ -94,6 +138,7 @@ pub struct Config {
     ///
     /// This should not be specified in any configuration. It will automatically be handled by the library.
     #[serde(skip_serializing)]
+    #[doc(hidden)]
     pub path: Option<PathBuf>,
 }
 
