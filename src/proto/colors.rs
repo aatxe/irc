@@ -92,3 +92,40 @@ impl FormattedStringExt for String {
         (&self[..]).strip_formatting()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use proto::colors::FormattedStringExt;
+
+    #[test]
+    fn test_strip_bold() {
+        assert_eq!("l\x02ol".strip_formatting(), "lol");
+    }
+
+    #[test]
+    fn test_strip_fg_color() {
+        assert_eq!("l\x033ol".strip_formatting(), "lol");
+    }
+
+    #[test]
+    fn test_strip_fg_color2() {
+        assert_eq!("l\x0312ol".strip_formatting(), "lol");
+    }
+
+    #[test]
+    fn test_strip_fg_bg_11() {
+        assert_eq!("l\x031,2ol".strip_formatting(), "lol");
+    }
+    #[test]
+    fn test_strip_fg_bg_21() {
+        assert_eq!("l\x0312,3ol".strip_formatting(), "lol");
+    }
+    #[test]
+    fn test_strip_fg_bg_12() {
+        assert_eq!("l\x031,12ol".strip_formatting(), "lol");
+    }
+    #[test]
+    fn test_strip_fg_bg_22() {
+        assert_eq!("l\x0312,13ol".strip_formatting(), "lol");
+    }
+}
