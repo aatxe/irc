@@ -39,12 +39,12 @@ impl FormattedStringExt for str {
         let mut parser = Parser {
             state: ParserState::Text,
         };
-
+        let mut prev: char = '\x00';
         let result: Cow<str> = self
             .chars()
             .filter(move |cur| {
-                match parser.state {
-                    ParserState::Text if *cur == '\x03' => {
+                let result = match parser.state {
+                    ParserState::Text | ParserState::Foreground1 | ParserState::Foreground2 if *cur == '\x03' => {
                         parser.state = ParserState::ColorCode;
                         false
                     },
@@ -54,8 +54,14 @@ impl FormattedStringExt for str {
                         false
                     },
                     ParserState::Foreground1 if (*cur).is_digit(6) => {
-                        parser.state = ParserState::Foreground2;
-                        false
+                        // can only consume another digit if previous char was 1.
+                        if (prev) == '1' {
+                            parser.state = ParserState::Foreground2;
+                            false
+                        } else {
+                            parser.state = ParserState::Text;
+                            true
+                        }
                     },
                     ParserState::Foreground1 if *cur == ','  => {
                         parser.state = ParserState::Comma;
@@ -70,11 +76,21 @@ impl FormattedStringExt for str {
                         false
                     },
                     ParserState::Background1 if (*cur).is_digit(6) => {
+                        // can only consume another digit if previous char was 1.
                         parser.state = ParserState::Text;
-                        false
+                        if (prev) == '1' {
+                            false
+                        } else {
+                            true
+                        }
                     }
-                    _ => true
-                }
+                    _ => {
+                        parser.state = ParserState::Text;
+                        true
+                    }
+                };
+                prev = *cur;
+                return result
             })
             .collect();
 
@@ -127,5 +143,21 @@ mod test {
     #[test]
     fn test_strip_fg_bg_22() {
         assert_eq!("l\x0312,13ol".strip_formatting(), "lol");
+    }
+    #[test]
+    fn test_strip_string_with_multiple_colors() {
+        assert_eq!("hoo\x034r\x033a\x0312y".strip_formatting(), "hooray");
+    }
+    #[test]
+    fn test_strip_string_with_digit_after_color() {
+        assert_eq!("\x0344\x0355\x0366".strip_formatting(), "456");
+    }
+    #[test]
+    fn test_strip_string_with_multiple_2digit_colors() {
+        assert_eq!("hoo\x0310r\x0311a\x0312y".strip_formatting(), "hooray");
+    }
+    #[test]
+    fn test_strip_string_with_digit_after_2digit_color() {
+        assert_eq!("\x031212\x031111\x031010".strip_formatting(), "121110");
     }
 }
