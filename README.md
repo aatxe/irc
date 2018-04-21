@@ -1,4 +1,4 @@
-# the irc crate [![Build Status][ci-badge]][ci] [![Crates.io][cr-badge]][cr] ![Downloads][dl-badge] [![Docs][doc-badge]][doc] [![Built with Spacemacs][bws]][sm]
+# the irc crate [![Build Status][ci-badge]][ci] [![Crates.io][cr-badge]][cr] ![Downloads][dl-badge] [![Docs][doc-badge]][doc]
 
 [ci-badge]: https://travis-ci.org/aatxe/irc.svg?branch=stable
 [ci]: https://travis-ci.org/aatxe/irc
@@ -7,8 +7,6 @@
 [dl-badge]: https://img.shields.io/crates/d/irc.svg
 [doc-badge]: https://docs.rs/irc/badge.svg
 [doc]: https://docs.rs/irc
-[bws]: https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg
-[sm]: http://spacemacs.org
 
 [rfc2812]: http://tools.ietf.org/html/rfc2812
 [ircv3.1]: http://ircv3.net/irc/3.1.html 
