@@ -14,9 +14,9 @@ possible for everyone, there are a few guidelines that we need contributors to f
 
 There will almost certainly be issues open on the irc crate at all times. These are a good place to
 start if you don't have anything pressing on your mind that you'd like to see. If you need or would
-like mentoring instructions on any issue, please ping @aatxe, and he will do his best to provide
-them in a timely fashion. If instead you have your own idea and would like mentoring or feedback,
-you should open a new issue and mention such a desire.
+like mentoring instructions on any issue, please ping [@aatxe](https://github.com/aatxe), and he
+will do his best to provide them in a timely fashion. If instead you have your own idea and would
+like mentoring or feedback, you should open a new issue and mention such a desire.
 
 ## Making Changes
 
