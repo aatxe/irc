@@ -10,6 +10,14 @@ possible for everyone, there are a few guidelines that we need contributors to f
 * Make sure you have a [GitHub account](https://github.com/signup/free).
 * Fork the repository on GitHub.
 
+## Finding Something to Do
+
+There will almost certainly be issues open on the irc crate at all times. These are a good place to
+start if you don't have anything pressing on your mind that you'd like to see. If you need or would
+like mentoring instructions on any issue, please ping @aatxe, and he will do his best to provide
+them in a timely fashion. If instead you have your own idea and would like mentoring or feedback,
+you should open a new issue and mention such a desire.
+
 ## Making Changes
 
 * Create a topic branch from where you want to base your work.
