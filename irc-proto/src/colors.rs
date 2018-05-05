@@ -111,7 +111,7 @@ impl FormattedStringExt for String {
 
 #[cfg(test)]
 mod test {
-    use proto::colors::FormattedStringExt;
+    use super::FormattedStringExt;
 
     #[test]
     fn test_strip_bold() {
