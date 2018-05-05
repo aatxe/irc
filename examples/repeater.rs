@@ -21,7 +21,7 @@ fn main() {
     client.for_each_incoming(|message| {
         print!("{}", message);
         if let Command::PRIVMSG(ref target, ref msg) = message.command {
-            if msg.starts_with(client.current_nickname()) {
+            if msg.starts_with(&*client.current_nickname()) {
                 let tokens: Vec<_> = msg.split(' ').collect();
                 if tokens.len() > 2 {
                     let n = tokens[0].len() + tokens[1].len() + 2;

@@ -29,7 +29,7 @@
 //! client.for_each_incoming(|irc_msg| {
 //!     // irc_msg is a Message
 //!     if let Command::PRIVMSG(channel, message) = irc_msg.command {
-//!         if message.contains(client.current_nickname()) {
+//!         if message.contains(&*client.current_nickname()) {
 //!             // send_privmsg comes from ClientExt
 //!             client.send_privmsg(&channel, "beep boop").unwrap();
 //!         }

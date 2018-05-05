@@ -37,7 +37,7 @@
 //! # client.identify().unwrap();
 //! client.for_each_incoming(|irc_msg| {
 //!     if let Command::PRIVMSG(channel, message) = irc_msg.command {
-//!         if message.contains(client.current_nickname()) {
+//!         if message.contains(&*client.current_nickname()) {
 //!             client.send_privmsg(&channel, "beep boop").unwrap();
 //!         }
 //!     }
@@ -49,7 +49,7 @@
 use std::ascii::AsciiExt;
 use std::collections::HashMap;
 use std::path::Path;
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, Mutex, RwLock, RwLockReadGuard};
 use std::thread;
 
 #[cfg(feature = "ctcp")]
@@ -94,7 +94,7 @@ pub mod transport;
 /// # client.identify().unwrap();
 /// client.stream().for_each_incoming(|irc_msg| {
 ///   match irc_msg.command {
-///     Command::PRIVMSG(channel, message) => if message.contains(client.current_nickname()) {
+///     Command::PRIVMSG(channel, message) => if message.contains(&*client.current_nickname()) {
 ///       client.send_privmsg(&channel, "beep boop").unwrap();
 ///     }
 ///     _ => ()
@@ -159,7 +159,7 @@ pub trait Client {
     /// # client.identify().unwrap();
     /// client.for_each_incoming(|irc_msg| {
     ///     if let Command::PRIVMSG(channel, message) = irc_msg.command {
-    ///         if message.contains(client.current_nickname()) {
+    ///         if message.contains(&*client.current_nickname()) {
     ///             client.send_privmsg(&channel, "beep boop").unwrap();
     ///         }
     ///     }
@@ -231,6 +231,9 @@ struct ClientState {
     chanlists: Mutex<HashMap<String, Vec<User>>>,
     /// A thread-safe index to track the current alternative nickname being used.
     alt_nick_index: RwLock<usize>,
+    /// The current nickname in use by this client, which may differ from the one implied by
+    /// `alt_nick_index`. This can be the case if, for example, a new `NICK` command is sent.
+    current_nickname: RwLock<String>,
     /// A thread-safe internal IRC stream used for the reading API.
     incoming: Mutex<Option<SplitStream<Connection>>>,
     /// A thread-safe copy of the outgoing channel.
@@ -289,26 +292,20 @@ impl ClientState {
         incoming: SplitStream<Connection>,
         outgoing: UnboundedSender<Message>,
         config: Config,
-    ) -> ClientState {
-        ClientState {
-            config: config,
+    ) -> error::Result<ClientState> {
+        Ok(ClientState {
             chanlists: Mutex::new(HashMap::new()),
             alt_nick_index: RwLock::new(0),
+            current_nickname: RwLock::new(config.nickname()?.to_owned()),
             incoming: Mutex::new(Some(incoming)),
             outgoing: outgoing,
-        }
+            config: config,
+        })
     }
 
     /// Gets the current nickname in use.
-    fn current_nickname(&self) -> &str {
-        let alt_nicks = self.config().alternate_nicknames();
-        let index = self.alt_nick_index.read().unwrap();
-        match *index {
-            0 => self.config().nickname().expect(
-                "current_nickname should not be callable if nickname is not defined."
-            ),
-            i => alt_nicks[i - 1],
-        }
+    fn current_nickname(&self) -> RwLockReadGuard<String> {
+        self.current_nickname.read().unwrap()
     }
 
     /// Handles sent messages internally for basic client functionality.
@@ -332,6 +329,7 @@ impl ClientState {
             KICK(ref chan, ref user, _) => self.handle_part(user, chan),
             QUIT(_) => self.handle_quit(msg.source_nickname().unwrap_or("")),
             NICK(ref new_nick) => {
+                self.handle_current_nick_change(msg.source_nickname().unwrap_or(""), new_nick);
                 self.handle_nick_change(msg.source_nickname().unwrap_or(""), new_nick)
             }
             ChannelMODE(ref chan, ref modes) => self.handle_mode(chan, modes),
@@ -473,6 +471,14 @@ impl ClientState {
                 }
             }
         }
+    }
+
+    fn handle_current_nick_change(&self, old_nick: &str, new_nick: &str) {
+        if old_nick.is_empty() || new_nick.is_empty() || old_nick != &*self.current_nickname() {
+            return;
+        }
+        let mut nick = self.current_nickname.write().unwrap();
+        *nick = new_nick.to_owned();
     }
 
     #[cfg(feature = "nochanlists")]
@@ -715,7 +721,7 @@ impl IrcClient {
         });
 
         Ok(IrcClient {
-            state: Arc::new(ClientState::new(rx_incoming.wait()?, tx_outgoing, config)),
+            state: Arc::new(ClientState::new(rx_incoming.wait()?, tx_outgoing, config)?),
             view: rx_view.wait()?,
         })
     }
@@ -774,7 +780,7 @@ impl IrcClient {
     /// Gets the current nickname in use. This may be the primary username set in the configuration,
     /// or it could be any of the alternative nicknames listed as well. As a result, this is the
     /// preferred way to refer to the client's nickname.
-    pub fn current_nickname(&self) -> &str {
+    pub fn current_nickname(&self) -> RwLockReadGuard<String> {
         self.state.current_nickname()
     }
 
@@ -820,7 +826,7 @@ impl<'a> Future for IrcClientFuture<'a> {
         let server = IrcClient {
             state: Arc::new(ClientState::new(
                 stream, self.tx_outgoing.take().unwrap(), self.config.clone()
-            )),
+            )?),
             view: view,
         };
         Ok(Async::Ready(PackedIrcClient(server, Box::new(outgoing_future))))
@@ -1046,6 +1052,22 @@ mod test {
         } else {
             panic!("expected error when no valid nicks were specified")
         }
+    }
+
+    #[test]
+    fn current_nickname_tracking() {
+        let value = ":test!test@test NICK :t3st\r\n\
+                     :t3st!test@test NICK :t35t\r\n";
+        let client = IrcClient::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            ..test_config()
+        }).unwrap();
+
+        assert_eq!(&*client.current_nickname(), "test");
+        client.for_each_incoming(|message| {
+            println!("{:?}", message);
+        }).unwrap();
+        assert_eq!(&*client.current_nickname(), "t35t");
     }
 
     #[test]
