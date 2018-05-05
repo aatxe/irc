@@ -18,9 +18,9 @@ impl IrcCodec {
     }
 
     /// Sanitizes the input string by cutting up to (and including) the first occurence of a line
-    /// terminiating phrase (`\r\n`, `\r`, or `\n`). This is used in sending messages back to
-    /// prevent the injection of additional commands.
-    pub(crate) fn sanitize(mut data: String) -> String {
+    /// terminiating phrase (`\r\n`, `\r`, or `\n`). This is used in sending messages through the
+    /// codec to prevent the injection of additional commands.
+    pub fn sanitize(mut data: String) -> String {
         // n.b. ordering matters here to prefer "\r\n" over "\r"
         if let Some((pos, len)) = ["\r\n", "\r", "\n"]
             .iter()
