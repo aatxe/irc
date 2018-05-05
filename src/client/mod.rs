@@ -223,20 +223,29 @@ impl Stream for ClientStream {
 }
 
 /// Thread-safe internal state for an IRC server connection.
+///
+/// Anything that should be synchronized across threads should be stuffed here. As `IrcClient` will
+/// hold a single shared instance of `ClientState` using an `Arc`.
 #[derive(Debug)]
 struct ClientState {
     /// The configuration used with this connection.
     config: Config,
-    /// A thread-safe map of channels to the list of users in them.
+    /// A thread-safe map of channels to the list of users in them. This is used to implement
+    /// the user tracking for each channel.
     chanlists: Mutex<HashMap<String, Vec<User>>>,
-    /// A thread-safe index to track the current alternative nickname being used.
+    /// A thread-safe index into `config.alt_nicks` to handle alternative nickname usage.
     alt_nick_index: RwLock<usize>,
     /// The current nickname in use by this client, which may differ from the one implied by
     /// `alt_nick_index`. This can be the case if, for example, a new `NICK` command is sent.
     current_nickname: RwLock<String>,
-    /// A thread-safe internal IRC stream used for the reading API.
+    /// The internal IRC stream used for the reading API. This stream can only be given out to one
+    /// thread, and from then on, the option will be empty. This may change in the future if we
+    /// split `Message` into an owned and borrowed variant (the latter being cheap to clone) since
+    /// we might then be able to forward the messages to many stream copies.
     incoming: Mutex<Option<SplitStream<Connection>>>,
-    /// A thread-safe copy of the outgoing channel.
+    /// The outgoing channel used for the sending API. This channel will send messages to the
+    /// writing task (which could be on a different thread) that will handle the actual transmission
+    /// over the wire.
     outgoing: UnboundedSender<Message>,
 }
 
@@ -247,6 +256,8 @@ impl<'a> Client for ClientState {
 
     fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> where Self: Sized {
         let msg = msg.into();
+        // Before sending any messages to the writing task, we first process them for any special
+        // library-provided functionality.
         self.handle_sent_message(&msg)?;
         Ok(self.outgoing.unbounded_send(msg)?)
     }
@@ -298,13 +309,13 @@ impl ClientState {
             alt_nick_index: RwLock::new(0),
             current_nickname: RwLock::new(config.nickname()?.to_owned()),
             incoming: Mutex::new(Some(incoming)),
-            outgoing: outgoing,
-            config: config,
+            outgoing, config,
         })
     }
 
     /// Gets the current nickname in use.
     fn current_nickname(&self) -> RwLockReadGuard<String> {
+        // This should never panic since we should never be poisoning the lock.
         self.current_nickname.read().unwrap()
     }
 
@@ -312,7 +323,9 @@ impl ClientState {
     fn handle_sent_message(&self, msg: &Message) -> error::Result<()> {
         trace!("[SENT] {}", msg.to_string());
         match msg.command {
+            // On sending a `PART`, we remove the channel from the channel listing.
             PART(ref chan, _) => {
+                // This should never panic since we should never be poisoning the mutex.
                 let _ = self.chanlists.lock().unwrap().remove(chan);
             }
             _ => (),
@@ -324,15 +337,37 @@ impl ClientState {
     fn handle_message(&self, msg: &Message) -> error::Result<()> {
         trace!("[RECV] {}", msg.to_string());
         match msg.command {
+            // On a `JOIN` message, we add the user to the channel in the channel listing. This
+            // works on the assumption that the client will only see `JOIN` commands for channels it
+            // is a member of.
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
+
+            // On a `PART` message, we remove the user from the channel in the channel listing. This
+            // works on the assumption that the client will only see `PART` commands for channels it
+            // is a member of.
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
+
+            // On a `KICK` message, we remove the user from the channel in the channel listing. This
+            // works on the assumption that the client will only see `KICK` commands for channels it
+            // is a member of.
             KICK(ref chan, ref user, _) => self.handle_part(user, chan),
+
+            // On a `QUIT` message, we remove the user from all channels in the channel listing.
             QUIT(_) => self.handle_quit(msg.source_nickname().unwrap_or("")),
+
+            // On a `NICK` message, we might update the current nickname (if the `NICK` source is
+            // the client), and we always update channel tracking accordingly.
             NICK(ref new_nick) => {
                 self.handle_current_nick_change(msg.source_nickname().unwrap_or(""), new_nick);
                 self.handle_nick_change(msg.source_nickname().unwrap_or(""), new_nick)
             }
+
+            // On a channel `MODE` message, the access level of a user might have changed (for
+            // example, in `MODE #pdgn +o awe`, the user `awe` is made an operator). Thus, we have
+            // to update the user instance in the channel listing accordingly.
             ChannelMODE(ref chan, ref modes) => self.handle_mode(chan, modes),
+
+            // On `PRIVMSG` commands, we pull out CTCP messages and process them accordingly.
             PRIVMSG(ref target, ref body) => {
                 if body.starts_with('\u{001}') {
                     let tokens: Vec<_> = {
@@ -350,9 +385,15 @@ impl ClientState {
                     }
                 }
             }
+
+            // When we receive `RPL_NAMREPLY`, we use it to populate the channel listing according
+            // to who is included in the reply.
             Command::Response(Response::RPL_NAMREPLY, ref args, ref suffix) => {
                 self.handle_namreply(args, suffix)
             }
+
+            // After `RPL_ENDOFMOTD` or `ERR_NOMOTD`, the client is considered "ready" and is
+            // allowed to perform tasks such as joining channels or setting their usermode.
             Command::Response(Response::RPL_ENDOFMOTD, _, _) |
             Command::Response(Response::ERR_NOMOTD, _, _) => {
                 self.send_nick_password()?;
@@ -366,13 +407,14 @@ impl ClientState {
                     }
                 }
                 let joined_chans = self.chanlists.lock().unwrap();
-                for chan in joined_chans.keys().filter(
-                    |x| !config_chans.contains(&x.as_str()),
-                )
-                {
+                for chan in joined_chans.keys().filter(|x| !config_chans.contains(&x.as_str())) {
                     self.send_join(chan)?
                 }
             }
+
+            // When `ERR_NICKNAMEINUSE` or `ERR_ERRONEOUSNICKNAME` occurs, we use the alternative
+            // nicknames listed in the configuration to try a different `NICK`. Each time it fails,
+            // we move to the next alternative, until all alternatives are exhausted.
             Command::Response(Response::ERR_NICKNAMEINUSE, _, _) |
             Command::Response(Response::ERR_ERRONEOUSNICKNAME, _, _) => {
                 let alt_nicks = self.config().alternate_nicknames();
@@ -384,11 +426,15 @@ impl ClientState {
                     *index += 1;
                 }
             }
+
             _ => (),
         }
         Ok(())
     }
 
+    /// If a password for the nickname is registered, send an identification command via `NICKSERV`.
+    /// This will also attempt to handle the necessary steps to replace an existing user with the
+    /// given nickname according to the ghost sequence specified in the configuration.
     fn send_nick_password(&self) -> error::Result<()> {
         if self.config().nick_password().is_empty() {
             Ok(())
@@ -412,6 +458,7 @@ impl ClientState {
         }
     }
 
+    /// If any user modes are specified in the configuration, this will send them to the server.
     fn send_umodes(&self) -> error::Result<()> {
         if self.config().umodes().is_empty() {
             Ok(())
@@ -473,6 +520,9 @@ impl ClientState {
         }
     }
 
+    /// If `old_nick` is the current nickname for this client, we'll update the current nickname to
+    /// `new_nick`. This should handle both user-initiated nickname changes _and_ server-intiated
+    /// ones.
     fn handle_current_nick_change(&self, old_nick: &str, new_nick: &str) {
         if old_nick.is_empty() || new_nick.is_empty() || old_nick != &*self.current_nickname() {
             return;
@@ -605,10 +655,7 @@ impl Client for IrcClient {
         &self.state.config
     }
 
-    fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()>
-    where
-        Self: Sized,
-    {
+    fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> where Self: Sized {
         self.state.send(msg)
     }
 
@@ -701,22 +748,28 @@ impl IrcClient {
 
         let cfg = config.clone();
 
+        // This thread is run separately to writing outgoing messages to the wire, and hides the
+        // internal details of the `tokio` reactor from the programmer. However, by virtue of being
+        // a separate thread hidden from the programmer, its errors cannot be handled gracefully and
+        // will instead panic.
         let _ = thread::spawn(move || {
             let mut reactor = Core::new().unwrap();
-            // Setting up internal processing stuffs.
             let handle = reactor.handle();
             let conn = reactor.run(Connection::new(&cfg, &handle).unwrap()).unwrap();
 
             tx_view.send(conn.log_view()).unwrap();
             let (sink, stream) = conn.split();
 
+            // Forward every message from the outgoing channel to the sink.
             let outgoing_future = sink.send_all(rx_outgoing.map_err::<error::IrcError, _>(|_| {
                 unreachable!("futures::sync::mpsc::Receiver should never return Err");
             })).map(|_| ()).map_err(|e| panic!("{}", e));
 
-            // Send the stream half back to the original thread.
+            // Send the stream half back to the original thread, to be stored in the client state.
             tx_incoming.send(stream).unwrap();
 
+            // Run the future that writes outgoing messages to the wire forever or until we panic.
+            // This will block the thread.
             reactor.run(outgoing_future).unwrap();
         });
 
@@ -770,8 +823,7 @@ impl IrcClient {
 
         Ok(IrcClientFuture {
             conn: Connection::new(config, &handle)?,
-            _handle: handle,
-            config: config,
+            _handle: handle, config,
             tx_outgoing: Some(tx_outgoing),
             rx_outgoing: Some(rx_outgoing),
         })
@@ -791,7 +843,9 @@ impl IrcClient {
     }
 }
 
-/// A future representing the eventual creation of an `IrcClient`.
+/// A future representing the eventual creation of an `IrcClient`. This future returns a
+/// `PackedIrcClient` which includes the actual `IrcClient` being created and a future that drives
+/// the sending of messages for the client.
 ///
 /// Interaction with this future relies on the `futures` API, but is only expected for more advanced
 /// use cases. To learn more, you can view the documentation for the
@@ -817,24 +871,25 @@ impl<'a> Future for IrcClientFuture<'a> {
         let view = conn.log_view();
         let (sink, stream) = conn.split();
 
+        // Forward every message from the outgoing channel to the sink.
         let outgoing_future = sink.send_all(
             self.rx_outgoing.take().unwrap().map_err::<error::IrcError, _>(|()| {
                 unreachable!("futures::sync::mpsc::Receiver should never return Err");
             })
         ).map(|_| ());
 
-        let server = IrcClient {
+        let client = IrcClient {
             state: Arc::new(ClientState::new(
                 stream, self.tx_outgoing.take().unwrap(), self.config.clone()
-            )?),
-            view: view,
+            )?), view,
         };
-        Ok(Async::Ready(PackedIrcClient(server, Box::new(outgoing_future))))
+        Ok(Async::Ready(PackedIrcClient(client, Box::new(outgoing_future))))
     }
 }
 
 /// An `IrcClient` packaged with a future that drives its message sending. In order for the client
-/// to actually work properly, this future _must_ be running.
+/// to actually work properly, this future _must_ be running. Without it, messages cannot be sent to
+/// the server.
 ///
 /// This type should only be used by advanced users who are familiar with the implementation of this
 /// crate. An easy to use abstraction that does not require this knowledge is available via
