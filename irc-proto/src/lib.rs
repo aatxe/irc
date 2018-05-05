@@ -12,6 +12,7 @@ extern crate tokio_io;
 
 pub mod caps;
 pub mod chan;
+pub mod colors;
 pub mod command;
 pub mod error;
 #[cfg(feature = "tokio")]
@@ -24,6 +25,7 @@ pub mod response;
 
 pub use self::caps::{Capability, NegotiationVersion};
 pub use self::chan::ChannelExt;
+pub use self::colors::FormattedStringExt;
 pub use self::command::{BatchSubCommand, CapSubCommand, Command};
 #[cfg(feature = "tokio")]
 pub use self::irc::IrcCodec;
