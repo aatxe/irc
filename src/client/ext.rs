@@ -184,7 +184,10 @@ pub trait ClientExt: Client {
         self.send(OPER(username.to_string(), password.to_string()))
     }
 
-    /// Sends a message to the specified target.
+    /// Sends a message to the specified target. If the message contains IRC newlines (`\r\n`), it
+    /// will automatically be split and sent as multiple separate `PRIVMSG`s to the specified
+    /// target. If you absolutely must avoid this behavior, you can do
+    /// `client.send(PRIVMSG(target, message))` directly.
     fn send_privmsg<S1, S2>(&self, target: S1, message: S2) -> Result<()>
     where
         Self: Sized,
