@@ -122,6 +122,8 @@ impl IrcReactor {
     /// connection indefinitely (or until failure). As registration is consumed by `run`, subsequent
     /// calls to run will require new registration.
     ///
+    /// **Note**: A client can only be registered once. Subsequent attempts will cause a panic.
+    ///
     /// # Example
     /// ```no_run
     /// # extern crate irc;
