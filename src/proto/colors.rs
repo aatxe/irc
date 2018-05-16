@@ -102,10 +102,10 @@ impl FormattedStringExt for str {
 
 impl FormattedStringExt for String {
     fn is_formatted(&self) -> bool {
-        (&self[..]).is_formatted()
+        (&self).is_formatted()
     }
     fn strip_formatting(&self) -> Cow<str> {
-        (&self[..]).strip_formatting()
+        (&self).strip_formatting()
     }
 }
 
