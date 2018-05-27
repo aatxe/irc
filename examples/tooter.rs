@@ -25,15 +25,15 @@ fn main() {
     let send_client = client.clone();
 
     // Rather than spawn a thread that reads the messages separately, we register a handler with the
-    // reactor. just as in the original version, we don't do any real handling and instead just print
-    // the messages that are received.
+    // reactor. just as in the original version, we don't do any real handling and instead just
+    // print the messages that are received.
     reactor.register_client_with_handler(client, |_, message| {
         print!("{}", message);
         Ok(())
     });
 
-    // We construct an interval using a wheel timer from tokio_timer. This interval will fire
-    // every 10 seconds (and is roughly accurate to the second).
+    // We construct an interval using a wheel timer from tokio_timer. This interval will fire every
+    // ten seconds (and is roughly accurate to the second).
     let send_interval = tokio_timer::wheel()
         .tick_duration(Duration::from_secs(1))
         .num_slots(256)
