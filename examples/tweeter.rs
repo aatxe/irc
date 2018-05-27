@@ -5,6 +5,7 @@ use std::thread;
 use std::time::Duration;
 use irc::client::prelude::*;
 
+// NOTE: you can find an asynchronous version of this example with `IrcReactor` in `tooter.rs`.
 fn main() {
     let config = Config {
         nickname: Some("pickles".to_owned()),
