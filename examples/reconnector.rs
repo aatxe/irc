@@ -26,7 +26,7 @@ fn main() {
     loop {
         let res = configs.iter().fold(Ok(()), |acc, config| {
             acc.and(
-                reactor.prepare_client_and_connect(config).and_then(|client| {
+                reactor.prepare_client_and_connect(config.clone()).and_then(|client| {
                     client.identify().and(Ok(client))
                 }).and_then(|client| {
                     reactor.register_client_with_handler(client, process_msg);

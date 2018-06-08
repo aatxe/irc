@@ -754,7 +754,7 @@ impl IrcClient {
         // will instead panic.
         let _ = thread::spawn(move || {
             let mut reactor = Core::new().unwrap();
-            let conn = reactor.run(Connection::new(&cfg)).unwrap();
+            let conn = reactor.run(Connection::new(cfg)).unwrap();
 
             tx_view.send(conn.log_view()).unwrap();
             let (sink, stream) = conn.split();
@@ -806,9 +806,9 @@ impl IrcClient {
     /// #  .. Default::default()
     /// # };
     /// let mut reactor = Core::new().unwrap();
-    /// let future = IrcClient::new_future(&config).unwrap();
+    /// let future = IrcClient::new_future(config);
     /// // immediate connection errors (like no internet) will turn up here...
-    /// let PackedIrcClient(client, future) = reactor.run(future).unwrap();
+    /// let (client, future) = reactor.run(future).unwrap();
     /// // runtime errors (like disconnections and so forth) will turn up here...
     /// reactor.run(client.stream().for_each(move |irc_msg| {
     ///   // processing messages works like usual
@@ -817,12 +817,12 @@ impl IrcClient {
     /// # }
     /// # fn process_msg(server: &IrcClient, message: Message) -> error::Result<()> { Ok(()) }
     /// ```
-    pub fn new_future(config: &Config) -> impl Future<
+    pub fn new_future(config: Config) -> impl Future<
         Item = (IrcClient, impl Future<Item = (), Error = error::IrcError> + 'static),
         Error = error::IrcError
     > {
-        Connection::new(config)
-            .and_then(|connection| {
+        Connection::new(config.clone())
+            .and_then(move |connection| {
                 let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
                 let log_view = connection.log_view();
                 let (sink, stream) = connection.split();
@@ -831,7 +831,7 @@ impl IrcClient {
                         unreachable!("futures::sync::mpsc::Receiver should never return Err");
                     })
                 ).map(|_| ());
-                ClientState::new(stream, tx_outgoing, config.clone()).map(|state| {
+                ClientState::new(stream, tx_outgoing, config).map(|state| {
                     let client = IrcClient {
                         state: Arc::new(state),
                         view: log_view,
@@ -866,7 +866,7 @@ impl IrcClient {
 /// not require this knowledge is available via [`IrcReactors`](./reactor/struct.IrcReactor.html).
 #[derive(Debug)]
 pub struct IrcClientFuture<'a> {
-    conn: ConnectionFuture<'a>,
+    conn: ConnectionFuture,
     config: &'a Config,
     tx_outgoing: Option<UnboundedSender<Message>>,
     rx_outgoing: Option<UnboundedReceiver<Message>>,
