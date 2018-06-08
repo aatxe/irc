@@ -16,7 +16,7 @@
 //! fn main() {
 //!   let config = Config::default();
 //!   let mut reactor = IrcReactor::new().unwrap();
-//!   let client = reactor.prepare_client_and_connect(&config).unwrap();
+//!   let client = reactor.prepare_client_and_connect(config).unwrap();
 //!   reactor.register_client_with_handler(client, process_msg);
 //!   reactor.run().unwrap();
 //! }
@@ -28,7 +28,7 @@ use futures::future;
 use tokio_core::reactor::{Core, Handle};
 
 use client::data::Config;
-use client::{IrcClient, IrcClientFuture, PackedIrcClient, Client};
+use client::{IrcClient, Client};
 use error;
 use proto::Message;
 
@@ -65,12 +65,15 @@ impl IrcReactor {
     /// # fn main() {
     /// # let config = Config::default();
     /// let future_client = IrcReactor::new().and_then(|mut reactor| {
-    ///     reactor.prepare_client(&config)
+    ///     Ok(reactor.prepare_client(config))
     /// });
     /// # }
     /// ```
-    pub fn prepare_client<'a>(&mut self, config: &'a Config) -> error::Result<IrcClientFuture<'a>> {
-        IrcClient::new_future(self.inner_handle(), config)
+    pub fn prepare_client(&mut self, config: Config) -> impl Future<
+        Item = (IrcClient, impl Future<Item = (), Error = error::IrcError> + 'static),
+        Error = error::IrcError
+    > {
+        IrcClient::new_future(config)
     }
 
     /// Runs an [`IrcClientFuture`](../struct.IrcClientFuture.html), such as one from
@@ -84,14 +87,17 @@ impl IrcReactor {
     /// # fn main() {
     /// # let config = Config::default();
     /// let client = IrcReactor::new().and_then(|mut reactor| {
-    ///     reactor.prepare_client(&config).and_then(|future| {
-    ///         reactor.connect_client(future)
-    ///     })
+    ///     let future = reactor.prepare_client(config);
+    ///     reactor.connect_client(future)
     /// });
     /// # }
     /// ```
-    pub fn connect_client(&mut self, future: IrcClientFuture) -> error::Result<IrcClient> {
-        self.inner.run(future).map(|PackedIrcClient(client, future)| {
+    pub fn connect_client<F, G>(&mut self, future: F) -> error::Result<IrcClient>
+        where
+            F: Future<Item = (IrcClient, G), Error = error::IrcError>,
+            G: Future<Item = (), Error = error::IrcError> + 'static,
+    {
+        self.inner.run(future).map(|(client, future)| {
             self.register_future(future);
             client
         })
@@ -109,12 +115,13 @@ impl IrcReactor {
     /// # fn main() {
     /// # let config = Config::default();
     /// let client = IrcReactor::new().and_then(|mut reactor| {
-    ///     reactor.prepare_client_and_connect(&config)
+    ///     reactor.prepare_client_and_connect(config)
     /// });
     /// # }
     /// ```
-    pub fn prepare_client_and_connect(&mut self, config: &Config) -> error::Result<IrcClient> {
-        self.prepare_client(config).and_then(|future| self.connect_client(future))
+    pub fn prepare_client_and_connect(&mut self, config: Config) -> error::Result<IrcClient> {
+        let client_future = self.prepare_client(config);
+        self.connect_client(client_future)
     }
 
     /// Registers the given client with the specified message handler. The reactor will store this
@@ -132,7 +139,7 @@ impl IrcReactor {
     /// # fn main() {
     /// # let config = Config::default();
     /// let mut reactor = IrcReactor::new().unwrap();
-    /// let client = reactor.prepare_client_and_connect(&config).unwrap();
+    /// let client = reactor.prepare_client_and_connect(config).unwrap();
     /// reactor.register_client_with_handler(client, |client, msg| {
     ///   // Message processing happens here.
     ///   Ok(())
@@ -178,7 +185,7 @@ impl IrcReactor {
     /// # fn main() {
     /// # let config = Config::default();
     /// let mut reactor = IrcReactor::new().unwrap();
-    /// let client = reactor.prepare_client_and_connect(&config).unwrap();
+    /// let client = reactor.prepare_client_and_connect(config).unwrap();
     /// reactor.register_client_with_handler(client, process_msg);
     /// reactor.run().unwrap();
     /// # }
