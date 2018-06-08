@@ -58,11 +58,11 @@ use futures::{Async, Poll, Future, Sink, Stream};
 use futures::stream::SplitStream;
 use futures::sync::mpsc;
 use futures::sync::oneshot;
-use futures::sync::mpsc::{UnboundedReceiver, UnboundedSender};
+use futures::sync::mpsc::UnboundedSender;
 use tokio_core::reactor::Core;
 
 use error;
-use client::conn::{Connection, ConnectionFuture};
+use client::conn::Connection;
 use client::data::{Config, User};
 use client::ext::ClientExt;
 use client::transport::LogView;
@@ -796,7 +796,6 @@ impl IrcClient {
     /// # extern crate tokio_core;
     /// # use std::default::Default;
     /// # use irc::client::prelude::*;
-    /// # use irc::client::PackedIrcClient;
     /// # use irc::error;
     /// # use tokio_core::reactor::Core;
     /// # fn main() {
@@ -854,58 +853,6 @@ impl IrcClient {
         self.view.as_ref().unwrap()
     }
 }
-
-/// A future representing the eventual creation of an `IrcClient`. This future returns a
-/// `PackedIrcClient` which includes the actual `IrcClient` being created and a future that drives
-/// the sending of messages for the client.
-///
-/// Interaction with this future relies on the `futures` API, but is only expected for more advanced
-/// use cases. To learn more, you can view the documentation for the
-/// [`futures`](https://docs.rs/futures/) crate, or the tutorials for
-/// [`tokio`](https://tokio.rs/docs/getting-started/futures/). An easy to use abstraction that does
-/// not require this knowledge is available via [`IrcReactors`](./reactor/struct.IrcReactor.html).
-#[derive(Debug)]
-pub struct IrcClientFuture<'a> {
-    conn: ConnectionFuture,
-    config: &'a Config,
-    tx_outgoing: Option<UnboundedSender<Message>>,
-    rx_outgoing: Option<UnboundedReceiver<Message>>,
-}
-
-impl<'a> Future for IrcClientFuture<'a> {
-    type Item = PackedIrcClient;
-    type Error = error::IrcError;
-
-    fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
-        let conn = try_ready!(self.conn.poll());
-
-        let view = conn.log_view();
-        let (sink, stream) = conn.split();
-
-        // Forward every message from the outgoing channel to the sink.
-        let outgoing_future = sink.send_all(
-            self.rx_outgoing.take().unwrap().map_err::<error::IrcError, _>(|()| {
-                unreachable!("futures::sync::mpsc::Receiver should never return Err");
-            })
-        ).map(|_| ());
-
-        let client = IrcClient {
-            state: Arc::new(ClientState::new(
-                stream, self.tx_outgoing.take().unwrap(), self.config.clone()
-            )?), view,
-        };
-        Ok(Async::Ready(PackedIrcClient(client, Box::new(outgoing_future))))
-    }
-}
-
-/// An `IrcClient` packaged with a future that drives its message sending. In order for the client
-/// to actually work properly, this future _must_ be running. Without it, messages cannot be sent to
-/// the server.
-///
-/// This type should only be used by advanced users who are familiar with the implementation of this
-/// crate. An easy to use abstraction that does not require this knowledge is available via
-/// [`IrcReactors`](./reactor/struct.IrcReactor.html).
-pub struct PackedIrcClient(pub IrcClient, pub Box<Future<Item = (), Error = error::IrcError>>);
 
 #[cfg(test)]
 mod test {
