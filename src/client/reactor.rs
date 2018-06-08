@@ -69,7 +69,10 @@ impl IrcReactor {
     /// });
     /// # }
     /// ```
-    pub fn prepare_client<'a>(&mut self, config: &'a Config) -> error::Result<IrcClientFuture<'a>> {
+    pub fn prepare_client<'a>(&mut self, config: &'a Config) -> impl Future<
+        Item = (IrcClient, impl Future<Item = (), Error = error::IrcError> + 'static),
+        Error = error::IrcError
+    > {
         IrcClient::new_future(config)
     }
 
@@ -90,8 +93,12 @@ impl IrcReactor {
     /// });
     /// # }
     /// ```
-    pub fn connect_client(&mut self, future: IrcClientFuture) -> error::Result<IrcClient> {
-        self.inner.run(future).map(|PackedIrcClient(client, future)| {
+    pub fn connect_client<F, G>(&mut self, future: F) -> error::Result<IrcClient>
+        where
+            F: Future<Item = (IrcClient, G), Error = error::IrcError>,
+            G: Future<Item = (), Error = error::IrcError> + 'static,
+    {
+        self.inner.run(future).map(|(client, future)| {
             self.register_future(future);
             client
         })
@@ -114,7 +121,8 @@ impl IrcReactor {
     /// # }
     /// ```
     pub fn prepare_client_and_connect(&mut self, config: &Config) -> error::Result<IrcClient> {
-        self.prepare_client(config).and_then(|future| self.connect_client(future))
+        let client_future = self.prepare_client(config);
+        self.connect_client(client_future)
     }
 
     /// Registers the given client with the specified message handler. The reactor will store this

@@ -754,7 +754,7 @@ impl IrcClient {
         // will instead panic.
         let _ = thread::spawn(move || {
             let mut reactor = Core::new().unwrap();
-            let conn = reactor.run(Connection::new(&cfg).unwrap()).unwrap();
+            let conn = reactor.run(Connection::new(&cfg)).unwrap();
 
             tx_view.send(conn.log_view()).unwrap();
             let (sink, stream) = conn.split();
@@ -817,15 +817,28 @@ impl IrcClient {
     /// # }
     /// # fn process_msg(server: &IrcClient, message: Message) -> error::Result<()> { Ok(()) }
     /// ```
-    pub fn new_future(config: &Config) -> error::Result<IrcClientFuture> {
-        let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
-
-        Ok(IrcClientFuture {
-            conn: Connection::new(config)?,
-            config,
-            tx_outgoing: Some(tx_outgoing),
-            rx_outgoing: Some(rx_outgoing),
-        })
+    pub fn new_future(config: &Config) -> impl Future<
+        Item = (IrcClient, impl Future<Item = (), Error = error::IrcError> + 'static),
+        Error = error::IrcError
+    > {
+        Connection::new(config)
+            .and_then(|connection| {
+                let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
+                let log_view = connection.log_view();
+                let (sink, stream) = connection.split();
+                let outgoing_future = sink.send_all(
+                    rx_outgoing.map_err::<error::IrcError, _>(|()| {
+                        unreachable!("futures::sync::mpsc::Receiver should never return Err");
+                    })
+                ).map(|_| ());
+                ClientState::new(stream, tx_outgoing, config.clone()).map(|state| {
+                    let client = IrcClient {
+                        state: Arc::new(state),
+                        view: log_view,
+                    };
+                    (client, outgoing_future)
+                })
+            })
     }
 
     /// Gets the current nickname in use. This may be the primary username set in the configuration,

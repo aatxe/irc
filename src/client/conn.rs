@@ -2,6 +2,7 @@
 use std::fs::File;
 use std::fmt;
 use std::io::Read;
+use std::net::SocketAddr;
 
 use encoding::EncoderTrap;
 use encoding::label::encoding_from_whatwg_label;
@@ -119,7 +120,7 @@ impl<'a> Future for ConnectionFuture<'a> {
 
 impl Connection {
     /// Creates a new `Connection` using the specified `Config` and `Handle`.
-    pub fn new<'a>(config: &'a Config) -> error::Result<ConnectionFuture<'a>> {
+    pub fn new<'a>(config: &'a Config) -> impl Future<Item = Connection, Error = error::IrcError> {
         if config.use_mock_connection() {
             Ok(ConnectionFuture::Mock(config))
         } else if config.use_ssl() {
