@@ -70,7 +70,7 @@ fn main() {
     };
 
     let mut reactor = IrcReactor::new().unwrap();
-    let client = reactor.prepare_client_and_connect(&config).unwrap();
+    let client = reactor.prepare_client_and_connect(config).unwrap();
     client.identify().unwrap();
     
     reactor.register_client_with_handler(client, |client, message| {
