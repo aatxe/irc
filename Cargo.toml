@@ -39,6 +39,7 @@ serde = "1.0"
 serde_derive = "1.0"
 serde_json = { version = "1.0", optional = true }
 serde_yaml = { version = "0.7", optional = true }
+tokio = "0.1"
 tokio-core = "0.1"
 tokio-io = "0.1"
 tokio-mockstream = "1.1"
