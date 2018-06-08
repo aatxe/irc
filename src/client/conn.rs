@@ -7,8 +7,7 @@ use encoding::EncoderTrap;
 use encoding::label::encoding_from_whatwg_label;
 use futures::{Async, Poll, Future, Sink, StartSend, Stream};
 use native_tls::{Certificate, TlsConnector, Pkcs12};
-use tokio_core::reactor::Handle;
-use tokio_core::net::{TcpStream, TcpStreamNew};
+use tokio::net::{ConnectFuture, TcpStream};
 use tokio_io::AsyncRead;
 use tokio_mockstream::MockStream;
 use tokio_tls::{TlsConnectorExt, TlsStream};
@@ -48,7 +47,7 @@ type TlsFuture = Box<Future<Error = error::IrcError, Item = TlsStream<TcpStream>
 /// A future representing an eventual `Connection`.
 pub enum ConnectionFuture<'a> {
     #[doc(hidden)]
-    Unsecured(&'a Config, TcpStreamNew),
+    Unsecured(&'a Config, ConnectFuture),
     #[doc(hidden)]
     Secured(&'a Config, TlsFuture),
     #[doc(hidden)]
@@ -120,7 +119,7 @@ impl<'a> Future for ConnectionFuture<'a> {
 
 impl Connection {
     /// Creates a new `Connection` using the specified `Config` and `Handle`.
-    pub fn new<'a>(config: &'a Config, handle: &Handle) -> error::Result<ConnectionFuture<'a>> {
+    pub fn new<'a>(config: &'a Config) -> error::Result<ConnectionFuture<'a>> {
         if config.use_mock_connection() {
             Ok(ConnectionFuture::Mock(config))
         } else if config.use_ssl() {
@@ -145,7 +144,7 @@ impl Connection {
                 info!("Using {} for client certificate authentication.", client_cert_path);
             }
             let connector = builder.build()?;
-            let stream = Box::new(TcpStream::connect(&config.socket_addr()?, handle).map_err(|e| {
+            let stream = Box::new(TcpStream::connect(&config.socket_addr()?).map_err(|e| {
                 let res: error::IrcError = e.into();
                 res
             }).and_then(move |socket| {
@@ -158,7 +157,7 @@ impl Connection {
             info!("Connecting to {}.", config.server()?);
             Ok(ConnectionFuture::Unsecured(
                 config,
-                TcpStream::connect(&config.socket_addr()?, handle),
+                TcpStream::connect(&config.socket_addr()?),
             ))
         }
     }

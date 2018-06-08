@@ -59,7 +59,7 @@ use futures::stream::SplitStream;
 use futures::sync::mpsc;
 use futures::sync::oneshot;
 use futures::sync::mpsc::{UnboundedReceiver, UnboundedSender};
-use tokio_core::reactor::{Core, Handle};
+use tokio_core::reactor::Core;
 
 use error;
 use client::conn::{Connection, ConnectionFuture};
@@ -754,8 +754,7 @@ impl IrcClient {
         // will instead panic.
         let _ = thread::spawn(move || {
             let mut reactor = Core::new().unwrap();
-            let handle = reactor.handle();
-            let conn = reactor.run(Connection::new(&cfg, &handle).unwrap()).unwrap();
+            let conn = reactor.run(Connection::new(&cfg).unwrap()).unwrap();
 
             tx_view.send(conn.log_view()).unwrap();
             let (sink, stream) = conn.split();
@@ -779,9 +778,9 @@ impl IrcClient {
         })
     }
 
-    /// Creates a `Future` of an `IrcClient` from the specified configuration and on the event loop
-    /// corresponding to the given handle. This can be used to set up a number of `IrcClients` on a
-    /// single, shared event loop. It can also be used to take more control over execution and error
+    /// Creates a `Future` of an `IrcClient` from the specified configuration.
+    /// This can be used to set up a number of `IrcClients` on a single,
+    /// shared event loop. It can also be used to take more control over execution and error
     /// handling. Connection will not occur until the event loop is run.
     ///
     /// Proper usage requires familiarity with `tokio` and `futures`. You can find more information
@@ -807,7 +806,7 @@ impl IrcClient {
     /// #  .. Default::default()
     /// # };
     /// let mut reactor = Core::new().unwrap();
-    /// let future = IrcClient::new_future(reactor.handle(), &config).unwrap();
+    /// let future = IrcClient::new_future(&config).unwrap();
     /// // immediate connection errors (like no internet) will turn up here...
     /// let PackedIrcClient(client, future) = reactor.run(future).unwrap();
     /// // runtime errors (like disconnections and so forth) will turn up here...
@@ -818,12 +817,12 @@ impl IrcClient {
     /// # }
     /// # fn process_msg(server: &IrcClient, message: Message) -> error::Result<()> { Ok(()) }
     /// ```
-    pub fn new_future(handle: Handle, config: &Config) -> error::Result<IrcClientFuture> {
+    pub fn new_future(config: &Config) -> error::Result<IrcClientFuture> {
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
 
         Ok(IrcClientFuture {
-            conn: Connection::new(config, &handle)?,
-            _handle: handle, config,
+            conn: Connection::new(config)?,
+            config,
             tx_outgoing: Some(tx_outgoing),
             rx_outgoing: Some(rx_outgoing),
         })
@@ -855,7 +854,6 @@ impl IrcClient {
 #[derive(Debug)]
 pub struct IrcClientFuture<'a> {
     conn: ConnectionFuture<'a>,
-    _handle: Handle,
     config: &'a Config,
     tx_outgoing: Option<UnboundedSender<Message>>,
     rx_outgoing: Option<UnboundedReceiver<Message>>,

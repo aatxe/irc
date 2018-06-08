@@ -70,7 +70,7 @@ impl IrcReactor {
     /// # }
     /// ```
     pub fn prepare_client<'a>(&mut self, config: &'a Config) -> error::Result<IrcClientFuture<'a>> {
-        IrcClient::new_future(self.inner_handle(), config)
+        IrcClient::new_future(config)
     }
 
     /// Runs an [`IrcClientFuture`](../struct.IrcClientFuture.html), such as one from
