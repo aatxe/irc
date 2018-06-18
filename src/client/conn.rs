@@ -42,12 +42,14 @@ impl fmt::Debug for Connection {
     }
 }
 
+type TlsFuture = Box<Future<Error = error::IrcError, Item = TlsStream<TcpStream>> + Send>;
+
 /// A future representing an eventual `Connection`.
 pub enum ConnectionFuture {
     #[doc(hidden)]
     Unsecured(Config, ConnectFuture),
     #[doc(hidden)]
-    Secured(Config, ConnectFuture, TlsConnector),
+    Secured(Config, TlsFuture),
     #[doc(hidden)]
     Mock(Config),
 }
@@ -59,12 +61,12 @@ impl fmt::Debug for ConnectionFuture {
             "{}({:?}, ...)",
             match *self {
                 ConnectionFuture::Unsecured(_, _) => "ConnectionFuture::Unsecured",
-                ConnectionFuture::Secured(_, _, _) => "ConnectionFuture::Secured",
+                ConnectionFuture::Secured(_, _) => "ConnectionFuture::Secured",
                 ConnectionFuture::Mock(_) => "ConnectionFuture::Mock",
             },
             match *self {
                 ConnectionFuture::Unsecured(ref cfg, _) |
-                ConnectionFuture::Secured(ref cfg, _, _) |
+                ConnectionFuture::Secured(ref cfg, _) |
                 ConnectionFuture::Mock(ref cfg) => cfg,
             }
         )
@@ -83,16 +85,7 @@ impl Future for ConnectionFuture {
 
                 Ok(Async::Ready(Connection::Unsecured(transport)))
             }
-            ConnectionFuture::Secured(ref config, ref mut inner, ref connector) => {
-                let domain = format!("{}", config.server().expect("should already be tested"));
-                let mut inner = inner.map_err(|e| {
-                    let res: error::IrcError = e.into();
-                    res
-                }).and_then(move |socket| {
-                    connector.connect_async(&domain, socket).map_err(
-                        |e| e.into(),
-                    )
-                });
+            ConnectionFuture::Secured(ref config, ref mut inner) => {
                 let framed = try_ready!(inner.poll()).framed(IrcCodec::new(config.encoding())?);
                 let transport = IrcTransport::new(config, framed);
 
@@ -138,6 +131,7 @@ impl Connection {
             let domain = format!("{}", config.server()?);
             info!("Connecting via SSL to {}.", domain);
             let mut builder = TlsConnector::builder()?;
+
             if let Some(cert_path) = config.cert_path() {
                 let mut file = File::open(cert_path)?;
                 let mut cert_data = vec![];
@@ -146,6 +140,7 @@ impl Connection {
                 builder.add_root_certificate(cert)?;
                 info!("Added {} to trusted certificates.", cert_path);
             }
+
             if let Some(client_cert_path) = config.client_cert_path() {
                 let client_cert_pass = config.client_cert_pass();
                 let mut file = File::open(client_cert_path)?;
@@ -155,13 +150,18 @@ impl Connection {
                 builder.identity(pkcs12_archive)?;
                 info!("Using {} for client certificate authentication.", client_cert_path);
             }
+
             let connector = builder.build()?;
             let socket_addr = config.socket_addr()?;
-            Ok(ConnectionFuture::Secured(
-                config,
-                TcpStream::connect(&socket_addr),
-                connector
-            ))
+
+            let stream = TcpStream::connect(&socket_addr).map_err(|e| {
+                let res: error::IrcError = e.into();
+                res
+            }).and_then(move |socket| {
+                connector.connect_async(&domain, socket).map_err(|e| e.into())
+            });
+
+            Ok(ConnectionFuture::Secured(config, Box::new(stream)))
         } else {
             info!("Connecting to {}.", config.server()?);
             let socket_addr = config.socket_addr()?;
