@@ -7,15 +7,15 @@ use irc::client::prelude::*;
 fn main() {
     let cfg1 = Config {
         nickname: Some("pickles".to_owned()),
-        server: Some("irc.fyrechat.net".to_owned()),
-        channels: Some(vec!["#irc-crate".to_owned()]),
+        server: Some("irc.mozilla.org".to_owned()),
+        channels: Some(vec!["#rust-spam".to_owned()]),
         ..Default::default()
     };
 
     let cfg2 = Config {
         nickname: Some("bananas".to_owned()),
-        server: Some("irc.fyrechat.net".to_owned()),
-        channels: Some(vec!["#irc-crate".to_owned()]),
+        server: Some("irc.mozilla.org".to_owned()),
+        channels: Some(vec!["#rust-spam".to_owned()]),
         ..Default::default()
     };
 

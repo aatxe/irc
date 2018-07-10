@@ -10,8 +10,8 @@ use irc::error::IrcError;
 fn main() {
     let config = Config {
         nickname: Some("mastodon".to_owned()),
-        server: Some("irc.fyrechat.net".to_owned()),
-        channels: Some(vec!["#irc-crate".to_owned()]),
+        server: Some("irc.mozilla.org".to_owned()),
+        channels: Some(vec!["#rust-spam".to_owned()]),
         ..Default::default()
     };
 
@@ -43,7 +43,7 @@ fn main() {
     // And then spawn a new future that performs the given action each time it fires.
     reactor.register_future(send_interval.map_err(IrcError::Timer).for_each(move |()| {
         // Anything in here will happen every 10 seconds!
-        send_client.send_privmsg("#irc-crate", "TOOT TOOT")
+        send_client.send_privmsg("#rust-spam", "AWOOOOOOOOOO")
     }));
 
     // Then, on the main thread, we finally run the reactor which blocks the program indefinitely.
