@@ -102,10 +102,10 @@ impl FormattedStringExt for str {
 
 impl FormattedStringExt for String {
     fn is_formatted(&self) -> bool {
-        (&self[..]).is_formatted()
+        self.as_str().is_formatted()
     }
     fn strip_formatting(&self) -> Cow<str> {
-        (&self[..]).strip_formatting()
+        self.as_str().strip_formatting()
     }
 }
 
@@ -116,6 +116,10 @@ mod test {
     #[test]
     fn test_strip_bold() {
         assert_eq!("l\x02ol".strip_formatting(), "lol");
+    }
+    #[test]
+    fn test_strip_bold_from_string() {
+        assert_eq!(String::from("l\x02ol").strip_formatting(), "lol");
     }
 
     #[test]
