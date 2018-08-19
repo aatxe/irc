@@ -123,129 +123,56 @@ mod test {
     use std::borrow::Cow;
     use proto::colors::FormattedStringExt;
 
-    #[test]
-    fn test_is_formatted_blank() {
-        assert!(!"".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_blank2() {
-        assert!(!"    ".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_blank3() {
-        assert!(!"\t\r\n".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_bold() {
-        assert!("l\x02ol".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_fg_color() {
-        assert!("l\x033ol".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_fg_color2() {
-        assert!("l\x0312ol".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_fg_bg_11() {
-        assert!("l\x031,2ol".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_fg_bg_21() {
-        assert!("l\x0312,3ol".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_fg_bg_12() {
-        assert!("l\x031,12ol".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_fg_bg_22() {
-        assert!("l\x0312,13ol".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_string_with_multiple_colors() {
-        assert!("hoo\x034r\x033a\x0312y".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_string_with_digit_after_color() {
-        assert!("\x0344\x0355\x0366".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_string_with_multiple_2digit_colors() {
-        assert!("hoo\x0310r\x0311a\x0312y".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_string_with_digit_after_2digit_color() {
-        assert!("\x031212\x031111\x031010".is_formatted());
-    }
-    #[test]
-    fn test_is_formatted_unformatted() {
-        assert!(!"a plain text".is_formatted());
+    macro_rules! test_formatted_string_ext {
+        { $( $name:ident ( $($line:tt)* ), )* } => {
+            $(
+            mod $name {
+                use super::*;
+                test_formatted_string_ext!(@ $($line)*);
+            }
+            )*
+        };
+        (@ $text:expr, should stripped into $expected:expr) => {
+            #[test]
+            fn test_formatted() {
+                assert!($text.is_formatted());
+            }
+            #[test]
+            fn test_strip() {
+                assert_eq!($text.strip_formatting(), $expected);
+            }
+        };
+        (@ $text:expr, is not formatted) => {
+            #[test]
+            fn test_formatted() {
+                assert!(!$text.is_formatted());
+            }
+            #[test]
+            fn test_strip() {
+                assert_eq!($text.strip_formatting(), $text);
+            }
+        }
     }
 
-    #[test]
-    fn test_strip_blank() {
-        assert_eq!("".strip_formatting(), "");
-    }
-    #[test]
-    fn test_strip_blank2() {
-        assert_eq!("    ".strip_formatting(), "    ");
-    }
-    #[test]
-    fn test_strip_blank3() {
-        assert_eq!("\t\r\n".strip_formatting(), "\t\r\n");
-    }
-    #[test]
-    fn test_strip_bold() {
-        assert_eq!("l\x02ol".strip_formatting(), "lol");
-    }
-    #[test]
-    fn test_strip_bold_from_string() {
-        assert_eq!(String::from("l\x02ol").strip_formatting(), "lol");
-    }
-
-    #[test]
-    fn test_strip_fg_color() {
-        assert_eq!("l\x033ol".strip_formatting(), "lol");
-    }
-
-    #[test]
-    fn test_strip_fg_color2() {
-        assert_eq!("l\x0312ol".strip_formatting(), "lol");
-    }
-
-    #[test]
-    fn test_strip_fg_bg_11() {
-        assert_eq!("l\x031,2ol".strip_formatting(), "lol");
-    }
-    #[test]
-    fn test_strip_fg_bg_21() {
-        assert_eq!("l\x0312,3ol".strip_formatting(), "lol");
-    }
-    #[test]
-    fn test_strip_fg_bg_12() {
-        assert_eq!("l\x031,12ol".strip_formatting(), "lol");
-    }
-    #[test]
-    fn test_strip_fg_bg_22() {
-        assert_eq!("l\x0312,13ol".strip_formatting(), "lol");
-    }
-    #[test]
-    fn test_strip_string_with_multiple_colors() {
-        assert_eq!("hoo\x034r\x033a\x0312y".strip_formatting(), "hooray");
-    }
-    #[test]
-    fn test_strip_string_with_digit_after_color() {
-        assert_eq!("\x0344\x0355\x0366".strip_formatting(), "456");
-    }
-    #[test]
-    fn test_strip_string_with_multiple_2digit_colors() {
-        assert_eq!("hoo\x0310r\x0311a\x0312y".strip_formatting(), "hooray");
-    }
-    #[test]
-    fn test_strip_string_with_digit_after_2digit_color() {
-        assert_eq!("\x031212\x031111\x031010".strip_formatting(), "121110");
+    test_formatted_string_ext! {
+        blank("", is not formatted),
+        blank2("    ", is not formatted),
+        blank3("\t\r\n", is not formatted),
+        bold("l\x02ol", should stripped into "lol"),
+        bold_from_string(String::from("l\x02ol"), should stripped into "lol"),
+        bold_hangul("우왕\x02굳", should stripped into "우왕굳"),
+        fg_color("l\x033ol", should stripped into "lol"),
+        fg_color2("l\x0312ol", should stripped into "lol"),
+        fg_bg_11("l\x031,2ol", should stripped into "lol"),
+        fg_bg_21("l\x0312,3ol", should stripped into "lol"),
+        fg_bg_12("l\x031,12ol", should stripped into "lol"),
+        fg_bg_22("l\x0312,13ol", should stripped into "lol"),
+        string_with_multiple_colors("hoo\x034r\x033a\x0312y", should stripped into "hooray"),
+        string_with_digit_after_color("\x0344\x0355\x0366", should stripped into "456"),
+        string_with_multiple_2digit_colors("hoo\x0310r\x0311a\x0312y", should stripped into "hooray"),
+        string_with_digit_after_2digit_color("\x031212\x031111\x031010", should stripped into "121110"),
+        thinking("🤔...", is not formatted),
+        unformatted("a plain text", is not formatted),
     }
 
     #[test]
