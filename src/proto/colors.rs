@@ -15,18 +15,18 @@ struct Parser {
 }
 
 /// An extension trait giving strings a function to strip IRC colors
-pub trait FormattedStringExt {
+pub trait FormattedStringExt<'a> {
 
     /// Returns true if the string contains color, bold, underline or italics
     fn is_formatted(&self) -> bool;
 
     /// Returns the string with all color, bold, underline and italics stripped
-    fn strip_formatting(&self) -> Cow<str>;
+    fn strip_formatting(self) -> Cow<'a, str>;
 
 }
 
 
-impl FormattedStringExt for str {
+impl<'a> FormattedStringExt<'a> for &'a str {
     fn is_formatted(&self) -> bool {
         self.contains('\x02') || // bold
             self.contains('\x1F') || // underline
@@ -35,12 +35,22 @@ impl FormattedStringExt for str {
             self.contains('\x03') // color
     }
 
-    fn strip_formatting(&self) -> Cow<str> {
+    fn strip_formatting(self) -> Cow<'a, str> {
+        if !self.is_formatted() {
+            return Cow::Borrowed(self);
+        }
+        Cow::Owned(internal::strip_formatting(self))
+    }
+}
+
+mod internal {  // to reduce commit diff
+    use super::*;
+    pub(super) fn strip_formatting(input: &str) -> String {
         let mut parser = Parser {
             state: ParserState::Text,
         };
         let mut prev: char = '\x00';
-        let result: Cow<str> = self
+        input
             .chars()
             .filter(move |cur| {
                 let result = match parser.state {
@@ -92,25 +102,25 @@ impl FormattedStringExt for str {
                 prev = *cur;
                 return result
             })
-            .collect();
-
-        result
+            .collect()
     }
-
-
 }
 
-impl FormattedStringExt for String {
+impl FormattedStringExt<'static> for String {
     fn is_formatted(&self) -> bool {
         self.as_str().is_formatted()
     }
-    fn strip_formatting(&self) -> Cow<str> {
-        self.as_str().strip_formatting()
+    fn strip_formatting(self) -> Cow<'static, str> {
+        if !self.is_formatted() {
+            return Cow::Owned(self);
+        }
+        Cow::Owned(internal::strip_formatting(&self))
     }
 }
 
 #[cfg(test)]
 mod test {
+    use std::borrow::Cow;
     use proto::colors::FormattedStringExt;
 
     #[test]
@@ -163,5 +173,14 @@ mod test {
     #[test]
     fn test_strip_string_with_digit_after_2digit_color() {
         assert_eq!("\x031212\x031111\x031010".strip_formatting(), "121110");
+    }
+
+    #[test]
+    fn test_strip_no_allocation_for_unformatted_text() {
+        if let Cow::Borrowed(formatted) = "plain text".strip_formatting() {
+            assert_eq!(formatted, "plain text");
+        } else {
+            panic!("allocation detected");
+        }
     }
 }
