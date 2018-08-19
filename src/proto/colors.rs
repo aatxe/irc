@@ -25,14 +25,17 @@ pub trait FormattedStringExt<'a> {
 
 }
 
+const FORMAT_CHARACTERS: &[char] = &[
+    '\x02', // bold
+    '\x1F', // underline
+    '\x16', // reverse
+    '\x0F', // normal
+    '\x03', // color
+];
 
 impl<'a> FormattedStringExt<'a> for &'a str {
     fn is_formatted(&self) -> bool {
-        self.contains('\x02') || // bold
-            self.contains('\x1F') || // underline
-            self.contains('\x16') || // reverse
-            self.contains('\x0F') || // normal
-            self.contains('\x03') // color
+        self.contains(FORMAT_CHARACTERS)
     }
 
     fn strip_formatting(self) -> Cow<'a, str> {
@@ -56,7 +59,7 @@ fn strip_formatting(buf: &mut String) {
                 parser.state = ParserState::ColorCode;
                 false
             },
-            ParserState::Text => !['\x02', '\x1F', '\x16', '\x0F'].contains(&cur),
+            ParserState::Text => !FORMAT_CHARACTERS.contains(&cur),
             ParserState::ColorCode if cur.is_digit(10) => {
                 parser.state = ParserState::Foreground1;
                 false
@@ -120,6 +123,79 @@ mod test {
     use std::borrow::Cow;
     use proto::colors::FormattedStringExt;
 
+    #[test]
+    fn test_is_formatted_blank() {
+        assert!(!"".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_blank2() {
+        assert!(!"    ".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_blank3() {
+        assert!(!"\t\r\n".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_bold() {
+        assert!("l\x02ol".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_fg_color() {
+        assert!("l\x033ol".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_fg_color2() {
+        assert!("l\x0312ol".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_fg_bg_11() {
+        assert!("l\x031,2ol".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_fg_bg_21() {
+        assert!("l\x0312,3ol".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_fg_bg_12() {
+        assert!("l\x031,12ol".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_fg_bg_22() {
+        assert!("l\x0312,13ol".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_string_with_multiple_colors() {
+        assert!("hoo\x034r\x033a\x0312y".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_string_with_digit_after_color() {
+        assert!("\x0344\x0355\x0366".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_string_with_multiple_2digit_colors() {
+        assert!("hoo\x0310r\x0311a\x0312y".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_string_with_digit_after_2digit_color() {
+        assert!("\x031212\x031111\x031010".is_formatted());
+    }
+    #[test]
+    fn test_is_formatted_unformatted() {
+        assert!(!"a plain text".is_formatted());
+    }
+
+    #[test]
+    fn test_strip_blank() {
+        assert_eq!("".strip_formatting(), "");
+    }
+    #[test]
+    fn test_strip_blank2() {
+        assert_eq!("    ".strip_formatting(), "    ");
+    }
+    #[test]
+    fn test_strip_blank3() {
+        assert_eq!("\t\r\n".strip_formatting(), "\t\r\n");
+    }
     #[test]
     fn test_strip_bold() {
         assert_eq!("l\x02ol".strip_formatting(), "lol");
