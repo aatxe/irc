@@ -1,14 +1,13 @@
 //! An extension trait that provides the ability to strip IRC colors from a string
 use std::borrow::Cow;
 
-#[derive(PartialEq)]
 enum ParserState {
     Text,
     ColorCode,
-    Foreground1,
+    Foreground1(char),
     Foreground2,
     Comma,
-    Background1,
+    Background1(char),
 }
 struct Parser {
     state: ParserState,
@@ -49,60 +48,63 @@ impl<'a> FormattedStringExt<'a> for &'a str {
 }
 
 fn strip_formatting(buf: &mut String) {
-    let mut parser = Parser {
-        state: ParserState::Text,
-    };
-    let mut prev: char = '\x00';
-    buf.retain(|cur| {
-        let result = match parser.state {
-            ParserState::Text | ParserState::Foreground1 | ParserState::Foreground2 if cur == '\x03' => {
-                parser.state = ParserState::ColorCode;
+    let mut parser = Parser::new();
+    buf.retain(|cur| parser.next(cur));
+}
+
+impl Parser {
+    fn new() -> Self {
+        Parser  {
+            state: ParserState::Text,
+        }
+    }
+
+    fn next(&mut self, cur: char) -> bool {
+        use self::ParserState::*;
+        match self.state {
+            Text | Foreground1(_) | Foreground2 if cur == '\x03' => {
+                self.state = ColorCode;
                 false
-            },
-            ParserState::Text => !FORMAT_CHARACTERS.contains(&cur),
-            ParserState::ColorCode if cur.is_digit(10) => {
-                parser.state = ParserState::Foreground1;
-                false
-            },
-            ParserState::Foreground1 if cur.is_digit(6) => {
-                // can only consume another digit if previous char was 1.
-                if prev == '1' {
-                    parser.state = ParserState::Foreground2;
-                    false
-                } else {
-                    parser.state = ParserState::Text;
-                    true
-                }
-            },
-            ParserState::Foreground1 if cur == ','  => {
-                parser.state = ParserState::Comma;
-                false
-            },
-            ParserState::Foreground2 if cur == ',' => {
-                parser.state = ParserState::Comma;
-                false
-            },
-            ParserState::Comma if (cur.is_digit(10)) => {
-                parser.state = ParserState::Background1;
-                false
-            },
-            ParserState::Background1 if cur.is_digit(6) => {
-                // can only consume another digit if previous char was 1.
-                parser.state = ParserState::Text;
-                if prev == '1' {
-                    false
-                } else {
-                    true
-                }
             }
-            _ => {
-                parser.state = ParserState::Text;
+            Text => {
+                !FORMAT_CHARACTERS.contains(&cur)
+            }
+            ColorCode if cur.is_digit(10) => {
+                self.state = Foreground1(cur);
+                false
+            }
+            Foreground1('1') if cur.is_digit(6) => {
+                // can only consume another digit if previous char was 1.
+                self.state = Foreground2;
+                false
+            }
+            Foreground1(_) if cur.is_digit(6) => {
+                self.state = Text;
                 true
             }
-        };
-        prev = cur;
-        return result
-    });
+            Foreground1(_) if cur == ',' => {
+                self.state = Comma;
+                false
+            }
+            Foreground2 if cur == ',' => {
+                self.state = Comma;
+                false
+            }
+            Comma if (cur.is_digit(10)) => {
+                self.state = Background1(cur);
+                false
+            }
+            Background1(prev) if cur.is_digit(6) => {
+                // can only consume another digit if previous char was 1.
+                self.state = Text;
+                prev != '1'
+            }
+            _ => {
+                self.state = Text;
+                true
+            }
+        }
+    }
 }
 
 impl FormattedStringExt<'static> for String {
