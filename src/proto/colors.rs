@@ -39,82 +39,79 @@ impl<'a> FormattedStringExt<'a> for &'a str {
         if !self.is_formatted() {
             return Cow::Borrowed(self);
         }
-        Cow::Owned(internal::strip_formatting(self))
+        let mut s = String::from(self);
+        strip_formatting(&mut s);
+        Cow::Owned(s)
     }
 }
 
-mod internal {  // to reduce commit diff
-    use super::*;
-    pub(super) fn strip_formatting(input: &str) -> String {
-        let mut parser = Parser {
-            state: ParserState::Text,
+fn strip_formatting(buf: &mut String) {
+    let mut parser = Parser {
+        state: ParserState::Text,
+    };
+    let mut prev: char = '\x00';
+    buf.retain(|cur| {
+        let result = match parser.state {
+            ParserState::Text | ParserState::Foreground1 | ParserState::Foreground2 if cur == '\x03' => {
+                parser.state = ParserState::ColorCode;
+                false
+            },
+            ParserState::Text => !['\x02', '\x1F', '\x16', '\x0F'].contains(&cur),
+            ParserState::ColorCode if cur.is_digit(10) => {
+                parser.state = ParserState::Foreground1;
+                false
+            },
+            ParserState::Foreground1 if cur.is_digit(6) => {
+                // can only consume another digit if previous char was 1.
+                if prev == '1' {
+                    parser.state = ParserState::Foreground2;
+                    false
+                } else {
+                    parser.state = ParserState::Text;
+                    true
+                }
+            },
+            ParserState::Foreground1 if cur == ','  => {
+                parser.state = ParserState::Comma;
+                false
+            },
+            ParserState::Foreground2 if cur == ',' => {
+                parser.state = ParserState::Comma;
+                false
+            },
+            ParserState::Comma if (cur.is_digit(10)) => {
+                parser.state = ParserState::Background1;
+                false
+            },
+            ParserState::Background1 if cur.is_digit(6) => {
+                // can only consume another digit if previous char was 1.
+                parser.state = ParserState::Text;
+                if prev == '1' {
+                    false
+                } else {
+                    true
+                }
+            }
+            _ => {
+                parser.state = ParserState::Text;
+                true
+            }
         };
-        let mut prev: char = '\x00';
-        input
-            .chars()
-            .filter(move |cur| {
-                let result = match parser.state {
-                    ParserState::Text | ParserState::Foreground1 | ParserState::Foreground2 if *cur == '\x03' => {
-                        parser.state = ParserState::ColorCode;
-                        false
-                    },
-                    ParserState::Text => !['\x02', '\x1F', '\x16', '\x0F'].contains(cur),
-                    ParserState::ColorCode if  (*cur).is_digit(10) => {
-                        parser.state = ParserState::Foreground1;
-                        false
-                    },
-                    ParserState::Foreground1 if (*cur).is_digit(6) => {
-                        // can only consume another digit if previous char was 1.
-                        if (prev) == '1' {
-                            parser.state = ParserState::Foreground2;
-                            false
-                        } else {
-                            parser.state = ParserState::Text;
-                            true
-                        }
-                    },
-                    ParserState::Foreground1 if *cur == ','  => {
-                        parser.state = ParserState::Comma;
-                        false
-                    },
-                    ParserState::Foreground2 if *cur == ',' => {
-                        parser.state = ParserState::Comma;
-                        false
-                    },
-                    ParserState::Comma if ((*cur).is_digit(10)) => {
-                        parser.state = ParserState::Background1;
-                        false
-                    },
-                    ParserState::Background1 if (*cur).is_digit(6) => {
-                        // can only consume another digit if previous char was 1.
-                        parser.state = ParserState::Text;
-                        if (prev) == '1' {
-                            false
-                        } else {
-                            true
-                        }
-                    }
-                    _ => {
-                        parser.state = ParserState::Text;
-                        true
-                    }
-                };
-                prev = *cur;
-                return result
-            })
-            .collect()
-    }
+        prev = cur;
+        return result
+    });
 }
 
 impl FormattedStringExt<'static> for String {
     fn is_formatted(&self) -> bool {
         self.as_str().is_formatted()
     }
-    fn strip_formatting(self) -> Cow<'static, str> {
+    fn strip_formatting(mut self) -> Cow<'static, str> {
         if !self.is_formatted() {
             return Cow::Owned(self);
         }
-        Cow::Owned(internal::strip_formatting(&self))
+        strip_formatting(&mut self);
+        Cow::Owned(self)
     }
 }
 
