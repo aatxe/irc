@@ -45,8 +45,6 @@
 //! # }
 //! ```
 
-#[cfg(feature = "ctcp")]
-use std::ascii::AsciiExt;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};

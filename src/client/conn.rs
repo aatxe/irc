@@ -7,9 +7,9 @@ use encoding::EncoderTrap;
 use encoding::label::encoding_from_whatwg_label;
 use futures::{Async, Poll, Future, Sink, StartSend, Stream};
 use native_tls::{Certificate, TlsConnector, Pkcs12};
+use tokio_codec::Decoder;
 use tokio_core::reactor::Handle;
 use tokio_core::net::{TcpStream, TcpStreamNew};
-use tokio_io::AsyncRead;
 use tokio_mockstream::MockStream;
 use tokio_tls::{TlsConnectorExt, TlsStream};
 
@@ -81,13 +81,15 @@ impl<'a> Future for ConnectionFuture<'a> {
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
         match *self {
             ConnectionFuture::Unsecured(config, ref mut inner) => {
-                let framed = try_ready!(inner.poll()).framed(IrcCodec::new(config.encoding())?);
+                let stream = try_ready!(inner.poll());
+                let framed = IrcCodec::new(config.encoding())?.framed(stream);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Unsecured(transport)))
             }
             ConnectionFuture::Secured(config, ref mut inner) => {
-                let framed = try_ready!(inner.poll()).framed(IrcCodec::new(config.encoding())?);
+                let stream = try_ready!(inner.poll());
+                let framed = IrcCodec::new(config.encoding())?.framed(stream);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Secured(transport)))
@@ -109,7 +111,8 @@ impl<'a> Future for ConnectionFuture<'a> {
                     })
                 };
 
-                let framed = MockStream::new(&initial?).framed(IrcCodec::new(config.encoding())?);
+                let stream = MockStream::new(&initial?);
+                let framed = IrcCodec::new(config.encoding())?.framed(stream);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Mock(Logged::wrap(transport))))
