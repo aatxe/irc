@@ -5,7 +5,9 @@ use std::str::FromStr;
 use std::fmt;
 
 /// The Prefix indicates "the true origin of the message", according to the server.
-/// It will 
+///
+/// Warning: Avoid constructing a `Nickname(nickname, None, Some(hostname))`, but
+/// `Nickname(nickname, Some("".to_owned()), Some(hostname))` works reliably.
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub enum Prefix {
     /// servername
@@ -16,8 +18,8 @@ pub enum Prefix {
 
 impl Prefix {
     /// Creates a prefix by parsing a string.
-    /// 
-    /// #Example
+    ///
+    /// # Example
     /// ```
     /// # extern crate irc;
     /// # use irc::client::prelude::*;
@@ -33,14 +35,22 @@ impl Prefix {
 
         for c in s.chars() {
             match c {
-                '.' if user.is_none() && host.is_none() => return Prefix::ServerName(s.to_owned()),
+                // We consider the '.' to be a ServerName except if a ! has already
+                // been encountered.
+                '.' if user.is_none() => return Prefix::ServerName(s.to_owned()),
+
                 '!' if user.is_none() => {
                     user = Some(String::new())
                 },
+
+                // The '@' is not special until we've started the username
+                // portion
                 '@' if user.is_some() && host.is_none() => {
                     host = Some(String::new())
                 },
+
                 _ => {
+                    // Push onto the latest buffer
                     if host.is_some() {
                         host.as_mut().unwrap().push(c)
                     } else if user.is_some() {
@@ -56,6 +66,7 @@ impl Prefix {
     }
 }
 
+/// This implementation never returns an error and is isomorphic with `Display`.
 impl FromStr for Prefix {
     type Err = string::ParseError;
 
@@ -64,6 +75,7 @@ impl FromStr for Prefix {
     }
 }
 
+/// This is isomorphic with `FromStr`, except when called on `Prefix::Nickname(nickname, None, Some(hostname))`
 impl fmt::Display for Prefix {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -71,9 +83,9 @@ impl fmt::Display for Prefix {
             Prefix::Nickname(name, None, None) => write!(f, "{}", name),
             Prefix::Nickname(name, Some(user), None) => write!(f, "{}!{}", name, user),
             Prefix::Nickname(name, Some(user), Some(host)) => write!(f, "{}!{}@{}", name, user, host),
-            // This is an issue with the type using two Option values when really host implies user
-            // Maybe this should do the same as the (name, None, None) case
-            Prefix::Nickname(_, None, Some(_)) => panic!("can't display prefix with host but not username"),
+
+            // This is an issue with the type using two Option values when really hostname implies username
+            Prefix::Nickname(name, None, Some(host)) => write!(f, "{}!@{}", name, host),
         }
     }
 }
@@ -145,6 +157,10 @@ mod test {
         assert_eq!(
             test_parse("name!@"),
             Nickname("name".into(), Some("".into()), Some("".into()))
+        );
+        assert_eq!(
+            test_parse("name!@hostname"),
+            Nickname("name".into(), Some("".into()), Some("hostname".into()))
         );
         assert_eq!(
             test_parse("name!.user"),
