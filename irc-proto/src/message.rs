@@ -1,12 +1,11 @@
 //! A module providing a data structure for messages to and from IRC servers.
 use std::borrow::ToOwned;
-use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
 use error;
-use error::{ProtocolError, MessageParseError};
-use chan::ChannelExt;
-use command::Command;
+use error::{IrcError, MessageParseError, ProtocolError, MessageParseError};
+use proto::{Command, ChannelExt, Prefix};
 
 /// A data structure representing an IRC message according to the protocol specification. It
 /// consists of a collection of IRCv3 tags, a prefix (describing the source of the message), and
@@ -20,7 +19,7 @@ pub struct Message {
     /// in IRCv3 extensions to the IRC protocol.
     pub tags: Option<Vec<Tag>>,
     /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
-    pub prefix: Option<String>,
+    pub prefix: Option<Prefix>,
     /// The IRC command, parsed according to the known specifications. The command itself and its
     /// arguments (including the special suffix argument) are captured in this component.
     pub command: Command,
@@ -60,7 +59,7 @@ impl Message {
     ) -> Result<Message, error::MessageParseError> {
         Ok(Message {
             tags: tags,
-            prefix: prefix.map(|s| s.to_owned()),
+            prefix: prefix.map(|p| p.into()),
             command: Command::new(command, args, suffix)?,
         })
     }
@@ -81,15 +80,9 @@ impl Message {
     pub fn source_nickname(&self) -> Option<&str> {
         // <prefix> ::= <servername> | <nick> [ '!' <user> ] [ '@' <host> ]
         // <servername> ::= <host>
-        self.prefix.as_ref().and_then(|s| match (
-            s.find('!'),
-            s.find('@'),
-            s.find('.'),
-        ) {
-            (Some(i), _, _) | // <nick> '!' <user> [ '@' <host> ]
-            (None, Some(i), _) => Some(&s[..i]), // <nick> '@' <host>
-            (None, None, None) => Some(s), // <nick>
-            _ => None, // <servername>
+        self.prefix.as_ref().and_then(|p| match p {
+            Prefix::Nickname(name, _, _) => Some(&name[..]),
+            _ => None
         })
     }
 
@@ -149,9 +142,7 @@ impl Message {
             ret.push(' ');
         }
         if let Some(ref prefix) = self.prefix {
-            ret.push(':');
-            ret.push_str(prefix);
-            ret.push(' ');
+            write!(ret, ":{} ", prefix).unwrap();
         }
         let cmd: String = From::from(&self.command);
         ret.push_str(&cmd);
@@ -362,7 +353,7 @@ mod test {
         assert_eq!(&message.to_string()[..], "PRIVMSG test :Testing!\r\n");
         let message = Message {
             tags: None,
-            prefix: Some(format!("test!test@test")),
+            prefix: Some("test!test@test".into()),
             command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
         assert_eq!(
@@ -384,7 +375,7 @@ mod test {
         );
         let message = Message {
             tags: None,
-            prefix: Some(format!("test!test@test")),
+            prefix: Some("test!test@test".into()),
             command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
         assert_eq!(
@@ -399,7 +390,7 @@ mod test {
                 Tag(format!("ccc"), None),
                 Tag(format!("example.com/ddd"), Some(format!("eee"))),
             ]),
-            prefix: Some(format!("test!test@test")),
+            prefix: Some("test!test@test".into()),
             command: PRIVMSG(format!("test"), format!("Testing with tags!")),
         };
         assert_eq!(
@@ -450,7 +441,7 @@ mod test {
         assert_eq!(msg, message);
         let message = Message {
             tags: None,
-            prefix: Some(format!("test!test@test")),
+            prefix: Some("test!test@test".into()),
             command: PRIVMSG(format!("test"), format!("Still testing!")),
         };
         let msg: Message = ":test!test@test PRIVMSG test :Still testing!\r\n".into();
@@ -463,7 +454,7 @@ mod test {
         // colons within individual parameters. So, let's make sure it parses correctly.
         let message = Message {
             tags: None,
-            prefix: Some(format!("test!test@test")),
+            prefix: Some("test!test@test".into()),
             command: Raw(
                 format!("COMMAND"),
                 vec![format!("ARG:test")],
