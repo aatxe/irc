@@ -5,13 +5,13 @@ use std::io::Read;
 
 use encoding::EncoderTrap;
 use encoding::label::encoding_from_whatwg_label;
-use futures::future;
 use futures::{Async, Poll, Future, Sink, StartSend, Stream};
-use native_tls::{Certificate, TlsConnector, Pkcs12};
-use tokio::net::{ConnectFuture, TcpStream};
-use tokio_io::AsyncRead;
+use native_tls::{Certificate, TlsConnector, Identity};
+use tokio_codec::Decoder;
+use tokio_core::reactor::Handle;
+use tokio_core::net::{TcpStream, TcpStreamNew};
 use tokio_mockstream::MockStream;
-use tokio_tls::{TlsConnectorExt, TlsStream};
+use tokio_tls::{self, TlsStream};
 
 use error;
 use client::data::Config;
@@ -42,19 +42,20 @@ impl fmt::Debug for Connection {
     }
 }
 
+/// A convenient type alias representing the `TlsStream` future.
 type TlsFuture = Box<Future<Error = error::IrcError, Item = TlsStream<TcpStream>> + Send>;
 
 /// A future representing an eventual `Connection`.
-pub enum ConnectionFuture {
+pub enum ConnectionFuture<'a> {
     #[doc(hidden)]
-    Unsecured(Config, ConnectFuture),
+    Unsecured(&'a Config, TcpStreamNew),
     #[doc(hidden)]
-    Secured(Config, TlsFuture),
+    Secured(&'a Config, TlsFuture),
     #[doc(hidden)]
-    Mock(Config),
+    Mock(&'a Config),
 }
 
-impl fmt::Debug for ConnectionFuture {
+impl<'a> fmt::Debug for ConnectionFuture<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
@@ -65,33 +66,35 @@ impl fmt::Debug for ConnectionFuture {
                 ConnectionFuture::Mock(_) => "ConnectionFuture::Mock",
             },
             match *self {
-                ConnectionFuture::Unsecured(ref cfg, _) |
-                ConnectionFuture::Secured(ref cfg, _) |
-                ConnectionFuture::Mock(ref cfg) => cfg,
+                ConnectionFuture::Unsecured(cfg, _) |
+                ConnectionFuture::Secured(cfg, _) |
+                ConnectionFuture::Mock(cfg) => cfg,
             }
         )
     }
 }
 
-impl Future for ConnectionFuture {
+impl<'a> Future for ConnectionFuture<'a> {
     type Item = Connection;
     type Error = error::IrcError;
 
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
         match *self {
-            ConnectionFuture::Unsecured(ref config, ref mut inner) => {
-                let framed = try_ready!(inner.poll()).framed(IrcCodec::new(config.encoding())?);
+            ConnectionFuture::Unsecured(config, ref mut inner) => {
+                let stream = try_ready!(inner.poll());
+                let framed = IrcCodec::new(config.encoding())?.framed(stream);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Unsecured(transport)))
             }
-            ConnectionFuture::Secured(ref config, ref mut inner) => {
-                let framed = try_ready!(inner.poll()).framed(IrcCodec::new(config.encoding())?);
+            ConnectionFuture::Secured(config, ref mut inner) => {
+                let stream = try_ready!(inner.poll());
+                let framed = IrcCodec::new(config.encoding())?.framed(stream);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Secured(transport)))
             }
-            ConnectionFuture::Mock(ref config) => {
+            ConnectionFuture::Mock(config) => {
                 let enc: error::Result<_> = encoding_from_whatwg_label(
                     config.encoding()
                 ).ok_or_else(|| error::IrcError::UnknownCodec {
@@ -108,7 +111,8 @@ impl Future for ConnectionFuture {
                     })
                 };
 
-                let framed = MockStream::new(&initial?).framed(IrcCodec::new(config.encoding())?);
+                let stream = MockStream::new(&initial?);
+                let framed = IrcCodec::new(config.encoding())?.framed(stream);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Mock(Logged::wrap(transport))))
@@ -118,56 +122,46 @@ impl Future for ConnectionFuture {
 }
 
 impl Connection {
-    /// Creates a future yielding a new `Connection` using the specified `Config`.
-    pub fn new(config: Config) -> impl Future<Item = Connection, Error = error::IrcError> {
-        future::lazy(move || Connection::new_inner(config))
-            .and_then(|connection_future| connection_future)
-    }
-
-    fn new_inner(config: Config) -> error::Result<ConnectionFuture> {
+    /// Creates a new `Connection` using the specified `Config` and `Handle`.
+    pub fn new<'a>(config: &'a Config, handle: &Handle) -> error::Result<ConnectionFuture<'a>> {
         if config.use_mock_connection() {
             Ok(ConnectionFuture::Mock(config))
         } else if config.use_ssl() {
             let domain = format!("{}", config.server()?);
             info!("Connecting via SSL to {}.", domain);
-            let mut builder = TlsConnector::builder()?;
-
+            let mut builder = TlsConnector::builder();
             if let Some(cert_path) = config.cert_path() {
                 let mut file = File::open(cert_path)?;
                 let mut cert_data = vec![];
                 file.read_to_end(&mut cert_data)?;
                 let cert = Certificate::from_der(&cert_data)?;
-                builder.add_root_certificate(cert)?;
+                builder.add_root_certificate(cert);
                 info!("Added {} to trusted certificates.", cert_path);
             }
-
             if let Some(client_cert_path) = config.client_cert_path() {
                 let client_cert_pass = config.client_cert_pass();
                 let mut file = File::open(client_cert_path)?;
                 let mut client_cert_data = vec![];
                 file.read_to_end(&mut client_cert_data)?;
-                let pkcs12_archive = Pkcs12::from_der(&client_cert_data, &client_cert_pass)?;
-                builder.identity(pkcs12_archive)?;
+                let pkcs12_archive = Identity::from_pkcs12(&client_cert_data, &client_cert_pass)?;
+                builder.identity(pkcs12_archive);
                 info!("Using {} for client certificate authentication.", client_cert_path);
             }
-
-            let connector = builder.build()?;
-            let socket_addr = config.socket_addr()?;
-
-            let stream = TcpStream::connect(&socket_addr).map_err(|e| {
+            let connector: tokio_tls::TlsConnector = builder.build()?.into();
+            let stream = Box::new(TcpStream::connect(&config.socket_addr()?, handle).map_err(|e| {
                 let res: error::IrcError = e.into();
                 res
             }).and_then(move |socket| {
-                connector.connect_async(&domain, socket).map_err(|e| e.into())
-            });
-
-            Ok(ConnectionFuture::Secured(config, Box::new(stream)))
+                connector.connect(&domain, socket).map_err(
+                    |e| e.into(),
+                )
+            }));
+            Ok(ConnectionFuture::Secured(config, stream))
         } else {
             info!("Connecting to {}.", config.server()?);
-            let socket_addr = config.socket_addr()?;
             Ok(ConnectionFuture::Unsecured(
                 config,
-                TcpStream::connect(&socket_addr),
+                TcpStream::connect(&config.socket_addr()?, handle),
             ))
         }
     }

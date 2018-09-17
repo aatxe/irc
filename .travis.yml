@@ -16,7 +16,7 @@ notifications:
   email: false
   irc:
     channels:
-      - "irc.fyrechat.net#vana-commits"
+      - "ircs://irc.pdgn.co:6697/#commits"
     template:
       - "%{repository_slug}/%{branch} (%{commit} - %{author}): %{message}"
     skip_join: true

@@ -7,15 +7,15 @@ use irc::client::prelude::*;
 fn main() {
     let cfg1 = Config {
         nickname: Some("pickles".to_owned()),
-        server: Some("irc.fyrechat.net".to_owned()),
-        channels: Some(vec!["#irc-crate".to_owned()]),
+        server: Some("irc.mozilla.org".to_owned()),
+        channels: Some(vec!["#rust-spam".to_owned()]),
         ..Default::default()
     };
 
     let cfg2 = Config {
         nickname: Some("bananas".to_owned()),
-        server: Some("irc.fyrechat.net".to_owned()),
-        channels: Some(vec!["#irc-crate".to_owned()]),
+        server: Some("irc.mozilla.org".to_owned()),
+        channels: Some(vec!["#rust-spam".to_owned()]),
         ..Default::default()
     };
 
@@ -26,7 +26,7 @@ fn main() {
     loop {
         let res = configs.iter().fold(Ok(()), |acc, config| {
             acc.and(
-                reactor.prepare_client_and_connect(config.clone()).and_then(|client| {
+                reactor.prepare_client_and_connect(&config).and_then(|client| {
                     client.identify().and(Ok(client))
                 }).and_then(|client| {
                     reactor.register_client_with_handler(client, process_msg);

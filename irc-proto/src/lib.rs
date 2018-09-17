@@ -8,6 +8,8 @@ extern crate encoding;
 #[macro_use]
 extern crate failure;
 #[cfg(feature = "tokio")]
+extern crate tokio_codec;
+#[cfg(feature = "tokio")]
 extern crate tokio_io;
 
 pub mod caps;

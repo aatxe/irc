@@ -14,10 +14,11 @@ travis-ci = { repository = "aatxe/irc" }
 
 [features]
 default = ["tokio"]
-tokio = ["tokio-io", "bytes"]
+tokio = ["tokio-codec", "tokio-io", "bytes"]
 
 [dependencies]
 bytes = { version = "0.4", optional = true }
 encoding = "0.2"
 failure = "0.1"
+tokio-codec = { version = "0.1", optional = true }
 tokio-io = { version = "0.1", optional = true }

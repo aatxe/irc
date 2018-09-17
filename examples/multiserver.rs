@@ -7,15 +7,15 @@ use irc::client::prelude::*;
 fn main() {
     let cfg1 = Config {
         nickname: Some("pickles".to_owned()),
-        server: Some("irc.fyrechat.net".to_owned()),
-        channels: Some(vec!["#irc-crate".to_owned()]),
+        server: Some("irc.mozilla.org".to_owned()),
+        channels: Some(vec!["#rust-spam".to_owned()]),
         ..Default::default()
     };
 
     let cfg2 = Config {
         nickname: Some("bananas".to_owned()),
-        server: Some("irc.fyrechat.net".to_owned()),
-        channels: Some(vec!["#irc-crate".to_owned()]),
+        server: Some("irc.mozilla.org".to_owned()),
+        channels: Some(vec!["#rust-spam".to_owned()]),
         ..Default::default()
     };
 
@@ -26,7 +26,7 @@ fn main() {
     for config in configs {
         // Immediate errors like failure to resolve the server's domain or to establish any connection will
         // manifest here in the result of prepare_client_and_connect.
-        let client = reactor.prepare_client_and_connect(config).unwrap();
+        let client = reactor.prepare_client_and_connect(&config).unwrap();
         client.identify().unwrap();
         // Here, we tell the reactor to setup this client for future handling (in run) using the specified
         // handler function process_msg.

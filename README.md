@@ -9,7 +9,7 @@
 [doc]: https://docs.rs/irc
 
 [rfc2812]: http://tools.ietf.org/html/rfc2812
-[ircv3.1]: http://ircv3.net/irc/3.1.html 
+[ircv3.1]: http://ircv3.net/irc/3.1.html
 [ircv3.2]: http://ircv3.net/irc/3.2.html
 
 "the irc crate" is a thread-safe and async-friendly IRC client library written in Rust. It's
@@ -39,7 +39,7 @@ Making your own project? [Submit a pull request](https://github.com/aatxe/irc/pu
 
 ## Getting Started
 
-To start using the irc crate with cargo, you can simply add `irc = "0.13"` to your dependencies in
+To start using the irc crate with cargo, you can add `irc = "0.13"` to your dependencies in
 your Cargo.toml file. The high-level API can be found in [`irc::client::prelude`][irc-prelude].
 You'll find a number of examples to help you get started in `examples/`, throughout the
 documentation, and below.
@@ -72,7 +72,7 @@ fn main() {
     let mut reactor = IrcReactor::new().unwrap();
     let client = reactor.prepare_client_and_connect(config).unwrap();
     client.identify().unwrap();
-    
+
     reactor.register_client_with_handler(client, |client, message| {
         print!("{}", message);
         // And here we can do whatever we want with the messages.
@@ -173,8 +173,8 @@ You can convert between different configuration formats with `convertconf` like 
 cargo run --example convertconf -- -i client_config.json -o client_config.toml
 ```
 
-Note that the formats are automatically determined based on the selected file extensions. This 
-tool should make it easy for users to migrate their old configurations to TOML.
+Note that the formats are automatically determined based on the selected file extensions. This
+tool should make it easier for users to migrate their old configurations to TOML.
 
 ## Contributing
 the irc crate is a free, open source library that relies on contributions from its maintainers,

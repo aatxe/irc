@@ -12,13 +12,14 @@ use error;
 /// A line-based codec parameterized by an encoding.
 pub struct LineCodec {
     encoding: EncodingRef,
+    next_index: usize,
 }
 
 impl LineCodec {
     /// Creates a new instance of LineCodec from the specified encoding.
     pub fn new(label: &str) -> error::Result<LineCodec> {
         encoding_from_whatwg_label(label)
-            .map(|enc| LineCodec { encoding: enc })
+            .map(|enc| LineCodec { encoding: enc, next_index: 0 })
             .ok_or_else(|| io::Error::new(
                 io::ErrorKind::InvalidInput,
                 &format!("Attempted to use unknown codec {}.", label)[..],
@@ -31,9 +32,12 @@ impl Decoder for LineCodec {
     type Error = error::ProtocolError;
 
     fn decode(&mut self, src: &mut BytesMut) -> error::Result<Option<String>> {
-        if let Some(n) = src.as_ref().iter().position(|b| *b == b'\n') {
+        if let Some(offset) = src[self.next_index..].iter().position(|b| *b == b'\n') {
             // Remove the next frame from the buffer.
-            let line = src.split_to(n + 1);
+            let line = src.split_to(self.next_index + offset + 1);
+
+            // Set the search start index back to 0 since we found a newline.
+            self.next_index = 0;
 
             // Decode the line using the codec's encoding.
             match self.encoding.decode(line.as_ref(), DecoderTrap::Replace) {
@@ -46,6 +50,9 @@ impl Decoder for LineCodec {
                 ),
             }
         } else {
+            // Set the search start index to the current length since we know that none of the
+            // characters we've already looked at are newlines.
+            self.next_index = src.len();
             Ok(None)
         }
     }

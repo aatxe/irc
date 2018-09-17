@@ -7,8 +7,8 @@ use std::time::{Duration, Instant};
 
 use futures::{Async, AsyncSink, Future, Poll, Sink, StartSend, Stream};
 use chrono::prelude::*;
+use tokio_codec::Framed;
 use tokio_io::{AsyncRead, AsyncWrite};
-use tokio_io::codec::Framed;
 use tokio_timer;
 use tokio_timer::{Interval, Sleep, Timer};
 
