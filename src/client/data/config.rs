@@ -557,6 +557,7 @@ mod test {
 
     use super::Config;
 
+    #[allow(unused)]
     fn test_config() -> Config {
         Config {
             owners: Some(vec![format!("test")]),
