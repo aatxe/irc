@@ -3,9 +3,12 @@ use std::borrow::ToOwned;
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
+use chan::ChannelExt;
+use command::Command;
 use error;
-use error::{IrcError, MessageParseError, ProtocolError, MessageParseError};
-use proto::{Command, ChannelExt, Prefix};
+use error::{MessageParseError, ProtocolError};
+use prefix::Prefix;
+
 
 /// A data structure representing an IRC message according to the protocol specification. It
 /// consists of a collection of IRCv3 tags, a prefix (describing the source of the message), and
