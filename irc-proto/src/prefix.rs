@@ -13,7 +13,7 @@ pub enum Prefix {
     /// servername
     ServerName(String),
     /// nickname [ ["!" username] "@" hostname ]
-    Nickname(String, Option<String>, Option<String>),
+    Nickname(String, String, String),
 }
 
 impl Prefix {
@@ -29,35 +29,41 @@ impl Prefix {
     /// # }
     /// ```
     pub fn new_from_str(s: &str) -> Prefix {
+        #[derive(Copy, Clone, Eq, PartialEq)]
+        enum Active {
+            Name = 0,
+            User = 1,
+            Host = 2,
+        }
+
         let mut name = String::new();
-        let mut user = None;
-        let mut host = None;
+        let mut user = String::new();
+        let mut host = String::new();
+        let mut active = Active::Name;
 
         for c in s.chars() {
             match c {
                 // We consider the '.' to be a ServerName except if a ! has already
                 // been encountered.
-                '.' if user.is_none() => return Prefix::ServerName(s.to_owned()),
+                '.' if active == Active::Name => return Prefix::ServerName(s.to_owned()),
 
-                '!' if user.is_none() => {
-                    user = Some(String::new())
+                '!' if active == Active::Name => {
+                    active = Active::User;
                 },
 
                 // The '@' is not special until we've started the username
                 // portion
-                '@' if user.is_some() && host.is_none() => {
-                    host = Some(String::new())
+                '@' if active == Active::User => {
+                    active = Active::Host;
                 },
 
                 _ => {
                     // Push onto the latest buffer
-                    if host.is_some() {
-                        host.as_mut().unwrap().push(c)
-                    } else if user.is_some() {
-                        user.as_mut().unwrap().push(c)
-                    } else {
-                        name.push(c)
-                    }
+                    match active {
+                        Active::Name => &mut name,
+                        Active::User => &mut user,
+                        Active::Host => &mut host,
+                    }.push(c)
                 }
             }
         }
@@ -75,17 +81,20 @@ impl FromStr for Prefix {
     }
 }
 
-/// This is isomorphic with `FromStr`, except when called on `Prefix::Nickname(nickname, None, Some(hostname))`
+/// This is isomorphic with `FromStr`
 impl fmt::Display for Prefix {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Prefix::ServerName(name) => write!(f, "{}", name),
-            Prefix::Nickname(name, None, None) => write!(f, "{}", name),
-            Prefix::Nickname(name, Some(user), None) => write!(f, "{}!{}", name, user),
-            Prefix::Nickname(name, Some(user), Some(host)) => write!(f, "{}!{}@{}", name, user, host),
-
-            // This is an issue with the type using two Option values when really hostname implies username
-            Prefix::Nickname(name, None, Some(host)) => write!(f, "{}!@{}", name, host),
+            Prefix::Nickname(name, user, host) => match (&name[..], &user[..], &host[..]) {
+                ("", "", "") => write!(f, ""),
+                (name, "", "") => write!(f, "{}", name),
+                (name, user, "") => write!(f, "{}!{}", name, user),
+                // This case shouldn't happen normally, but user!@host is invalid, so we
+                // format it without the host
+                (name, "", _host) => write!(f, "{}", name),
+                (name, user, host) => write!(f, "{}!{}@{}", name, user, host),
+            },
         }
     }
 }
@@ -109,10 +118,20 @@ mod test {
     }
 
     #[test]
+    fn print() {
+        let s = format!("{}", Nickname("nick".into(), "".into(), "".into()));
+        assert_eq!(&s, "nick");
+        let s = format!("{}", Nickname("nick".into(), "user".into(), "".into()));
+        assert_eq!(&s, "nick!user");
+        let s = format!("{}", Nickname("nick".into(), "user".into(), "host".into()));
+        assert_eq!(&s, "nick!user@host");
+    }
+
+    #[test]
     fn parse_word() {
         assert_eq!(
             test_parse("only_nick"),
-            Nickname("only_nick".into(), None, None)
+            Nickname("only_nick".into(), String::new(), String::new())
         )
     }
 
@@ -128,7 +147,7 @@ mod test {
     fn parse_nick_user() {
         assert_eq!(
             test_parse("test!nick"),
-            Nickname("test".into(), Some("nick".into()), None)
+            Nickname("test".into(), "nick".into(), String::new())
         )
     }
 
@@ -136,7 +155,7 @@ mod test {
     fn parse_nick_user_host() {
         assert_eq!(
             test_parse("test!nick@host"),
-            Nickname("test".into(), Some("nick".into()), Some("host".into()))
+            Nickname("test".into(), "nick".into(), "host".into())
         )
     }
 
@@ -152,35 +171,35 @@ mod test {
     fn parse_danger_cases() {
         assert_eq!(
             test_parse("name@name!user"),
-            Nickname("name@name".into(), Some("user".into()), None)
+            Nickname("name@name".into(), "user".into(), String::new())
         );
         assert_eq!(
             test_parse("name!@"),
-            Nickname("name".into(), Some("".into()), Some("".into()))
+            Nickname("name".into(), "".into(), "".into())
         );
         assert_eq!(
             test_parse("name!@hostname"),
-            Nickname("name".into(), Some("".into()), Some("hostname".into()))
+            Nickname("name".into(), "".into(), "hostname".into())
         );
         assert_eq!(
             test_parse("name!.user"),
-            Nickname("name".into(), Some(".user".into()), None)
+            Nickname("name".into(), ".user".into(), String::new())
         );
         assert_eq!(
             test_parse("name!user.user"),
-            Nickname("name".into(), Some("user.user".into()), None)
+            Nickname("name".into(), "user.user".into(), String::new())
         );
         assert_eq!(
             test_parse("name!user@host.host"),
-            Nickname("name".into(), Some("user".into()), Some("host.host".into()))
+            Nickname("name".into(), "user".into(), "host.host".into())
         );
         assert_eq!(
             test_parse("!user"),
-            Nickname("".into(), Some("user".into()), None)
+            Nickname("".into(), "user".into(), String::new())
         );
         assert_eq!(
             test_parse("!@host.host"),
-            Nickname("".into(), Some("".into()), Some("host.host".into()))
+            Nickname("".into(), "".into(), "host.host".into())
         );
     }
 }
