@@ -19,8 +19,8 @@ impl Prefix {
     ///
     /// # Example
     /// ```
-    /// # extern crate irc;
-    /// # use irc::client::prelude::*;
+    /// # extern crate irc_proto;
+    /// # use irc_proto::Prefix;
     /// # fn main() {
     /// Prefix::new_from_str("nickname!username@hostname");
     /// Prefix::new_from_str("example.com");
@@ -41,7 +41,7 @@ impl Prefix {
         let mut is_server = false;
 
         for c in s.chars() {
-            if c == '.' {
+            if c == '.' && active == Active::Name {
                 // We won't return Nickname("nick", "", "") but if @ or ! are
                 // encountered, then we set this back to false
                 is_server = true;
@@ -166,7 +166,7 @@ mod test {
     fn parse_dot_and_symbols() {
         assert_eq!(
             test_parse("test.net@something"),
-            ServerName("test.net@something".into())
+            Nickname("test.net".into(), "".into(), "something".into())
         )
     }
 
@@ -174,23 +174,25 @@ mod test {
     fn parse_danger_cases() {
         assert_eq!(
             test_parse("name@name!user"),
-            Nickname("name@name".into(), "user".into(), String::new())
+            Nickname("name".into(), "".into(), "name!user".into())
         );
         assert_eq!(
-            test_parse("name!@"),
+            // can't reverse the parse
+            "name!@".parse::<Prefix>().unwrap(),
             Nickname("name".into(), "".into(), "".into())
         );
         assert_eq!(
-            test_parse("name!@hostname"),
+            // can't reverse the parse
+            "name!@hostname".parse::<Prefix>().unwrap(),
             Nickname("name".into(), "".into(), "hostname".into())
         );
         assert_eq!(
             test_parse("name!.user"),
-            Nickname("name".into(), ".user".into(), String::new())
+            Nickname("name".into(), ".user".into(), "".into())
         );
         assert_eq!(
             test_parse("name!user.user"),
-            Nickname("name".into(), "user.user".into(), String::new())
+            Nickname("name".into(), "user.user".into(), "".into())
         );
         assert_eq!(
             test_parse("name!user@host.host"),
@@ -198,10 +200,10 @@ mod test {
         );
         assert_eq!(
             test_parse("!user"),
-            Nickname("".into(), "user".into(), String::new())
+            Nickname("".into(), "user".into(), "".into())
         );
         assert_eq!(
-            test_parse("!@host.host"),
+            "!@host.host".parse::<Prefix>().unwrap(),
             Nickname("".into(), "".into(), "host.host".into())
         );
     }
