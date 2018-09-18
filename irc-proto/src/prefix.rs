@@ -1,5 +1,4 @@
 //! A module providing an enum for a message prefix.
-use std::borrow::ToOwned;
 use std::string;
 use std::str::FromStr;
 use std::fmt;
@@ -30,34 +29,37 @@ impl Prefix {
     pub fn new_from_str(s: &str) -> Prefix {
         #[derive(Copy, Clone, Eq, PartialEq)]
         enum Active {
-            Name = 0,
-            User = 1,
-            Host = 2,
+            Name,
+            User,
+            Host,
         }
 
         let mut name = String::new();
         let mut user = String::new();
         let mut host = String::new();
         let mut active = Active::Name;
+        let mut is_server = false;
 
         for c in s.chars() {
-            match c {
-                // We consider the '.' to be a ServerName except if a ! has already
-                // been encountered.
-                '.' if active == Active::Name => return Prefix::ServerName(s.to_owned()),
+            if c == '.' {
+                // We won't return Nickname("nick", "", "") but if @ or ! are
+                // encountered, then we set this back to false
+                is_server = true;
+            }
 
+            match c {
                 '!' if active == Active::Name => {
+                    is_server = false;
                     active = Active::User;
                 },
 
-                // The '@' is not special until we've started the username
-                // portion
-                '@' if active == Active::User => {
+                '@' if active != Active::Host => {
+                    is_server = false;
                     active = Active::Host;
                 },
 
                 _ => {
-                    // Push onto the latest buffer
+                    // Push onto the active buffer
                     match active {
                         Active::Name => &mut name,
                         Active::User => &mut user,
@@ -67,7 +69,11 @@ impl Prefix {
             }
         }
 
-        Prefix::Nickname(name, user, host)
+        if is_server {
+            Prefix::ServerName(name)
+        } else {
+            Prefix::Nickname(name, user, host)
+        }
     }
 }
 
@@ -89,9 +95,7 @@ impl fmt::Display for Prefix {
                 ("", "", "") => write!(f, ""),
                 (name, "", "") => write!(f, "{}", name),
                 (name, user, "") => write!(f, "{}!{}", name, user),
-                // This case shouldn't happen normally, but user!@host is invalid, so we
-                // format it without the host
-                (name, "", _host) => write!(f, "{}", name),
+                (name, "", host) => write!(f, "{}@{}", name, host),
                 (name, user, host) => write!(f, "{}!{}@{}", name, user, host),
             },
         }
