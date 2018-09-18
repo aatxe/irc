@@ -1,5 +1,4 @@
 //! A module providing an enum for a message prefix.
-use std::string;
 use std::str::FromStr;
 use std::fmt;
 
@@ -79,7 +78,7 @@ impl Prefix {
 
 /// This implementation never returns an error and is isomorphic with `Display`.
 impl FromStr for Prefix {
-    type Err = string::ParseError;
+    type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Prefix::new_from_str(s))
