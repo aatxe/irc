@@ -5,14 +5,13 @@ use std::str::FromStr;
 use std::fmt;
 
 /// The Prefix indicates "the true origin of the message", according to the server.
-///
-/// Warning: Avoid constructing a `Nickname(nickname, None, Some(hostname))`, but
-/// `Nickname(nickname, Some("".to_owned()), Some(hostname))` works reliably.
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub enum Prefix {
-    /// servername
+    /// servername, e.g. collins.mozilla.org
     ServerName(String),
     /// nickname [ ["!" username] "@" hostname ]
+    /// i.e. Nickname(nickname, username, hostname)
+    /// Any of the strings may be ""
     Nickname(String, String, String),
 }
 
