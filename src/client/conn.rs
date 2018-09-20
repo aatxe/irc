@@ -1,17 +1,14 @@
 //! A module providing IRC connections for use by `IrcServer`s.
-use std::fs::File;
 use std::fmt;
-use std::io::Read;
 
 use encoding::EncoderTrap;
 use encoding::label::encoding_from_whatwg_label;
 use futures::{Async, Poll, Future, Sink, StartSend, Stream};
-use native_tls::{Certificate, TlsConnector, Identity};
 use tokio_codec::Decoder;
 use tokio_core::reactor::Handle;
 use tokio_core::net::{TcpStream, TcpStreamNew};
 use tokio_mockstream::MockStream;
-use tokio_tls::{self, TlsStream};
+use tokio_rustls::{self, TlsStream, rustls, webpki};
 
 use error;
 use client::data::Config;
@@ -23,7 +20,7 @@ pub enum Connection {
     #[doc(hidden)]
     Unsecured(IrcTransport<TcpStream>),
     #[doc(hidden)]
-    Secured(IrcTransport<TlsStream<TcpStream>>),
+    Secured(IrcTransport<RustlsStream>),
     #[doc(hidden)]
     Mock(Logged<MockStream>),
 }
@@ -42,8 +39,11 @@ impl fmt::Debug for Connection {
     }
 }
 
+/// A type alias for the appropriate `tokio_rustls::TlsStream` type.
+type RustlsStream = TlsStream<TcpStream, rustls::ClientSession>;
+
 /// A convenient type alias representing the `TlsStream` future.
-type TlsFuture = Box<Future<Error = error::IrcError, Item = TlsStream<TcpStream>> + Send>;
+type TlsFuture = Box<Future<Error = error::IrcError, Item = RustlsStream> + Send>;
 
 /// A future representing an eventual `Connection`.
 pub enum ConnectionFuture<'a> {
@@ -127,32 +127,17 @@ impl Connection {
         if config.use_mock_connection() {
             Ok(ConnectionFuture::Mock(config))
         } else if config.use_ssl() {
-            let domain = format!("{}", config.server()?);
+            let domain = config.server()?;
             info!("Connecting via SSL to {}.", domain);
-            let mut builder = TlsConnector::builder();
-            if let Some(cert_path) = config.cert_path() {
-                let mut file = File::open(cert_path)?;
-                let mut cert_data = vec![];
-                file.read_to_end(&mut cert_data)?;
-                let cert = Certificate::from_der(&cert_data)?;
-                builder.add_root_certificate(cert);
-                info!("Added {} to trusted certificates.", cert_path);
-            }
-            if let Some(client_cert_path) = config.client_cert_path() {
-                let client_cert_pass = config.client_cert_pass();
-                let mut file = File::open(client_cert_path)?;
-                let mut client_cert_data = vec![];
-                file.read_to_end(&mut client_cert_data)?;
-                let pkcs12_archive = Identity::from_pkcs12(&client_cert_data, &client_cert_pass)?;
-                builder.identity(pkcs12_archive);
-                info!("Using {} for client certificate authentication.", client_cert_path);
-            }
-            let connector: tokio_tls::TlsConnector = builder.build()?.into();
+            let domain = webpki::DNSNameRef::try_from_ascii_str(domain).map_err(|()| {
+                error::IrcError::DomainNameSyntaxError { input: domain.to_owned() }
+            })?.to_owned();
+            let connector: tokio_rustls::TlsConnector = config.rustls_config()?.into();
             let stream = Box::new(TcpStream::connect(&config.socket_addr()?, handle).map_err(|e| {
                 let res: error::IrcError = e.into();
                 res
             }).and_then(move |socket| {
-                connector.connect(&domain, socket).map_err(
+                connector.connect(domain.as_ref(), socket).map_err(
                     |e| e.into(),
                 )
             }));

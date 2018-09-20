@@ -6,11 +6,11 @@ use std::sync::mpsc::RecvError;
 use failure;
 use futures::sync::mpsc::SendError;
 use futures::sync::oneshot::Canceled;
-use native_tls::Error as TlsError;
 #[cfg(feature = "json")]
 use serde_json::Error as JsonError;
 #[cfg(feature = "yaml")]
 use serde_yaml::Error as YamlError;
+use tokio_rustls::webpki::Error as WebPkiError;
 use tokio_timer::TimerError;
 #[cfg(feature = "toml")]
 use toml::de::Error as TomlReadError;
@@ -29,9 +29,12 @@ pub enum IrcError {
     #[fail(display = "an io error occurred")]
     Io(#[cause] IoError),
 
-    /// An internal TLS error.
-    #[fail(display = "a TLS error occurred")]
-    Tls(#[cause] TlsError),
+    /// An internal WebPKI error.
+    #[fail(display = "a WebPKI error occurred ({:?})", inner)]
+    WebPki {
+        /// The original WebPKI error.
+        inner: WebPkiError,
+    },
 
     /// An internal synchronous channel closed.
     #[fail(display = "a sync channel closed")]
@@ -73,6 +76,11 @@ pub enum IrcError {
     #[fail(display = "mutex for a logged transport was poisoned")]
     PoisonedLog,
 
+    /// The lock around a `rustls` configuration structure was poisoned, making that configuration
+    /// unusable for new TLS connections.
+    #[fail(display = "the lock around a `rustls` configuration structure was poisoned")]
+    PoisonedRustlsConfig,
+
     /// Ping timed out due to no response.
     #[fail(display = "connection reset: no ping response")]
     PingTimeout,
@@ -96,6 +104,13 @@ pub enum IrcError {
     /// All specified nicknames were in use or unusable.
     #[fail(display = "none of the specified nicknames were usable")]
     NoUsableNick,
+
+    /// A string intended as a domain name failed to parse as a syntactically-valid domain name.
+    #[fail(display = "failed to parse string {:?} as domain name", input)]
+    DomainNameSyntaxError {
+        /// The string that failed to parse as a domain name.
+        input: String,
+    },
 
     /// This allows you to produce any `failure::Error` within closures used by
     /// the irc crate. No errors of this kind will ever be produced by the crate
@@ -216,9 +231,9 @@ impl From<IoError> for IrcError {
     }
 }
 
-impl From<TlsError> for IrcError {
-    fn from(e: TlsError) -> IrcError {
-        IrcError::Tls(e)
+impl From<WebPkiError> for IrcError {
+    fn from(e: WebPkiError) -> IrcError {
+        IrcError::WebPki { inner: e }
     }
 }
 

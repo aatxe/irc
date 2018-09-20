@@ -1,22 +1,26 @@
 //! JSON configuration files using serde
 use std::borrow::ToOwned;
 use std::collections::HashMap;
+use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, RwLock};
 
 #[cfg(feature = "json")]
 use serde_json;
 #[cfg(feature = "yaml")]
 use serde_yaml;
+use tokio_rustls::rustls::{self, Certificate};
 #[cfg(feature = "toml")]
 use toml;
+use webpki_roots;
 
 #[cfg(feature = "toml")]
 use error::TomlError;
 use error::{ConfigError, Result};
-use error::IrcError::InvalidConfig;
+use error::IrcError::{InvalidConfig, PoisonedRustlsConfig};
 
 /// Configuration for IRC clients.
 ///
@@ -144,6 +148,14 @@ pub struct Config {
     #[serde(skip_serializing)]
     #[doc(hidden)]
     pub path: Option<PathBuf>,
+
+    /// The `rustls` client configuration corresponding to this `irc` client configuration.
+    ///
+    /// This should not be specified in any configuration. It will automatically be handled by the
+    /// library.
+    #[serde(skip)]
+    #[doc(hidden)]
+    pub rustls_config: RustlsConfig,
 }
 
 impl Config {
@@ -545,6 +557,115 @@ impl Config {
     /// This has no effect if `use_mock_connection` is not `true`.
     pub fn mock_initial_value(&self) -> &str {
         self.mock_initial_value.as_ref().map_or("", |s| &s)
+    }
+
+    /// Gets the `rustls` client configuration corresponding to this `irc` client configuration.
+    pub(crate) fn rustls_config(&self) -> Result<Arc<rustls::ClientConfig>> {
+        {
+            let guard = self.rustls_config.inner.read().map_err(|_| PoisonedRustlsConfig)?;
+            if let Some(ref inner) = *guard {
+                return Ok(inner.clone());
+            }
+            // The `rustls` configuration hasn't been set up yet, so we'll drop this read guard and
+            // get a write guard with which to set it up.
+        }
+
+        let mut guard = self.rustls_config.inner.write().map_err(|_| PoisonedRustlsConfig)?;
+
+        // Another thread might have gotten here first and already done the work for us.
+        if let Some(ref inner) = *guard {
+            return Ok(inner.clone());
+        }
+
+        let mut rustls_config = rustls::ClientConfig::new();
+
+        rustls_config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+
+        if let Some(cert_path) = self.cert_path() {
+            let mut file = File::open(cert_path)?;
+            let mut cert_data = vec![];
+            file.read_to_end(&mut cert_data)?;
+            let cert = Certificate(cert_data);
+            rustls_config.root_store.add(&cert)?;
+            info!("Added {} to trusted certificates.", cert_path);
+        }
+
+        if let Some(client_cert_path) = self.client_cert_path() {
+            let mut file = File::open(client_cert_path)?;
+            let mut cert_data = vec![];
+            file.read_to_end(&mut cert_data)?;
+            rustls_config.client_auth_cert_resolver = Arc::new(ClientCertificateResolver {
+                cert_data,
+                cert_password: self.client_cert_pass.clone(),
+            });
+            info!("Using {} for client certificate authentication.", client_cert_path);
+        }
+
+        let pointer = Arc::new(rustls_config);
+        *guard = Some(pointer.clone());
+
+        Ok(pointer)
+    }
+}
+
+/// A wrapper around `Arc<rustls::ClientConfig>` that essentially caches a `rustls` client
+/// configuration and implements traits needed by our `Config`.
+///
+/// We create this for each `Config` rather than for each connection per the `rustls::ClientConfig`
+/// documentation.
+#[derive(Default)]
+pub struct RustlsConfig {
+    inner: RwLock<Option<Arc<rustls::ClientConfig>>>,
+}
+
+impl Clone for RustlsConfig {
+    fn clone(&self) -> Self {
+        // If the lock has been poisoned, just make a new, blank `RustlsConfig`, which will get
+        // regenerated from its associated `Config`.
+        self.inner
+            .read()
+            .map(|guard| RustlsConfig { inner: guard.clone().into() })
+            .unwrap_or_default()
+    }
+}
+
+// A `RustlsConfig`, as far as the consumer should be able to tell, is equivalent to any other
+// `RustlsConfig` generated from the same `irc` client configuration, and `RustlsConfig` only ever
+// should be compared for equality in the derived `PartialEq` implementation of `Config`.
+impl PartialEq for RustlsConfig {
+    fn eq(&self, _other: &RustlsConfig) -> bool {
+        true
+    }
+}
+
+impl fmt::Debug for RustlsConfig {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}(...)", stringify!(RustlsConfig))
+    }
+}
+
+struct ClientCertificateResolver {
+    #[allow(unused)]
+    cert_data: Vec<u8>,
+
+    #[allow(unused)]
+    cert_password: Option<String>,
+}
+
+// <@8573> I don't understand cryptographic APIs well enough to implement CertFP with `rustls`, so
+// I'm leaving the WIP version of my patch to switch `irc` to `rustls` with this stub
+// implementation. To implement CertFP, this trait implementation will need to be written properly.
+impl rustls::ResolvesClientCert for ClientCertificateResolver {
+    fn resolve(
+        &self,
+        _acceptable_issuers: &[&[u8]],
+        _sigschemes: &[rustls::SignatureScheme]
+    ) -> Option<rustls::sign::CertifiedKey> {
+        None
+    }
+
+    fn has_certs(&self) -> bool {
+        false
     }
 }
 
