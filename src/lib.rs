@@ -59,8 +59,8 @@ extern crate serde_derive;
 extern crate serde_json;
 #[cfg(feature = "yaml")]
 extern crate serde_yaml;
+extern crate tokio;
 extern crate tokio_codec;
-extern crate tokio_core;
 extern crate tokio_io;
 extern crate tokio_mockstream;
 extern crate tokio_timer;
