@@ -57,7 +57,7 @@ use futures::stream::SplitStream;
 use futures::sync::mpsc;
 use futures::sync::oneshot;
 use futures::sync::mpsc::{UnboundedReceiver, UnboundedSender};
-use tokio_core::reactor::{Core, Handle};
+use tokio::runtime::current_thread::Runtime;
 
 use error;
 use client::conn::{Connection, ConnectionFuture};
@@ -118,7 +118,7 @@ pub trait Client {
     /// Gets the configuration being used with this `Client`.
     fn config(&self) -> &Config;
 
-    /// Sends a [`Command`](../proto/command/enum.Command.html) as this `Client`. This is the 
+    /// Sends a [`Command`](../proto/command/enum.Command.html) as this `Client`. This is the
     /// core primitive for sending messages to the server. In practice, it's often more pleasant
     /// (and more idiomatic) to use the functions defined on
     /// [`ClientExt`](./ext/trait.ClientExt.html). They capture a lot of the more repetitive
@@ -694,10 +694,9 @@ impl IrcClient {
         let cfg = config.clone();
 
         let _ = thread::spawn(move || {
-            let mut reactor = Core::new().unwrap();
+            let mut reactor = Runtime::new().unwrap();
             // Setting up internal processing stuffs.
-            let handle = reactor.handle();
-            let conn = reactor.run(Connection::new(&cfg, &handle).unwrap()).unwrap();
+            let conn = reactor.block_on(Connection::new(&cfg).unwrap()).unwrap();
 
             tx_view.send(conn.log_view()).unwrap();
             let (sink, stream) = conn.split();
@@ -709,7 +708,7 @@ impl IrcClient {
             // Send the stream half back to the original thread.
             tx_incoming.send(stream).unwrap();
 
-            reactor.run(outgoing_future).unwrap();
+            reactor.block_on(outgoing_future).unwrap();
         });
 
         Ok(IrcClient {
@@ -733,36 +732,35 @@ impl IrcClient {
     /// # Example
     /// ```no_run
     /// # extern crate irc;
-    /// # extern crate tokio_core;
+    /// # extern crate tokio;
     /// # use std::default::Default;
     /// # use irc::client::prelude::*;
     /// # use irc::client::PackedIrcClient;
     /// # use irc::error;
-    /// # use tokio_core::reactor::Core;
+    /// # use tokio::runtime::current_thread::Runtime;
     /// # fn main() {
     /// # let config = Config {
     /// #  nickname: Some("example".to_owned()),
     /// #  server: Some("irc.example.com".to_owned()),
     /// #  .. Default::default()
     /// # };
-    /// let mut reactor = Core::new().unwrap();
-    /// let future = IrcClient::new_future(reactor.handle(), &config).unwrap();
+    /// let mut reactor = Runtime::new().unwrap();
+    /// let future = IrcClient::new_future(&config).unwrap();
     /// // immediate connection errors (like no internet) will turn up here...
-    /// let PackedIrcClient(client, future) = reactor.run(future).unwrap();
+    /// let PackedIrcClient(client, future) = reactor.block_on(future).unwrap();
     /// // runtime errors (like disconnections and so forth) will turn up here...
-    /// reactor.run(client.stream().for_each(move |irc_msg| {
+    /// reactor.block_on(client.stream().for_each(move |irc_msg| {
     ///   // processing messages works like usual
     ///   process_msg(&client, irc_msg)
     /// }).join(future)).unwrap();
     /// # }
     /// # fn process_msg(server: &IrcClient, message: Message) -> error::Result<()> { Ok(()) }
     /// ```
-    pub fn new_future(handle: Handle, config: &Config) -> error::Result<IrcClientFuture> {
+    pub fn new_future(config: &Config) -> error::Result<IrcClientFuture> {
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
 
         Ok(IrcClientFuture {
-            conn: Connection::new(config, &handle)?,
-            _handle: handle,
+            conn: Connection::new(config)?,
             config: config,
             tx_outgoing: Some(tx_outgoing),
             rx_outgoing: Some(rx_outgoing),
@@ -793,7 +791,6 @@ impl IrcClient {
 #[derive(Debug)]
 pub struct IrcClientFuture<'a> {
     conn: ConnectionFuture<'a>,
-    _handle: Handle,
     config: &'a Config,
     tx_outgoing: Option<UnboundedSender<Message>>,
     rx_outgoing: Option<UnboundedReceiver<Message>>,

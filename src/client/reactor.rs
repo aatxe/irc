@@ -25,7 +25,7 @@
 
 use futures::{Future, IntoFuture, Stream};
 use futures::future;
-use tokio_core::reactor::{Core, Handle};
+use tokio::runtime::current_thread as tokio_rt;
 
 use client::data::Config;
 use client::{IrcClient, IrcClientFuture, PackedIrcClient, Client};
@@ -40,7 +40,7 @@ use proto::Message;
 ///
 /// For a full example usage, see [`irc::client::reactor`](./index.html).
 pub struct IrcReactor {
-    inner: Core,
+    inner: tokio_rt::Runtime,
     handlers: Vec<Box<Future<Item = (), Error = error::IrcError>>>,
 }
 
@@ -48,7 +48,7 @@ impl IrcReactor {
     /// Creates a new reactor.
     pub fn new() -> error::Result<IrcReactor> {
         Ok(IrcReactor {
-            inner: Core::new()?,
+            inner: tokio_rt::Runtime::new()?,
             handlers: Vec::new(),
         })
     }
@@ -70,7 +70,7 @@ impl IrcReactor {
     /// # }
     /// ```
     pub fn prepare_client<'a>(&mut self, config: &'a Config) -> error::Result<IrcClientFuture<'a>> {
-        IrcClient::new_future(self.inner_handle(), config)
+        IrcClient::new_future(config)
     }
 
     /// Runs an [`IrcClientFuture`](../struct.IrcClientFuture.html), such as one from
@@ -91,7 +91,7 @@ impl IrcReactor {
     /// # }
     /// ```
     pub fn connect_client(&mut self, future: IrcClientFuture) -> error::Result<IrcClient> {
-        self.inner.run(future).map(|PackedIrcClient(client, future)| {
+        self.inner.block_on(future).map(|PackedIrcClient(client, future)| {
             self.register_future(future);
             client
         })
@@ -159,7 +159,7 @@ impl IrcReactor {
     /// Returns a handle to the internal event loop. This is a sort of escape hatch that allows you
     /// to take more control over what runs on the reactor using `tokio`. This can be used for
     /// sharing this reactor with some elements of other libraries.
-    pub fn inner_handle(&self) -> Handle {
+    pub fn inner_handle(&self) -> tokio_rt::Handle {
         self.inner.handle()
     }
 
@@ -187,6 +187,6 @@ impl IrcReactor {
         while let Some(handler) = self.handlers.pop() {
             handlers.push(handler);
         }
-        self.inner.run(future::join_all(handlers).map(|_| ()))
+        self.inner.block_on(future::join_all(handlers).map(|_| ()))
     }
 }
