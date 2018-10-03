@@ -696,7 +696,7 @@ impl IrcClient {
         let _ = thread::spawn(move || {
             let mut reactor = Runtime::new().unwrap();
             // Setting up internal processing stuffs.
-            let conn = reactor.block_on(Connection::new(&cfg).unwrap()).unwrap();
+            let conn = reactor.block_on(Connection::new(cfg.clone()).unwrap()).unwrap();
 
             tx_view.send(conn.log_view()).unwrap();
             let (sink, stream) = conn.split();
@@ -745,7 +745,7 @@ impl IrcClient {
     /// #  .. Default::default()
     /// # };
     /// let mut reactor = Runtime::new().unwrap();
-    /// let future = IrcClient::new_future(&config).unwrap();
+    /// let future = IrcClient::new_future(config).unwrap();
     /// // immediate connection errors (like no internet) will turn up here...
     /// let PackedIrcClient(client, future) = reactor.block_on(future).unwrap();
     /// // runtime errors (like disconnections and so forth) will turn up here...
@@ -756,11 +756,11 @@ impl IrcClient {
     /// # }
     /// # fn process_msg(server: &IrcClient, message: Message) -> error::Result<()> { Ok(()) }
     /// ```
-    pub fn new_future(config: &Config) -> error::Result<IrcClientFuture> {
+    pub fn new_future(config: Config) -> error::Result<IrcClientFuture> {
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
 
         Ok(IrcClientFuture {
-            conn: Connection::new(config)?,
+            conn: Connection::new(config.clone())?,
             config: config,
             tx_outgoing: Some(tx_outgoing),
             rx_outgoing: Some(rx_outgoing),
@@ -789,14 +789,14 @@ impl IrcClient {
 /// [`tokio`](https://tokio.rs/docs/getting-started/futures/). An easy to use abstraction that does
 /// not require this knowledge is available via [`IrcReactors`](./reactor/struct.IrcReactor.html).
 #[derive(Debug)]
-pub struct IrcClientFuture<'a> {
-    conn: ConnectionFuture<'a>,
-    config: &'a Config,
+pub struct IrcClientFuture {
+    conn: ConnectionFuture,
+    config: Config,
     tx_outgoing: Option<UnboundedSender<Message>>,
     rx_outgoing: Option<UnboundedReceiver<Message>>,
 }
 
-impl<'a> Future for IrcClientFuture<'a> {
+impl Future for IrcClientFuture {
     type Item = PackedIrcClient;
     type Error = error::IrcError;
 

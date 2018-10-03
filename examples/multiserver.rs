@@ -26,7 +26,7 @@ fn main() {
     for config in configs {
         // Immediate errors like failure to resolve the server's domain or to establish any connection will
         // manifest here in the result of prepare_client_and_connect.
-        let client = reactor.prepare_client_and_connect(&config).unwrap();
+        let client = reactor.prepare_client_and_connect(config).unwrap();
         client.identify().unwrap();
         // Here, we tell the reactor to setup this client for future handling (in run) using the specified
         // handler function process_msg.
