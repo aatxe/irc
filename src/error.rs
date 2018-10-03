@@ -3,6 +3,7 @@
 use std::io::Error as IoError;
 use std::sync::mpsc::RecvError;
 
+use failure;
 use futures::sync::mpsc::SendError;
 use futures::sync::oneshot::Canceled;
 use native_tls::Error as TlsError;
@@ -94,7 +95,16 @@ pub enum IrcError {
 
     /// All specified nicknames were in use or unusable.
     #[fail(display = "none of the specified nicknames were usable")]
-    NoUsableNick
+    NoUsableNick,
+
+    /// This allows you to produce any `failure::Error` within closures used by
+    /// the irc crate. No errors of this kind will ever be produced by the crate
+    /// itself.
+    #[fail(display = "{}", inner)]
+    Custom {
+        /// The actual error that occurred.
+        inner: failure::Error
+    },
 }
 
 /// Errors that occur when parsing messages.

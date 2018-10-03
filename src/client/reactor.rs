@@ -138,8 +138,8 @@ impl IrcReactor {
     /// # }
     /// ```
     pub fn register_client_with_handler<F, U>(
-        &mut self, client: IrcClient, handler: F
-    ) where F: Fn(&IrcClient, Message) -> U + 'static,
+        &mut self, client: IrcClient, mut handler: F
+    ) where F: FnMut(&IrcClient, Message) -> U + 'static,
             U: IntoFuture<Item = (), Error = error::IrcError> + 'static {
         self.handlers.push(Box::new(client.stream().for_each(move |message| {
             handler(&client, message)

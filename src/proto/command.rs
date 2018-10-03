@@ -1,5 +1,4 @@
 //! Enumeration of all available client commands.
-use std::ascii::AsciiExt;
 use std::str::FromStr;
 
 use error::MessageParseError;
@@ -49,8 +48,32 @@ pub enum Command {
 
     // 3.3 Sending messages
     /// PRIVMSG msgtarget :message
+    ///
+    /// ## Responding to a `PRIVMSG`
+    ///
+    /// When responding to a message, it is not sufficient to simply copy the message target
+    /// (msgtarget). This will work just fine for responding to messages in channels where the
+    /// target is the same for all participants. However, when the message is sent directly to a
+    /// user, this target will be that client's username, and responding to that same target will
+    /// actually mean sending itself a response. In such a case, you should instead respond to the
+    /// user sending the message as specified in the message prefix. Since this is a common
+    /// pattern, there is a utility function
+    /// [`Message::response_target`](../message/struct.Message.html#method.response_target)
+    /// which is used for this exact purpose.
     PRIVMSG(String, String),
     /// NOTICE msgtarget :message
+    ///
+    /// ## Responding to a `NOTICE`
+    ///
+    /// When responding to a notice, it is not sufficient to simply copy the message target
+    /// (msgtarget). This will work just fine for responding to messages in channels where the
+    /// target is the same for all participants. However, when the message is sent directly to a
+    /// user, this target will be that client's username, and responding to that same target will
+    /// actually mean sending itself a response. In such a case, you should instead respond to the
+    /// user sending the message as specified in the message prefix. Since this is a common
+    /// pattern, there is a utility function
+    /// [`Message::response_target`](../message/struct.Message.html#method.response_target)
+    /// which is used for this exact purpose.
     NOTICE(String, String),
 
     // 3.4 Server queries and commands
@@ -421,18 +444,14 @@ impl<'a> From<&'a Command> for String {
             Command::CHGHOST(ref u, ref h) => stringify("CHGHOST", &[u, h], None),
 
             Command::Response(ref resp, ref a, Some(ref s)) => {
-                stringify(
-                    &format!("{}", *resp as u16),
-                    &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
-                    Some(s),
-                )
+                stringify(&format!("{:03}", *resp as u16),
+                          &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
+                          Some(s))
             }
             Command::Response(ref resp, ref a, None) => {
-                stringify(
-                    &format!("{}", *resp as u16),
-                    &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
-                    None,
-                )
+                stringify(&format!("{:03}", *resp as u16),
+                          &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
+                          None)
             }
             Command::Raw(ref c, ref a, Some(ref s)) => {
                 stringify(c, &a.iter().map(|s| &s[..]).collect::<Vec<_>>(), Some(s))
@@ -1761,5 +1780,18 @@ impl FromStr for BatchSubCommand {
         } else {
             Ok(BatchSubCommand::CUSTOM(s.to_uppercase()))
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Response;
+    use super::Command;
+
+    #[test]
+    fn format_response() {
+        assert!(String::from(&Command::Response(Response::RPL_WELCOME,
+                                                vec!["foo".into()],
+                                                None)) == "001 foo");
     }
 }

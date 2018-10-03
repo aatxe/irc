@@ -6,12 +6,12 @@ use std::io::Read;
 use encoding::EncoderTrap;
 use encoding::label::encoding_from_whatwg_label;
 use futures::{Async, Poll, Future, Sink, StartSend, Stream};
-use native_tls::{Certificate, TlsConnector};
+use native_tls::{Certificate, TlsConnector, Identity};
+use tokio_codec::Decoder;
 use tokio_core::reactor::Handle;
 use tokio_core::net::{TcpStream, TcpStreamNew};
-use tokio_io::AsyncRead;
 use tokio_mockstream::MockStream;
-use tokio_tls::{TlsConnectorExt, TlsStream};
+use tokio_tls::{self, TlsStream};
 
 use error;
 use client::data::Config;
@@ -81,13 +81,15 @@ impl<'a> Future for ConnectionFuture<'a> {
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
         match *self {
             ConnectionFuture::Unsecured(config, ref mut inner) => {
-                let framed = try_ready!(inner.poll()).framed(IrcCodec::new(config.encoding())?);
+                let stream = try_ready!(inner.poll());
+                let framed = IrcCodec::new(config.encoding())?.framed(stream);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Unsecured(transport)))
             }
             ConnectionFuture::Secured(config, ref mut inner) => {
-                let framed = try_ready!(inner.poll()).framed(IrcCodec::new(config.encoding())?);
+                let stream = try_ready!(inner.poll());
+                let framed = IrcCodec::new(config.encoding())?.framed(stream);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Secured(transport)))
@@ -109,7 +111,8 @@ impl<'a> Future for ConnectionFuture<'a> {
                     })
                 };
 
-                let framed = MockStream::new(&initial?).framed(IrcCodec::new(config.encoding())?);
+                let stream = MockStream::new(&initial?);
+                let framed = IrcCodec::new(config.encoding())?.framed(stream);
                 let transport = IrcTransport::new(config, framed);
 
                 Ok(Async::Ready(Connection::Mock(Logged::wrap(transport))))
@@ -126,21 +129,30 @@ impl Connection {
         } else if config.use_ssl() {
             let domain = format!("{}", config.server()?);
             info!("Connecting via SSL to {}.", domain);
-            let mut builder = TlsConnector::builder()?;
+            let mut builder = TlsConnector::builder();
             if let Some(cert_path) = config.cert_path() {
                 let mut file = File::open(cert_path)?;
                 let mut cert_data = vec![];
                 file.read_to_end(&mut cert_data)?;
                 let cert = Certificate::from_der(&cert_data)?;
-                builder.add_root_certificate(cert)?;
+                builder.add_root_certificate(cert);
                 info!("Added {} to trusted certificates.", cert_path);
             }
-            let connector = builder.build()?;
+            if let Some(client_cert_path) = config.client_cert_path() {
+                let client_cert_pass = config.client_cert_pass();
+                let mut file = File::open(client_cert_path)?;
+                let mut client_cert_data = vec![];
+                file.read_to_end(&mut client_cert_data)?;
+                let pkcs12_archive = Identity::from_pkcs12(&client_cert_data, &client_cert_pass)?;
+                builder.identity(pkcs12_archive);
+                info!("Using {} for client certificate authentication.", client_cert_path);
+            }
+            let connector: tokio_tls::TlsConnector = builder.build()?.into();
             let stream = Box::new(TcpStream::connect(&config.socket_addr()?, handle).map_err(|e| {
                 let res: error::IrcError = e.into();
                 res
             }).and_then(move |socket| {
-                connector.connect_async(&domain, socket).map_err(
+                connector.connect(&domain, socket).map_err(
                     |e| e.into(),
                 )
             }));

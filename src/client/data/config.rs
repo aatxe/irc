@@ -18,7 +18,51 @@ use error::TomlError;
 use error::{ConfigError, Result};
 use error::IrcError::InvalidConfig;
 
-/// Configuration data.
+/// Configuration for IRC clients.
+///
+/// # Building a configuration programmatically
+///
+/// For some use cases, it may be useful to build configurations programmatically. Since `Config` is
+/// an ordinary struct with public fields, this should be rather straightforward. However, it is
+/// important to note that the use of `Config::default()` is important, even when specifying all
+/// visible fields because `Config` keeps track of whether it was loaded from a file or
+/// programmatically defined, in order to produce better error messages. Using `Config::default()`
+/// as below will ensure that this process is handled correctly.
+///
+/// ```
+/// # extern crate irc;
+/// use irc::client::prelude::Config;
+///
+/// # fn main() {
+/// let config = Config {
+///     nickname: Some("test".to_owned()),
+///     server: Some("irc.example.com".to_owned()),
+///     ..Config::default()
+/// };
+/// # }
+/// ```
+///
+/// # Loading a configuration from a file
+///
+/// The standard method of using a configuration is to load it from a TOML file. You can find an
+/// example TOML configuration in the README, as well as a minimal example with code for loading the
+/// configuration below.
+///
+/// ## TOML (`config.toml`)
+/// ```toml
+/// nickname = "test"
+/// server = "irc.example.com"
+/// ```
+///
+/// ## Rust
+/// ```no_run
+/// # extern crate irc;
+/// use irc::client::prelude::Config;
+///
+/// # fn main() {
+/// let config = Config::load("config.toml").unwrap();
+/// # }
+/// ```
 #[derive(Clone, Deserialize, Serialize, Default, PartialEq, Debug)]
 pub struct Config {
     /// A list of the owners of the client by nickname (for bots).
@@ -44,6 +88,10 @@ pub struct Config {
     pub use_ssl: Option<bool>,
     /// The path to the SSL certificate for this server in DER format.
     pub cert_path: Option<String>,
+    /// The path to a SSL certificate to use for CertFP client authentication in DER format.
+    pub client_cert_path: Option<String>,
+    /// The password for the certificate to use in CertFP authentication.
+    pub client_cert_pass: Option<String>,
     /// The encoding type used for this connection.
     /// This is typically UTF-8, but could be something else.
     pub encoding: Option<String>,
@@ -93,6 +141,8 @@ pub struct Config {
     /// The path that this configuration was loaded from.
     ///
     /// This should not be specified in any configuration. It will automatically be handled by the library.
+    #[serde(skip_serializing)]
+    #[doc(hidden)]
     pub path: Option<PathBuf>,
 }
 
@@ -373,6 +423,16 @@ impl Config {
         self.cert_path.as_ref().map(|s| &s[..])
     }
 
+    /// Gets the path to the client authentication certificate in DER format if specified.
+    pub fn client_cert_path(&self) -> Option<&str> {
+        self.client_cert_path.as_ref().map(|s| &s[..])
+    }
+
+    /// Gets the password to the client authentication certificate.
+    pub fn client_cert_pass(&self) -> &str {
+        self.client_cert_pass.as_ref().map_or("", |s| &s[..])
+    }
+
     /// Gets the encoding to use for this connection. This requires the encode feature to work.
     /// This defaults to UTF-8 when not specified.
     pub fn encoding(&self) -> &str {
@@ -468,13 +528,10 @@ impl Config {
     }
 
     /// Looks up the specified string in the options map.
-    /// This uses indexing, and thus panics when the string is not present.
-    /// This will also panic if used and there are no options.
-    pub fn get_option(&self, option: &str) -> &str {
-        self.options
-            .as_ref()
-            .map(|o| &o[&option.to_owned()][..])
-            .unwrap()
+    pub fn get_option(&self, option: &str) -> Option<&str> {
+        self.options.as_ref().and_then(|o| {
+            o.get(&option.to_owned()).map(|s| &s[..])
+        })
     }
 
     /// Gets whether or not to use a mock connection for testing.
@@ -514,6 +571,8 @@ mod test {
             port: Some(6667),
             use_ssl: Some(false),
             cert_path: None,
+            client_cert_path: None,
+            client_cert_pass: None,
             encoding: Some(format!("UTF-8")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             channel_keys: None,
@@ -573,6 +632,7 @@ mod test {
             },
             ..Default::default()
         };
-        assert_eq!(cfg.get_option("testing"), "test");
+        assert_eq!(cfg.get_option("testing"), Some("test"));
+        assert_eq!(cfg.get_option("not"), None);
     }
 }

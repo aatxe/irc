@@ -45,8 +45,6 @@
 //! # }
 //! ```
 
-#[cfg(feature = "ctcp")]
-use std::ascii::AsciiExt;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
@@ -363,7 +361,7 @@ impl ClientState {
                 let config_chans = self.config().channels();
                 for chan in &config_chans {
                     match self.config().channel_key(chan) {
-                        Some(key) => self.send_join_with_keys(chan, key)?,
+                        Some(key) => self.send_join_with_keys::<&str, &str>(chan, key)?,
                         None => self.send_join(chan)?,
                     }
                 }
@@ -444,7 +442,7 @@ impl ClientState {
     }
 
     #[cfg(feature = "nochanlists")]
-    fn handle_part(&self, src: &str, chan: &str) {}
+    fn handle_part(&self, _: &str, _: &str) {}
 
     #[cfg(not(feature = "nochanlists"))]
     fn handle_part(&self, src: &str, chan: &str) {
@@ -495,7 +493,7 @@ impl ClientState {
     }
 
     #[cfg(feature = "nochanlists")]
-    fn handle_mode(&self, _: &str, _: &[Mode<ChannelMODE>]) {}
+    fn handle_mode(&self, _: &str, _: &[Mode<ChannelMode>]) {}
 
     #[cfg(not(feature = "nochanlists"))]
     fn handle_mode(&self, chan: &str, modes: &[Mode<ChannelMode>]) {
