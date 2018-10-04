@@ -18,7 +18,7 @@ fn main() {
     // We need to create a reactor first and foremost
     let mut reactor = IrcReactor::new().unwrap();
     // and then create a client via its API.
-    let client = reactor.prepare_client_and_connect(&config).unwrap();
+    let client = reactor.prepare_client_and_connect(config).unwrap();
     // Then, we identify
     client.identify().unwrap();
     // and clone just as before.

@@ -16,7 +16,7 @@
 //! fn main() {
 //!   let config = Config::default();
 //!   let mut reactor = IrcReactor::new().unwrap();
-//!   let client = reactor.prepare_client_and_connect(&config).unwrap();
+//!   let client = reactor.prepare_client_and_connect(config).unwrap();
 //!   reactor.register_client_with_handler(client, process_msg);
 //!   reactor.run().unwrap();
 //! }
@@ -63,13 +63,12 @@ impl IrcReactor {
     /// # use std::default::Default;
     /// # use irc::client::prelude::*;
     /// # fn main() {
-    /// # let config = Config::default();
     /// let future_client = IrcReactor::new().and_then(|mut reactor| {
-    ///     reactor.prepare_client(&config)
+    ///     reactor.prepare_client(Config::default())
     /// });
     /// # }
     /// ```
-    pub fn prepare_client<'a>(&mut self, config: &'a Config) -> error::Result<IrcClientFuture<'a>> {
+    pub fn prepare_client(&mut self, config: Config) -> error::Result<IrcClientFuture> {
         IrcClient::new_future(config)
     }
 
@@ -82,9 +81,8 @@ impl IrcReactor {
     /// # use std::default::Default;
     /// # use irc::client::prelude::*;
     /// # fn main() {
-    /// # let config = Config::default();
     /// let client = IrcReactor::new().and_then(|mut reactor| {
-    ///     reactor.prepare_client(&config).and_then(|future| {
+    ///     reactor.prepare_client(Config::default()).and_then(|future| {
     ///         reactor.connect_client(future)
     ///     })
     /// });
@@ -107,13 +105,12 @@ impl IrcReactor {
     /// # use std::default::Default;
     /// # use irc::client::prelude::*;
     /// # fn main() {
-    /// # let config = Config::default();
     /// let client = IrcReactor::new().and_then(|mut reactor| {
-    ///     reactor.prepare_client_and_connect(&config)
+    ///     reactor.prepare_client_and_connect(Config::default())
     /// });
     /// # }
     /// ```
-    pub fn prepare_client_and_connect(&mut self, config: &Config) -> error::Result<IrcClient> {
+    pub fn prepare_client_and_connect(&mut self, config: Config) -> error::Result<IrcClient> {
         self.prepare_client(config).and_then(|future| self.connect_client(future))
     }
 
@@ -130,7 +127,7 @@ impl IrcReactor {
     /// # fn main() {
     /// # let config = Config::default();
     /// let mut reactor = IrcReactor::new().unwrap();
-    /// let client = reactor.prepare_client_and_connect(&config).unwrap();
+    /// let client = reactor.prepare_client_and_connect(config).unwrap();
     /// reactor.register_client_with_handler(client, |client, msg| {
     ///   // Message processing happens here.
     ///   Ok(())
@@ -176,7 +173,7 @@ impl IrcReactor {
     /// # fn main() {
     /// # let config = Config::default();
     /// let mut reactor = IrcReactor::new().unwrap();
-    /// let client = reactor.prepare_client_and_connect(&config).unwrap();
+    /// let client = reactor.prepare_client_and_connect(config).unwrap();
     /// reactor.register_client_with_handler(client, process_msg);
     /// reactor.run().unwrap();
     /// # }
