@@ -8,7 +8,8 @@ use encoding::label::encoding_from_whatwg_label;
 use futures::{Async, Poll, Future, Sink, StartSend, Stream};
 use native_tls::{Certificate, TlsConnector, Identity};
 use tokio_codec::Decoder;
-use tokio::net::{TcpStream, ConnectFuture};
+use tokio::net::{TcpStream};
+use tokio::net::tcp::ConnectFuture;
 use tokio_mockstream::MockStream;
 use tokio_tls::{self, TlsStream};
 
