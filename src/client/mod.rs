@@ -828,7 +828,7 @@ impl Future for IrcClientFuture {
 /// This type should only be used by advanced users who are familiar with the implementation of this
 /// crate. An easy to use abstraction that does not require this knowledge is available via
 /// [`IrcReactors`](./reactor/struct.IrcReactor.html).
-pub struct PackedIrcClient(pub IrcClient, pub Box<Future<Item = (), Error = error::IrcError>>);
+pub struct PackedIrcClient(pub IrcClient, pub Box<Future<Item = (), Error = error::IrcError> + Send>);
 
 #[cfg(test)]
 mod test {
