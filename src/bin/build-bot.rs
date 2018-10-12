@@ -27,8 +27,11 @@ fn main() {
                 client.send_privmsg(
                     "#commits",
                     format!(
-                        "Hello from Travis CI! {}/{} {}: {}",
-                        repository_slug, branch, commit, commit_message
+                        "[{}/{}] ({}) {}",
+                        repository_slug,
+                        branch,
+                        &commit[..7],
+                        commit_message
                     ),
                 )?;
                 client.send_quit("QUIT")?;
