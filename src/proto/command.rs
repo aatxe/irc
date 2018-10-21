@@ -503,17 +503,17 @@ impl Command {
         } else if cmd.eq_ignore_ascii_case("USER") {
             match suffix {
                 Some(suffix) => {
-                    if args.len() != 2 {
+                    if args.len() != 3 {
                         raw(cmd, args, Some(suffix))
                     } else {
                         Command::USER(args[0].to_owned(), args[1].to_owned(), suffix.to_owned())
                     }
                 }
                 None => {
-                    if args.len() != 3 {
+                    if args.len() != 4 {
                         raw(cmd, args, suffix)
                     } else {
-                        Command::USER(args[0].to_owned(), args[1].to_owned(), args[2].to_owned())
+                        Command::USER(args[0].to_owned(), args[1].to_owned(), args[3].to_owned())
                     }
                 }
             }
@@ -1785,6 +1785,7 @@ impl FromStr for BatchSubCommand {
 
 #[cfg(test)]
 mod test {
+    use proto::Message;
     use super::Response;
     use super::Command;
 
@@ -1793,5 +1794,19 @@ mod test {
         assert!(String::from(&Command::Response(Response::RPL_WELCOME,
                                                 vec!["foo".into()],
                                                 None)) == "001 foo");
+    }
+
+    #[test]
+    fn user_round_trip() {
+        let cmd = Command::USER("a".to_string(), "b".to_string(), "c".to_string());
+        let line = Message::from(cmd.clone()).to_string();
+        let returned_cmd = line.parse::<Message>().unwrap().command;
+        assert_eq!(cmd, returned_cmd);
+    }
+
+    #[test]
+    fn parse_user_message() {
+        let cmd = "USER a 0 * b".parse::<Message>().unwrap().command;
+        assert_eq!(Command::USER("a".to_string(), "0".to_string(), "b".to_string()), cmd);
     }
 }
