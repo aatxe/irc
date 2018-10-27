@@ -16,7 +16,10 @@ is-it-maintained-issue-resolution = { repository = "aatxe/irc" }
 is-it-maintained-open-issues = { repository = "aatxe/irc" }
 
 [features]
-default = ["ctcp", "toml"]
+default = ["client", "ctcp", "toml"]
+client = ["tokio-codec", "tokio-core", "tokio-io",
+    "tokio-mockstream", "tokio-timer", "tokio-tls",
+    "futures", "native-tls"]
 ctcp = []
 nochanlists = []
 json = ["serde_json"]
@@ -28,19 +31,19 @@ bytes = "0.4"
 chrono = "0.4"
 encoding = "0.2"
 failure = "0.1"
-futures = "0.1"
+futures = { version = "0.1", optional = true }
 log = "0.4"
-native-tls = "0.2"
+native-tls = { version = "0.2", optional = true }
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = { version = "1.0", optional = true }
 serde_yaml = { version = "0.7", optional = true }
-tokio-codec = "0.1"
-tokio-core = "0.1"
-tokio-io = "0.1"
-tokio-mockstream = "1.1"
-tokio-timer = "0.1"
-tokio-tls = "0.2"
+tokio-codec = { version = "0.1", optional = true }
+tokio-core = { version = "0.1", optional = true }
+tokio-io = { version = "0.1", optional = true }
+tokio-mockstream = { version = "1.1", optional = true }
+tokio-timer = { version = "0.1", optional = true }
+tokio-tls = { version = "0.2", optional = true }
 toml = { version = "0.4", optional = true }
 
 [dev-dependencies]

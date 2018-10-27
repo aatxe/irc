@@ -4,13 +4,17 @@ use std::io::Error as IoError;
 use std::sync::mpsc::RecvError;
 
 use failure;
+#[cfg(feature = "client")]
 use futures::sync::mpsc::SendError;
+#[cfg(feature = "client")]
 use futures::sync::oneshot::Canceled;
+#[cfg(feature = "client")]
 use native_tls::Error as TlsError;
 #[cfg(feature = "json")]
 use serde_json::Error as JsonError;
 #[cfg(feature = "yaml")]
 use serde_yaml::Error as YamlError;
+#[cfg(feature = "client")]
 use tokio_timer::TimerError;
 #[cfg(feature = "toml")]
 use toml::de::Error as TomlReadError;
@@ -31,23 +35,45 @@ pub enum IrcError {
 
     /// An internal TLS error.
     #[fail(display = "a TLS error occurred")]
+    #[cfg(feature = "client")]
     Tls(#[cause] TlsError),
+
+    /// An internal TLS error.
+    #[cfg(not(feature = "client"))]
+    #[fail(display = "a TLS error occurred")]
+    Tls(()),
 
     /// An internal synchronous channel closed.
     #[fail(display = "a sync channel closed")]
     SyncChannelClosed(#[cause] RecvError),
 
     /// An internal asynchronous channel closed.
+    #[cfg(feature = "client")]
     #[fail(display = "an async channel closed")]
     AsyncChannelClosed(#[cause] SendError<Message>),
 
+    #[cfg(not(feature = "client"))]
+    #[fail(display = "an async channel closed")]
+    AsyncChannelClosed(()),
+
     /// An internal oneshot channel closed.
+    #[cfg(feature = "client")]
     #[fail(display = "a oneshot channel closed")]
     OneShotCanceled(#[cause] Canceled),
 
+    /// An internal oneshot channel closed.
+    #[cfg(not(feature = "client"))]
+    #[fail(display = "a oneshot channel closed")]
+    OneShotCanceled(()),
+
     /// An internal timer error.
+    #[cfg(feature = "client")]
     #[fail(display = "timer failed")]
     Timer(#[cause] TimerError),
+
+    #[cfg(not(feature = "client"))]
+    #[fail(display = "timer failed")]
+    Timer(()),
 
     /// Error for invalid configurations.
     #[fail(display = "invalid config: {}", path)]
@@ -216,30 +242,35 @@ impl From<IoError> for IrcError {
     }
 }
 
+#[cfg(feature = "client")]
 impl From<TlsError> for IrcError {
     fn from(e: TlsError) -> IrcError {
         IrcError::Tls(e)
     }
 }
 
+#[cfg(feature = "client")]
 impl From<RecvError> for IrcError {
     fn from(e: RecvError) -> IrcError {
         IrcError::SyncChannelClosed(e)
     }
 }
 
+#[cfg(feature = "client")]
 impl From<SendError<Message>> for IrcError {
     fn from(e: SendError<Message>) -> IrcError {
         IrcError::AsyncChannelClosed(e)
     }
 }
 
+#[cfg(feature = "client")]
 impl From<Canceled> for IrcError {
     fn from(e: Canceled) -> IrcError {
         IrcError::OneShotCanceled(e)
     }
 }
 
+#[cfg(feature = "client")]
 impl From<TimerError> for IrcError {
     fn from(e: TimerError) -> IrcError {
         IrcError::Timer(e)

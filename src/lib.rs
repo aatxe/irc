@@ -18,8 +18,10 @@
 //!
 //! ```no_run
 //! # extern crate irc;
+//! # #[cfg(feature = "client")]
 //! use irc::client::prelude::*;
 //!
+//! # #[cfg(feature = "client")]
 //! # fn main() {
 //! // configuration is loaded from config.toml into a Config
 //! let client = IrcClient::new("config.toml").unwrap();
@@ -36,6 +38,7 @@
 //!     }
 //! }).unwrap();
 //! # }
+//! # #[cfg(not(feature = "client"))] fn main() {}
 //! ```
 
 #![warn(missing_docs)]
@@ -47,9 +50,11 @@ extern crate chrono;
 extern crate failure;
 extern crate encoding;
 #[macro_use]
+#[cfg(feature = "client")]
 extern crate futures;
 #[macro_use]
 extern crate log;
+#[cfg(feature = "client")]
 extern crate native_tls;
 extern crate serde;
 #[macro_use]
@@ -58,19 +63,27 @@ extern crate serde_derive;
 extern crate serde_json;
 #[cfg(feature = "yaml")]
 extern crate serde_yaml;
+#[cfg(feature = "client")]
 extern crate tokio_codec;
+#[cfg(feature = "client")]
 extern crate tokio_core;
+#[cfg(feature = "client")]
 extern crate tokio_io;
+#[cfg(feature = "client")]
 extern crate tokio_mockstream;
+#[cfg(feature = "client")]
 extern crate tokio_timer;
+#[cfg(feature = "client")]
 extern crate tokio_tls;
 #[cfg(feature = "toml")]
 extern crate toml;
 
+#[cfg(feature = "client")]
 pub mod client;
 pub mod error;
 pub mod proto;
 
+#[cfg(feature = "client")]
 const VERSION_STR: &str = concat!(
     env!("CARGO_PKG_NAME"),
     ":",

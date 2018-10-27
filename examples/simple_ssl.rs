@@ -1,8 +1,10 @@
 extern crate irc;
 
 use std::default::Default;
+#[cfg(feature = "client")]
 use irc::client::prelude::*;
 
+#[cfg(feature = "client")]
 fn main() {
     let config = Config {
         nickname: Some("pickles".to_owned()),
@@ -23,4 +25,9 @@ fn main() {
             }
         }
     }).unwrap();
+}
+
+#[cfg(not(feature = "client"))]
+fn main() {
+    eprintln!("built without client support")
 }

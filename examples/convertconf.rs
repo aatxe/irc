@@ -7,11 +7,13 @@ use std::process::exit;
 
 use args::{Args, ArgsError};
 use getopts::Occur;
+#[cfg(feature = "client")]
 use irc::client::data::Config;
 
 const PROGRAM_DESC: &str = "Use this program to convert configs between {JSON, TOML, YAML}.";
 const PROGRAM_NAME: &str = "convertconf";
 
+#[cfg(feature = "client")]
 fn main() {
     let args: Vec<_> = env::args().collect();
     match parse(&args) {
@@ -59,4 +61,9 @@ fn parse(input: &[String]) -> Result<Option<(String, String)>, ArgsError> {
         args.value_of("input")?,
         args.value_of("output")?,
     )))
+}
+
+#[cfg(not(feature = "client"))]
+fn main() {
+    eprintln!("built without client support")
 }

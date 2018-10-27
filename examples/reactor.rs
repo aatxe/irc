@@ -1,10 +1,11 @@
 extern crate irc;
 
-use std::default::Default;
-use irc::client::prelude::*;
-
 // This example is meant to be a direct analogue to simple.rs using the reactor API.
+#[cfg(feature = "client")]
 fn main() {
+    use std::default::Default;
+    use irc::client::prelude::*;
+
     let config = Config {
         nickname: Some("pickles".to_owned()),
         alt_nicks: Some(vec!["bananas".to_owned(), "apples".to_owned()]),
@@ -28,4 +29,9 @@ fn main() {
     });
 
     reactor.run().unwrap();
+}
+
+#[cfg(not(feature = "client"))]
+fn main() {
+    eprintln!("built without client support")
 }

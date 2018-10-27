@@ -2,8 +2,10 @@ extern crate irc;
 
 use std::default::Default;
 use irc::error;
+#[cfg(feature = "client")]
 use irc::client::prelude::*;
 
+#[cfg(feature = "client")]
 fn main() {
     let cfg1 = Config {
         nickname: Some("pickles".to_owned()),
@@ -37,6 +39,7 @@ fn main() {
     reactor.run().unwrap();
 }
 
+#[cfg(feature = "client")]
 fn process_msg(client: &IrcClient, message: Message) -> error::Result<()> {
     print!("{}", message);
     match message.command {
@@ -48,4 +51,9 @@ fn process_msg(client: &IrcClient, message: Message) -> error::Result<()> {
         _ => (),
     }
     Ok(())
+}
+
+#[cfg(not(feature = "client"))]
+fn main() {
+    eprintln!("built without client support")
 }

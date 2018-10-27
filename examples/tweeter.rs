@@ -1,12 +1,13 @@
 extern crate irc;
 
-use std::default::Default;
-use std::thread;
-use std::time::Duration;
-use irc::client::prelude::*;
-
 // NOTE: you can find an asynchronous version of this example with `IrcReactor` in `tooter.rs`.
+#[cfg(feature = "client")]
 fn main() {
+    use std::default::Default;
+    use std::thread;
+    use std::time::Duration;
+    use irc::client::prelude::*;
+
     let config = Config {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.mozilla.org".to_owned()),
@@ -24,4 +25,9 @@ fn main() {
         client.send_privmsg("#rust-spam", "TWEET TWEET").unwrap();
         thread::sleep(Duration::new(10, 0));
     }
+}
+
+#[cfg(not(feature = "client"))]
+fn main() {
+    eprintln!("built without client support")
 }

@@ -1,13 +1,15 @@
 extern crate irc;
+#[cfg(feature = "client")]
 extern crate tokio_timer;
 
-use std::default::Default;
-use std::time::Duration;
-use irc::client::prelude::*;
-use irc::error::IrcError;
-
 // NOTE: this example is a conversion of `tweeter.rs` to an asynchronous style with `IrcReactor`.
+#[cfg(feature = "client")]
 fn main() {
+    use std::default::Default;
+    use std::time::Duration;
+    use irc::client::prelude::*;
+    use irc::error::IrcError;
+
     let config = Config {
         nickname: Some("mastodon".to_owned()),
         server: Some("irc.mozilla.org".to_owned()),
@@ -48,4 +50,9 @@ fn main() {
 
     // Then, on the main thread, we finally run the reactor which blocks the program indefinitely.
     reactor.run().unwrap();
+}
+
+#[cfg(not(feature = "client"))]
+fn main() {
+    eprintln!("built without client support")
 }

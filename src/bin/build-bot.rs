@@ -1,9 +1,13 @@
 extern crate irc;
 
+#[cfg(feature = "client")]
 use irc::client::prelude::*;
+#[cfg(feature = "client")]
 use std::default::Default;
+#[cfg(feature = "client")]
 use std::env;
 
+#[cfg(feature = "client")]
 fn main() {
     let repository_slug = env::var("TRAVIS_REPO_SLUG").unwrap();
     let branch = env::var("TRAVIS_BRANCH").unwrap();
@@ -43,4 +47,9 @@ fn main() {
     });
 
     reactor.run().unwrap();
+}
+
+#[cfg(not(feature = "client"))]
+fn main() {
+    eprintln!("built without client support")
 }
