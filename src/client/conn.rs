@@ -10,6 +10,7 @@ use native_tls::{Certificate, TlsConnector, Identity};
 use tokio_codec::Decoder;
 use tokio_core::reactor::Handle;
 use tokio_core::net::{TcpStream, TcpStreamNew};
+use tokio_io::{AsyncRead, AsyncWrite};
 use tokio_mockstream::MockStream;
 use tokio_tls::{self, TlsStream};
 
@@ -18,8 +19,14 @@ use client::data::Config;
 use client::transport::{IrcTransport, LogView, Logged};
 use proto::{IrcCodec, Message};
 
+/// A trait that requires both `AsyncRead` and `AsyncWrite`
+pub trait AsyncReadWrite : AsyncRead + AsyncWrite {}
+impl<T: AsyncRead + AsyncWrite> AsyncReadWrite for T {}
+
 /// An IRC connection used internally by `IrcServer`.
 pub enum Connection {
+    #[doc(hidden)]
+    Generic(IrcTransport<Box<AsyncReadWrite + Send>>),
     #[doc(hidden)]
     Unsecured(IrcTransport<TcpStream>),
     #[doc(hidden)]
@@ -34,6 +41,7 @@ impl fmt::Debug for Connection {
             f,
             "{}",
             match *self {
+                Connection::Generic(_) => "Connection::Generic(...)",
                 Connection::Unsecured(_) => "Connection::Unsecured(...)",
                 Connection::Secured(_) => "Connection::Secured(...)",
                 Connection::Mock(_) => "Connection::Mock(...)",
@@ -48,6 +56,8 @@ type TlsFuture = Box<Future<Error = error::IrcError, Item = TlsStream<TcpStream>
 /// A future representing an eventual `Connection`.
 pub enum ConnectionFuture<'a> {
     #[doc(hidden)]
+    Generic(&'a Config, Option<Box<AsyncReadWrite + Send>>),
+    #[doc(hidden)]
     Unsecured(&'a Config, TcpStreamNew),
     #[doc(hidden)]
     Secured(&'a Config, TlsFuture),
@@ -61,11 +71,13 @@ impl<'a> fmt::Debug for ConnectionFuture<'a> {
             f,
             "{}({:?}, ...)",
             match *self {
+                ConnectionFuture::Generic(_, _) => "ConnectionFuture::Generic",
                 ConnectionFuture::Unsecured(_, _) => "ConnectionFuture::Unsecured",
                 ConnectionFuture::Secured(_, _) => "ConnectionFuture::Secured",
                 ConnectionFuture::Mock(_) => "ConnectionFuture::Mock",
             },
             match *self {
+                ConnectionFuture::Generic(cfg, _) |
                 ConnectionFuture::Unsecured(cfg, _) |
                 ConnectionFuture::Secured(cfg, _) |
                 ConnectionFuture::Mock(cfg) => cfg,
@@ -80,6 +92,12 @@ impl<'a> Future for ConnectionFuture<'a> {
 
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
         match *self {
+            ConnectionFuture::Generic(config, ref mut inner) => {
+                let stream = inner.take().unwrap();
+                let framed = IrcCodec::new(config.encoding())?.framed(stream);
+                let transport = IrcTransport::new(config, framed);
+                Ok(Async::Ready(Connection::Generic(transport)))
+            },
             ConnectionFuture::Unsecured(config, ref mut inner) => {
                 let stream = try_ready!(inner.poll());
                 let framed = IrcCodec::new(config.encoding())?.framed(stream);
@@ -166,6 +184,11 @@ impl Connection {
         }
     }
 
+    /// Create a new Connection from any trait object that implements `AsyncReadWrite`
+    pub fn from_stream<'a>(config: &'a Config, stream: Box<AsyncReadWrite + Send>) -> error::Result<ConnectionFuture<'a>> {
+        Ok(ConnectionFuture::Generic(config, Some(stream)))
+    }
+
     /// Gets a view of the internal logging if and only if this connection is using a mock stream.
     /// Otherwise, this will always return `None`. This is used for unit testing.
     pub fn log_view(&self) -> Option<LogView> {
@@ -182,6 +205,7 @@ impl Stream for Connection {
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
         match *self {
+            Connection::Generic(ref mut inner) => inner.poll(),
             Connection::Unsecured(ref mut inner) => inner.poll(),
             Connection::Secured(ref mut inner) => inner.poll(),
             Connection::Mock(ref mut inner) => inner.poll(),
@@ -195,6 +219,7 @@ impl Sink for Connection {
 
     fn start_send(&mut self, item: Self::SinkItem) -> StartSend<Self::SinkItem, Self::SinkError> {
         match *self {
+            Connection::Generic(ref mut inner) => inner.start_send(item),
             Connection::Unsecured(ref mut inner) => inner.start_send(item),
             Connection::Secured(ref mut inner) => inner.start_send(item),
             Connection::Mock(ref mut inner) => inner.start_send(item),
@@ -203,6 +228,7 @@ impl Sink for Connection {
 
     fn poll_complete(&mut self) -> Poll<(), Self::SinkError> {
         match *self {
+            Connection::Generic(ref mut inner) => inner.poll_complete(),
             Connection::Unsecured(ref mut inner) => inner.poll_complete(),
             Connection::Secured(ref mut inner) => inner.poll_complete(),
             Connection::Mock(ref mut inner) => inner.poll_complete(),

@@ -60,7 +60,7 @@ use futures::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio_core::reactor::{Core, Handle};
 
 use error;
-use client::conn::{Connection, ConnectionFuture};
+use client::conn::{AsyncReadWrite, Connection, ConnectionFuture};
 use client::data::{Config, User};
 use client::ext::ClientExt;
 use client::transport::LogView;
@@ -758,10 +758,21 @@ impl IrcClient {
     /// # fn process_msg(server: &IrcClient, message: Message) -> error::Result<()> { Ok(()) }
     /// ```
     pub fn new_future(handle: Handle, config: &Config) -> error::Result<IrcClientFuture> {
+        let future = Connection::new(config, &handle)?;
+        Self::from_future(handle, config, future)
+    }
+
+    /// Create a `Future` of an `IrcClient` from an existing connection and on the event loop
+    /// corresponding to the given handle. See `IrcClient::new_future` for details.
+    pub fn new_future_from_stream(handle: Handle, config: &Config, stream: Box<AsyncReadWrite + Send>) -> error::Result<IrcClientFuture> {
+        Self::from_future(handle, config, Connection::from_stream(config, stream)?)
+    }
+
+    fn from_future<'a>(handle: Handle, config: &'a Config, future: ConnectionFuture<'a>) -> error::Result<IrcClientFuture<'a>> {
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
 
         Ok(IrcClientFuture {
-            conn: Connection::new(config, &handle)?,
+            conn: future,
             _handle: handle,
             config: config,
             tx_outgoing: Some(tx_outgoing),
