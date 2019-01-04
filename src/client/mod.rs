@@ -336,7 +336,7 @@ impl ClientState {
             PRIVMSG(ref target, ref body) => {
                 if body.starts_with('\u{001}') {
                     let tokens: Vec<_> = {
-                        let end = if body.ends_with('\u{001}') {
+                        let end = if body.ends_with('\u{001}') && body.len() > 1 {
                             body.len() - 1
                         } else {
                             body.len()
@@ -1233,6 +1233,21 @@ mod test {
         }).unwrap();
         assert!(client.list_users("#test").is_none())
     }
+
+    #[test]
+    fn handle_single_soh() {
+        let value = ":test!test@test PRIVMSG #test :\u{001}\r\n";
+        let client = IrcClient::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            nickname: Some(format!("test")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            ..test_config()
+        }).unwrap();
+        client.for_each_incoming(|message| {
+            println!("{:?}", message);
+        }).unwrap();
+    }
+
 
     #[test]
     #[cfg(feature = "ctcp")]
