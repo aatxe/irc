@@ -118,7 +118,7 @@ pub trait Client {
     /// Gets the configuration being used with this `Client`.
     fn config(&self) -> &Config;
 
-    /// Sends a [`Command`](../proto/command/enum.Command.html) as this `Client`. This is the 
+    /// Sends a [`Command`](../proto/command/enum.Command.html) as this `Client`. This is the
     /// core primitive for sending messages to the server. In practice, it's often more pleasant
     /// (and more idiomatic) to use the functions defined on
     /// [`ClientExt`](./ext/trait.ClientExt.html). They capture a lot of the more repetitive
@@ -831,7 +831,7 @@ impl<'a> Future for IrcClientFuture<'a> {
 /// This type should only be used by advanced users who are familiar with the implementation of this
 /// crate. An easy to use abstraction that does not require this knowledge is available via
 /// [`IrcReactors`](./reactor/struct.IrcReactor.html).
-pub struct PackedIrcClient(pub IrcClient, pub Box<Future<Item = (), Error = error::IrcError>>);
+pub struct PackedIrcClient(pub IrcClient, pub Box<Future<Item = (), Error = error::IrcError> + Send + 'static>);
 
 #[cfg(test)]
 mod test {
