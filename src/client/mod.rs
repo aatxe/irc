@@ -550,8 +550,7 @@ impl ClientState {
             self.send_ctcp_internal(
                 resp,
                 &format!("SOURCE {}", self.config().source()),
-            )?;
-            self.send_ctcp_internal(resp, "SOURCE")
+            )
         } else if tokens[0].eq_ignore_ascii_case("PING") && tokens.len() > 1 {
             self.send_ctcp_internal(resp, &format!("PING {}", tokens[1]))
         } else if tokens[0].eq_ignore_ascii_case("TIME") {
