@@ -1298,8 +1298,7 @@ mod test {
         }).unwrap();
         assert_eq!(
             &get_client_value(client)[..],
-            "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n\
-             NOTICE test :\u{001}SOURCE\u{001}\r\n"
+            "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n"
         );
     }
 
