@@ -138,8 +138,11 @@ impl IrcReactor {
         &mut self, client: IrcClient, mut handler: F
     ) where F: FnMut(&IrcClient, Message) -> U + 'static,
             U: IntoFuture<Item = (), Error = error::IrcError> + 'static {
+        let handle = self.inner.handle().clone();
         self.handlers.push(Box::new(client.stream().for_each(move |message| {
-            handler(&client, message)
+            handle.spawn(handler(&client, message).into_future().map_err(|_| (())));
+
+            Ok(())
         })));
     }
 

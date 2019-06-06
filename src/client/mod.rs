@@ -336,7 +336,7 @@ impl ClientState {
             PRIVMSG(ref target, ref body) => {
                 if body.starts_with('\u{001}') {
                     let tokens: Vec<_> = {
-                        let end = if body.ends_with('\u{001}') {
+                        let end = if body.ends_with('\u{001}') && body.len() > 1 {
                             body.len() - 1
                         } else {
                             body.len()
@@ -550,8 +550,7 @@ impl ClientState {
             self.send_ctcp_internal(
                 resp,
                 &format!("SOURCE {}", self.config().source()),
-            )?;
-            self.send_ctcp_internal(resp, "SOURCE")
+            )
         } else if tokens[0].eq_ignore_ascii_case("PING") && tokens.len() > 1 {
             self.send_ctcp_internal(resp, &format!("PING {}", tokens[1]))
         } else if tokens[0].eq_ignore_ascii_case("TIME") {
@@ -828,7 +827,8 @@ impl Future for IrcClientFuture {
 /// This type should only be used by advanced users who are familiar with the implementation of this
 /// crate. An easy to use abstraction that does not require this knowledge is available via
 /// [`IrcReactors`](./reactor/struct.IrcReactor.html).
-pub struct PackedIrcClient(pub IrcClient, pub Box<Future<Item = (), Error = error::IrcError> + Send>);
+pub struct PackedIrcClient(pub IrcClient, pub Box<Future<Item = (), Error = error::IrcError> + Send + 'static>);
+>>>>>>> develop
 
 #[cfg(test)]
 mod test {
@@ -1232,6 +1232,21 @@ mod test {
     }
 
     #[test]
+    fn handle_single_soh() {
+        let value = ":test!test@test PRIVMSG #test :\u{001}\r\n";
+        let client = IrcClient::from_config(Config {
+            mock_initial_value: Some(value.to_owned()),
+            nickname: Some(format!("test")),
+            channels: Some(vec![format!("#test"), format!("#test2")]),
+            ..test_config()
+        }).unwrap();
+        client.for_each_incoming(|message| {
+            println!("{:?}", message);
+        }).unwrap();
+    }
+
+
+    #[test]
     #[cfg(feature = "ctcp")]
     fn finger_response() {
         let value = ":test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
@@ -1281,8 +1296,7 @@ mod test {
         }).unwrap();
         assert_eq!(
             &get_client_value(client)[..],
-            "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n\
-             NOTICE test :\u{001}SOURCE\u{001}\r\n"
+            "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n"
         );
     }
 

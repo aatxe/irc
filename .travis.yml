@@ -12,6 +12,7 @@ script:
   - cargo test --verbose --features "toml yaml"
   - cargo test --doc
   - cargo test --verbose --no-default-features
+  - cargo run --bin build-bot
 notifications:
   email: false
   irc:

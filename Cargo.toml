@@ -1,10 +1,10 @@
 [package]
 name = "irc"
-version = "0.13.5"
+version = "0.13.6"
 description = "the irc crate – usable, async IRC for Rust "
 authors = ["Aaron Weiss <awe@pdgn.co>"]
 license = "MPL-2.0"
-keywords = ["irc", "client", "thread-safe", "async", "tokio", "protocol"]
+keywords = ["irc", "client", "thread-safe", "async", "tokio"]
 categories = ["asynchronous", "network-programming"]
 documentation = "https://docs.rs/irc/"
 repository = "https://github.com/aatxe/irc"
