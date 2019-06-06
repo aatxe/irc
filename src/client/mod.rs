@@ -828,7 +828,6 @@ impl Future for IrcClientFuture {
 /// crate. An easy to use abstraction that does not require this knowledge is available via
 /// [`IrcReactors`](./reactor/struct.IrcReactor.html).
 pub struct PackedIrcClient(pub IrcClient, pub Box<Future<Item = (), Error = error::IrcError> + Send + 'static>);
->>>>>>> develop
 
 #[cfg(test)]
 mod test {
