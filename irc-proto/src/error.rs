@@ -57,7 +57,23 @@ pub enum MessageParseError {
         cmd: &'static str,
         /// The invalid subcommand.
         sub: String,
-    }
+    },
+
+    /// The message exceeded the maximum allowable length.
+    #[fail(display = "message exceeded the maximum length")]
+    MaxLengthExceeded,
+
+    /// The message exceeded the maximum allowable arguments.
+    #[fail(display = "message exceeded the maximum number of arguments")]
+    MaxArgsExceeded,
+
+    /// The message did not contain a trailing CRLF.
+    #[fail(display = "message does not contain a trailing CRLF")]
+    MissingCrLf,
+
+    /// The message did not contain a command.
+    #[fail(display = "message does not contain a command")]
+    MissingCommand,
 }
 
 /// Errors that occur while parsing mode strings.

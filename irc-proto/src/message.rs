@@ -114,12 +114,10 @@ impl Message {
     /// ```
     pub fn parse_string(message: String) -> Result<Self, MessageParseError> {
         if message.len() > MAX_BYTES {
-            // Message must not exceed our pointer size (u16).
-            return unimplemented!();
+            return Err(MessageParseError::MaxLengthExceeded);
         }
         if !message.ends_with("\r\n") {
-            // Message must end with CRLF
-            return unimplemented!();
+            return Err(MessageParseError::MissingCrLf);
         }
         let message_end = message.len() - '\n'.len_utf8() - '\r'.len_utf8();
         let mut i = 0;
@@ -163,6 +161,10 @@ impl Message {
             Part::new(start, end)
         };
 
+        if command.start == command.end {
+            return Err(MessageParseError::MissingCommand);
+        }
+
         while message[i..].starts_with(' ') {
             i += ' '.len_utf8();
         }
@@ -184,8 +186,7 @@ impl Message {
             }
 
             if args_len as usize >= MAX_ARGS {
-                // Arguments cannot exceed MAX_ARGS.
-                return unimplemented!();
+                return Err(MessageParseError::MaxArgsExceeded);
             }
 
             let start = i;
