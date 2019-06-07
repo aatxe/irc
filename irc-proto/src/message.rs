@@ -74,7 +74,7 @@ impl Message {
         let message_end = message.len() - '\n'.len_utf8() - '\r'.len_utf8();
         let mut i = 0;
 
-        let tags = None;
+        let mut tags = None;
         if message[i..].starts_with('@') {
             i += '@'.len_utf8();
             let start = i;
@@ -89,7 +89,7 @@ impl Message {
             i += ' '.len_utf8();
         }
 
-        let prefix = None;
+        let mut prefix = None;
         if message[i..].starts_with(':') {
             i += ':'.len_utf8();
             let start = i;
@@ -205,10 +205,11 @@ impl Message {
 }
 
 impl FromStr for Message {
-    type Err = MessageParseError;
+    type Err = ProtocolError;
 
-    fn from_str(s: &str) -> Result<Self, MessageParseError> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         Message::parse(s)
+            .map_err(|err| ProtocolError::InvalidMessage { string: s.to_string(), cause: err })
     }
 }
 
@@ -238,9 +239,9 @@ impl<'a> Iterator for Tags<'a> {
             
             if let Some(key_end) = tag.find('=') {
                 let key = &tag[..key_end];
-                let raw_value = &tag[key_end + '='.len_utf8()..];
+                let mut raw_value = &tag[key_end + '='.len_utf8()..];
 
-                let value = String::new();
+                let mut value = String::new();
                 while let Some(escape_idx) = raw_value.find('\\') {
                     value.push_str(&raw_value[..escape_idx]);
                     let c = match raw_value[escape_idx + '\\'.len_utf8()..].chars().next() {
