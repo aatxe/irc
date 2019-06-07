@@ -36,13 +36,15 @@ impl From<Command> for Message {
     }
 }
 
+/// The maximum number of bytes allowed in a message, currently set to `u16::max_value()`, though
+/// the IRC specification is stricter than this.
+pub const MAX_BYTES: usize = u16::max_value() as usize;
+
+/// The maximum number of arguments supported by the message parser, currently set to 15 as it is
+/// the maximum according to the IRC specification.
 pub const MAX_ARGS: usize = 15;
 
-/// A data structure representing an IRC message according to the protocol specification. It
-/// consists of a collection of IRCv3 tags, a prefix (describing the source of the message), and
-/// the protocol command. If the command is unknown, it is treated as a special raw command that
-/// consists of a collection of arguments and the special suffix argument. Otherwise, the command
-/// is parsed into a more useful form as described in [Command](../command/enum.Command.html).
+/// A parsed IRC message, containing a buffer with pointers to the individual parts.
 #[derive(Clone, PartialEq, Debug)]
 pub struct Message {
     buf: String,
@@ -55,6 +57,38 @@ pub struct Message {
 }
 
 impl Message {
+    /// Parses the message, converting the given object into an owned string.
+    ///
+    /// This will perform an additional allocation if a `String` is passed. To avoid this and
+    /// transfer ownership instead, use the [`parse_string`] method.
+    ///
+    /// # Error
+    ///
+    /// This method will fail in the following conditions:
+    ///
+    /// - The message length is longer than the maximum supported number of bytes ([`MAX_BYTES`]).
+    /// - The message contains more than the maximum supported number of arguments ([`MAX_ARGS`]).
+    /// - The message is missing required components such as the trailing CRLF or the command.
+    ///
+    /// Note that it does not check whether the parts of the message have illegal forms, as
+    /// there is little benefit to restricting that. It will also not perform any allocations
+    /// except for the initial buffer; any unbounded dynamically-sized components like tags are
+    /// parsed through iterators instead (see the [`tags`] method).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::Message;
+    ///
+    /// let message = Message::parse("PRIVMSG #rust :Hello Rustaceans!\r\n")?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`parse_string`]: #method.parse_string
+    /// [`MAX_BYTES`]: ./constant.MAX_BYTES.html
+    /// [`MAX_ARGS`]: ./constant.MAX_ARGS.html
     pub fn parse<S>(message: S) -> Result<Self, MessageParseError>
     where
         S: ToString,
@@ -62,9 +96,25 @@ impl Message {
         Message::parse_string(message.to_string())
     }
 
+    /// Takes ownership of the given string and parses it into a message.
+    ///
+    /// For more information about the details of the parser, see the [`parse`] method.
+    ///
+    /// [`parse`] #method.parse
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::Message;
+    ///
+    /// let message = Message::parse_string("NICK ferris\r\n".to_string())?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn parse_string(message: String) -> Result<Self, MessageParseError> {
-        if message.len() <= u16::max_value() as usize {
-            // Message must not exceed 64K (8.5k under normal circumstances)
+        if message.len() > MAX_BYTES {
+            // Message must not exceed our pointer size (u16).
             return unimplemented!();
         }
         if !message.ends_with("\r\n") {
@@ -162,28 +212,125 @@ impl Message {
         })
     }
 
+    /// Borrows from the string slice containing the serialized message.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::Message;
+    ///
+    /// let raw_message = "JOIN #rust\r\n";
+    /// let parsed_message = Message::parse(raw_message)?;
+    /// assert_eq!(parsed_message.as_str(), raw_message);
+    /// # Ok(())
+    /// # }
     pub fn as_str(&self) -> &str {
         &self.buf
     }
 
+    /// Consumes this message, producing the string containing the serialized message.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::Message;
+    ///
+    /// let raw_message = "JOIN #rust\r\n";
+    /// let parsed_message = Message::parse(raw_message)?;
+    /// assert_eq!(parsed_message.into_string(), raw_message);
+    /// # Ok(())
+    /// # }
     pub fn into_string(self) -> String {
         self.buf
     }
 
+    /// Produces a parser iterator over the message's tags. The iterator will produce items of
+    /// `(&str, Option<Cow<str>>)` for each tag in order, containing the tag's key and its value if
+    /// one exists for that key. It is entirely zero copy except when the value contains escape
+    /// sequences, in which case the unescaped value will be produced and stored in an owned
+    /// buffer.
+    ///
+    /// This parser will not dedupe tags, nor will it check whether the tag's key is empty or
+    /// whether it contains illegal characters. 
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::Message;
+    /// use std::borrow::Cow;
+    ///
+    /// let message = Message::parse(
+    ///     "@aaa=bbb;ccc;example.com/ddd=eee :nick!ident@host.com PRIVMSG me :Hello\r\n"
+    /// )?;
+    ///
+    /// let mut tags = message.tags();
+    /// assert_eq!(tags.len(), 3);
+    ///
+    /// assert_eq!(tags.next(), Some(("aaa", Some(Cow::Borrowed("bbb")))));
+    /// assert_eq!(tags.next(), Some(("ccc", None)));
+    /// assert_eq!(tags.next(), Some(("example.com/ddd", Some(Cow::Borrowed("eee")))));
+    /// assert_eq!(tags.next(), None);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tags(&self) -> Tags {
         Tags {
             buf: self.tags.as_ref().map(|part| part.index(&self.buf)).unwrap_or(""),
         }
     }
 
+    /// Returns a string slice containing the message's prefix, if it exists.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::Message;
+    ///
+    /// let message = Message::parse(":nick!ident@host.com PRIVMSG me :Hello\r\n")?;
+    /// assert_eq!(message.prefix(), Some("nick!ident@host.com"));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn prefix(&self) -> Option<&str> {
         self.prefix.as_ref().map(|part| part.index(&self.buf))
     }
 
+    /// Returns a string slice containing the message's command.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::Message;
+    ///
+    /// let message = Message::parse("NICK ferris\r\n")?;
+    /// assert_eq!(message.command(), "NICK");
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn command(&self) -> &str {
         self.command.index(&self.buf)
     }
 
+    /// Returns a string slice containing the value of the given argument (indexed starting from
+    /// 0), if it exists.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::Message;
+    ///
+    /// let message = Message::parse("PRIVMSG #rust :Hello Rustaceans!\r\n")?;
+    /// assert_eq!(message.arg(0), Some("#rust"));
+    /// assert_eq!(message.arg(1), None);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn arg(&self, arg: usize) -> Option<&str> {
         if arg < self.args_len as usize {
             Some(self.args[arg].index(&self.buf))
@@ -192,6 +339,25 @@ impl Message {
         }
     }
 
+    /// Returns an iterator over the message's arguments, yielding `&str` string slices containing
+    /// each argument in order.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::Message;
+    ///
+    /// let message = Message::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
+    /// let mut args = message.args();
+    /// assert_eq!(args.len(), 3);
+    /// assert_eq!(args.next(), Some("guest"));
+    /// assert_eq!(args.next(), Some("tolmoon"));
+    /// assert_eq!(args.next(), Some("tolsun"));
+    /// assert_eq!(args.next(), None);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn args(&self) -> Args {
         Args {
             buf: &self.buf,
@@ -199,6 +365,19 @@ impl Message {
         }
     }
 
+    /// Returns a string slice containing the message's suffix, if it exists.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::Message;
+    ///
+    /// let message = Message::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
+    /// assert_eq!(message.suffix(), Some("Ronnie Reagan"));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn suffix(&self) -> Option<&str> {
         self.suffix.as_ref().map(|part| part.index(&self.buf))
     }
@@ -213,12 +392,21 @@ impl FromStr for Message {
     }
 }
 
+impl AsRef<str> for Message {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
 impl fmt::Display for Message {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(&self.buf)
     }
 }
 
+/// A parser iterator over a message's tags. See [`Message::tags`] for more information.
+///
+/// [`Message::tags`]: ./struct.Message.html#method.tags
 pub struct Tags<'a> {
     buf: &'a str,
 }
@@ -235,7 +423,12 @@ impl<'a> Iterator for Tags<'a> {
                 .find(|&(_i, c)| c == ';')
                 .map(|(i, _c)| &self.buf[..i])
                 .unwrap_or(&self.buf);
-            self.buf = &self.buf[tag.len()..];
+
+            if self.buf.len() == tag.len() {
+                self.buf = "";
+            } else {
+                self.buf = &self.buf[tag.len() + ';'.len_utf8()..];
+            }
             
             if let Some(key_end) = tag.find('=') {
                 let key = &tag[..key_end];
@@ -276,6 +469,19 @@ impl<'a> Iterator for Tags<'a> {
     }
 }
 
+impl<'a> ExactSizeIterator for Tags<'a> {
+    fn len(&self) -> usize {
+        if self.buf.len() == 0 {
+            0
+        } else {
+            self.buf.chars().filter(|&c| c == ';').count() + 1
+        }
+    }
+}
+
+/// An iterator over a message's tags. See [`Message::args`] for more information.
+///
+/// [`Message::args`]: ./struct.Message.html#method.args
 pub struct Args<'a> {
     buf: &'a str,
     args: std::iter::Take<std::slice::Iter<'a, Part>>,
@@ -289,13 +495,23 @@ impl<'a> Iterator for Args<'a> {
     }
 }
 
+impl<'a> ExactSizeIterator for Args<'a> {
+    fn len(&self) -> usize {
+        self.args.len()
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use super::{Message, Tag};
-    use command::Command::{PRIVMSG, QUIT, Raw};
+
+
 
     // Legacy tests
     // TODO: Adapt to new message/command API
+
+    /*
+    use super::{Message, Tag};
+    use command::Command::{PRIVMSG, QUIT, Raw};
 
     #[test]
     #[ignore]
@@ -517,4 +733,5 @@ mod test {
     fn to_message_invalid_format() {
         let _: Message = ":invalid :message".into();
     }
+    */
 }
