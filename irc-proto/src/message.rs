@@ -42,7 +42,7 @@ pub const MAX_BYTES: usize = u16::max_value() as usize;
 
 /// The maximum number of arguments supported by the message parser, currently set to 15 as it is
 /// the maximum according to the IRC specification.
-pub const MAX_ARGS: usize = 15;
+pub const MAX_PARAMS: usize = 15;
 
 /// A parsed IRC message, containing a buffer with pointers to the individual parts.
 #[derive(Clone, PartialEq, Debug)]
@@ -51,9 +51,8 @@ pub struct Message {
     tags: Option<Part>,
     prefix: Option<Part>,
     command: Part,
-    args: [Part; MAX_ARGS],
-    args_len: u8,
-    suffix: Option<Part>,
+    params: [Part; MAX_PARAMS],
+    params_len: u8,
 }
 
 impl Message {
@@ -67,7 +66,7 @@ impl Message {
     /// This method will fail in the following conditions:
     ///
     /// - The message length is longer than the maximum supported number of bytes ([`MAX_BYTES`]).
-    /// - The message contains more than the maximum supported number of arguments ([`MAX_ARGS`]).
+    /// - The message contains more than the maximum supported number of arguments ([`MAX_PARAMS`]).
     /// - The message is missing required components such as the trailing CRLF or the command.
     ///
     /// Note that it does not check whether the parts of the message have illegal forms, as
@@ -88,7 +87,7 @@ impl Message {
     ///
     /// [`parse_string`]: #method.parse_string
     /// [`MAX_BYTES`]: ./constant.MAX_BYTES.html
-    /// [`MAX_ARGS`]: ./constant.MAX_ARGS.html
+    /// [`MAX_PARAMS`]: ./constant.MAX_PARAMS.html
     pub fn parse<S>(message: S) -> Result<Self, MessageParseError>
     where
         S: ToString,
@@ -113,103 +112,128 @@ impl Message {
     /// # }
     /// ```
     pub fn parse_string(message: String) -> Result<Self, MessageParseError> {
+        // To make sure pointers don't overflow:
         if message.len() > MAX_BYTES {
             return Err(MessageParseError::MaxLengthExceeded);
         }
+
+        // Make sure the message is terminated with line endings:
         if !message.ends_with("\r\n") {
             return Err(MessageParseError::MissingCrLf);
         }
-        let message_end = message.len() - '\n'.len_utf8() - '\r'.len_utf8();
+        // Used as the end of the "useful" part of the message.
+        let crlf = message.len() - '\n'.len_utf8() - '\r'.len_utf8();
+
+        // Accumulating pointer used to keep track of how much has already been parsed.
         let mut i = 0;
 
-        let mut tags = None;
+        // If word starts with '@', it is a tag.
+        let tags;
         if message[i..].starts_with('@') {
+            // Take everything between '@' and next space.
             i += '@'.len_utf8();
             let start = i;
 
-            i += message[i..].find(' ').unwrap_or_else(|| message_end - i);
+            i += message[i..].find(' ').unwrap_or_else(|| crlf - i);
             let end = i;
 
             tags = Some(Part::new(start, end));
+        } else {
+            tags = None;
         }
 
+        // Skip to next non-space.
         while message[i..].starts_with(' ') {
             i += ' '.len_utf8();
         }
 
-        let mut prefix = None;
+        // If word starts with ':', it is a prefix.
+        let prefix;
         if message[i..].starts_with(':') {
+            // Take everything between ':' and next space.
             i += ':'.len_utf8();
             let start = i;
 
-            i += message[i..].find(' ').unwrap_or_else(|| message_end - i);
+            i += message[i..].find(' ').unwrap_or_else(|| crlf - i);
             let end = i;
 
             prefix = Some(Part::new(start, end));
+        } else {
+            prefix = None;
         }
 
+        // Skip to next non-space.
         while message[i..].starts_with(' ') {
             i += ' '.len_utf8();
         }
 
+        // Next word must be command.
         let command = {
+            // Take everything between here and next space.
             let start = i;
 
-            i += message[i..].find(' ').unwrap_or_else(|| message_end - i);
+            i += message[i..].find(' ').unwrap_or_else(|| crlf - i);
             let end = i;
 
             Part::new(start, end)
         };
 
+        // Command must not be empty.
         if command.start == command.end {
             return Err(MessageParseError::MissingCommand);
         }
 
+        // Skip to next non-space.
         while message[i..].starts_with(' ') {
             i += ' '.len_utf8();
         }
 
-        let mut args = [Part::new(0, 0); MAX_ARGS];
-        let mut args_len = 0;
-        let mut suffix = None;
+        // Everything from here to crlf must be parameters.
+        let mut params = [Part::new(0, 0); MAX_PARAMS];
+        let mut params_len = 0;
 
-        while i < message_end {
-            if message[i..].starts_with(':') {
-                i += ':'.len_utf8();
-                let start = i;
-
-                i = message_end;
-                let end = i;
-
-                suffix = Some(Part::new(start, end));
-                break;
-            }
-
-            if args_len as usize >= MAX_ARGS {
+        while i < crlf {
+            // Make sure we don't overrun the maximum parameter count.
+            if params_len as usize >= MAX_PARAMS {
                 return Err(MessageParseError::MaxArgsExceeded);
             }
 
-            let start = i;
+            // If parameter begins with ':', it is trailing.
+            let start;
+            let end;
+            if message[i..].starts_with(':') {
+                // Take everything between ':' and crlf.
+                i += ':'.len_utf8();
+                start = i;
 
-            i += message[i..].find(' ').unwrap_or_else(|| message_end - i);
-            let end = i;
+                i = crlf;
+                end = i;
+            } else {
+                // Take everything from here to next space.
+                start = i;
 
-            args[args_len as usize] = Part::new(start, end);
-            args_len += 1;
+                i += message[i..].find(' ').unwrap_or_else(|| crlf - i);
+                end = i;
 
-            while message[i..].starts_with(' ') {
-                i += ' '.len_utf8();
+                // Skip to next non-space.
+                while message[i..].starts_with(' ') {
+                    i += ' '.len_utf8();
+                }
             }
+
+            // Add to parameters.
+            params[params_len as usize] = Part::new(start, end);
+            params_len += 1;
         }
 
+        // Done parsing.
         Ok(Message {
             buf: message,
             tags,
             prefix,
             command,
-            args,
-            args_len,
-            suffix,
+            params,
+            params_len,
         })
     }
 
@@ -279,7 +303,7 @@ impl Message {
     /// ```
     pub fn tags(&self) -> Tags {
         Tags {
-            buf: self.tags.as_ref().map(|part| part.index(&self.buf)).unwrap_or(""),
+            remaining: self.tags.as_ref().map(|part| part.index(&self.buf)).unwrap_or(""),
         }
     }
 
@@ -328,13 +352,14 @@ impl Message {
     ///
     /// let message = Message::parse("PRIVMSG #rust :Hello Rustaceans!\r\n")?;
     /// assert_eq!(message.arg(0), Some("#rust"));
-    /// assert_eq!(message.arg(1), None);
+    /// assert_eq!(message.arg(1), Some("Hello Rustaceans!"));
+    /// assert_eq!(message.arg(2), None);
     /// # Ok(())
     /// # }
     /// ```
     pub fn arg(&self, arg: usize) -> Option<&str> {
-        if arg < self.args_len as usize {
-            Some(self.args[arg].index(&self.buf))
+        if arg < self.params_len as usize {
+            Some(self.params[arg].index(&self.buf))
         } else {
             None
         }
@@ -350,37 +375,21 @@ impl Message {
     /// use irc_proto::Message;
     ///
     /// let message = Message::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
-    /// let mut args = message.args();
-    /// assert_eq!(args.len(), 3);
-    /// assert_eq!(args.next(), Some("guest"));
-    /// assert_eq!(args.next(), Some("tolmoon"));
-    /// assert_eq!(args.next(), Some("tolsun"));
-    /// assert_eq!(args.next(), None);
+    /// let mut params = message.params();
+    /// assert_eq!(params.len(), 4);
+    /// assert_eq!(params.next(), Some("guest"));
+    /// assert_eq!(params.next(), Some("tolmoon"));
+    /// assert_eq!(params.next(), Some("tolsun"));
+    /// assert_eq!(params.next(), Some("Ronnie Reagan"));
+    /// assert_eq!(params.next(), None);
     /// # Ok(())
     /// # }
     /// ```
-    pub fn args(&self) -> Args {
+    pub fn params(&self) -> Args {
         Args {
             buf: &self.buf,
-            args: self.args.iter().take(self.args_len as usize),
+            params: self.params.iter().take(self.params_len as usize),
         }
-    }
-
-    /// Returns a string slice containing the message's suffix, if it exists.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::Message;
-    ///
-    /// let message = Message::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
-    /// assert_eq!(message.suffix(), Some("Ronnie Reagan"));
-    /// # Ok(())
-    /// # }
-    /// ```
-    pub fn suffix(&self) -> Option<&str> {
-        self.suffix.as_ref().map(|part| part.index(&self.buf))
     }
 }
 
@@ -409,35 +418,46 @@ impl fmt::Display for Message {
 ///
 /// [`Message::tags`]: ./struct.Message.html#method.tags
 pub struct Tags<'a> {
-    buf: &'a str,
+    remaining: &'a str,
 }
 
 impl<'a> Iterator for Tags<'a> {
     type Item = (&'a str, Option<Cow<'a, str>>);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.len() == 0 {
+        // If remaining is empty, nothing is left to yield.
+        if self.remaining.len() == 0 {
             None
         } else {
-            let tag = self.buf
+            // Take everything from here to next ';'.
+            let tag = self.remaining
                 .char_indices()
                 .find(|&(_i, c)| c == ';')
-                .map(|(i, _c)| &self.buf[..i])
-                .unwrap_or(&self.buf);
+                .map(|(i, _c)| &self.remaining[..i])
+                .unwrap_or(&self.remaining);
 
-            if self.buf.len() == tag.len() {
-                self.buf = "";
+            // Remove taken data from the remaining buffer.
+            if self.remaining.len() == tag.len() {
+                self.remaining = "";
             } else {
-                self.buf = &self.buf[tag.len() + ';'.len_utf8()..];
+                self.remaining = &self.remaining[tag.len() + ';'.len_utf8()..];
             }
             
+            // If an equal sign exists in the tag data, it must have an associated value.
             if let Some(key_end) = tag.find('=') {
+                // Everything before the first equal sign is the key.
                 let key = &tag[..key_end];
+
+                // Everything after the first equal sign is the value.
                 let mut raw_value = &tag[key_end + '='.len_utf8()..];
 
+                // Resolve escape sequences if any are found.
+                // This will not allocate unless data is given to it.
                 let mut value = String::new();
                 while let Some(escape_idx) = raw_value.find('\\') {
+                    // Copy everything before this escape sequence.
                     value.push_str(&raw_value[..escape_idx]);
+                    // Resolve this escape sequence.
                     let c = match raw_value[escape_idx + '\\'.len_utf8()..].chars().next() {
                         Some(':') => Some(';'),
                         Some('s') => Some(' '),
@@ -447,9 +467,14 @@ impl<'a> Iterator for Tags<'a> {
                         Some(c) => Some(c),
                         None => None,
                     };
+                    // If it resolves to a character, then push it.
                     if let Some(c) = c {
                         value.push(c);
                     }
+                    // Cut off the beginning of raw_value such that it only contains
+                    // everything after the parsed escape sequence.
+                    // Upon looping, it will start searching from this point, skipping the last
+                    // escape sequence.
                     raw_value = &raw_value[
                         (escape_idx
                             + '\\'.len_utf8()
@@ -457,9 +482,13 @@ impl<'a> Iterator for Tags<'a> {
                         )..
                     ];
                 }
+
+                // If we didn't add data, no escape sequences exist and the raw value can be
+                // referenced.
                 if value.len() == 0 {
                     Some((key, Some(Cow::Borrowed(raw_value))))
                 } else {
+                    // Make sure you add the rest of the raw value that doesn't contain escapes.
                     value.push_str(raw_value);
                     Some((key, Some(Cow::Owned(value))))
                 }
@@ -472,33 +501,35 @@ impl<'a> Iterator for Tags<'a> {
 
 impl<'a> ExactSizeIterator for Tags<'a> {
     fn len(&self) -> usize {
-        if self.buf.len() == 0 {
+        // Number of arguments yielded is number of remaining semicolons plus one, unless the
+        // remaining buffer is empty.
+        if self.remaining.len() == 0 {
             0
         } else {
-            self.buf.chars().filter(|&c| c == ';').count() + 1
+            self.remaining.chars().filter(|&c| c == ';').count() + 1
         }
     }
 }
 
-/// An iterator over a message's tags. See [`Message::args`] for more information.
+/// An iterator over a message's tags. See [`Message::params`] for more information.
 ///
-/// [`Message::args`]: ./struct.Message.html#method.args
+/// [`Message::params`]: ./struct.Message.html#method.params
 pub struct Args<'a> {
     buf: &'a str,
-    args: std::iter::Take<std::slice::Iter<'a, Part>>,
+    params: std::iter::Take<std::slice::Iter<'a, Part>>,
 }
 
 impl<'a> Iterator for Args<'a> {
     type Item = &'a str;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.args.next().map(|part| part.index(self.buf))
+        self.params.next().map(|part| part.index(self.buf))
     }
 }
 
 impl<'a> ExactSizeIterator for Args<'a> {
     fn len(&self) -> usize {
-        self.args.len()
+        self.params.len()
     }
 }
 
