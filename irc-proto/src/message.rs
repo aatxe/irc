@@ -1,6 +1,7 @@
 //! A module providing a data structure for messages to and from IRC servers.
-use std::borrow::ToOwned;
-use std::fmt::{Display, Formatter, Result as FmtResult, Write};
+use std::borrow::Cow;
+use std::fmt;
+use std::num::NonZeroU16;
 use std::str::FromStr;
 
 use chan::ChannelExt;
@@ -10,6 +11,33 @@ use error::{MessageParseError, ProtocolError};
 use prefix::Prefix;
 
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+struct Part {
+    start: u16,
+    end: u16,
+}
+
+impl Part {
+    fn new(start: usize, end: usize) -> Part {
+        Part {
+            start: start as u16,
+            end: end as u16,
+        }
+    }
+
+    fn index<'a>(&self, s: &'a str) -> &'a str {
+        &s[self.start as usize..self.end as usize]
+    }
+}
+
+impl From<Command> for Message {
+    fn from(c: Command) -> Message {
+        unimplemented!("dummy impl")
+    }
+}
+
+pub const MAX_ARGS: usize = 15;
+
 /// A data structure representing an IRC message according to the protocol specification. It
 /// consists of a collection of IRCv3 tags, a prefix (describing the source of the message), and
 /// the protocol command. If the command is unknown, it is treated as a special raw command that
@@ -17,264 +45,259 @@ use prefix::Prefix;
 /// is parsed into a more useful form as described in [Command](../command/enum.Command.html).
 #[derive(Clone, PartialEq, Debug)]
 pub struct Message {
-    /// Message tags as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
-    /// These tags are used to add extended information to the given message, and are commonly used
-    /// in IRCv3 extensions to the IRC protocol.
-    pub tags: Option<Vec<Tag>>,
-    /// The message prefix (or source) as defined by [RFC 2812](http://tools.ietf.org/html/rfc2812).
-    pub prefix: Option<Prefix>,
-    /// The IRC command, parsed according to the known specifications. The command itself and its
-    /// arguments (including the special suffix argument) are captured in this component.
-    pub command: Command,
+    buf: String,
+    tags: Option<Part>,
+    prefix: Option<Part>,
+    command: Part,
+    args: [Part; MAX_ARGS],
+    args_len: u8,
+    suffix: Option<Part>,
 }
 
 impl Message {
-    /// Creates a new message from the given components.
-    ///
-    /// # Example
-    /// ```
-    /// # extern crate irc_proto;
-    /// # use irc_proto::Message;
-    /// # fn main() {
-    /// let message = Message::new(
-    ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"], None
-    /// ).unwrap();
-    /// # }
-    /// ```
-    pub fn new(
-        prefix: Option<&str>,
-        command: &str,
-        args: Vec<&str>,
-        suffix: Option<&str>,
-    ) -> Result<Message, MessageParseError> {
-        Message::with_tags(None, prefix, command, args, suffix)
+    pub fn parse<S>(message: S) -> Result<Self, MessageParseError>
+    where
+        S: ToString,
+    {
+        Message::parse_string(message.to_string())
     }
 
-    /// Creates a new IRCv3.2 message from the given components, including message tags. These tags
-    /// are used to add extended information to the given message, and are commonly used in IRCv3
-    /// extensions to the IRC protocol.
-    pub fn with_tags(
-        tags: Option<Vec<Tag>>,
-        prefix: Option<&str>,
-        command: &str,
-        args: Vec<&str>,
-        suffix: Option<&str>,
-    ) -> Result<Message, error::MessageParseError> {
-        Ok(Message {
-            tags: tags,
-            prefix: prefix.map(|p| p.into()),
-            command: Command::new(command, args, suffix)?,
-        })
-    }
-
-    /// Gets the nickname of the message source, if it exists.
-    ///
-    /// # Example
-    /// ```
-    /// # extern crate irc_proto;
-    /// # use irc_proto::Message;
-    /// # fn main() {
-    /// let message = Message::new(
-    ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"], None
-    /// ).unwrap();
-    /// assert_eq!(message.source_nickname(), Some("nickname"));
-    /// # }
-    /// ```
-    pub fn source_nickname(&self) -> Option<&str> {
-        // <prefix> ::= <servername> | <nick> [ '!' <user> ] [ '@' <host> ]
-        // <servername> ::= <host>
-        self.prefix.as_ref().and_then(|p| match p {
-            Prefix::Nickname(name, _, _) => Some(&name[..]),
-            _ => None
-        })
-    }
-
-    /// Gets the likely intended place to respond to this message.
-    /// If the type of the message is a `PRIVMSG` or `NOTICE` and the message is sent to a channel,
-    /// the result will be that channel. In all other cases, this will call `source_nickname`.
-    ///
-    /// # Example
-    /// ```
-    /// # extern crate irc_proto;
-    /// # use irc_proto::Message;
-    /// # fn main() {
-    /// let msg1 = Message::new(
-    ///     Some("ada"), "PRIVMSG", vec!["#channel"], Some("Hi, everyone!")
-    /// ).unwrap();
-    /// assert_eq!(msg1.response_target(), Some("#channel"));
-    /// let msg2 = Message::new(
-    ///     Some("ada"), "PRIVMSG", vec!["betsy"], Some("betsy: hi")
-    /// ).unwrap();
-    /// assert_eq!(msg2.response_target(), Some("ada"));
-    /// # }
-    /// ```
-    pub fn response_target(&self) -> Option<&str> {
-        match self.command {
-            Command::PRIVMSG(ref target, _) if target.is_channel_name() => Some(target),
-            Command::NOTICE(ref target, _) if target.is_channel_name() => Some(target),
-            _ => self.source_nickname()
+    pub fn parse_string(message: String) -> Result<Self, MessageParseError> {
+        if message.len() <= u16::max_value() as usize {
+            // Message must not exceed 64K (8.5k under normal circumstances)
+            return unimplemented!();
         }
-    }
+        if !message.ends_with("\r\n") {
+            // Message must end with CRLF
+            return unimplemented!();
+        }
+        let message_end = message.len() - '\n'.len_utf8() - '\r'.len_utf8();
+        let mut i = 0;
 
-    /// Converts a Message into a String according to the IRC protocol.
-    ///
-    /// # Example
-    /// ```
-    /// # extern crate irc_proto;
-    /// # use irc_proto::Message;
-    /// # fn main() {
-    /// let msg = Message::new(
-    ///     Some("ada"), "PRIVMSG", vec!["#channel"], Some("Hi, everyone!")
-    /// ).unwrap();
-    /// assert_eq!(msg.to_string(), ":ada PRIVMSG #channel :Hi, everyone!\r\n");
-    /// # }
-    /// ```
-    pub fn to_string(&self) -> String {
-        let mut ret = String::new();
-        if let Some(ref tags) = self.tags {
-            ret.push('@');
-            for tag in tags {
-                ret.push_str(&tag.0);
-                if let Some(ref value) = tag.1 {
-                    ret.push('=');
-                    ret.push_str(value);
-                }
-                ret.push(';');
+        let tags = None;
+        if message[i..].starts_with('@') {
+            i += '@'.len_utf8();
+            let start = i;
+
+            i += message[i..].find(' ').unwrap_or_else(|| message_end - i);
+            let end = i;
+
+            tags = Some(Part::new(start, end));
+        }
+
+        while message[i..].starts_with(' ') {
+            i += ' '.len_utf8();
+        }
+
+        let prefix = None;
+        if message[i..].starts_with(':') {
+            i += ':'.len_utf8();
+            let start = i;
+
+            i += message[i..].find(' ').unwrap_or_else(|| message_end - i);
+            let end = i;
+
+            prefix = Some(Part::new(start, end));
+        }
+
+        while message[i..].starts_with(' ') {
+            i += ' '.len_utf8();
+        }
+
+        let command = {
+            let start = i;
+
+            i += message[i..].find(' ').unwrap_or_else(|| message_end - i);
+            let end = i;
+
+            Part::new(start, end)
+        };
+
+        while message[i..].starts_with(' ') {
+            i += ' '.len_utf8();
+        }
+
+        let mut args = [Part::new(0, 0); MAX_ARGS];
+        let mut args_len = 0;
+        let mut suffix = None;
+
+        while i < message_end {
+            if message[i..].starts_with(':') {
+                i += ':'.len_utf8();
+                let start = i;
+
+                i = message_end;
+                let end = i;
+
+                suffix = Some(Part::new(start, end));
+                break;
             }
-            ret.pop();
-            ret.push(' ');
-        }
-        if let Some(ref prefix) = self.prefix {
-            write!(ret, ":{} ", prefix).unwrap();
-        }
-        let cmd: String = From::from(&self.command);
-        ret.push_str(&cmd);
-        ret.push_str("\r\n");
-        ret
-    }
-}
 
-impl From<Command> for Message {
-    fn from(cmd: Command) -> Message {
-        Message {
-            tags: None,
-            prefix: None,
-            command: cmd,
+            if args_len as usize >= MAX_ARGS {
+                // Arguments cannot exceed MAX_ARGS.
+                return unimplemented!();
+            }
+
+            let start = i;
+
+            i += message[i..].find(' ').unwrap_or_else(|| message_end - i);
+            let end = i;
+
+            args[args_len as usize] = Part::new(start, end);
+            args_len += 1;
+
+            while message[i..].starts_with(' ') {
+                i += ' '.len_utf8();
+            }
         }
+
+        Ok(Message {
+            buf: message,
+            tags,
+            prefix,
+            command,
+            args,
+            args_len,
+            suffix,
+        })
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.buf
+    }
+
+    pub fn into_string(self) -> String {
+        self.buf
+    }
+
+    pub fn tags(&self) -> Tags {
+        Tags {
+            buf: self.tags.as_ref().map(|part| part.index(&self.buf)).unwrap_or(""),
+        }
+    }
+
+    pub fn prefix(&self) -> Option<&str> {
+        self.prefix.as_ref().map(|part| part.index(&self.buf))
+    }
+
+    pub fn command(&self) -> &str {
+        self.command.index(&self.buf)
+    }
+
+    pub fn arg(&self, arg: usize) -> Option<&str> {
+        if arg < self.args_len as usize {
+            Some(self.args[arg].index(&self.buf))
+        } else {
+            None
+        }
+    }
+
+    pub fn args(&self) -> Args {
+        Args {
+            buf: &self.buf,
+            args: self.args.iter().take(self.args_len as usize),
+        }
+    }
+
+    pub fn suffix(&self) -> Option<&str> {
+        self.suffix.as_ref().map(|part| part.index(&self.buf))
     }
 }
 
 impl FromStr for Message {
-    type Err = ProtocolError;
+    type Err = MessageParseError;
 
-    fn from_str(s: &str) -> Result<Message, Self::Err> {
-        if s.is_empty() {
-            return Err(ProtocolError::InvalidMessage {
-                string: s.to_owned(),
-                cause: MessageParseError::EmptyMessage,
-            })
+    fn from_str(s: &str) -> Result<Self, MessageParseError> {
+        Message::parse(s)
+    }
+}
+
+impl fmt::Display for Message {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(&self.buf)
+    }
+}
+
+pub struct Tags<'a> {
+    buf: &'a str,
+}
+
+impl<'a> Iterator for Tags<'a> {
+    type Item = (&'a str, Option<Cow<'a, str>>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.buf.len() == 0 {
+            None
+        } else {
+            let tag = self.buf
+                .char_indices()
+                .find(|&(_i, c)| c == ';')
+                .map(|(i, _c)| &self.buf[..i])
+                .unwrap_or(&self.buf);
+            self.buf = &self.buf[tag.len()..];
+            
+            if let Some(key_end) = tag.find('=') {
+                let key = &tag[..key_end];
+                let raw_value = &tag[key_end + '='.len_utf8()..];
+
+                let value = String::new();
+                while let Some(escape_idx) = raw_value.find('\\') {
+                    value.push_str(&raw_value[..escape_idx]);
+                    let c = match raw_value[escape_idx + '\\'.len_utf8()..].chars().next() {
+                        Some(':') => Some(';'),
+                        Some('s') => Some(' '),
+                        Some('\\') => Some('\\'),
+                        Some('r') => Some('\r'),
+                        Some('n') => Some('\n'),
+                        Some(c) => Some(c),
+                        None => None,
+                    };
+                    if let Some(c) = c {
+                        value.push(c);
+                    }
+                    raw_value = &raw_value[
+                        (escape_idx
+                            + '\\'.len_utf8()
+                            + c.map(char::len_utf8).unwrap_or(0)
+                        )..
+                    ];
+                }
+                if value.len() == 0 {
+                    Some((key, Some(Cow::Borrowed(raw_value))))
+                } else {
+                    value.push_str(raw_value);
+                    Some((key, Some(Cow::Owned(value))))
+                }
+            } else {
+                Some((tag, None))
+            }
         }
-
-        let mut state = s;
-
-        let tags = if state.starts_with('@') {
-            let tags = state.find(' ').map(|i| &state[1..i]);
-            state = state.find(' ').map_or("", |i| &state[i + 1..]);
-            tags.map(|ts| {
-                ts.split(';')
-                    .filter(|s| !s.is_empty())
-                    .map(|s: &str| {
-                        let mut iter = s.splitn(2, '=');
-                        let (fst, snd) = (iter.next(), iter.next());
-                        Tag(fst.unwrap_or("").to_owned(), snd.map(|s| s.to_owned()))
-                    })
-                    .collect::<Vec<_>>()
-            })
-        } else {
-            None
-        };
-
-        let prefix = if state.starts_with(':') {
-            let prefix = state.find(' ').map(|i| &state[1..i]);
-            state = state.find(' ').map_or("", |i| &state[i + 1..]);
-            prefix
-        } else {
-            None
-        };
-
-        let line_ending_len = if state.ends_with("\r\n") {
-            "\r\n"
-        } else if state.ends_with('\r') {
-            "\r"
-        } else if state.ends_with('\n') {
-            "\n"
-        } else {
-            ""
-        }.len();
-
-        let suffix = if state.contains(" :") {
-            let suffix = state.find(" :").map(|i| &state[i + 2..state.len() - line_ending_len]);
-            state = state.find(" :").map_or("", |i| &state[..i + 1]);
-            suffix
-        } else {
-            state = &state[..state.len() - line_ending_len];
-            None
-        };
-
-        let command = match state.find(' ').map(|i| &state[..i]) {
-            Some(cmd) => {
-                state = state.find(' ').map_or("", |i| &state[i + 1..]);
-                cmd
-            }
-            // If there's no arguments but the "command" starts with colon, it's not a command.
-            None if state.starts_with(':') => return Err(ProtocolError::InvalidMessage {
-                string: s.to_owned(),
-                cause: MessageParseError::InvalidCommand,
-            }),
-            // If there's no arguments following the command, the rest of the state is the command.
-            None => {
-                let cmd = state;
-                state = "";
-                cmd
-            },
-        };
-
-        let args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
-
-        Message::with_tags(tags, prefix, command, args, suffix).map_err(|e| {
-            ProtocolError::InvalidMessage {
-                string: s.to_owned(),
-                cause: e,
-            }
-        })
     }
 }
 
-impl<'a> From<&'a str> for Message {
-    fn from(s: &'a str) -> Message {
-        s.parse().unwrap()
-    }
+pub struct Args<'a> {
+    buf: &'a str,
+    args: std::iter::Take<std::slice::Iter<'a, Part>>,
 }
 
-impl Display for Message {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", self.to_string())
+impl<'a> Iterator for Args<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.args.next().map(|part| part.index(self.buf))
     }
 }
-
-/// A message tag as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).
-/// It consists of a tag key, and an optional value for the tag. Each message can contain a number
-/// of tags (in the string format, they are separated by semicolons). Tags are used to add extended
-/// information to a message under IRCv3.
-#[derive(Clone, PartialEq, Debug)]
-pub struct Tag(pub String, pub Option<String>);
 
 #[cfg(test)]
 mod test {
     use super::{Message, Tag};
     use command::Command::{PRIVMSG, QUIT, Raw};
 
+    // Legacy tests
+    // TODO: Adapt to new message/command API
+
     #[test]
+    #[ignore]
     fn new() {
         let message = Message {
             tags: None,
@@ -288,6 +311,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn source_nickname() {
         assert_eq!(
             Message::new(None, "PING", vec![], Some("data"))
@@ -347,6 +371,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn to_string() {
         let message = Message {
             tags: None,
@@ -366,6 +391,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn from_string() {
         let message = Message {
             tags: None,
@@ -406,6 +432,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn from_string_atypical_endings() {
         let message = Message {
             tags: None,
@@ -427,6 +454,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn from_and_to_string() {
         let message = "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
                        tags!\r\n";
@@ -434,6 +462,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn to_message() {
         let message = Message {
             tags: None,
@@ -452,6 +481,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn to_message_with_colon_in_arg() {
         // Apparently, UnrealIRCd (and perhaps some others) send some messages that include
         // colons within individual parameters. So, let's make sure it parses correctly.
@@ -469,6 +499,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn to_message_no_prefix_no_args() {
         let message = Message {
             tags: None,
@@ -480,6 +511,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn to_message_invalid_format() {
         let _: Message = ":invalid :message".into();
