@@ -1,14 +1,10 @@
 //! A module providing a data structure for messages to and from IRC servers.
 use std::borrow::Cow;
 use std::fmt;
-use std::num::NonZeroU16;
 use std::str::FromStr;
 
-use chan::ChannelExt;
 use command::Command;
-use error;
 use error::{MessageParseError, ProtocolError};
-use prefix::Prefix;
 
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]

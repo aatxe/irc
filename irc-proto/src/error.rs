@@ -63,10 +63,6 @@ pub enum MessageParseError {
     #[fail(display = "message exceeded the maximum length")]
     MaxLengthExceeded,
 
-    /// The message exceeded the maximum allowable arguments.
-    #[fail(display = "message exceeded the maximum number of arguments")]
-    MaxArgsExceeded,
-
     /// The message did not contain a trailing CRLF.
     #[fail(display = "message does not contain a trailing CRLF")]
     MissingCrLf,
