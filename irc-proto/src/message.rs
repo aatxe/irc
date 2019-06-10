@@ -31,8 +31,11 @@ impl Part {
 }
 
 impl From<Command> for Message {
-    fn from(c: Command) -> Message {
-        unimplemented!("dummy impl")
+    fn from(cmd: Command) -> Message {
+        let mut buf = String::from(&cmd);
+        buf.push_str("\r\n");
+        Message::parse_string(buf)
+            .unwrap()
     }
 }
 
@@ -47,8 +50,8 @@ pub struct Message {
     tags: Option<Part>,
     prefix: Option<Part>,
     command: Part,
-    middle_params: Part,
-    trailing_param: Option<Part>,
+    args: Part,
+    suffix: Option<Part>,
 }
 
 impl Message {
@@ -57,10 +60,10 @@ impl Message {
     /// This will allocate a new `String` to hold the message data, even if a `String` is
     /// passed. To avoid this and transfer ownership instead, use the [`parse_string`] method.
     ///
-    /// This function does not parse parameters or tags, as those may have an arbitrary number of
+    /// This function does not parse arguments or tags, as those may have an arbitrary number of
     /// elements and would require additional allocations to hold their pointer data. They have
     /// their own iterator-parsers that produce the elements while avoiding additional allocations;
-    /// see the [`params`] and [`tags`] methods for more information.
+    /// see the [`args`] and [`tags`] methods for more information.
     ///
     /// # Error
     ///
@@ -84,7 +87,7 @@ impl Message {
     /// ```
     ///
     /// [`parse_string`]: #method.parse_string
-    /// [`params`]: #method.params
+    /// [`args`]: #method.args
     /// [`tags`]: #method.tags
     /// [`MAX_BYTES`]: ./constant.MAX_BYTES.html
     pub fn parse<S>(message: S) -> Result<Self, MessageParseError>
@@ -187,33 +190,33 @@ impl Message {
             i += ' '.len_utf8();
         }
 
-        // Everything from here to crlf must be parameters.
-        let middle_params;
-        let trailing_param;
+        // Everything from here to crlf must be args.
+        let args;
+        let suffix;
 
         // If " :" exists in the remaining data, the first instance marks the beginning of a
-        // trailing parameter.
-        if let Some(trailing_idx) = message[i..].find(" :") {
-            // Middle parameters are everything from the current position to the last
-            // non-space character before the trailing parameter.
+        // suffix.
+        if let Some(suffix_idx) = message[i..].find(" :") {
+            // Middle args are everything from the current position to the last
+            // non-space character before the suffix.
             let start = i;
 
             // Walking back to the last non-space character:
-            let mut j = i + trailing_idx;
+            let mut j = i + suffix_idx;
             while message[..j].ends_with(' ') {
                 j -= ' '.len_utf8();
             }
             let end = j;
-            middle_params = Part::new(start, end);
+            args = Part::new(start, end);
 
-            // Trailing parameter is everything between the leading " :" and crlf.
-            i += trailing_idx + ' '.len_utf8() + ':'.len_utf8();
+            // Suffix is everything between the leading " :" and crlf.
+            i += suffix_idx + ' '.len_utf8() + ':'.len_utf8();
             let start = i;
             i = crlf;
             let end = i;
-            trailing_param = Some(Part::new(start, end));
+            suffix = Some(Part::new(start, end));
         } else {
-            // Middle parameters are everything from the current position to the last non-space
+            // Middle arg are everything from the current position to the last non-space
             // character before crlf.
             let start = i;
 
@@ -223,10 +226,10 @@ impl Message {
                 j -= ' '.len_utf8();
             }
             let end = j;
-            middle_params = Part::new(start, end);
+            args = Part::new(start, end);
 
-            // Trailing parameter does not exist:
-            trailing_param = None;
+            // Suffix does not exist:
+            suffix = None;
         }
 
         // Done parsing.
@@ -235,8 +238,8 @@ impl Message {
             tags,
             prefix,
             command,
-            middle_params,
-            trailing_param,
+            args,
+            suffix,
         })
     }
 
@@ -344,9 +347,9 @@ impl Message {
         self.command.index(&self.buf)
     }
 
-    /// Returns a parser iterator over the message's parameters. The iterator will produce items of 
-    /// `&str` for each parameter in order, containing the raw data in the parameter. It is entirely
-    /// zero-copy, borrowing each parameter slice directly from the message buffer.
+    /// Returns a parser iterator over the message's arguments. The iterator will produce items of 
+    /// `&str` for each argument in order, containing the raw data in the argument. It is entirely
+    /// zero-copy, borrowing each argument slice directly from the message buffer.
     ///
     /// # Examples
     ///
@@ -355,21 +358,35 @@ impl Message {
     /// use irc_proto::Message;
     ///
     /// let message = Message::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
-    /// let mut params = message.params();
-    /// assert_eq!(params.len(), 4);
-    /// assert_eq!(params.next(), Some("guest"));
-    /// assert_eq!(params.next(), Some("tolmoon"));
-    /// assert_eq!(params.next(), Some("tolsun"));
-    /// assert_eq!(params.next(), Some("Ronnie Reagan"));
-    /// assert_eq!(params.next(), None);
+    /// let mut args = message.args();
+    /// assert_eq!(args.len(), 3);
+    /// assert_eq!(args.next(), Some("guest"));
+    /// assert_eq!(args.next(), Some("tolmoon"));
+    /// assert_eq!(args.next(), Some("tolsun"));
+    /// assert_eq!(args.next(), None);
     /// # Ok(())
     /// # }
     /// ```
-    pub fn params(&self) -> Params {
-        Params {
-            remaining: self.middle_params.index(&self.buf),
-            trailing: self.trailing_param.map(|part| part.index(&self.buf)),
+    pub fn args(&self) -> Args {
+        Args {
+            remaining: self.args.index(&self.buf),
         }
+    }
+
+    /// Returns the suffix of this message, if one exists.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::Message;
+    /// 
+    /// let message = Message::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
+    /// assert_eq!(message.suffix(), Some("Ronnie Reagan"));
+    /// # Ok(())
+    /// # }
+    pub fn suffix(&self) -> Option<&str> {
+        self.suffix.map(|part| part.index(&self.buf))
     }
 }
 
@@ -491,58 +508,48 @@ impl<'a> ExactSizeIterator for Tags<'a> {
     }
 }
 
-/// An iterator over a message's parameters. See [`Message::params`] for more information.
+/// An iterator over a message's arguments. See [`Message::args`] for more information.
 ///
-/// [`Message::params`]: ./struct.Message.html#method.params
-pub struct Params<'a> {
+/// [`Message::args`]: ./struct.Message.html#method.args
+pub struct Args<'a> {
     remaining: &'a str,
-    trailing: Option<&'a str>,
 }
 
-impl<'a> Iterator for Params<'a> {
+impl<'a> Iterator for Args<'a> {
     type Item = &'a str;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // If remaining slice is non-empty, we still have middle params to take:
+        // If remaining slice is non-empty, we still have args to take:
         if self.remaining.len() > 0 {
-            // Next param is everything from here to next whitespace character (or end of string).
-            let param_end = self.remaining.find(' ').unwrap_or(self.remaining.len());
-            let param = &self.remaining[..param_end];
+            // Next arg is everything from here to next whitespace character (or end of string).
+            let arg_end = self.remaining.find(' ').unwrap_or(self.remaining.len());
+            let arg = &self.remaining[..arg_end];
 
-            // Trim this param and its trailing spaces out of remaining.
-            self.remaining = self.remaining[param_end..].trim_start_matches(' ');
+            // Trim this arg and its trailing spaces out of remaining.
+            self.remaining = self.remaining[arg_end..].trim_start_matches(' ');
 
-            Some(param)
+            Some(arg)
         } else {
-            // No more middle params to parse, return trailing if it hasn't been already.
-            // take will replace with None on the first call, so all future calls will return None.
-            self.trailing.take()
+            // No more args to parse.
+            None
         }
     }
 }
 
-impl<'a> ExactSizeIterator for Params<'a> {
+impl<'a> ExactSizeIterator for Args<'a> {
     fn len(&self) -> usize {
-        // Number of middle parameter remaining is equal to the number of points where a non-space
+        // Number of args remaining is equal to the number of points where a non-space
         // character is preceded by a space character or the beginning of the string.
-        let mut middle_len = 0;
+        let mut len = 0;
         let mut last = true;
         for c in self.remaining.chars() {
             let current = c == ' ';
             if (last, current) == (true, false) {
-                middle_len += 1;
+                len += 1;
             }
             last = current;
         }
-
-        // Add one if the trailing parameter hasn't been taken.
-        let trailing_len;
-        if self.trailing.is_some() {
-            trailing_len = 1;
-        } else {
-            trailing_len = 0;
-        }
-        middle_len + trailing_len
+        len
     }
 }
 
