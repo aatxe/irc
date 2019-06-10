@@ -49,7 +49,7 @@ pub struct Message {
     buf: String,
     tags: Option<Part>,
     prefix: Option<Part>,
-    command: Part,
+    command_name: Part,
     args: Part,
     suffix: Option<Part>,
 }
@@ -70,7 +70,7 @@ impl Message {
     /// This method will fail in the following conditions:
     ///
     /// - The message length is longer than the maximum supported number of bytes ([`MAX_BYTES`]).
-    /// - The message is missing required components such as the trailing CRLF or the command.
+    /// - The message is missing required components such as the trailing CRLF or the command name.
     ///
     /// Note that it does not check whether the parts of the message have illegal forms, as
     /// there is little benefit to restricting that.
@@ -169,8 +169,8 @@ impl Message {
             i += ' '.len_utf8();
         }
 
-        // Next word must be command.
-        let command = {
+        // Next word must be command name.
+        let command_name = {
             // Take everything between here and next space.
             let start = i;
 
@@ -180,8 +180,8 @@ impl Message {
             Part::new(start, end)
         };
 
-        // Command must not be empty.
-        if command.start == command.end {
+        // Command name must not be empty.
+        if command_name.start == command_name.end {
             return Err(MessageParseError::MissingCommand);
         }
 
@@ -237,7 +237,7 @@ impl Message {
             buf: message,
             tags,
             prefix,
-            command,
+            command_name,
             args,
             suffix,
         })
@@ -330,7 +330,7 @@ impl Message {
         self.prefix.as_ref().map(|part| part.index(&self.buf))
     }
 
-    /// Returns a string slice containing the message's command.
+    /// Returns a string slice containing the message's command name.
     ///
     /// # Examples
     ///
@@ -339,12 +339,31 @@ impl Message {
     /// use irc_proto::Message;
     ///
     /// let message = Message::parse("NICK ferris\r\n")?;
-    /// assert_eq!(message.command(), "NICK");
+    /// assert_eq!(message.command_name(), "NICK");
     /// # Ok(())
     /// # }
     /// ```
-    pub fn command(&self) -> &str {
-        self.command.index(&self.buf)
+    pub fn command_name(&self) -> &str {
+        self.command_name.index(&self.buf)
+    }
+
+    /// Converts this message into a [`Command`].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::{Message, Command};
+    ///
+    /// let message = Message::parse("NICK ferris\r\n")?;
+    /// assert_eq!(message.command()?, Command::NICK("ferris".to_string()));
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`Command`]: ../command/enum.Command.html
+    pub fn command(&self) -> Result<Command, MessageParseError> {
+        Command::new(self.command_name(), self.args().collect(), self.suffix())
     }
 
     /// Returns a parser iterator over the message's arguments. The iterator will produce items of 
