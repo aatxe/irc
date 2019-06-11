@@ -1802,13 +1802,13 @@ mod test {
     fn user_round_trip() {
         let cmd = Command::USER("a".to_string(), "b".to_string(), "c".to_string());
         let line = Message::from(cmd.clone()).to_string();
-        let returned_cmd = line.parse::<Message>().unwrap().command().unwrap();
+        let returned_cmd = line.parse::<Message>().unwrap().command;
         assert_eq!(cmd, returned_cmd);
     }
 
     #[test]
     fn parse_user_message() {
-        let cmd = "USER a 0 * b\r\n".parse::<Message>().unwrap().command().unwrap();
+        let cmd = "USER a 0 * b".parse::<Message>().unwrap().command;
         assert_eq!(Command::USER("a".to_string(), "0".to_string(), "b".to_string()), cmd);
     }
 }

@@ -66,7 +66,7 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::MessageBuf;
+    /// use irc_proto::buf::MessageBuf;
     ///
     /// let message = MessageBuf::parse("PRIVMSG #rust :Hello Rustaceans!\r\n")?;
     /// # Ok(())
@@ -92,7 +92,7 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::MessageBuf;
+    /// use irc_proto::buf::MessageBuf;
     ///
     /// let message = MessageBuf::parse_string("NICK ferris\r\n".to_string())?;
     /// # Ok(())
@@ -236,7 +236,7 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::MessageBuf;
+    /// use irc_proto::buf::MessageBuf;
     ///
     /// let raw_message = "JOIN #rust\r\n";
     /// let parsed_message = MessageBuf::parse(raw_message)?;
@@ -253,7 +253,7 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::MessageBuf;
+    /// use irc_proto::buf::MessageBuf;
     ///
     /// let raw_message = "JOIN #rust\r\n";
     /// let parsed_message = MessageBuf::parse(raw_message)?;
@@ -277,7 +277,7 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::MessageBuf;
+    /// use irc_proto::buf::MessageBuf;
     /// use std::borrow::Cow;
     ///
     /// let message = MessageBuf::parse(
@@ -306,7 +306,7 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::MessageBuf;
+    /// use irc_proto::buf::MessageBuf;
     ///
     /// let message = MessageBuf::parse(":nick!ident@host.com PRIVMSG me :Hello\r\n")?;
     /// assert_eq!(message.prefix(), Some("nick!ident@host.com"));
@@ -323,7 +323,7 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::MessageBuf;
+    /// use irc_proto::buf::MessageBuf;
     ///
     /// let message = MessageBuf::parse("NICK ferris\r\n")?;
     /// assert_eq!(message.command(), "NICK");
@@ -342,7 +342,7 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::MessageBuf;
+    /// use irc_proto::buf::MessageBuf;
     ///
     /// let message = MessageBuf::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
     /// let mut args = message.args();
@@ -366,7 +366,7 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::MessageBuf;
+    /// use irc_proto::buf::MessageBuf;
     /// 
     /// let message = MessageBuf::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
     /// assert_eq!(message.suffix(), Some("Ronnie Reagan"));
