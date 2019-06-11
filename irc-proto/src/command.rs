@@ -1787,7 +1787,7 @@ impl FromStr for BatchSubCommand {
 
 #[cfg(test)]
 mod test {
-    use proto::Message;
+    use crate::Message;
     use super::Response;
     use super::Command;
 
