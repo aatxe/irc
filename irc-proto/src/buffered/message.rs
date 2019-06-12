@@ -36,6 +36,9 @@ pub struct Message {
     buf: String,
     tags: Option<Part>,
     prefix: Option<Part>,
+    sender_name: Option<Part>,
+    sender_user: Option<Part>,
+    sender_host: Option<Part>,
     command: Part,
     args: Part,
     suffix: Option<Part>,
@@ -138,17 +141,63 @@ impl Message {
 
         // If word starts with ':', it is a prefix.
         let prefix;
+        let sender_name;
+        let sender_user;
+        let sender_host;
         if message[i..].starts_with(':') {
             // Take everything between ':' and next space.
             i += ':'.len_utf8();
-            let start = i;
+            let prefix_start = i;
 
             i += message[i..].find(' ').unwrap_or_else(|| crlf - i);
-            let end = i;
+            let prefix_end = i;
 
-            prefix = Some(Part::new(start, end));
+            prefix = Some(Part::new(prefix_start, prefix_end));
+
+            let prefix_str = &message[prefix_start..prefix_end];
+
+            if let Some(at_idx) = prefix_str.find('@') {
+                // ...@host
+                let host_start = prefix_start + at_idx + '@'.len_utf8();
+                let host_end = prefix_end;
+                
+                sender_host = Some(Part::new(host_start, host_end));
+                
+                if let Some(exclam_idx) = prefix_str[..at_idx].find('!') {
+                    // name!user@host
+
+                    let name_start = prefix_start;
+                    let name_end = prefix_start + exclam_idx;
+
+                    sender_name = Some(Part::new(name_start, name_end));
+
+                    let user_start = prefix_start + exclam_idx + '!'.len_utf8();
+                    let user_end = prefix_start + at_idx;
+
+                    sender_user = Some(Part::new(user_start, user_end));
+                } else {
+                    // name@host
+                    let name_start = prefix_start;
+                    let name_end = prefix_start + at_idx;
+
+                    sender_name = Some(Part::new(name_start, name_end));
+                    sender_user = None;
+                }
+            } else {
+                // name only
+
+                let name_start = prefix_start;
+                let name_end = prefix_end;
+
+                sender_name = Some(Part::new(name_start, name_end));
+                sender_user = None;
+                sender_host = None;
+            }
         } else {
             prefix = None;
+            sender_name = None;
+            sender_user = None;
+            sender_host = None;
         }
 
         // Skip to next non-space.
@@ -224,6 +273,9 @@ impl Message {
             buf: message,
             tags,
             prefix,
+            sender_name,
+            sender_user,
+            sender_host,
             command,
             args,
             suffix,
@@ -315,6 +367,57 @@ impl Message {
     /// ```
     pub fn prefix(&self) -> Option<&str> {
         self.prefix.as_ref().map(|part| part.index(&self.buf))
+    }
+
+    /// Returns a string slice containing the message's sender if it was provided. It may be either
+    /// a server name or a nickname.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::buffered::message::Message;
+    ///
+    /// let message = Message::parse(":nick!ident@host.com PRIVMSG me :Hello\r\n")?;
+    /// assert_eq!(message.sender_name(), Some("nick"));
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn sender_name(&self) -> Option<&str> {
+        self.sender_name.as_ref().map(|part| part.index(&self.buf))
+    }
+
+    /// Returns a string slice containing the username of the message's sender if it was provided.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::buffered::message::Message;
+    ///
+    /// let message = Message::parse(":nick!ident@host.com PRIVMSG me :Hello\r\n")?;
+    /// assert_eq!(message.sender_user(), Some("ident"));
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn sender_user(&self) -> Option<&str> {
+        self.sender_user.as_ref().map(|part| part.index(&self.buf))
+    }
+
+    /// Returns a string slice containing the hostname of the message's sender if it was provided.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
+    /// use irc_proto::buffered::message::Message;
+    ///
+    /// let message = Message::parse(":nick!ident@host.com PRIVMSG me :Hello\r\n")?;
+    /// assert_eq!(message.sender_host(), Some("host.com"));
+    /// # Ok(())
+    /// # }
+    pub fn sender_host(&self) -> Option<&str> {
+        self.sender_host.as_ref().map(|part| part.index(&self.buf))
     }
 
     /// Returns a string slice containing the message's command.
