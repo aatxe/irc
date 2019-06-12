@@ -6,7 +6,6 @@ use std::str::FromStr;
 
 use error::{MessageParseError, ProtocolError};
 
-
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 struct Part {
     start: u16,
@@ -160,9 +159,9 @@ impl Message {
                 // ...@host
                 let host_start = prefix_start + at_idx + '@'.len_utf8();
                 let host_end = prefix_end;
-                
+
                 sender_host = Some(Part::new(host_start, host_end));
-                
+
                 if let Some(exclam_idx) = prefix_str[..at_idx].find('!') {
                     // name!user@host
 
@@ -323,7 +322,7 @@ impl Message {
     /// stored in an owned buffer.
     ///
     /// This parser will not dedupe tags, nor will it check whether the tag's key is empty or
-    /// whether it contains illegal characters. 
+    /// whether it contains illegal characters.
     ///
     /// # Examples
     ///
@@ -348,7 +347,11 @@ impl Message {
     /// ```
     pub fn tags(&self) -> Tags {
         Tags {
-            remaining: self.tags.as_ref().map(|part| part.index(&self.buf)).unwrap_or(""),
+            remaining: self
+                .tags
+                .as_ref()
+                .map(|part| part.index(&self.buf))
+                .unwrap_or(""),
         }
     }
 
@@ -437,7 +440,7 @@ impl Message {
         self.command.index(&self.buf)
     }
 
-    /// Returns a parser iterator over the message's arguments. The iterator will produce items of 
+    /// Returns a parser iterator over the message's arguments. The iterator will produce items of
     /// `&str` for each argument in order, containing the raw data in the argument. It is entirely
     /// zero-copy, borrowing each argument slice directly from the message buffer.
     ///
@@ -470,7 +473,7 @@ impl Message {
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
     /// use irc_proto::buffered::message::Message;
-    /// 
+    ///
     /// let message = Message::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
     /// assert_eq!(message.suffix(), Some("Ronnie Reagan"));
     /// # Ok(())
@@ -484,8 +487,10 @@ impl FromStr for Message {
     type Err = ProtocolError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Message::parse(s)
-            .map_err(|err| ProtocolError::InvalidMessage { string: s.to_string(), cause: err })
+        Message::parse(s).map_err(|err| ProtocolError::InvalidMessage {
+            string: s.to_string(),
+            cause: err,
+        })
     }
 }
 
@@ -517,7 +522,8 @@ impl<'a> Iterator for Tags<'a> {
             None
         } else {
             // Take everything from here to next ';'.
-            let tag = self.remaining
+            let tag = self
+                .remaining
                 .char_indices()
                 .find(|&(_i, c)| c == ';')
                 .map(|(i, _c)| &self.remaining[..i])
@@ -529,7 +535,7 @@ impl<'a> Iterator for Tags<'a> {
             } else {
                 self.remaining = &self.remaining[tag.len() + ';'.len_utf8()..];
             }
-            
+
             // If an equal sign exists in the tag data, it must have an associated value.
             if let Some(key_end) = tag.find('=') {
                 // Everything before the first equal sign is the key.
@@ -562,12 +568,8 @@ impl<'a> Iterator for Tags<'a> {
                     // everything after the parsed escape sequence.
                     // Upon looping, it will start searching from this point, skipping the last
                     // escape sequence.
-                    raw_value = &raw_value[
-                        (escape_idx
-                            + '\\'.len_utf8()
-                            + c.map(char::len_utf8).unwrap_or(0)
-                        )..
-                    ];
+                    raw_value = &raw_value
+                        [(escape_idx + '\\'.len_utf8() + c.map(char::len_utf8).unwrap_or(0))..];
                 }
 
                 // If we didn't add data, no escape sequences exist and the raw value can be
