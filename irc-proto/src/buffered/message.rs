@@ -32,7 +32,7 @@ pub const MAX_BYTES: usize = u16::max_value() as usize;
 
 /// A parsed IRC message string, containing a single buffer with pointers to the individual parts.
 #[derive(Clone, PartialEq, Debug)]
-pub struct MessageBuf {
+pub struct Message {
     buf: String,
     tags: Option<Part>,
     prefix: Option<Part>,
@@ -41,7 +41,7 @@ pub struct MessageBuf {
     suffix: Option<Part>,
 }
 
-impl MessageBuf {
+impl Message {
     /// Parses the message, converting the given object into an owned string.
     ///
     /// This will allocate a new `String` to hold the message data, even if a `String` is
@@ -66,9 +66,9 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::buf::MessageBuf;
+    /// use irc_proto::buffered::message::Message;
     ///
-    /// let message = MessageBuf::parse("PRIVMSG #rust :Hello Rustaceans!\r\n")?;
+    /// let message = Message::parse("PRIVMSG #rust :Hello Rustaceans!\r\n")?;
     /// # Ok(())
     /// # }
     /// ```
@@ -81,7 +81,7 @@ impl MessageBuf {
     where
         S: ToString,
     {
-        MessageBuf::parse_string(message.to_string())
+        Message::parse_string(message.to_string())
     }
 
     /// Takes ownership of the given string and parses it into a message.
@@ -92,9 +92,9 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::buf::MessageBuf;
+    /// use irc_proto::buffered::message::Message;
     ///
-    /// let message = MessageBuf::parse_string("NICK ferris\r\n".to_string())?;
+    /// let message = Message::parse_string("NICK ferris\r\n".to_string())?;
     /// # Ok(())
     /// # }
     /// ```
@@ -220,7 +220,7 @@ impl MessageBuf {
         }
 
         // Done parsing.
-        Ok(MessageBuf {
+        Ok(Message {
             buf: message,
             tags,
             prefix,
@@ -236,10 +236,10 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::buf::MessageBuf;
+    /// use irc_proto::buffered::message::Message;
     ///
     /// let raw_message = "JOIN #rust\r\n";
-    /// let parsed_message = MessageBuf::parse(raw_message)?;
+    /// let parsed_message = Message::parse(raw_message)?;
     /// assert_eq!(parsed_message.as_str(), raw_message);
     /// # Ok(())
     /// # }
@@ -253,10 +253,10 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::buf::MessageBuf;
+    /// use irc_proto::buffered::message::Message;
     ///
     /// let raw_message = "JOIN #rust\r\n";
-    /// let parsed_message = MessageBuf::parse(raw_message)?;
+    /// let parsed_message = Message::parse(raw_message)?;
     /// assert_eq!(parsed_message.into_string(), raw_message);
     /// # Ok(())
     /// # }
@@ -277,10 +277,10 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::buf::MessageBuf;
+    /// use irc_proto::buffered::message::Message;
     /// use std::borrow::Cow;
     ///
-    /// let message = MessageBuf::parse(
+    /// let message = Message::parse(
     ///     "@aaa=bbb;ccc;example.com/ddd=eee :nick!ident@host.com PRIVMSG me :Hello\r\n"
     /// )?;
     ///
@@ -306,9 +306,9 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::buf::MessageBuf;
+    /// use irc_proto::buffered::message::Message;
     ///
-    /// let message = MessageBuf::parse(":nick!ident@host.com PRIVMSG me :Hello\r\n")?;
+    /// let message = Message::parse(":nick!ident@host.com PRIVMSG me :Hello\r\n")?;
     /// assert_eq!(message.prefix(), Some("nick!ident@host.com"));
     /// # Ok(())
     /// # }
@@ -323,9 +323,9 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::buf::MessageBuf;
+    /// use irc_proto::buffered::message::Message;
     ///
-    /// let message = MessageBuf::parse("NICK ferris\r\n")?;
+    /// let message = Message::parse("NICK ferris\r\n")?;
     /// assert_eq!(message.command(), "NICK");
     /// # Ok(())
     /// # }
@@ -342,9 +342,9 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::buf::MessageBuf;
+    /// use irc_proto::buffered::message::Message;
     ///
-    /// let message = MessageBuf::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
+    /// let message = Message::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
     /// let mut args = message.args();
     /// assert_eq!(args.len(), 3);
     /// assert_eq!(args.next(), Some("guest"));
@@ -366,9 +366,9 @@ impl MessageBuf {
     ///
     /// ```
     /// # fn main() -> Result<(), irc_proto::error::MessageParseError> {
-    /// use irc_proto::buf::MessageBuf;
+    /// use irc_proto::buffered::message::Message;
     /// 
-    /// let message = MessageBuf::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
+    /// let message = Message::parse("USER guest tolmoon tolsun :Ronnie Reagan\r\n")?;
     /// assert_eq!(message.suffix(), Some("Ronnie Reagan"));
     /// # Ok(())
     /// # }
@@ -377,30 +377,30 @@ impl MessageBuf {
     }
 }
 
-impl FromStr for MessageBuf {
+impl FromStr for Message {
     type Err = ProtocolError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        MessageBuf::parse(s)
+        Message::parse(s)
             .map_err(|err| ProtocolError::InvalidMessage { string: s.to_string(), cause: err })
     }
 }
 
-impl AsRef<str> for MessageBuf {
+impl AsRef<str> for Message {
     fn as_ref(&self) -> &str {
         self.as_str()
     }
 }
 
-impl fmt::Display for MessageBuf {
+impl fmt::Display for Message {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(&self.buf)
     }
 }
 
-/// A parser iterator over a message's tags. See [`MessageBuf::tags`] for more information.
+/// A parser iterator over a message's tags. See [`Message::tags`] for more information.
 ///
-/// [`MessageBuf::tags`]: ./struct.MessageBuf.html#method.tags
+/// [`Message::tags`]: ./struct.Message.html#method.tags
 pub struct Tags<'a> {
     remaining: &'a str,
 }
@@ -495,9 +495,9 @@ impl<'a> ExactSizeIterator for Tags<'a> {
     }
 }
 
-/// An iterator over a message's arguments. See [`MessageBuf::args`] for more information.
+/// An iterator over a message's arguments. See [`Message::args`] for more information.
 ///
-/// [`MessageBuf::args`]: ./struct.MessageBuf.html#method.args
+/// [`Message::args`]: ./struct.Message.html#method.args
 pub struct Args<'a> {
     remaining: &'a str,
 }

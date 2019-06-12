@@ -12,7 +12,7 @@ extern crate tokio_codec;
 #[cfg(feature = "tokio")]
 extern crate tokio_io;
 
-pub mod buf;
+pub mod buffered;
 pub mod caps;
 pub mod chan;
 pub mod colors;
