@@ -11,6 +11,7 @@ use native_tls::Error as TlsError;
 use serde_json::Error as JsonError;
 #[cfg(feature = "yaml")]
 use serde_yaml::Error as YamlError;
+use tokio::executor::SpawnError;
 use tokio_timer::TimerError;
 #[cfg(feature = "toml")]
 use toml::de::Error as TomlReadError;
@@ -33,6 +34,10 @@ pub enum IrcError {
     /// An internal TLS error.
     #[fail(display = "a TLS error occurred")]
     Tls(#[cause] TlsError),
+
+    /// An error caused by Tokio being unable to spawn a task.
+    #[fail(display = "unable to spawn task")]
+    Spawn(#[cause] SpawnError),
 
     /// An internal synchronous channel closed.
     #[fail(display = "a sync channel closed")]
@@ -185,6 +190,12 @@ impl From<IoError> for IrcError {
 impl From<TlsError> for IrcError {
     fn from(e: TlsError) -> IrcError {
         IrcError::Tls(e)
+    }
+}
+
+impl From<SpawnError> for IrcError {
+    fn from(e: SpawnError) -> IrcError {
+        IrcError::Spawn(e)
     }
 }
 
