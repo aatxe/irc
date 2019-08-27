@@ -57,7 +57,7 @@ pub enum MessageParseError {
         cmd: &'static str,
         /// The invalid subcommand.
         sub: String,
-    }
+    },
 }
 
 /// Errors that occur while parsing mode strings.

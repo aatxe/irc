@@ -9,7 +9,6 @@ use error;
 use error::{MessageParseError, ProtocolError};
 use prefix::Prefix;
 
-
 /// A data structure representing an IRC message according to the protocol specification. It
 /// consists of a collection of IRCv3 tags, a prefix (describing the source of the message), and
 /// the protocol command. If the command is unknown, it is treated as a special raw command that
@@ -85,7 +84,7 @@ impl Message {
         // <servername> ::= <host>
         self.prefix.as_ref().and_then(|p| match p {
             Prefix::Nickname(name, _, _) => Some(&name[..]),
-            _ => None
+            _ => None,
         })
     }
 
@@ -112,7 +111,7 @@ impl Message {
         match self.command {
             Command::PRIVMSG(ref target, _) if target.is_channel_name() => Some(target),
             Command::NOTICE(ref target, _) if target.is_channel_name() => Some(target),
-            _ => self.source_nickname()
+            _ => self.source_nickname(),
         }
     }
 
@@ -172,7 +171,7 @@ impl FromStr for Message {
             return Err(ProtocolError::InvalidMessage {
                 string: s.to_owned(),
                 cause: MessageParseError::EmptyMessage,
-            })
+            });
         }
 
         let mut state = s;
@@ -210,10 +209,13 @@ impl FromStr for Message {
             "\n"
         } else {
             ""
-        }.len();
+        }
+        .len();
 
         let suffix = if state.contains(" :") {
-            let suffix = state.find(" :").map(|i| &state[i + 2..state.len() - line_ending_len]);
+            let suffix = state
+                .find(" :")
+                .map(|i| &state[i + 2..state.len() - line_ending_len]);
             state = state.find(" :").map_or("", |i| &state[..i + 1]);
             suffix
         } else {
@@ -227,16 +229,18 @@ impl FromStr for Message {
                 cmd
             }
             // If there's no arguments but the "command" starts with colon, it's not a command.
-            None if state.starts_with(':') => return Err(ProtocolError::InvalidMessage {
-                string: s.to_owned(),
-                cause: MessageParseError::InvalidCommand,
-            }),
+            None if state.starts_with(':') => {
+                return Err(ProtocolError::InvalidMessage {
+                    string: s.to_owned(),
+                    cause: MessageParseError::InvalidCommand,
+                })
+            }
             // If there's no arguments following the command, the rest of the state is the command.
             None => {
                 let cmd = state;
                 state = "";
                 cmd
-            },
+            }
         };
 
         let args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
@@ -272,7 +276,7 @@ pub struct Tag(pub String, pub Option<String>);
 #[cfg(test)]
 mod test {
     use super::{Message, Tag};
-    use command::Command::{PRIVMSG, QUIT, Raw};
+    use command::Command::{Raw, PRIVMSG, QUIT};
 
     #[test]
     fn new() {
@@ -398,7 +402,7 @@ mod test {
         };
         assert_eq!(
             "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
-                    tags!\r\n"
+             tags!\r\n"
                 .parse::<Message>()
                 .unwrap(),
             message
@@ -428,8 +432,9 @@ mod test {
 
     #[test]
     fn from_and_to_string() {
-        let message = "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
-                       tags!\r\n";
+        let message =
+            "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
+             tags!\r\n";
         assert_eq!(message.parse::<Message>().unwrap().to_string(), message);
     }
 

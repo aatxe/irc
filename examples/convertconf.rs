@@ -1,7 +1,3 @@
-extern crate args;
-extern crate getopts;
-extern crate irc;
-
 use std::env;
 use std::process::exit;
 
@@ -34,18 +30,22 @@ fn main() {
 fn parse(input: &[String]) -> Result<Option<(String, String)>, ArgsError> {
     let mut args = Args::new(PROGRAM_NAME, PROGRAM_DESC);
     args.flag("h", "help", "Print the usage menu");
-    args.option("i",
-                "input",
-                "The path to the input config",
-                "FILE",
-                Occur::Req,
-                None);
-    args.option("o",
-                "output",
-                "The path to output the new config to",
-                "FILE",
-                Occur::Req,
-                None);
+    args.option(
+        "i",
+        "input",
+        "The path to the input config",
+        "FILE",
+        Occur::Req,
+        None,
+    );
+    args.option(
+        "o",
+        "output",
+        "The path to output the new config to",
+        "FILE",
+        Occur::Req,
+        None,
+    );
 
     args.parse(input)?;
 
@@ -55,8 +55,5 @@ fn parse(input: &[String]) -> Result<Option<(String, String)>, ArgsError> {
         return Ok(None);
     }
 
-    Ok(Some((
-        args.value_of("input")?,
-        args.value_of("output")?,
-    )))
+    Ok(Some((args.value_of("input")?, args.value_of("output")?)))
 }

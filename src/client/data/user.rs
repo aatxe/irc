@@ -1,10 +1,10 @@
 //! Data for tracking user information.
 use std::borrow::ToOwned;
 use std::cmp::Ordering;
-use std::cmp::Ordering::{Less, Equal, Greater};
+use std::cmp::Ordering::{Equal, Greater, Less};
 use std::str::FromStr;
 
-use proto::{Mode, ChannelMode};
+use crate::proto::{ChannelMode, Mode};
 
 /// IRC User data.
 #[derive(Clone, Debug)]
@@ -124,8 +124,9 @@ impl User {
 
 impl PartialEq for User {
     fn eq(&self, other: &User) -> bool {
-        self.nickname == other.nickname && self.username == other.username &&
-            self.hostname == other.hostname
+        self.nickname == other.nickname
+            && self.username == other.username
+            && self.hostname == other.hostname
     }
 }
 
@@ -208,7 +209,9 @@ struct AccessLevelIterator {
 
 impl AccessLevelIterator {
     pub fn new(value: &str) -> AccessLevelIterator {
-        AccessLevelIterator { value: value.to_owned() }
+        AccessLevelIterator {
+            value: value.to_owned(),
+        }
     }
 }
 
@@ -225,10 +228,10 @@ impl Iterator for AccessLevelIterator {
 
 #[cfg(test)]
 mod test {
-    use super::{AccessLevel, User};
     use super::AccessLevel::*;
-    use proto::ChannelMode as M;
-    use proto::Mode::*;
+    use super::{AccessLevel, User};
+    use crate::proto::ChannelMode as M;
+    use crate::proto::Mode::*;
 
     #[test]
     fn parse_access_level() {
@@ -269,7 +272,6 @@ mod test {
         assert_eq!(user, exp);
         assert_eq!(user.highest_access_level, exp.highest_access_level);
         assert_eq!(user.access_levels, exp.access_levels);
-
     }
 
     #[test]

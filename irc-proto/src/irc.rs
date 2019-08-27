@@ -1,6 +1,6 @@
 //! Implementation of IRC codec for Tokio.
 use bytes::BytesMut;
-use tokio_codec::{Decoder, Encoder};
+use tokio_util::codec::{Decoder, Encoder};
 
 use error;
 use line::LineCodec;
@@ -31,7 +31,6 @@ impl IrcCodec {
         }
         data
     }
-
 }
 
 impl Decoder for IrcCodec {
@@ -39,16 +38,15 @@ impl Decoder for IrcCodec {
     type Error = error::ProtocolError;
 
     fn decode(&mut self, src: &mut BytesMut) -> error::Result<Option<Message>> {
-        self.inner.decode(src).and_then(|res| {
-            res.map_or(Ok(None), |msg| msg.parse::<Message>().map(Some))
-        })
+        self.inner
+            .decode(src)
+            .and_then(|res| res.map_or(Ok(None), |msg| msg.parse::<Message>().map(Some)))
     }
 }
 
 impl Encoder for IrcCodec {
     type Item = Message;
     type Error = error::ProtocolError;
-
 
     fn encode(&mut self, msg: Message, dst: &mut BytesMut) -> error::Result<()> {
         self.inner.encode(IrcCodec::sanitize(msg.to_string()), dst)

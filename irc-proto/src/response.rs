@@ -52,7 +52,7 @@ make_response! {
     RPL_BOUNCE          =  10,
     /// Undefined format. (Source: Modern)
     ///
-    /// RPL_NONE is a dummy numeric. It does not have a defined use nor format. 
+    /// RPL_NONE is a dummy numeric. It does not have a defined use nor format.
     RPL_NONE            = 300,
     /// `302 :*1<reply> *( " " <reply> )` (Source: RFC2812)
     RPL_USERHOST        = 302,

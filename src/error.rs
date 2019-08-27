@@ -4,29 +4,28 @@ use std::io::Error as IoError;
 use std::sync::mpsc::RecvError;
 
 use failure;
-use futures::sync::mpsc::SendError;
-use futures::sync::oneshot::Canceled;
+use futures_channel::{
+    mpsc::{SendError, TrySendError},
+    oneshot::Canceled,
+};
 use native_tls::Error as TlsError;
 #[cfg(feature = "json")]
 use serde_json::Error as JsonError;
 #[cfg(feature = "yaml")]
 use serde_yaml::Error as YamlError;
-use tokio::executor::SpawnError;
-use tokio_timer::TimerError;
 #[cfg(feature = "toml")]
 use toml::de::Error as TomlReadError;
 #[cfg(feature = "toml")]
 use toml::ser::Error as TomlWriteError;
 
-use proto::Message;
-use proto::error::{ProtocolError, MessageParseError};
+use crate::proto::error::{MessageParseError, ProtocolError};
 
 /// A specialized `Result` type for the `irc` crate.
-pub type Result<T> = ::std::result::Result<T, IrcError>;
+pub type Result<T> = ::std::result::Result<T, Error>;
 
 /// The main crate-wide error type.
 #[derive(Debug, Fail)]
-pub enum IrcError {
+pub enum Error {
     /// An internal I/O error.
     #[fail(display = "an io error occurred")]
     Io(#[cause] IoError),
@@ -35,25 +34,17 @@ pub enum IrcError {
     #[fail(display = "a TLS error occurred")]
     Tls(#[cause] TlsError),
 
-    /// An error caused by Tokio being unable to spawn a task.
-    #[fail(display = "unable to spawn task")]
-    Spawn(#[cause] SpawnError),
-
     /// An internal synchronous channel closed.
     #[fail(display = "a sync channel closed")]
     SyncChannelClosed(#[cause] RecvError),
 
     /// An internal asynchronous channel closed.
     #[fail(display = "an async channel closed")]
-    AsyncChannelClosed(#[cause] SendError<Message>),
+    AsyncChannelClosed(#[cause] SendError),
 
     /// An internal oneshot channel closed.
     #[fail(display = "a oneshot channel closed")]
     OneShotCanceled(#[cause] Canceled),
-
-    /// An internal timer error.
-    #[fail(display = "timer failed")]
-    Timer(#[cause] TimerError),
 
     /// Error for invalid configurations.
     #[fail(display = "invalid config: {}", path)]
@@ -103,13 +94,17 @@ pub enum IrcError {
     #[fail(display = "none of the specified nicknames were usable")]
     NoUsableNick,
 
+    /// Stream has already been configured.
+    #[fail(display = "stream has already been configured")]
+    StreamAlreadyConfigured,
+
     /// This allows you to produce any `failure::Error` within closures used by
     /// the irc crate. No errors of this kind will ever be produced by the crate
     /// itself.
     #[fail(display = "{}", inner)]
     Custom {
         /// The actual error that occurred.
-        inner: failure::Error
+        inner: failure::Error,
     },
 }
 
@@ -170,55 +165,49 @@ pub enum TomlError {
     Write(#[cause] TomlWriteError),
 }
 
-impl From<ProtocolError> for IrcError {
-    fn from(e: ProtocolError) -> IrcError {
+impl From<ProtocolError> for Error {
+    fn from(e: ProtocolError) -> Error {
         match e {
-            ProtocolError::Io(e) => IrcError::Io(e),
-            ProtocolError::InvalidMessage { string, cause } => IrcError::InvalidMessage {
-                string, cause
-            },
+            ProtocolError::Io(e) => Error::Io(e),
+            ProtocolError::InvalidMessage { string, cause } => {
+                Error::InvalidMessage { string, cause }
+            }
         }
     }
 }
 
-impl From<IoError> for IrcError {
-    fn from(e: IoError) -> IrcError {
-        IrcError::Io(e)
+impl From<IoError> for Error {
+    fn from(e: IoError) -> Error {
+        Error::Io(e)
     }
 }
 
-impl From<TlsError> for IrcError {
-    fn from(e: TlsError) -> IrcError {
-        IrcError::Tls(e)
+impl From<TlsError> for Error {
+    fn from(e: TlsError) -> Error {
+        Error::Tls(e)
     }
 }
 
-impl From<SpawnError> for IrcError {
-    fn from(e: SpawnError) -> IrcError {
-        IrcError::Spawn(e)
+impl From<RecvError> for Error {
+    fn from(e: RecvError) -> Error {
+        Error::SyncChannelClosed(e)
     }
 }
 
-impl From<RecvError> for IrcError {
-    fn from(e: RecvError) -> IrcError {
-        IrcError::SyncChannelClosed(e)
+impl From<SendError> for Error {
+    fn from(e: SendError) -> Error {
+        Error::AsyncChannelClosed(e)
     }
 }
 
-impl From<SendError<Message>> for IrcError {
-    fn from(e: SendError<Message>) -> IrcError {
-        IrcError::AsyncChannelClosed(e)
+impl<T> From<TrySendError<T>> for Error {
+    fn from(e: TrySendError<T>) -> Error {
+        Error::AsyncChannelClosed(e.into_send_error())
     }
 }
 
-impl From<Canceled> for IrcError {
-    fn from(e: Canceled) -> IrcError {
-        IrcError::OneShotCanceled(e)
-    }
-}
-
-impl From<TimerError> for IrcError {
-    fn from(e: TimerError) -> IrcError {
-        IrcError::Timer(e)
+impl From<Canceled> for Error {
+    fn from(e: Canceled) -> Error {
+        Error::OneShotCanceled(e)
     }
 }

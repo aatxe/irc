@@ -3,9 +3,9 @@
 use std::io;
 
 use bytes::BytesMut;
-use encoding::{DecoderTrap, EncoderTrap, EncodingRef};
 use encoding::label::encoding_from_whatwg_label;
-use tokio_io::codec::{Decoder, Encoder};
+use encoding::{DecoderTrap, EncoderTrap, EncodingRef};
+use tokio_util::codec::{Decoder, Encoder};
 
 use error;
 
@@ -19,11 +19,17 @@ impl LineCodec {
     /// Creates a new instance of LineCodec from the specified encoding.
     pub fn new(label: &str) -> error::Result<LineCodec> {
         encoding_from_whatwg_label(label)
-            .map(|enc| LineCodec { encoding: enc, next_index: 0 })
-            .ok_or_else(|| io::Error::new(
-                io::ErrorKind::InvalidInput,
-                &format!("Attempted to use unknown codec {}.", label)[..],
-            ).into())
+            .map(|enc| LineCodec {
+                encoding: enc,
+                next_index: 0,
+            })
+            .ok_or_else(|| {
+                io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    &format!("Attempted to use unknown codec {}.", label)[..],
+                )
+                .into()
+            })
     }
 }
 
@@ -42,12 +48,11 @@ impl Decoder for LineCodec {
             // Decode the line using the codec's encoding.
             match self.encoding.decode(line.as_ref(), DecoderTrap::Replace) {
                 Ok(data) => Ok(Some(data)),
-                Err(data) => Err(
-                    io::Error::new(
-                        io::ErrorKind::InvalidInput,
-                        &format!("Failed to decode {} as {}.", data, self.encoding.name())[..],
-                    ).into(),
-                ),
+                Err(data) => Err(io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    &format!("Failed to decode {} as {}.", data, self.encoding.name())[..],
+                )
+                .into()),
             }
         } else {
             // Set the search start index to the current length since we know that none of the
@@ -64,13 +69,15 @@ impl Encoder for LineCodec {
 
     fn encode(&mut self, msg: String, dst: &mut BytesMut) -> error::Result<()> {
         // Encode the message using the codec's encoding.
-        let data: error::Result<Vec<u8>> = self.encoding
+        let data: error::Result<Vec<u8>> = self
+            .encoding
             .encode(&msg, EncoderTrap::Replace)
             .map_err(|data| {
                 io::Error::new(
                     io::ErrorKind::InvalidInput,
                     &format!("Failed to encode {} as {}.", data, self.encoding.name())[..],
-                ).into()
+                )
+                .into()
             });
 
         // Write the encoded message to the output buffer.

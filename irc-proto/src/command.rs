@@ -1,8 +1,8 @@
 //! Enumeration of all available client commands.
 use std::str::FromStr;
 
-use error::MessageParseError;
 use chan::ChannelExt;
+use error::MessageParseError;
 use mode::{ChannelMode, Mode, UserMode};
 use response::Response;
 
@@ -170,7 +170,12 @@ pub enum Command {
 
     // IRCv3 support
     /// CAP [*] COMMAND [*] :[param]
-    CAP(Option<String>, CapSubCommand, Option<String>, Option<String>),
+    CAP(
+        Option<String>,
+        CapSubCommand,
+        Option<String>,
+        Option<String>,
+    ),
 
     // IRCv3.1 extensions
     /// AUTHENTICATE data
@@ -184,7 +189,12 @@ pub enum Command {
 
     // IRCv3.2 extensions
     /// METADATA target COMMAND [params] :[param]
-    METADATA(String, Option<MetadataSubCommand>, Option<Vec<String>>, Option<String>),
+    METADATA(
+        String,
+        Option<MetadataSubCommand>,
+        Option<Vec<String>>,
+        Option<String>,
+    ),
     /// MONITOR command [nicklist]
     MONITOR(String, Option<String>),
     /// BATCH (+/-)reference-tag [type [params]]
@@ -206,7 +216,6 @@ fn stringify(cmd: &str, args: &[&str], suffix: Option<&str>) -> String {
         Some(suffix) => format!("{}{}{} :{}", cmd, sp, args, suffix),
         None => format!("{}{}{}", cmd, sp, args),
     }
-
 }
 
 impl<'a> From<&'a Command> for String {
@@ -216,13 +225,15 @@ impl<'a> From<&'a Command> for String {
             Command::NICK(ref n) => stringify("NICK", &[], Some(n)),
             Command::USER(ref u, ref m, ref r) => stringify("USER", &[u, m, "*"], Some(r)),
             Command::OPER(ref u, ref p) => stringify("OPER", &[u], Some(p)),
-            Command::UserMODE(ref u, ref m) => {
-                format!("MODE {}{}", u, m.iter().fold(String::new(), |mut acc, mode| {
+            Command::UserMODE(ref u, ref m) => format!(
+                "MODE {}{}",
+                u,
+                m.iter().fold(String::new(), |mut acc, mode| {
                     acc.push_str(" ");
                     acc.push_str(&mode.to_string());
                     acc
-                }))
-            }
+                })
+            ),
             Command::SERVICE(ref n, ref r, ref d, ref t, ref re, ref i) => {
                 stringify("SERVICE", &[n, r, d, t, re], Some(i))
             }
@@ -235,13 +246,15 @@ impl<'a> From<&'a Command> for String {
             Command::JOIN(ref c, None, None) => stringify("JOIN", &[c], None),
             Command::PART(ref c, Some(ref m)) => stringify("PART", &[c], Some(m)),
             Command::PART(ref c, None) => stringify("PART", &[c], None),
-            Command::ChannelMODE(ref u, ref m) => {
-                format!("MODE {}{}", u, m.iter().fold(String::new(), |mut acc, mode| {
+            Command::ChannelMODE(ref u, ref m) => format!(
+                "MODE {}{}",
+                u,
+                m.iter().fold(String::new(), |mut acc, mode| {
                     acc.push_str(" ");
                     acc.push_str(&mode.to_string());
                     acc
-                }))
-            }
+                })
+            ),
             Command::TOPIC(ref c, Some(ref t)) => stringify("TOPIC", &[c], Some(t)),
             Command::TOPIC(ref c, None) => stringify("TOPIC", &[c], None),
             Command::NAMES(Some(ref c), Some(ref t)) => stringify("NAMES", &[c], Some(t)),
@@ -311,13 +324,11 @@ impl<'a> From<&'a Command> for String {
             Command::USERS(Some(ref t)) => stringify("USERS", &[], Some(t)),
             Command::USERS(None) => stringify("USERS", &[], None),
             Command::WALLOPS(ref t) => stringify("WALLOPS", &[], Some(t)),
-            Command::USERHOST(ref u) => {
-                stringify(
-                    "USERHOST",
-                    &u.iter().map(|s| &s[..]).collect::<Vec<_>>(),
-                    None,
-                )
-            }
+            Command::USERHOST(ref u) => stringify(
+                "USERHOST",
+                &u.iter().map(|s| &s[..]).collect::<Vec<_>>(),
+                None,
+            ),
             Command::ISON(ref u) => {
                 stringify("ISON", &u.iter().map(|s| &s[..]).collect::<Vec<_>>(), None)
             }
@@ -369,92 +380,80 @@ impl<'a> From<&'a Command> for String {
                 stringify("METADATA", &[&t[..], c.to_str()], None)
             }
 
-            Command::METADATA(ref t, Some(ref c), Some(ref a), Some(ref p)) => {
-                stringify(
-                    "METADATA",
-                    &vec![t, &c.to_str().to_owned()]
-                        .iter()
-                        .map(|s| &s[..])
-                        .chain(a.iter().map(|s| &s[..]))
-                        .collect::<Vec<_>>(),
-                    Some(p),
-                )
-            }
-            Command::METADATA(ref t, Some(ref c), Some(ref a), None) => {
-                stringify(
-                    "METADATA",
-                    &vec![t, &c.to_str().to_owned()]
-                        .iter()
-                        .map(|s| &s[..])
-                        .chain(a.iter().map(|s| &s[..]))
-                        .collect::<Vec<_>>(),
-                    None,
-                )
-            }
+            Command::METADATA(ref t, Some(ref c), Some(ref a), Some(ref p)) => stringify(
+                "METADATA",
+                &vec![t, &c.to_str().to_owned()]
+                    .iter()
+                    .map(|s| &s[..])
+                    .chain(a.iter().map(|s| &s[..]))
+                    .collect::<Vec<_>>(),
+                Some(p),
+            ),
+            Command::METADATA(ref t, Some(ref c), Some(ref a), None) => stringify(
+                "METADATA",
+                &vec![t, &c.to_str().to_owned()]
+                    .iter()
+                    .map(|s| &s[..])
+                    .chain(a.iter().map(|s| &s[..]))
+                    .collect::<Vec<_>>(),
+                None,
+            ),
             Command::METADATA(ref t, None, None, Some(ref p)) => {
                 stringify("METADATA", &[t], Some(p))
             }
             Command::METADATA(ref t, None, None, None) => stringify("METADATA", &[t], None),
-            Command::METADATA(ref t, None, Some(ref a), Some(ref p)) => {
-                stringify(
-                    "METADATA",
-                    &vec![t]
-                        .iter()
-                        .map(|s| &s[..])
-                        .chain(a.iter().map(|s| &s[..]))
-                        .collect::<Vec<_>>(),
-                    Some(p),
-                )
-            }
-            Command::METADATA(ref t, None, Some(ref a), None) => {
-                stringify(
-                    "METADATA",
-                    &vec![t]
-                        .iter()
-                        .map(|s| &s[..])
-                        .chain(a.iter().map(|s| &s[..]))
-                        .collect::<Vec<_>>(),
-                    None,
-                )
-            }
+            Command::METADATA(ref t, None, Some(ref a), Some(ref p)) => stringify(
+                "METADATA",
+                &vec![t]
+                    .iter()
+                    .map(|s| &s[..])
+                    .chain(a.iter().map(|s| &s[..]))
+                    .collect::<Vec<_>>(),
+                Some(p),
+            ),
+            Command::METADATA(ref t, None, Some(ref a), None) => stringify(
+                "METADATA",
+                &vec![t]
+                    .iter()
+                    .map(|s| &s[..])
+                    .chain(a.iter().map(|s| &s[..]))
+                    .collect::<Vec<_>>(),
+                None,
+            ),
             Command::MONITOR(ref c, Some(ref t)) => stringify("MONITOR", &[c, t], None),
             Command::MONITOR(ref c, None) => stringify("MONITOR", &[c], None),
-            Command::BATCH(ref t, Some(ref c), Some(ref a)) => {
-                stringify(
-                    "BATCH",
-                    &vec![t, &c.to_str().to_owned()]
-                        .iter()
-                        .map(|s| &s[..])
-                        .chain(a.iter().map(|s| &s[..]))
-                        .collect::<Vec<_>>(),
-                    None,
-                )
-            }
+            Command::BATCH(ref t, Some(ref c), Some(ref a)) => stringify(
+                "BATCH",
+                &vec![t, &c.to_str().to_owned()]
+                    .iter()
+                    .map(|s| &s[..])
+                    .chain(a.iter().map(|s| &s[..]))
+                    .collect::<Vec<_>>(),
+                None,
+            ),
             Command::BATCH(ref t, Some(ref c), None) => stringify("BATCH", &[t, c.to_str()], None),
-            Command::BATCH(ref t, None, Some(ref a)) => {
-                stringify(
-                    "BATCH",
-                    &vec![t]
-                        .iter()
-                        .map(|s| &s[..])
-                        .chain(a.iter().map(|s| &s[..]))
-                        .collect::<Vec<_>>(),
-                    None,
-                )
-            }
+            Command::BATCH(ref t, None, Some(ref a)) => stringify(
+                "BATCH",
+                &vec![t]
+                    .iter()
+                    .map(|s| &s[..])
+                    .chain(a.iter().map(|s| &s[..]))
+                    .collect::<Vec<_>>(),
+                None,
+            ),
             Command::BATCH(ref t, None, None) => stringify("BATCH", &[t], None),
             Command::CHGHOST(ref u, ref h) => stringify("CHGHOST", &[u, h], None),
 
-            Command::Response(ref resp, ref a, Some(ref s)) => {
-                stringify(&format!("{:03}", *resp as u16),
-                          &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
-                          Some(s))
-            }
-            Command::Response(ref resp, ref a, None) => {
-                stringify(&format!("{:03}", *resp as u16),
-                          &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
-                          None)
-            }
+            Command::Response(ref resp, ref a, Some(ref s)) => stringify(
+                &format!("{:03}", *resp as u16),
+                &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
+                Some(s),
+            ),
+            Command::Response(ref resp, ref a, None) => stringify(
+                &format!("{:03}", *resp as u16),
+                &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
+                None,
+            ),
             Command::Raw(ref c, ref a, Some(ref s)) => {
                 stringify(c, &a.iter().map(|s| &s[..]).collect::<Vec<_>>(), Some(s))
             }
@@ -467,7 +466,11 @@ impl<'a> From<&'a Command> for String {
 
 impl Command {
     /// Constructs a new Command.
-    pub fn new(cmd: &str, args: Vec<&str>, suffix: Option<&str>) -> Result<Command, MessageParseError> {
+    pub fn new(
+        cmd: &str,
+        args: Vec<&str>,
+        suffix: Option<&str>,
+    ) -> Result<Command, MessageParseError> {
         Ok(if cmd.eq_ignore_ascii_case("PASS") {
             match suffix {
                 Some(suffix) => {
@@ -539,13 +542,15 @@ impl Command {
         } else if cmd.eq_ignore_ascii_case("MODE") {
             match suffix {
                 Some(suffix) => raw(cmd, args, Some(suffix)),
-                None => if args[0].is_channel_name() {
-                    let arg = args[1..].join(" ");
-                    Command::ChannelMODE(args[0].to_owned(), Mode::as_channel_modes(&arg)?)
-                } else {
-                    let arg = args[1..].join(" ");
-                    Command::UserMODE(args[0].to_owned(), Mode::as_user_modes(&arg)?)
-                },
+                None => {
+                    if args[0].is_channel_name() {
+                        let arg = args[1..].join(" ");
+                        Command::ChannelMODE(args[0].to_owned(), Mode::as_channel_modes(&arg)?)
+                    } else {
+                        let arg = args[1..].join(" ");
+                        Command::UserMODE(args[0].to_owned(), Mode::as_user_modes(&arg)?)
+                    }
+                }
             }
         } else if cmd.eq_ignore_ascii_case("SERVICE") {
             match suffix {
@@ -1432,26 +1437,22 @@ impl Command {
             } else if args.len() == 2 {
                 if let Ok(cmd) = args[0].parse() {
                     match suffix {
-                        Some(suffix) => {
-                            Command::CAP(
-                                None,
-                                cmd,
-                                Some(args[1].to_owned()),
-                                Some(suffix.to_owned()),
-                            )
-                        }
+                        Some(suffix) => Command::CAP(
+                            None,
+                            cmd,
+                            Some(args[1].to_owned()),
+                            Some(suffix.to_owned()),
+                        ),
                         None => Command::CAP(None, cmd, Some(args[1].to_owned()), None),
                     }
                 } else if let Ok(cmd) = args[1].parse() {
                     match suffix {
-                        Some(suffix) => {
-                            Command::CAP(
-                                Some(args[0].to_owned()),
-                                cmd,
-                                None,
-                                Some(suffix.to_owned()),
-                            )
-                        }
+                        Some(suffix) => Command::CAP(
+                            Some(args[0].to_owned()),
+                            cmd,
+                            None,
+                            Some(suffix.to_owned()),
+                        ),
                         None => Command::CAP(Some(args[0].to_owned()), cmd, None, None),
                     }
                 } else {
@@ -1460,22 +1461,18 @@ impl Command {
             } else if args.len() == 3 {
                 if let Ok(cmd) = args[1].parse() {
                     match suffix {
-                        Some(suffix) => {
-                            Command::CAP(
-                                Some(args[0].to_owned()),
-                                cmd,
-                                Some(args[2].to_owned()),
-                                Some(suffix.to_owned()),
-                            )
-                        }
-                        None => {
-                            Command::CAP(
-                                Some(args[0].to_owned()),
-                                cmd,
-                                Some(args[2].to_owned()),
-                                None,
-                            )
-                        }
+                        Some(suffix) => Command::CAP(
+                            Some(args[0].to_owned()),
+                            cmd,
+                            Some(args[2].to_owned()),
+                            Some(suffix.to_owned()),
+                        ),
+                        None => Command::CAP(
+                            Some(args[0].to_owned()),
+                            cmd,
+                            Some(args[2].to_owned()),
+                            None,
+                        ),
                     }
                 } else {
                     raw(cmd, args, suffix)
@@ -1521,23 +1518,19 @@ impl Command {
             if args.len() == 2 {
                 match suffix {
                     Some(_) => raw(cmd, args, suffix),
-                    None => {
-                        match args[1].parse() {
-                            Ok(c) => Command::METADATA(args[0].to_owned(), Some(c), None, None),
-                            Err(_) => raw(cmd, args, suffix),
-                        }
-                    }
+                    None => match args[1].parse() {
+                        Ok(c) => Command::METADATA(args[0].to_owned(), Some(c), None, None),
+                        Err(_) => raw(cmd, args, suffix),
+                    },
                 }
             } else if args.len() > 2 {
                 match args[1].parse() {
-                    Ok(c) => {
-                        Command::METADATA(
-                            args[0].to_owned(),
-                            Some(c),
-                            Some(args.into_iter().skip(1).map(|s| s.to_owned()).collect()),
-                            suffix.map(|s| s.to_owned()),
-                        )
-                    }
+                    Ok(c) => Command::METADATA(
+                        args[0].to_owned(),
+                        Some(c),
+                        Some(args.into_iter().skip(1).map(|s| s.to_owned()).collect()),
+                        suffix.map(|s| s.to_owned()),
+                    ),
                     Err(_) => {
                         if args.len() == 3 && suffix.is_some() {
                             Command::METADATA(
@@ -1787,15 +1780,19 @@ impl FromStr for BatchSubCommand {
 
 #[cfg(test)]
 mod test {
-    use crate::Message;
-    use super::Response;
     use super::Command;
+    use super::Response;
+    use crate::Message;
 
     #[test]
     fn format_response() {
-        assert!(String::from(&Command::Response(Response::RPL_WELCOME,
-                                                vec!["foo".into()],
-                                                None)) == "001 foo");
+        assert!(
+            String::from(&Command::Response(
+                Response::RPL_WELCOME,
+                vec!["foo".into()],
+                None
+            )) == "001 foo"
+        );
     }
 
     #[test]
@@ -1809,6 +1806,9 @@ mod test {
     #[test]
     fn parse_user_message() {
         let cmd = "USER a 0 * b".parse::<Message>().unwrap().command;
-        assert_eq!(Command::USER("a".to_string(), "0".to_string(), "b".to_string()), cmd);
+        assert_eq!(
+            Command::USER("a".to_string(), "0".to_string(), "b".to_string()),
+            cmd
+        );
     }
 }

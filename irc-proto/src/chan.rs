@@ -8,10 +8,10 @@ pub trait ChannelExt {
 
 impl<'a> ChannelExt for &'a str {
     fn is_channel_name(&self) -> bool {
-        self.starts_with('#') ||
-            self.starts_with('&') ||
-            self.starts_with('+') ||
-            self.starts_with('!')
+        self.starts_with('#')
+            || self.starts_with('&')
+            || self.starts_with('+')
+            || self.starts_with('!')
     }
 }
 
