@@ -488,6 +488,8 @@ struct ClientState {
     chanlists: RwLock<HashMap<String, Vec<User>>>,
     /// A thread-safe index to track the current alternative nickname being used.
     alt_nick_index: RwLock<usize>,
+    /// Default ghost sequence to send if one is required but none is configured.
+    default_ghost_sequence: Vec<String>,
 }
 
 impl ClientState {
@@ -497,6 +499,7 @@ impl ClientState {
             config: config,
             chanlists: RwLock::new(HashMap::new()),
             alt_nick_index: RwLock::new(0),
+            default_ghost_sequence: vec![String::from("GHOST")],
         }
     }
 
@@ -520,7 +523,7 @@ impl ClientState {
                 .config()
                 .nickname()
                 .expect("current_nickname should not be callable if nickname is not defined."),
-            i => alt_nicks[i - 1],
+            i => alt_nicks[i - 1].as_str(),
         }
     }
 
@@ -576,7 +579,7 @@ impl ClientState {
                 self.send_umodes()?;
 
                 let config_chans = self.config().channels();
-                for chan in &config_chans {
+                for chan in config_chans {
                     match self.config().channel_key(chan) {
                         Some(key) => self.send_join_with_keys::<&str, &str>(chan, key)?,
                         None => self.send_join(chan)?,
@@ -585,7 +588,7 @@ impl ClientState {
                 let joined_chans = self.chanlists.read();
                 for chan in joined_chans
                     .keys()
-                    .filter(|x| !config_chans.contains(&x.as_str()))
+                    .filter(|x| config_chans.iter().find(|c| c == x).is_none())
                 {
                     self.send_join(chan)?
                 }
@@ -614,10 +617,15 @@ impl ClientState {
             let mut index = self.alt_nick_index.write();
 
             if self.config().should_ghost() && *index != 0 {
-                for seq in &self.config().ghost_sequence() {
+                let seq = match self.config().ghost_sequence() {
+                    Some(seq) => seq,
+                    None => &*self.default_ghost_sequence,
+                };
+
+                for s in seq {
                     self.send(NICKSERV(format!(
                         "{} {} {}",
-                        seq,
+                        s,
                         self.config().nickname()?,
                         self.config().nick_password()
                     )))?;
@@ -1090,13 +1098,13 @@ mod test {
 
     pub fn test_config() -> Config {
         Config {
-            owners: Some(vec![format!("test")]),
+            owners: vec![format!("test")],
             nickname: Some(format!("test")),
-            alt_nicks: Some(vec![format!("test2")]),
+            alt_nicks: vec![format!("test2")],
             server: Some(format!("irc.test.net")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
+            channels: vec![format!("#test"), format!("#test2")],
             user_info: Some(format!("Testing.")),
-            use_mock_connection: Some(true),
+            use_mock_connection: true,
             ..Default::default()
         }
     }
@@ -1157,7 +1165,7 @@ mod test {
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             nick_password: Some(format!("password")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
+            channels: vec![format!("#test"), format!("#test2")],
             ..test_config()
         })
         .await?;
@@ -1176,11 +1184,11 @@ mod test {
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             nickname: Some(format!("test")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
+            channels: vec![format!("#test"), format!("#test2")],
             channel_keys: {
                 let mut map = HashMap::new();
                 map.insert(format!("#test2"), format!("password"));
-                Some(map)
+                map
             },
             ..test_config()
         })
@@ -1200,10 +1208,10 @@ mod test {
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             nickname: Some(format!("test")),
-            alt_nicks: Some(vec![format!("test2")]),
+            alt_nicks: vec![format!("test2")],
             nick_password: Some(format!("password")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
-            should_ghost: Some(true),
+            channels: vec![format!("#test"), format!("#test2")],
+            should_ghost: true,
             ..test_config()
         })
         .await?;
@@ -1223,10 +1231,10 @@ mod test {
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             nickname: Some(format!("test")),
-            alt_nicks: Some(vec![format!("test2")]),
+            alt_nicks: vec![format!("test2")],
             nick_password: Some(format!("password")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
-            should_ghost: Some(true),
+            channels: vec![format!("#test"), format!("#test2")],
+            should_ghost: true,
             ghost_sequence: Some(vec![format!("RECOVER"), format!("RELEASE")]),
             ..test_config()
         })
@@ -1248,7 +1256,7 @@ mod test {
             mock_initial_value: Some(value.to_owned()),
             nickname: Some(format!("test")),
             umodes: Some(format!("+B")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
+            channels: vec![format!("#test"), format!("#test2")],
             ..test_config()
         })
         .await?;
@@ -1496,7 +1504,7 @@ mod test {
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             nickname: Some(format!("test")),
-            channels: Some(vec![format!("#test"), format!("#test2")]),
+            channels: vec![format!("#test"), format!("#test2")],
             ..test_config()
         })
         .await?;

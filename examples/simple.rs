@@ -5,9 +5,9 @@ use irc::client::prelude::*;
 async fn main() -> irc::error::Result<()> {
     let config = Config {
         nickname: Some("pickles".to_owned()),
-        alt_nicks: Some(vec!["bananas".to_owned(), "apples".to_owned()]),
+        alt_nicks: vec!["bananas".to_owned(), "apples".to_owned()],
         server: Some("irc.mozilla.org".to_owned()),
-        channels: Some(vec!["#rust-spam".to_owned()]),
+        channels: vec!["#rust-spam".to_owned()],
         ..Default::default()
     };
 
