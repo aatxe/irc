@@ -1,10 +1,10 @@
 //! Enumeration of all available client commands.
 use std::str::FromStr;
 
-use chan::ChannelExt;
-use error::MessageParseError;
-use mode::{ChannelMode, Mode, UserMode};
-use response::Response;
+use crate::chan::ChannelExt;
+use crate::error::MessageParseError;
+use crate::mode::{ChannelMode, Mode, UserMode};
+use crate::response::Response;
 
 /// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This
 /// also includes commands from the

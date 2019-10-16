@@ -3,11 +3,11 @@ use std::borrow::ToOwned;
 use std::fmt::{Display, Formatter, Result as FmtResult, Write};
 use std::str::FromStr;
 
-use chan::ChannelExt;
-use command::Command;
-use error;
-use error::{MessageParseError, ProtocolError};
-use prefix::Prefix;
+use crate::chan::ChannelExt;
+use crate::command::Command;
+use crate::error;
+use crate::error::{MessageParseError, ProtocolError};
+use crate::prefix::Prefix;
 
 /// A data structure representing an IRC message according to the protocol specification. It
 /// consists of a collection of IRCv3 tags, a prefix (describing the source of the message), and
@@ -276,7 +276,7 @@ pub struct Tag(pub String, pub Option<String>);
 #[cfg(test)]
 mod test {
     use super::{Message, Tag};
-    use command::Command::{Raw, PRIVMSG, QUIT};
+    use crate::command::Command::{Raw, PRIVMSG, QUIT};
 
     #[test]
     fn new() {

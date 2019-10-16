@@ -7,7 +7,7 @@ use encoding::label::encoding_from_whatwg_label;
 use encoding::{DecoderTrap, EncoderTrap, EncodingRef};
 use tokio_util::codec::{Decoder, Encoder};
 
-use error;
+use crate::error;
 
 /// A line-based codec parameterized by an encoding.
 pub struct LineCodec {

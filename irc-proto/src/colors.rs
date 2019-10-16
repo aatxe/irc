@@ -118,7 +118,7 @@ impl FormattedStringExt<'static> for String {
 
 #[cfg(test)]
 mod test {
-    use colors::FormattedStringExt;
+    use crate::colors::FormattedStringExt;
     use std::borrow::Cow;
 
     macro_rules! test_formatted_string_ext {

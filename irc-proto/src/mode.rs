@@ -1,10 +1,10 @@
 //! A module defining an API for IRC user and channel modes.
 use std::fmt;
 
-use command::Command;
-use error::MessageParseError;
-use error::MessageParseError::InvalidModeString;
-use error::ModeParseError::*;
+use crate::command::Command;
+use crate::error::MessageParseError;
+use crate::error::MessageParseError::InvalidModeString;
+use crate::error::ModeParseError::*;
 
 /// A marker trait for different kinds of Modes.
 pub trait ModeType: fmt::Display + fmt::Debug + Clone + PartialEq {
