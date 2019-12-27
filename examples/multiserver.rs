@@ -10,14 +10,14 @@ async fn main() -> irc::error::Result<()> {
     let cfg1 = Config {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.mozilla.org".to_owned()),
-        channels: Some(vec!["#rust-spam".to_owned()]),
+        channels: vec!["#rust-spam".to_owned()],
         ..Default::default()
     };
 
     let cfg2 = Config {
         nickname: Some("bananas".to_owned()),
         server: Some("irc.mozilla.org".to_owned()),
-        channels: Some(vec!["#rust-spam".to_owned()]),
+        channels: vec!["#rust-spam".to_owned()],
         ..Default::default()
     };
 

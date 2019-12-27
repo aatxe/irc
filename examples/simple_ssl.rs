@@ -6,8 +6,8 @@ async fn main() -> irc::error::Result<()> {
     let config = Config {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.mozilla.org".to_owned()),
-        channels: Some(vec!["#rust-spam".to_owned()]),
-        use_ssl: Some(true),
+        channels: vec!["#rust-spam".to_owned()],
+        use_ssl: true,
         ..Default::default()
     };
 
