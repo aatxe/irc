@@ -535,6 +535,7 @@ impl Config {
 #[cfg(test)]
 mod test {
     use super::Config;
+    use anyhow::Result;
     use std::collections::HashMap;
 
     #[allow(unused)]
@@ -601,7 +602,7 @@ mod test {
 
     #[test]
     #[cfg(feature = "json")]
-    fn load_from_json() -> Result<(), failure::Error> {
+    fn load_from_json() -> Result<()> {
         const DATA: &str = include_str!("client_config.json");
         assert_eq!(
             Config::load_json("client_config.json", DATA)?.with_path("client_config.json"),
@@ -612,7 +613,7 @@ mod test {
 
     #[test]
     #[cfg(feature = "toml")]
-    fn load_from_toml() -> Result<(), failure::Error> {
+    fn load_from_toml() -> Result<()> {
         const DATA: &str = include_str!("client_config.toml");
         assert_eq!(
             Config::load_toml("client_config.toml", DATA)?.with_path("client_config.toml"),
@@ -623,7 +624,7 @@ mod test {
 
     #[test]
     #[cfg(feature = "yaml")]
-    fn load_from_yaml() -> Result<(), failure::Error> {
+    fn load_from_yaml() -> Result<()> {
         const DATA: &str = include_str!("client_config.yaml");
         assert_eq!(
             Config::load_yaml("client_config.yaml", DATA)?.with_path("client_config.yaml"),

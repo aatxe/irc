@@ -1,57 +1,57 @@
 //! IRC protocol errors using `failure`.
 
-use std::io::Error as IoError;
+use thiserror::Error;
 
 /// A `Result` type for IRC `ProtocolErrors`.
-pub type Result<T> = ::std::result::Result<T, ProtocolError>;
+pub type Result<T, E = ProtocolError> = ::std::result::Result<T, E>;
 
 /// An IRC protocol error.
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum ProtocolError {
     /// An internal I/O error.
-    #[fail(display = "an io error occurred")]
-    Io(#[cause] IoError),
+    #[error("an io error occurred")]
+    Io(#[source] std::io::Error),
 
     /// Error for invalid messages.
-    #[fail(display = "invalid message: {}", string)]
+    #[error("invalid message: {}", string)]
     InvalidMessage {
         /// The string that failed to parse.
         string: String,
         /// The detailed message parsing error.
-        #[cause]
+        #[source]
         cause: MessageParseError,
     },
 }
 
-impl From<IoError> for ProtocolError {
-    fn from(e: IoError) -> ProtocolError {
+impl From<std::io::Error> for ProtocolError {
+    fn from(e: std::io::Error) -> ProtocolError {
         ProtocolError::Io(e)
     }
 }
 
 /// Errors that occur when parsing messages.
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum MessageParseError {
     /// The message was empty.
-    #[fail(display = "empty message")]
+    #[error("empty message")]
     EmptyMessage,
 
     /// The command was invalid (i.e. missing).
-    #[fail(display = "invalid command")]
+    #[error("invalid command")]
     InvalidCommand,
 
     /// The mode string was malformed.
-    #[fail(display = "invalid mode string: {}", string)]
+    #[error("invalid mode string: {}", string)]
     InvalidModeString {
         /// The invalid mode string.
         string: String,
         /// The detailed mode parsing error.
-        #[cause]
+        #[source]
         cause: ModeParseError,
     },
 
     /// The subcommand used was invalid.
-    #[fail(display = "invalid {} subcommand: {}", cmd, sub)]
+    #[error("invalid {} subcommand: {}", cmd, sub)]
     InvalidSubcommand {
         /// The command whose invalid subcommand was referenced.
         cmd: &'static str,
@@ -61,16 +61,16 @@ pub enum MessageParseError {
 }
 
 /// Errors that occur while parsing mode strings.
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum ModeParseError {
     /// Invalid modifier used in a mode string (only + and - are valid).
-    #[fail(display = "invalid mode modifier: {}", modifier)]
+    #[error("invalid mode modifier: {}", modifier)]
     InvalidModeModifier {
         /// The invalid mode modifier.
         modifier: char,
     },
 
     /// Missing modifier used in a mode string.
-    #[fail(display = "missing mode modifier")]
+    #[error("missing mode modifier")]
     MissingModeModifier,
 }

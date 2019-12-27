@@ -2,16 +2,6 @@
 
 #![warn(missing_docs)]
 
-#[cfg(feature = "tokio")]
-extern crate bytes;
-extern crate encoding;
-#[macro_use]
-extern crate failure;
-#[cfg(feature = "tokio")]
-extern crate tokio;
-#[cfg(feature = "tokio-util")]
-extern crate tokio_util;
-
 pub mod caps;
 pub mod chan;
 pub mod colors;

@@ -27,11 +27,11 @@ json = ["serde_json"]
 yaml = ["serde_yaml"]
 
 [dependencies]
+thiserror = "1.0.2"
 bufstream = "0.1"
 bytes = "0.4"
 chrono = "0.4"
 encoding = "0.2"
-failure = "0.1"
 irc-proto = { version = "*", path = "irc-proto" }
 log = "0.4"
 native-tls = "0.2"
@@ -46,7 +46,7 @@ toml = { version = "0.4", optional = true }
 pin-utils = "0.1.0-alpha.4"
 parking_lot = "0.9.0"
 futures-channel = "0.3.1"
-futures-util = "0.3.1"
+futures-util = { version = "0.3.1", features = ["sink"] }
 
 [dev-dependencies]
 futures = "0.3.1"

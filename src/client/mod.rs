@@ -1086,6 +1086,7 @@ mod test {
             ChannelMode, IrcCodec, Mode,
         },
     };
+    use anyhow::Result;
     use futures::prelude::*;
 
     pub fn test_config() -> Config {
@@ -1120,7 +1121,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn stream() -> Result<(), failure::Error> {
+    async fn stream() -> Result<()> {
         let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n\
                    :test!test@test JOIN #test\r\n";
 
@@ -1136,7 +1137,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn handle_message() -> Result<(), failure::Error> {
+    async fn handle_message() -> Result<()> {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1152,7 +1153,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn handle_end_motd_with_nick_password() -> Result<(), failure::Error> {
+    async fn handle_end_motd_with_nick_password() -> Result<()> {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1171,7 +1172,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn handle_end_motd_with_chan_keys() -> Result<(), failure::Error> {
+    async fn handle_end_motd_with_chan_keys() -> Result<()> {
         let value = ":irc.test.net 376 test :End of /MOTD command\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1194,7 +1195,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn handle_end_motd_with_ghost() -> Result<(), failure::Error> {
+    async fn handle_end_motd_with_ghost() -> Result<()> {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
@@ -1217,7 +1218,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn handle_end_motd_with_ghost_seq() -> Result<(), failure::Error> {
+    async fn handle_end_motd_with_ghost_seq() -> Result<()> {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
@@ -1242,7 +1243,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn handle_end_motd_with_umodes() -> Result<(), failure::Error> {
+    async fn handle_end_motd_with_umodes() -> Result<()> {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1261,7 +1262,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn nickname_in_use() -> Result<(), failure::Error> {
+    async fn nickname_in_use() -> Result<()> {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1274,7 +1275,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn ran_out_of_nicknames() -> Result<(), failure::Error> {
+    async fn ran_out_of_nicknames() -> Result<()> {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
         let mut client = Client::from_config(Config {
@@ -1292,7 +1293,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send() -> Result<(), failure::Error> {
+    async fn send() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
             .send(PRIVMSG(format!("#test"), format!("Hi there!")))
@@ -1306,7 +1307,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_no_newline_injection() -> Result<(), failure::Error> {
+    async fn send_no_newline_injection() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
             .send(PRIVMSG(format!("#test"), format!("Hi there!\r\nJOIN #bad")))
@@ -1320,7 +1321,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_raw_is_really_raw() -> Result<(), failure::Error> {
+    async fn send_raw_is_really_raw() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
             .send(Raw("PASS".to_owned(), vec!["password".to_owned()], None))
@@ -1338,7 +1339,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    async fn channel_tracking_names() -> Result<(), failure::Error> {
+    async fn channel_tracking_names() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1355,7 +1356,7 @@ mod test {
     /*
     #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    async fn channel_tracking_names_part() -> Result<(), failure::Error> {
+    async fn channel_tracking_names_part() -> Result<()> {
         use crate::proto::command::Command::PART;
 
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
@@ -1373,7 +1374,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    async fn user_tracking_names() -> Result<(), failure::Error> {
+    async fn user_tracking_names() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1390,7 +1391,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    async fn user_tracking_names_join() -> Result<(), failure::Error> {
+    async fn user_tracking_names_join() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :test2!test@test JOIN #test\r\n";
         let mut client = Client::from_config(Config {
@@ -1413,7 +1414,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    async fn user_tracking_names_kick() -> Result<(), failure::Error> {
+    async fn user_tracking_names_kick() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test KICK #test test\r\n";
         let mut client = Client::from_config(Config {
@@ -1431,7 +1432,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    async fn user_tracking_names_part() -> Result<(), failure::Error> {
+    async fn user_tracking_names_part() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test PART #test\r\n";
         let mut client = Client::from_config(Config {
@@ -1449,7 +1450,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    async fn user_tracking_names_mode() -> Result<(), failure::Error> {
+    async fn user_tracking_names_mode() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :+test ~owner &admin\r\n\
                      :test!test@test MODE #test +o test\r\n";
         let mut client = Client::from_config(Config {
@@ -1478,7 +1479,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "nochanlists")]
-    async fn no_user_tracking() -> Result<(), failure::Error> {
+    async fn no_user_tracking() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1491,7 +1492,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn handle_single_soh() -> Result<(), failure::Error> {
+    async fn handle_single_soh() -> Result<()> {
         let value = ":test!test@test PRIVMSG #test :\u{001}\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1506,7 +1507,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn finger_response() -> Result<(), failure::Error> {
+    async fn finger_response() -> Result<()> {
         let value = ":test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1523,7 +1524,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn version_response() -> Result<(), failure::Error> {
+    async fn version_response() -> Result<()> {
         let value = ":test!test@test PRIVMSG test :\u{001}VERSION\u{001}\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1543,7 +1544,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn source_response() -> Result<(), failure::Error> {
+    async fn source_response() -> Result<()> {
         let value = ":test!test@test PRIVMSG test :\u{001}SOURCE\u{001}\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1560,7 +1561,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn ctcp_ping_response() -> Result<(), failure::Error> {
+    async fn ctcp_ping_response() -> Result<()> {
         let value = ":test!test@test PRIVMSG test :\u{001}PING test\u{001}\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1577,7 +1578,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn time_response() -> Result<(), failure::Error> {
+    async fn time_response() -> Result<()> {
         let value = ":test!test@test PRIVMSG test :\u{001}TIME\u{001}\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1593,7 +1594,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn user_info_response() -> Result<(), failure::Error> {
+    async fn user_info_response() -> Result<()> {
         let value = ":test!test@test PRIVMSG test :\u{001}USERINFO\u{001}\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1611,7 +1612,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn ctcp_ping_no_timestamp() -> Result<(), failure::Error> {
+    async fn ctcp_ping_no_timestamp() -> Result<()> {
         let value = ":test!test@test PRIVMSG test :\u{001}PING\u{001}\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1624,7 +1625,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn identify() -> Result<(), failure::Error> {
+    async fn identify() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.identify()?;
         client.stream()?.collect().await?;
@@ -1637,7 +1638,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn identify_with_password() -> Result<(), failure::Error> {
+    async fn identify_with_password() -> Result<()> {
         let mut client = Client::from_config(Config {
             nickname: Some(format!("test")),
             password: Some(format!("password")),
@@ -1655,7 +1656,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_pong() -> Result<(), failure::Error> {
+    async fn send_pong() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_pong("irc.test.net")?;
         client.stream()?.collect().await?;
@@ -1664,7 +1665,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_join() -> Result<(), failure::Error> {
+    async fn send_join() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_join("#test,#test2,#test3")?;
         client.stream()?.collect().await?;
@@ -1676,7 +1677,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_part() -> Result<(), failure::Error> {
+    async fn send_part() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_part("#test")?;
         client.stream()?.collect().await?;
@@ -1685,7 +1686,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_oper() -> Result<(), failure::Error> {
+    async fn send_oper() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_oper("test", "test")?;
         client.stream()?.collect().await?;
@@ -1694,7 +1695,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_privmsg() -> Result<(), failure::Error> {
+    async fn send_privmsg() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_privmsg("#test", "Hi, everybody!")?;
         client.stream()?.collect().await?;
@@ -1706,7 +1707,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_notice() -> Result<(), failure::Error> {
+    async fn send_notice() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_notice("#test", "Hi, everybody!")?;
         client.stream()?.collect().await?;
@@ -1718,7 +1719,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_topic_no_topic() -> Result<(), failure::Error> {
+    async fn send_topic_no_topic() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_topic("#test", "")?;
         client.stream()?.collect().await?;
@@ -1727,7 +1728,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_topic() -> Result<(), failure::Error> {
+    async fn send_topic() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_topic("#test", "Testing stuff.")?;
         client.stream()?.collect().await?;
@@ -1739,7 +1740,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_kill() -> Result<(), failure::Error> {
+    async fn send_kill() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_kill("test", "Testing kills.")?;
         client.stream()?.collect().await?;
@@ -1751,7 +1752,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_kick_no_message() -> Result<(), failure::Error> {
+    async fn send_kick_no_message() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_kick("#test", "test", "")?;
         client.stream()?.collect().await?;
@@ -1760,7 +1761,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_kick() -> Result<(), failure::Error> {
+    async fn send_kick() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_kick("#test", "test", "Testing kicks.")?;
         client.stream()?.collect().await?;
@@ -1772,7 +1773,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_mode_no_modeparams() -> Result<(), failure::Error> {
+    async fn send_mode_no_modeparams() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_mode("#test", &[Mode::Plus(ChannelMode::InviteOnly, None)])?;
         client.stream()?.collect().await?;
@@ -1781,7 +1782,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_mode() -> Result<(), failure::Error> {
+    async fn send_mode() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_mode(
             "#test",
@@ -1793,7 +1794,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_samode_no_modeparams() -> Result<(), failure::Error> {
+    async fn send_samode_no_modeparams() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_samode("#test", "+i", "")?;
         client.stream()?.collect().await?;
@@ -1802,7 +1803,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_samode() -> Result<(), failure::Error> {
+    async fn send_samode() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_samode("#test", "+o", "test")?;
         client.stream()?.collect().await?;
@@ -1811,7 +1812,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_sanick() -> Result<(), failure::Error> {
+    async fn send_sanick() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_sanick("test", "test2")?;
         client.stream()?.collect().await?;
@@ -1820,7 +1821,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn send_invite() -> Result<(), failure::Error> {
+    async fn send_invite() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_invite("test", "#test")?;
         client.stream()?.collect().await?;
@@ -1830,7 +1831,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn send_ctcp() -> Result<(), failure::Error> {
+    async fn send_ctcp() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_ctcp("test", "MESSAGE")?;
         client.stream()?.collect().await?;
@@ -1843,7 +1844,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn send_action() -> Result<(), failure::Error> {
+    async fn send_action() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_action("test", "tests.")?;
         client.stream()?.collect().await?;
@@ -1856,7 +1857,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn send_finger() -> Result<(), failure::Error> {
+    async fn send_finger() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_finger("test")?;
         client.stream()?.collect().await?;
@@ -1869,7 +1870,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn send_version() -> Result<(), failure::Error> {
+    async fn send_version() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_version("test")?;
         client.stream()?.collect().await?;
@@ -1882,7 +1883,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn send_source() -> Result<(), failure::Error> {
+    async fn send_source() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_source("test")?;
         client.stream()?.collect().await?;
@@ -1895,7 +1896,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn send_user_info() -> Result<(), failure::Error> {
+    async fn send_user_info() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_user_info("test")?;
         client.stream()?.collect().await?;
@@ -1908,7 +1909,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn send_ctcp_ping() -> Result<(), failure::Error> {
+    async fn send_ctcp_ping() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_ctcp_ping("test")?;
         client.stream()?.collect().await?;
@@ -1921,7 +1922,7 @@ mod test {
 
     #[tokio::test]
     #[cfg(feature = "ctcp")]
-    async fn send_time() -> Result<(), failure::Error> {
+    async fn send_time() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_time("test")?;
         client.stream()?.collect().await?;

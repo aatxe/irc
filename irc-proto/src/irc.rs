@@ -2,9 +2,9 @@
 use bytes::BytesMut;
 use tokio_util::codec::{Decoder, Encoder};
 
-use error;
-use line::LineCodec;
-use message::Message;
+use crate::error;
+use crate::line::LineCodec;
+use crate::message::Message;
 
 /// An IRC codec built around an inner codec.
 pub struct IrcCodec {

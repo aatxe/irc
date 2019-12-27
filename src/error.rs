@@ -3,86 +3,77 @@
 use std::io::Error as IoError;
 use std::sync::mpsc::RecvError;
 
-use failure;
 use futures_channel::{
     mpsc::{SendError, TrySendError},
     oneshot::Canceled,
 };
-use native_tls::Error as TlsError;
-#[cfg(feature = "json")]
-use serde_json::Error as JsonError;
-#[cfg(feature = "yaml")]
-use serde_yaml::Error as YamlError;
-#[cfg(feature = "toml")]
-use toml::de::Error as TomlReadError;
-#[cfg(feature = "toml")]
-use toml::ser::Error as TomlWriteError;
+use thiserror::Error;
 
 use crate::proto::error::{MessageParseError, ProtocolError};
 
 /// A specialized `Result` type for the `irc` crate.
-pub type Result<T> = ::std::result::Result<T, Error>;
+pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 /// The main crate-wide error type.
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum Error {
     /// An internal I/O error.
-    #[fail(display = "an io error occurred")]
-    Io(#[cause] IoError),
+    #[error("an io error occurred")]
+    Io(#[source] IoError),
 
     /// An internal TLS error.
-    #[fail(display = "a TLS error occurred")]
-    Tls(#[cause] TlsError),
+    #[error("a TLS error occurred")]
+    Tls(#[source] native_tls::Error),
 
     /// An internal synchronous channel closed.
-    #[fail(display = "a sync channel closed")]
-    SyncChannelClosed(#[cause] RecvError),
+    #[error("a sync channel closed")]
+    SyncChannelClosed(#[source] RecvError),
 
     /// An internal asynchronous channel closed.
-    #[fail(display = "an async channel closed")]
-    AsyncChannelClosed(#[cause] SendError),
+    #[error("an async channel closed")]
+    AsyncChannelClosed(#[source] SendError),
 
     /// An internal oneshot channel closed.
-    #[fail(display = "a oneshot channel closed")]
-    OneShotCanceled(#[cause] Canceled),
+    #[error("a oneshot channel closed")]
+    OneShotCanceled(#[source] Canceled),
 
     /// Error for invalid configurations.
-    #[fail(display = "invalid config: {}", path)]
+    #[error("invalid config: {}", path)]
     InvalidConfig {
         /// The path to the configuration, or "<none>" if none specified.
         path: String,
         /// The detailed configuration error.
-        #[cause]
+        #[source]
         cause: ConfigError,
     },
 
     /// Error for invalid messages.
-    #[fail(display = "invalid message: {}", string)]
+    #[error("invalid message: {}", string)]
     InvalidMessage {
         /// The string that failed to parse.
         string: String,
         /// The detailed message parsing error.
-        #[cause]
+        #[source]
         cause: MessageParseError,
     },
 
     /// Mutex for a logged transport was poisoned making the log inaccessible.
-    #[fail(display = "mutex for a logged transport was poisoned")]
+    #[error("mutex for a logged transport was poisoned")]
     PoisonedLog,
 
     /// Ping timed out due to no response.
-    #[fail(display = "connection reset: no ping response")]
+    #[error("connection reset: no ping response")]
     PingTimeout,
 
     /// Failed to lookup an unknown codec.
-    #[fail(display = "unknown codec: {}", codec)]
+    #[error("unknown codec: {}", codec)]
     UnknownCodec {
         /// The attempted codec.
         codec: String,
     },
 
     /// Failed to encode or decode something with the given codec.
-    #[fail(display = "codec {} failed: {}", codec, data)]
+    #[error("codec {} failed: {}", codec, data)]
     CodecFailed {
         /// The canonical codec name.
         codec: &'static str,
@@ -91,78 +82,69 @@ pub enum Error {
     },
 
     /// All specified nicknames were in use or unusable.
-    #[fail(display = "none of the specified nicknames were usable")]
+    #[error("none of the specified nicknames were usable")]
     NoUsableNick,
 
     /// Stream has already been configured.
-    #[fail(display = "stream has already been configured")]
+    #[error("stream has already been configured")]
     StreamAlreadyConfigured,
-
-    /// This allows you to produce any `failure::Error` within closures used by
-    /// the irc crate. No errors of this kind will ever be produced by the crate
-    /// itself.
-    #[fail(display = "{}", inner)]
-    Custom {
-        /// The actual error that occurred.
-        inner: failure::Error,
-    },
 }
 
 /// Errors that occur with configurations.
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum ConfigError {
     /// Failed to parse as TOML.
     #[cfg(feature = "toml")]
-    #[fail(display = "invalid toml")]
-    InvalidToml(#[cause] TomlError),
+    #[error("invalid toml")]
+    InvalidToml(#[source] TomlError),
 
     /// Failed to parse as JSON.
     #[cfg(feature = "json")]
-    #[fail(display = "invalid json")]
-    InvalidJson(#[cause] JsonError),
+    #[error("invalid json")]
+    InvalidJson(#[source] serde_json::Error),
 
     /// Failed to parse as YAML.
     #[cfg(feature = "yaml")]
-    #[fail(display = "invalid yaml")]
-    InvalidYaml(#[cause] YamlError),
+    #[error("invalid yaml")]
+    InvalidYaml(#[source] serde_yaml::Error),
 
     /// Failed to parse the given format because it was disabled at compile-time.
-    #[fail(display = "config format disabled: {}", format)]
+    #[error("config format disabled: {}", format)]
     ConfigFormatDisabled {
         /// The disabled file format.
         format: &'static str,
     },
 
     /// Could not identify the given file format.
-    #[fail(display = "config format unknown: {}", format)]
+    #[error("config format unknown: {}", format)]
     UnknownConfigFormat {
         /// The unknown file extension.
         format: String,
     },
 
     /// File was missing an extension to identify file format.
-    #[fail(display = "missing format extension")]
+    #[error("missing format extension")]
     MissingExtension,
 
     /// Configuration does not specify a nickname.
-    #[fail(display = "nickname not specified")]
+    #[error("nickname not specified")]
     NicknameNotSpecified,
 
     /// Configuration does not specify a server.
-    #[fail(display = "server not specified")]
+    #[error("server not specified")]
     ServerNotSpecified,
 }
 
 /// A wrapper that combines toml's serialization and deserialization errors.
 #[cfg(feature = "toml")]
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum TomlError {
     /// A TOML deserialization error.
-    #[fail(display = "deserialization failed")]
-    Read(#[cause] TomlReadError),
+    #[error("deserialization failed")]
+    Read(#[source] toml::de::Error),
     /// A TOML serialization error.
-    #[fail(display = "serialization failed")]
-    Write(#[cause] TomlWriteError),
+    #[error("serialization failed")]
+    Write(#[source] toml::ser::Error),
 }
 
 impl From<ProtocolError> for Error {
@@ -182,8 +164,8 @@ impl From<IoError> for Error {
     }
 }
 
-impl From<TlsError> for Error {
-    fn from(e: TlsError) -> Error {
+impl From<native_tls::Error> for Error {
+    fn from(e: native_tls::Error) -> Error {
         Error::Tls(e)
     }
 }

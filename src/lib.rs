@@ -43,9 +43,6 @@
 
 #![warn(missing_docs)]
 
-#[macro_use]
-extern crate failure;
-
 pub extern crate irc_proto as proto;
 
 pub mod client;
