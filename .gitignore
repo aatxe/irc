@@ -2,7 +2,4 @@
 /irc-proto/target
 /Cargo.lock
 /irc-proto/Cargo.lock
-*.json
-*.toml
-*.yaml
 !Cargo.toml

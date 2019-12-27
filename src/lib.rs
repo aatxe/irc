@@ -17,56 +17,36 @@
 //! # Example
 //!
 //! ```no_run
-//! # extern crate irc;
 //! use irc::client::prelude::*;
+//! use futures::prelude::*;
 //!
-//! # fn main() {
+//! # #[tokio::main]
+//! # async fn main() -> irc::error::Result<()> {
 //! // configuration is loaded from config.toml into a Config
-//! let client = IrcClient::new("config.toml").unwrap();
+//! let mut client = Client::new("config.toml").await?;
 //! // identify comes from ClientExt
-//! client.identify().unwrap();
-//! // for_each_incoming comes from Client
-//! client.for_each_incoming(|irc_msg| {
-//!     // irc_msg is a Message
-//!     if let Command::PRIVMSG(channel, message) = irc_msg.command {
+//! client.identify()?;
+//!
+//! let mut stream = client.stream()?;
+//!
+//! while let Some(message) = stream.next().await.transpose()? {
+//!     if let Command::PRIVMSG(channel, message) = message.command {
 //!         if message.contains(&*client.current_nickname()) {
 //!             // send_privmsg comes from ClientExt
 //!             client.send_privmsg(&channel, "beep boop").unwrap();
 //!         }
 //!     }
-//! }).unwrap();
+//! }
+//! # Ok(())
 //! # }
 //! ```
 
 #![warn(missing_docs)]
 
-extern crate bufstream;
-extern crate bytes;
-extern crate chrono;
 #[macro_use]
 extern crate failure;
-extern crate encoding;
-#[macro_use]
-extern crate futures;
+
 pub extern crate irc_proto as proto;
-#[macro_use]
-extern crate log;
-extern crate native_tls;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-#[cfg(feature = "json")]
-extern crate serde_json;
-#[cfg(feature = "yaml")]
-extern crate serde_yaml;
-extern crate tokio;
-extern crate tokio_codec;
-extern crate tokio_io;
-extern crate tokio_mockstream;
-extern crate tokio_timer;
-extern crate tokio_tls;
-#[cfg(feature = "toml")]
-extern crate toml;
 
 pub mod client;
 pub mod error;

@@ -1,10 +1,12 @@
 extern crate irc;
 
+use futures::prelude::*;
 use irc::client::prelude::*;
 use std::default::Default;
 use std::env;
 
-fn main() {
+#[tokio::main]
+async fn main() -> irc::error::Result<()> {
     let repository_slug = env::var("TRAVIS_REPO_SLUG").unwrap();
     let branch = env::var("TRAVIS_BRANCH").unwrap();
     let commit = env::var("TRAVIS_COMMIT").unwrap();
@@ -17,11 +19,13 @@ fn main() {
         ..Default::default()
     };
 
-    let mut reactor = IrcReactor::new().unwrap();
-    let client = reactor.prepare_client_and_connect(config).unwrap();
-    client.identify().unwrap();
+    let mut client = Client::from_config(config).await?;
 
-    reactor.register_client_with_handler(client, move |client, message| {
+    client.identify()?;
+
+    let mut stream = client.stream()?;
+
+    while let Some(message) = stream.next().await.transpose()? {
         match message.command {
             Command::Response(Response::RPL_ISUPPORT, _, _) => {
                 client.send_privmsg(
@@ -34,13 +38,12 @@ fn main() {
                         commit_message
                     ),
                 )?;
+
                 client.send_quit("QUIT")?;
             }
             _ => (),
-        };
+        }
+    }
 
-        Ok(())
-    });
-
-    reactor.run().unwrap();
+    Ok(())
 }

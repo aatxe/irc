@@ -9,6 +9,7 @@ categories = ["asynchronous", "network-programming"]
 documentation = "https://docs.rs/irc/"
 repository = "https://github.com/aatxe/irc"
 readme = "README.md"
+edition = "2018"
 
 [badges]
 travis-ci = { repository = "aatxe/irc" }
@@ -31,22 +32,25 @@ bytes = "0.4"
 chrono = "0.4"
 encoding = "0.2"
 failure = "0.1"
-futures = "0.1"
 irc-proto = { version = "*", path = "irc-proto" }
 log = "0.4"
 native-tls = "0.2"
-serde = "1.0"
+serde = { version = "1.0", features = ["derive"] }
 serde_derive = "1.0"
+tokio = { version = "0.2.4", features = ["time", "net", "stream", "macros", "stream"] }
+tokio-util = { version = "0.2.0", features = ["codec"] }
+tokio-tls = "0.3.0"
 serde_json = { version = "1.0", optional = true }
 serde_yaml = { version = "0.7", optional = true }
-tokio = "0.1"
-tokio-codec = "0.1"
-tokio-io = "0.1"
-tokio-mockstream = "1.1"
-tokio-timer = "0.1"
-tokio-tls = "0.2"
 toml = { version = "0.4", optional = true }
+pin-utils = "0.1.0-alpha.4"
+parking_lot = "0.9.0"
+futures-channel = "0.3.1"
+futures-util = "0.3.1"
 
 [dev-dependencies]
+futures = "0.3.1"
+anyhow = "1.0.13"
 args = "2.0"
 getopts = "0.2"
+env_logger = "0.6.2"

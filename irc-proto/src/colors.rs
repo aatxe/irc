@@ -15,13 +15,11 @@ struct Parser {
 
 /// An extension trait giving strings a function to strip IRC colors
 pub trait FormattedStringExt<'a> {
-
     /// Returns true if the string contains color, bold, underline or italics
     fn is_formatted(&self) -> bool;
 
     /// Returns the string with all color, bold, underline and italics stripped
     fn strip_formatting(self) -> Cow<'a, str>;
-
 }
 
 const FORMAT_CHARACTERS: &[char] = &[
@@ -54,7 +52,7 @@ fn strip_formatting(buf: &mut String) {
 
 impl Parser {
     fn new() -> Self {
-        Parser  {
+        Parser {
             state: ParserState::Text,
         }
     }
@@ -66,9 +64,7 @@ impl Parser {
                 self.state = ColorCode;
                 false
             }
-            Text => {
-                !FORMAT_CHARACTERS.contains(&cur)
-            }
+            Text => !FORMAT_CHARACTERS.contains(&cur),
             ColorCode if cur.is_digit(10) => {
                 self.state = Foreground1(cur);
                 false
@@ -122,8 +118,8 @@ impl FormattedStringExt<'static> for String {
 
 #[cfg(test)]
 mod test {
-    use std::borrow::Cow;
     use colors::FormattedStringExt;
+    use std::borrow::Cow;
 
     macro_rules! test_formatted_string_ext {
         { $( $name:ident ( $($line:tt)* ), )* } => {

@@ -1,9 +1,8 @@
-extern crate irc;
-
-use std::default::Default;
+use futures::prelude::*;
 use irc::client::prelude::*;
 
-fn main() {
+#[tokio::main]
+async fn main() -> irc::error::Result<()> {
     let config = Config {
         nickname: Some("repeater".to_owned()),
         alt_nicks: Some(vec!["blaster".to_owned(), "smg".to_owned()]),
@@ -15,11 +14,14 @@ fn main() {
         ..Default::default()
     };
 
-    let client = IrcClient::from_config(config).unwrap();
-    client.identify().unwrap();
+    let mut client = Client::from_config(config).await?;
+    client.identify()?;
 
-    client.for_each_incoming(|message| {
-        print!("{}", message);
+    let mut stream = client.stream()?;
+
+    loop {
+        let message = stream.select_next_some().await?;
+
         if let Command::PRIVMSG(ref target, ref msg) = message.command {
             if msg.starts_with(&*client.current_nickname()) {
                 let tokens: Vec<_> = msg.split(' ').collect();
@@ -29,12 +31,12 @@ fn main() {
                         for _ in 0..count {
                             client.send_privmsg(
                                 message.response_target().unwrap_or(target),
-                                &msg[n..]
-                            ).unwrap();
+                                &msg[n..],
+                            )?;
                         }
                     }
                 }
             }
         }
-    }).unwrap()
+    }
 }

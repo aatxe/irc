@@ -48,21 +48,16 @@ documentation, and below.
 
 [irc-prelude]: https://docs.rs/irc/*/irc/client/prelude/index.html
 
-## A Tale of Two APIs
+## Using Futures
 
-### Reactors (The "New" API)
+The release of v0.14 replaced all existing APIs with one based on async/await.
 
-The release of v0.13 brought with it a new API called `IrcReactor` that enables easier multiserver
-support and more graceful error handling. The general model is that you use the reactor to create
-new `IrcClients`, register message handler functions, and finally block the thread to run the
-clients with their respective handlers. Here's an example:
-
-```rust,no_run
-extern crate irc;
-
+```rust,no_run,edition2018
 use irc::client::prelude::*;
+use futures::prelude::*;
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), failure::Error> {
     // We can also load the Config at runtime via Config::load("path/to/config.toml")
     let config = Config {
         nickname: Some("the-irc-crate".to_owned()),
@@ -71,50 +66,16 @@ fn main() {
         ..Config::default()
     };
 
-    let mut reactor = IrcReactor::new().unwrap();
-    let client = reactor.prepare_client_and_connect(config).unwrap();
-    client.identify().unwrap();
+    let mut client = Client::from_config(config).await?;
+    client.identify()?;
 
-    reactor.register_client_with_handler(client, |client, message| {
+    let mut stream = client.stream()?;
+
+    while let Some(message) = stream.next().await.transpose()? {
         print!("{}", message);
-        // And here we can do whatever we want with the messages.
-        Ok(())
-    });
+    }
 
-    reactor.run().unwrap();
-}
-```
-
-
-### Direct Style (The "Old" API)
-
-The old API for connecting to an IRC server is still supported through the `IrcClient` type. It's
-simpler for the most basic use case, but will panic upon encountering any sort of connection issues.
-In general, it's recommended that users switch to the new API if possible. Nevertheless, here is an
-example:
-
-```rust,no_run
-extern crate irc;
-
-use std::default::Default;
-use irc::client::prelude::*;
-
-fn main() {
-    // We can also load the Config at runtime via Config::load("path/to/config.toml")
-    let cfg = Config {
-        nickname: Some(format!("the-irc-crate")),
-        server: Some(format!("irc.example.com")),
-        channels: Some(vec![format!("#test")]),
-        .. Default::default()
-    };
-
-    let client = IrcClient::from_config(cfg).unwrap();
-    client.identify().unwrap();
-
-    client.for_each_incoming(|message| {
-        print!("{}", message);
-        // And here we can do whatever we want with the messages.
-    }).unwrap()
+    Ok(())
 }
 ```
 

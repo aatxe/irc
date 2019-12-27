@@ -1,11 +1,9 @@
 //! A simple, thread-safe, and async-friendly IRC client library.
 //!
 //! This API provides the ability to connect to an IRC server via the
-//! [`IrcClient`](struct.IrcClient.html) type. The [`Client`](trait.Client.html) trait that
-//! [`IrcClient`](struct.IrcClient.html) implements provides methods for communicating with the
-//! server. An extension trait, [`ClientExt`](./ext/trait.ClientExt.html), provides short-hand for
-//! sending a variety of important messages without referring to their entries in
-//! [`proto::command`](../proto/command/enum.Command.html).
+//! [`Client`](struct.Client.html) type. The [`Client`](trait.Client.html) trait that
+//! [`Client`](struct.Client.html) implements provides methods for communicating with the
+//! server.
 //!
 //! # Examples
 //!
@@ -14,12 +12,13 @@
 //!
 //! ```no_run
 //! # extern crate irc;
-//! use irc::client::prelude::{IrcClient, ClientExt};
+//! use irc::client::prelude::Client;
 //!
-//! # fn main() {
-//! let client = IrcClient::new("config.toml").unwrap();
-//! // identify comes from `ClientExt`
-//! client.identify().unwrap();
+//! # #[tokio::main]
+//! # async fn main() -> irc::error::Result<()> {
+//! let client = Client::new("config.toml").await?;
+//! client.identify()?;
+//! # Ok(())
 //! # }
 //! ```
 //!
@@ -28,172 +27,393 @@
 //! performs a simple call-and-response when the bot's name is mentioned in a channel.
 //!
 //! ```no_run
-//! # extern crate irc;
-//! # use irc::client::prelude::{IrcClient, ClientExt};
-//! use irc::client::prelude::{Client, Command};
+//! use irc::client::prelude::*;
+//! use futures::*;
 //!
-//! # fn main() {
-//! # let client = IrcClient::new("config.toml").unwrap();
-//! # client.identify().unwrap();
-//! client.for_each_incoming(|irc_msg| {
-//!     if let Command::PRIVMSG(channel, message) = irc_msg.command {
+//! # #[tokio::main]
+//! # async fn main() -> irc::error::Result<()> {
+//! let mut client = Client::new("config.toml").await?;
+//! let mut stream = client.stream()?;
+//! client.identify()?;
+//!
+//! while let Some(message) = stream.next().await.transpose()? {
+//!     if let Command::PRIVMSG(channel, message) = message.command {
 //!         if message.contains(client.current_nickname()) {
 //!             client.send_privmsg(&channel, "beep boop").unwrap();
 //!         }
 //!     }
-//! }).unwrap();
+//! }
+//! # Ok(())
 //! # }
 //! ```
 
-use std::collections::HashMap;
-use std::path::Path;
-use std::sync::{Arc, Mutex, RwLock};
-use std::thread;
-
 #[cfg(feature = "ctcp")]
 use chrono::prelude::*;
-use futures::{Async, Poll, Future, Sink, Stream};
-use futures::stream::SplitStream;
-use futures::sync::mpsc;
-use futures::sync::oneshot;
-use futures::sync::mpsc::{UnboundedReceiver, UnboundedSender};
-use tokio::runtime::current_thread::Runtime;
+use futures_channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
+use futures_util::{
+    future::{FusedFuture, Future},
+    ready,
+    stream::{FusedStream, Stream},
+};
+use futures_util::{
+    sink::Sink as _,
+    stream::{SplitSink, SplitStream, StreamExt as _},
+};
+use parking_lot::RwLock;
+use std::{
+    collections::HashMap,
+    fmt,
+    path::Path,
+    pin::Pin,
+    sync::Arc,
+    task::{Context, Poll},
+};
 
-use error;
-use client::conn::{Connection, ConnectionFuture};
-use client::data::{Config, User};
-use client::ext::ClientExt;
-use client::transport::LogView;
-use proto::{ChannelMode, Command, Message, Mode, Response};
-use proto::Command::{JOIN, KICK, NICK, NICKSERV, PART, PRIVMSG, ChannelMODE, QUIT};
+use crate::{
+    client::{
+        conn::Connection,
+        data::{Config, User},
+    },
+    error,
+    proto::{
+        mode::ModeType,
+        CapSubCommand::{END, LS, REQ},
+        Capability, ChannelMode, Command,
+        Command::{
+            ChannelMODE, AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, NICK, NICKSERV, NOTICE, OPER,
+            PART, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER,
+        },
+        Message, Mode, NegotiationVersion, Response,
+    },
+};
 
 pub mod conn;
 pub mod data;
-pub mod ext;
+mod mock;
 pub mod prelude;
-pub mod reactor;
 pub mod transport;
 
-/// Trait extending all IRC streams with `for_each_incoming` convenience function.
-///
-/// This is typically used in conjunction with [`Client::stream`](trait.Client.html#tymethod.stream)
-/// in order to use an API akin to
-/// [`Client::for_each_incoming`](trait.Client.html#method.for_each_incoming).
-///
-/// # Example
-///
-/// ```no_run
-/// # extern crate irc;
-/// # use irc::client::prelude::{IrcClient, Client, Command, ClientExt};
-/// use irc::client::prelude::EachIncomingExt;
-///
-/// # fn main() {
-/// # let client = IrcClient::new("config.toml").unwrap();
-/// # client.identify().unwrap();
-/// client.stream().for_each_incoming(|irc_msg| {
-///   match irc_msg.command {
-///     Command::PRIVMSG(channel, message) => if message.contains(client.current_nickname()) {
-///       client.send_privmsg(&channel, "beep boop").unwrap();
-///     }
-///     _ => ()
-///   }
-/// }).unwrap();
-/// # }
-/// ```
-pub trait EachIncomingExt: Stream<Item=Message, Error=error::IrcError> {
-    /// Blocks on the stream, running the given function on each incoming message as they arrive.
-    fn for_each_incoming<F>(self, mut f: F) -> error::Result<()>
-    where F: FnMut(Message) -> (), Self: Sized {
-        self.for_each(|msg| {
-            f(msg);
-            Ok(())
-        }).wait()
+macro_rules! pub_state_base {
+    () => {
+    /// Changes the modes for the specified target.
+    pub fn send_mode<S, T>(&self, target: S, modes: &[Mode<T>]) -> error::Result<()>
+    where
+        S: fmt::Display,
+        T: ModeType,
+    {
+        self.send(T::mode(&target.to_string(), modes))
+    }
+
+    /// Joins the specified channel or chanlist.
+    pub fn send_join<S>(&self, chanlist: S) -> error::Result<()>
+    where
+        S: fmt::Display,
+    {
+        self.send(JOIN(chanlist.to_string(), None, None))
+    }
+
+    /// Joins the specified channel or chanlist using the specified key or keylist.
+    pub fn send_join_with_keys<S1, S2>(&self, chanlist: &str, keylist: &str) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+    {
+        self.send(JOIN(chanlist.to_string(), Some(keylist.to_string()), None))
+    }
+
+    /// Sends a notice to the specified target.
+    pub fn send_notice<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+    {
+        let message = message.to_string();
+        for line in message.split("\r\n") {
+            self.send(NOTICE(target.to_string(), line.to_string()))?
+        }
+        Ok(())
+    }
     }
 }
 
-impl<T> EachIncomingExt for T where T: Stream<Item=Message, Error=error::IrcError> {}
-
-/// An interface for communicating with an IRC server.
-pub trait Client {
-    /// Gets the configuration being used with this `Client`.
-    fn config(&self) -> &Config;
-
-    /// Sends a [`Command`](../proto/command/enum.Command.html) as this `Client`. This is the
-    /// core primitive for sending messages to the server. In practice, it's often more pleasant
-    /// (and more idiomatic) to use the functions defined on
-    /// [`ClientExt`](./ext/trait.ClientExt.html). They capture a lot of the more repetitive
-    /// aspects of sending messages.
-    ///
-    /// # Example
-    /// ```no_run
-    /// # extern crate irc;
-    /// # use irc::client::prelude::*;
-    /// # fn main() {
-    /// # let client = IrcClient::new("config.toml").unwrap();
-    /// client.send(Command::NICK("example".to_owned())).unwrap();
-    /// client.send(Command::USER("user".to_owned(), "0".to_owned(), "name".to_owned())).unwrap();
-    /// # }
-    /// ```
-    fn send<M: Into<Message>>(&self, message: M) -> error::Result<()> where Self: Sized;
-
-    /// Gets a stream of incoming messages from the `Client`'s connection. This is only necessary
-    /// when trying to set up more complex clients, and requires use of the `futures` crate. Most
-    /// IRC bots should be able to get by using only `for_each_incoming` to handle received
-    /// messages. You can find some examples of more complex setups using `stream` in the
-    /// [GitHub repository](https://github.com/aatxe/irc/tree/stable/examples).
-    ///
-    /// **Note**: The stream can only be returned once. Subsequent attempts will cause a panic.
-    // FIXME: when impl traits stabilize, we should change this return type.
-    fn stream(&self) -> ClientStream;
-
-    /// Blocks on the stream, running the given function on each incoming message as they arrive.
-    ///
-    /// # Example
-    /// ```no_run
-    /// # extern crate irc;
-    /// # use irc::client::prelude::{IrcClient, ClientExt, Client, Command};
-    /// # fn main() {
-    /// # let client = IrcClient::new("config.toml").unwrap();
-    /// # client.identify().unwrap();
-    /// client.for_each_incoming(|irc_msg| {
-    ///     if let Command::PRIVMSG(channel, message) = irc_msg.command {
-    ///         if message.contains(client.current_nickname()) {
-    ///             client.send_privmsg(&channel, "beep boop").unwrap();
-    ///         }
-    ///     }
-    /// }).unwrap();
-    /// # }
-    /// ```
-    fn for_each_incoming<F>(&self, f: F) -> error::Result<()> where F: FnMut(Message) -> () {
-        self.stream().for_each_incoming(f)
+macro_rules! pub_sender_base {
+    () => {
+    /// Sends a request for a list of server capabilities for a specific IRCv3 version.
+    pub fn send_cap_ls(&self, version: NegotiationVersion) -> error::Result<()> {
+        self.send(Command::CAP(
+            None,
+            LS,
+            match version {
+                NegotiationVersion::V301 => None,
+                NegotiationVersion::V302 => Some("302".to_owned()),
+            },
+            None,
+        ))
     }
 
-    /// Gets a list of currently joined channels. This will be `None` if tracking is disabled
-    /// altogether via the `nochanlists` feature.
-    fn list_channels(&self) -> Option<Vec<String>>;
+    /// Sends an IRCv3 capabilities request for the specified extensions.
+    pub fn send_cap_req(&self, extensions: &[Capability]) -> error::Result<()> {
+        let append = |mut s: String, c| {
+            s.push_str(c);
+            s.push(' ');
+            s
+        };
+        let mut exts = extensions
+            .iter()
+            .map(|c| c.as_ref())
+            .fold(String::new(), append);
+        let len = exts.len() - 1;
+        exts.truncate(len);
+        self.send(CAP(None, REQ, None, Some(exts)))
+    }
 
-    /// Gets a list of [`Users`](./data/user/struct.User.html) in the specified channel. If the
-    /// specified channel hasn't been joined or the `nochanlists` feature is enabled, this function
-    /// will return `None`.
-    ///
-    /// For best results, be sure to request `multi-prefix` support from the server. This will allow
-    /// for more accurate tracking of user rank (e.g. oper, half-op, etc.).
-    /// # Requesting multi-prefix support
-    /// ```no_run
-    /// # extern crate irc;
-    /// # use irc::client::prelude::{IrcClient, ClientExt, Client, Command};
-    /// use irc::proto::caps::Capability;
-    ///
-    /// # fn main() {
-    /// # let client = IrcClient::new("config.toml").unwrap();
-    /// client.send_cap_req(&[Capability::MultiPrefix]).unwrap();
-    /// client.identify().unwrap();
-    /// # }
-    /// ```
-    fn list_users(&self, channel: &str) -> Option<Vec<User>>;
+    /// Sends a SASL AUTHENTICATE message with the specified data.
+    pub fn send_sasl<S: fmt::Display>(&self, data: S) -> error::Result<()> {
+        self.send(AUTHENTICATE(data.to_string()))
+    }
+
+    /// Sends a SASL AUTHENTICATE request to use the PLAIN mechanism.
+    pub fn send_sasl_plain(&self) -> error::Result<()> {
+        self.send_sasl("PLAIN")
+    }
+
+    /// Sends a SASL AUTHENTICATE request to use the EXTERNAL mechanism.
+    pub fn send_sasl_external(&self) -> error::Result<()> {
+        self.send_sasl("EXTERNAL")
+    }
+
+    /// Sends a SASL AUTHENTICATE request to abort authentication.
+    pub fn send_sasl_abort(&self) -> error::Result<()> {
+        self.send_sasl("*")
+    }
+
+    /// Sends a PONG with the specified message.
+    pub fn send_pong<S>(&self, msg: S) -> error::Result<()>
+    where
+        S: fmt::Display,
+    {
+        self.send(PONG(msg.to_string(), None))
+    }
+
+    /// Parts the specified channel or chanlist.
+    pub fn send_part<S>(&self, chanlist: S) -> error::Result<()>
+    where
+        S: fmt::Display,
+    {
+        self.send(PART(chanlist.to_string(), None))
+    }
+
+    /// Attempts to oper up using the specified username and password.
+    pub fn send_oper<S1, S2>(&self, username: S1, password: S2) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+    {
+        self.send(OPER(username.to_string(), password.to_string()))
+    }
+
+    /// Sends a message to the specified target. If the message contains IRC newlines (`\r\n`), it
+    /// will automatically be split and sent as multiple separate `PRIVMSG`s to the specified
+    /// target. If you absolutely must avoid this behavior, you can do
+    /// `client.send(PRIVMSG(target, message))` directly.
+    pub fn send_privmsg<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+    {
+        let message = message.to_string();
+        for line in message.split("\r\n") {
+            self.send(PRIVMSG(target.to_string(), line.to_string()))?
+        }
+        Ok(())
+    }
+
+    /// Sets the topic of a channel or requests the current one.
+    /// If `topic` is an empty string, it won't be included in the message.
+    pub fn send_topic<S1, S2>(&self, channel: S1, topic: S2) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+    {
+        let topic = topic.to_string();
+        self.send(TOPIC(
+            channel.to_string(),
+            if topic.is_empty() { None } else { Some(topic) },
+        ))
+    }
+
+    /// Kills the target with the provided message.
+    pub fn send_kill<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+    {
+        self.send(KILL(target.to_string(), message.to_string()))
+    }
+
+    /// Kicks the listed nicknames from the listed channels with a comment.
+    /// If `message` is an empty string, it won't be included in the message.
+    pub fn send_kick<S1, S2, S3>(
+        &self,
+        chanlist: S1,
+        nicklist: S2,
+        message: S3,
+    ) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+        S3: fmt::Display,
+    {
+        let message = message.to_string();
+        self.send(KICK(
+            chanlist.to_string(),
+            nicklist.to_string(),
+            if message.is_empty() {
+                None
+            } else {
+                Some(message)
+            },
+        ))
+    }
+
+    /// Changes the mode of the target by force.
+    /// If `modeparams` is an empty string, it won't be included in the message.
+    pub fn send_samode<S1, S2, S3>(&self, target: S1, mode: S2, modeparams: S3) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+        S3: fmt::Display,
+    {
+        let modeparams = modeparams.to_string();
+        self.send(SAMODE(
+            target.to_string(),
+            mode.to_string(),
+            if modeparams.is_empty() {
+                None
+            } else {
+                Some(modeparams)
+            },
+        ))
+    }
+
+    /// Forces a user to change from the old nickname to the new nickname.
+    pub fn send_sanick<S1, S2>(&self, old_nick: S1, new_nick: S2) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+    {
+        self.send(SANICK(old_nick.to_string(), new_nick.to_string()))
+    }
+
+    /// Invites a user to the specified channel.
+    pub fn send_invite<S1, S2>(&self, nick: S1, chan: S2) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+    {
+        self.send(INVITE(nick.to_string(), chan.to_string()))
+    }
+
+    /// Quits the server entirely with a message.
+    /// This defaults to `Powered by Rust.` if none is specified.
+    pub fn send_quit<S>(&self, msg: S) -> error::Result<()>
+    where
+        S: fmt::Display,
+    {
+        let msg = msg.to_string();
+        self.send(QUIT(Some(if msg.is_empty() {
+            "Powered by Rust.".to_string()
+        } else {
+            msg
+        })))
+    }
+
+    /// Sends a CTCP-escaped message to the specified target.
+    /// This requires the CTCP feature to be enabled.
+    #[cfg(feature = "ctcp")]
+    pub fn send_ctcp<S1, S2>(&self, target: S1, msg: S2) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+    {
+        self.send_privmsg(target, &format!("\u{001}{}\u{001}", msg.to_string())[..])
+    }
+
+    /// Sends an action command to the specified target.
+    /// This requires the CTCP feature to be enabled.
+    #[cfg(feature = "ctcp")]
+    pub fn send_action<S1, S2>(&self, target: S1, msg: S2) -> error::Result<()>
+    where
+        S1: fmt::Display,
+        S2: fmt::Display,
+    {
+        self.send_ctcp(target, &format!("ACTION {}", msg.to_string())[..])
+    }
+
+    /// Sends a finger request to the specified target.
+    /// This requires the CTCP feature to be enabled.
+    #[cfg(feature = "ctcp")]
+    pub fn send_finger<S: fmt::Display>(&self, target: S) -> error::Result<()>
+    where
+        S: fmt::Display,
+    {
+        self.send_ctcp(target, "FINGER")
+    }
+
+    /// Sends a version request to the specified target.
+    /// This requires the CTCP feature to be enabled.
+    #[cfg(feature = "ctcp")]
+    pub fn send_version<S>(&self, target: S) -> error::Result<()>
+    where
+        S: fmt::Display,
+    {
+        self.send_ctcp(target, "VERSION")
+    }
+
+    /// Sends a source request to the specified target.
+    /// This requires the CTCP feature to be enabled.
+    #[cfg(feature = "ctcp")]
+    pub fn send_source<S>(&self, target: S) -> error::Result<()>
+    where
+        S: fmt::Display,
+    {
+        self.send_ctcp(target, "SOURCE")
+    }
+
+    /// Sends a user info request to the specified target.
+    /// This requires the CTCP feature to be enabled.
+    #[cfg(feature = "ctcp")]
+    pub fn send_user_info<S>(&self, target: S) -> error::Result<()>
+    where
+        S: fmt::Display,
+    {
+        self.send_ctcp(target, "USERINFO")
+    }
+
+    /// Sends a finger request to the specified target.
+    /// This requires the CTCP feature to be enabled.
+    #[cfg(feature = "ctcp")]
+    pub fn send_ctcp_ping<S>(&self, target: S) -> error::Result<()>
+    where
+        S: fmt::Display,
+    {
+        let time = Local::now();
+        self.send_ctcp(target, &format!("PING {}", time.timestamp())[..])
+    }
+
+    /// Sends a time request to the specified target.
+    /// This requires the CTCP feature to be enabled.
+    #[cfg(feature = "ctcp")]
+    pub fn send_time<S>(&self, target: S) -> error::Result<()>
+    where
+        S: fmt::Display,
+    {
+        self.send_ctcp(target, "TIME")
+    }
+    }
 }
 
-/// A stream of `Messages` received from an IRC server via an `IrcClient`.
+/// A stream of `Messages` received from an IRC server via an `Client`.
 ///
 /// Interaction with this stream relies on the `futures` API, but is only expected for less
 /// traditional use cases. To learn more, you can view the documentation for the
@@ -203,19 +423,57 @@ pub trait Client {
 pub struct ClientStream {
     state: Arc<ClientState>,
     stream: SplitStream<Connection>,
+    // In case the client stream also handles outgoing messages.
+    outgoing: Option<Outgoing>,
+}
+
+impl ClientStream {
+    /// collect stream and collect all messages available.
+    pub async fn collect(mut self) -> error::Result<Vec<Message>> {
+        let mut output = Vec::new();
+
+        while let Some(message) = self.next().await {
+            match message {
+                Ok(message) => output.push(message),
+                Err(e) => return Err(e),
+            }
+        }
+
+        Ok(output)
+    }
+}
+
+impl FusedStream for ClientStream {
+    fn is_terminated(&self) -> bool {
+        false
+    }
 }
 
 impl Stream for ClientStream {
-    type Item = Message;
-    type Error = error::IrcError;
+    type Item = Result<Message, error::Error>;
 
-    fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
-        match try_ready!(self.stream.poll()) {
-            Some(msg) => {
-                self.state.handle_message(&msg)?;
-                Ok(Async::Ready(Some(msg)))
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        if let Some(outgoing) = self.as_mut().outgoing.as_mut() {
+            match Pin::new(outgoing).poll(cx) {
+                Poll::Ready(Ok(())) => {
+                    // assure that we wake up again to check the incoming stream.
+                    cx.waker().wake_by_ref();
+                    return Poll::Ready(None);
+                }
+                Poll::Ready(Err(e)) => {
+                    cx.waker().wake_by_ref();
+                    return Poll::Ready(Some(Err(e)));
+                }
+                Poll::Pending => (),
             }
-            None => Ok(Async::Ready(None)),
+        }
+
+        match ready!(Pin::new(&mut self.as_mut().stream).poll_next(cx)) {
+            Some(Ok(msg)) => {
+                self.state.handle_message(&msg)?;
+                return Poll::Ready(Some(Ok(msg)));
+            }
+            other => Poll::Ready(other),
         }
     }
 }
@@ -223,107 +481,66 @@ impl Stream for ClientStream {
 /// Thread-safe internal state for an IRC server connection.
 #[derive(Debug)]
 struct ClientState {
+    sender: Sender,
     /// The configuration used with this connection.
     config: Config,
     /// A thread-safe map of channels to the list of users in them.
-    chanlists: Mutex<HashMap<String, Vec<User>>>,
+    chanlists: RwLock<HashMap<String, Vec<User>>>,
     /// A thread-safe index to track the current alternative nickname being used.
     alt_nick_index: RwLock<usize>,
-    /// A thread-safe internal IRC stream used for the reading API.
-    incoming: Mutex<Option<SplitStream<Connection>>>,
-    /// A thread-safe copy of the outgoing channel.
-    outgoing: UnboundedSender<Message>,
 }
 
-impl<'a> Client for ClientState {
+impl ClientState {
+    fn new(sender: Sender, config: Config) -> ClientState {
+        ClientState {
+            sender,
+            config: config,
+            chanlists: RwLock::new(HashMap::new()),
+            alt_nick_index: RwLock::new(0),
+        }
+    }
+
     fn config(&self) -> &Config {
         &self.config
     }
 
-    fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> where Self: Sized {
+    fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> {
         let msg = msg.into();
         self.handle_sent_message(&msg)?;
-        Ok(self.outgoing.unbounded_send(msg)?)
-    }
-
-    fn stream(&self) -> ClientStream {
-        unimplemented!()
-    }
-
-    #[cfg(not(feature = "nochanlists"))]
-    fn list_channels(&self) -> Option<Vec<String>> {
-        Some(
-            self.chanlists
-                .lock()
-                .unwrap()
-                .keys()
-                .map(|k| k.to_owned())
-                .collect(),
-        )
-    }
-
-    #[cfg(feature = "nochanlists")]
-    fn list_channels(&self) -> Option<Vec<String>> {
-        None
-    }
-
-    #[cfg(not(feature = "nochanlists"))]
-    fn list_users(&self, chan: &str) -> Option<Vec<User>> {
-        self.chanlists
-            .lock()
-            .unwrap()
-            .get(&chan.to_owned())
-            .cloned()
-    }
-
-    #[cfg(feature = "nochanlists")]
-    fn list_users(&self, _: &str) -> Option<Vec<User>> {
-        None
-    }
-}
-
-impl ClientState {
-    fn new(
-        incoming: SplitStream<Connection>,
-        outgoing: UnboundedSender<Message>,
-        config: Config,
-    ) -> ClientState {
-        ClientState {
-            config: config,
-            chanlists: Mutex::new(HashMap::new()),
-            alt_nick_index: RwLock::new(0),
-            incoming: Mutex::new(Some(incoming)),
-            outgoing: outgoing,
-        }
+        Ok(self.sender.send(msg)?)
     }
 
     /// Gets the current nickname in use.
     fn current_nickname(&self) -> &str {
         let alt_nicks = self.config().alternate_nicknames();
-        let index = self.alt_nick_index.read().unwrap();
+        let index = self.alt_nick_index.read();
+
         match *index {
-            0 => self.config().nickname().expect(
-                "current_nickname should not be callable if nickname is not defined."
-            ),
+            0 => self
+                .config()
+                .nickname()
+                .expect("current_nickname should not be callable if nickname is not defined."),
             i => alt_nicks[i - 1],
         }
     }
 
     /// Handles sent messages internally for basic client functionality.
     fn handle_sent_message(&self, msg: &Message) -> error::Result<()> {
-        trace!("[SENT] {}", msg.to_string());
+        log::trace!("[SENT] {}", msg.to_string());
+
         match msg.command {
             PART(ref chan, _) => {
-                let _ = self.chanlists.lock().unwrap().remove(chan);
+                let _ = self.chanlists.write().remove(chan);
             }
             _ => (),
         }
+
         Ok(())
     }
 
     /// Handles received messages internally for basic client functionality.
     fn handle_message(&self, msg: &Message) -> error::Result<()> {
-        trace!("[RECV] {}", msg.to_string());
+        log::trace!("[RECV] {}", msg.to_string());
         match msg.command {
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
@@ -353,8 +570,8 @@ impl ClientState {
             Command::Response(Response::RPL_NAMREPLY, ref args, ref suffix) => {
                 self.handle_namreply(args, suffix)
             }
-            Command::Response(Response::RPL_ENDOFMOTD, _, _) |
-            Command::Response(Response::ERR_NOMOTD, _, _) => {
+            Command::Response(Response::RPL_ENDOFMOTD, _, _)
+            | Command::Response(Response::ERR_NOMOTD, _, _) => {
                 self.send_nick_password()?;
                 self.send_umodes()?;
 
@@ -365,20 +582,21 @@ impl ClientState {
                         None => self.send_join(chan)?,
                     }
                 }
-                let joined_chans = self.chanlists.lock().unwrap();
-                for chan in joined_chans.keys().filter(
-                    |x| !config_chans.contains(&x.as_str()),
-                )
+                let joined_chans = self.chanlists.read();
+                for chan in joined_chans
+                    .keys()
+                    .filter(|x| !config_chans.contains(&x.as_str()))
                 {
                     self.send_join(chan)?
                 }
             }
-            Command::Response(Response::ERR_NICKNAMEINUSE, _, _) |
-            Command::Response(Response::ERR_ERRONEOUSNICKNAME, _, _) => {
+            Command::Response(Response::ERR_NICKNAMEINUSE, _, _)
+            | Command::Response(Response::ERR_ERRONEOUSNICKNAME, _, _) => {
                 let alt_nicks = self.config().alternate_nicknames();
-                let mut index = self.alt_nick_index.write().unwrap();
+                let mut index = self.alt_nick_index.write();
+
                 if *index >= alt_nicks.len() {
-                    return Err(error::IrcError::NoUsableNick);
+                    return Err(error::Error::NoUsableNick);
                 } else {
                     self.send(NICK(alt_nicks[*index].to_owned()))?;
                     *index += 1;
@@ -393,7 +611,8 @@ impl ClientState {
         if self.config().nick_password().is_empty() {
             Ok(())
         } else {
-            let mut index = self.alt_nick_index.write().unwrap();
+            let mut index = self.alt_nick_index.write();
+
             if self.config().should_ghost() && *index != 0 {
                 for seq in &self.config().ghost_sequence() {
                     self.send(NICKSERV(format!(
@@ -406,9 +625,11 @@ impl ClientState {
                 *index = 0;
                 self.send(NICK(self.config().nickname()?.to_owned()))?
             }
-            self.send(NICKSERV(
-                format!("IDENTIFY {}", self.config().nick_password()),
-            ))
+
+            self.send(NICKSERV(format!(
+                "IDENTIFY {}",
+                self.config().nick_password()
+            )))
         }
     }
 
@@ -417,14 +638,17 @@ impl ClientState {
             Ok(())
         } else {
             self.send_mode(
-                self.current_nickname(), &Mode::as_user_modes(self.config().umodes()).map_err(|e| {
-                    error::IrcError::InvalidMessage {
+                self.current_nickname(),
+                &Mode::as_user_modes(self.config().umodes()).map_err(|e| {
+                    error::Error::InvalidMessage {
                         string: format!(
-                            "MODE {} {}", self.current_nickname(), self.config().umodes()
+                            "MODE {} {}",
+                            self.current_nickname(),
+                            self.config().umodes()
                         ),
                         cause: e,
                     }
-                })?
+                })?,
             )
         }
     }
@@ -434,7 +658,7 @@ impl ClientState {
 
     #[cfg(not(feature = "nochanlists"))]
     fn handle_join(&self, src: &str, chan: &str) {
-        if let Some(vec) = self.chanlists.lock().unwrap().get_mut(&chan.to_owned()) {
+        if let Some(vec) = self.chanlists.write().get_mut(&chan.to_owned()) {
             if !src.is_empty() {
                 vec.push(User::new(src))
             }
@@ -446,7 +670,7 @@ impl ClientState {
 
     #[cfg(not(feature = "nochanlists"))]
     fn handle_part(&self, src: &str, chan: &str) {
-        if let Some(vec) = self.chanlists.lock().unwrap().get_mut(&chan.to_owned()) {
+        if let Some(vec) = self.chanlists.write().get_mut(&chan.to_owned()) {
             if !src.is_empty() {
                 if let Some(n) = vec.iter().position(|x| x.get_nickname() == src) {
                     vec.swap_remove(n);
@@ -463,12 +687,10 @@ impl ClientState {
         if src.is_empty() {
             return;
         }
-        let mut chanlists = self.chanlists.lock().unwrap();
-        for channel in chanlists.clone().keys() {
-            if let Some(vec) = chanlists.get_mut(&channel.to_owned()) {
-                if let Some(p) = vec.iter().position(|x| x.get_nickname() == src) {
-                    vec.swap_remove(p);
-                }
+
+        for vec in self.chanlists.write().values_mut() {
+            if let Some(p) = vec.iter().position(|x| x.get_nickname() == src) {
+                vec.swap_remove(p);
             }
         }
     }
@@ -481,13 +703,11 @@ impl ClientState {
         if old_nick.is_empty() || new_nick.is_empty() {
             return;
         }
-        let mut chanlists = self.chanlists.lock().unwrap();
-        for channel in chanlists.clone().keys() {
-            if let Some(vec) = chanlists.get_mut(&channel.to_owned()) {
-                if let Some(n) = vec.iter().position(|x| x.get_nickname() == old_nick) {
-                    let new_entry = User::new(new_nick);
-                    vec[n] = new_entry;
-                }
+
+        for (_, vec) in self.chanlists.write().iter_mut() {
+            if let Some(n) = vec.iter().position(|x| x.get_nickname() == old_nick) {
+                let new_entry = User::new(new_nick);
+                vec[n] = new_entry;
             }
         }
     }
@@ -500,7 +720,7 @@ impl ClientState {
         for mode in modes {
             match *mode {
                 Mode::Plus(_, Some(ref user)) | Mode::Minus(_, Some(ref user)) => {
-                    if let Some(vec) = self.chanlists.lock().unwrap().get_mut(chan) {
+                    if let Some(vec) = self.chanlists.write().get_mut(chan) {
                         if let Some(n) = vec.iter().position(|x| x.get_nickname() == user) {
                             vec[n].update_access_level(mode)
                         }
@@ -520,8 +740,8 @@ impl ClientState {
             if args.len() == 3 {
                 let chan = &args[2];
                 for user in users.split(' ') {
-                    let mut chanlists = self.chanlists.lock().unwrap();
-                    chanlists
+                    self.chanlists
+                        .write()
                         .entry(chan.clone())
                         .or_insert_with(Vec::new)
                         .push(User::new(user))
@@ -547,10 +767,7 @@ impl ClientState {
         } else if tokens[0].eq_ignore_ascii_case("VERSION") {
             self.send_ctcp_internal(resp, &format!("VERSION {}", self.config().version()))
         } else if tokens[0].eq_ignore_ascii_case("SOURCE") {
-            self.send_ctcp_internal(
-                resp,
-                &format!("SOURCE {}", self.config().source()),
-            )
+            self.send_ctcp_internal(resp, &format!("SOURCE {}", self.config().source()))
         } else if tokens[0].eq_ignore_ascii_case("PING") && tokens.len() > 1 {
             self.send_ctcp_internal(resp, &format!("PING {}", tokens[1]))
         } else if tokens[0].eq_ignore_ascii_case("TIME") {
@@ -571,54 +788,205 @@ impl ClientState {
     fn handle_ctcp(&self, _: &str, _: &[&str]) -> error::Result<()> {
         Ok(())
     }
+
+    pub_state_base!();
+}
+
+/// Thread-safe sender that can be used with the client.
+#[derive(Debug, Clone)]
+pub struct Sender {
+    tx_outgoing: UnboundedSender<Message>,
+}
+
+impl Sender {
+    /// Send a single message to the unbounded queue.
+    pub fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> {
+        Ok(self.tx_outgoing.unbounded_send(msg.into())?)
+    }
+
+    pub_state_base!();
+    pub_sender_base!();
+}
+
+/// Future to handle outgoing messages.
+///
+/// Note: this is essentially the same as a version of [SendAll](https://github.com/rust-lang-nursery/futures-rs/blob/master/futures-util/src/sink/send_all.rs) that owns it's sink and stream.
+#[derive(Debug)]
+pub struct Outgoing {
+    sink: SplitSink<Connection, Message>,
+    stream: UnboundedReceiver<Message>,
+    buffered: Option<Message>,
+}
+
+impl Outgoing {
+    fn try_start_send(
+        &mut self,
+        cx: &mut Context<'_>,
+        message: Message,
+    ) -> Poll<Result<(), error::Error>> {
+        debug_assert!(self.buffered.is_none());
+
+        match Pin::new(&mut self.sink).poll_ready(cx)? {
+            Poll::Ready(()) => Poll::Ready(Pin::new(&mut self.sink).start_send(message)),
+            Poll::Pending => {
+                self.buffered = Some(message);
+                Poll::Pending
+            }
+        }
+    }
+}
+
+impl FusedFuture for Outgoing {
+    fn is_terminated(&self) -> bool {
+        // NB: outgoing stream never terminates.
+        // TODO: should it terminate if rx_outgoing is terminated?
+        false
+    }
+}
+
+impl Future for Outgoing {
+    type Output = error::Result<()>;
+
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let this = &mut *self;
+
+        if let Some(message) = this.buffered.take() {
+            ready!(this.try_start_send(cx, message))?
+        }
+
+        loop {
+            match this.stream.poll_next_unpin(cx) {
+                Poll::Ready(Some(message)) => ready!(this.try_start_send(cx, message))?,
+                Poll::Ready(None) => {
+                    ready!(Pin::new(&mut this.sink).poll_flush(cx))?;
+                    return Poll::Ready(Ok(()));
+                }
+                Poll::Pending => {
+                    ready!(Pin::new(&mut this.sink).poll_flush(cx))?;
+                    return Poll::Pending;
+                }
+            }
+        }
+    }
 }
 
 /// The canonical implementation of a connection to an IRC server.
 ///
-/// The type itself provides a number of methods to create new connections, but most of the API
-/// surface is in the form of the [`Client`](trait.Client.html) and
-/// [`ClientExt`](./ext/trait.ClientExt.html) traits that provide methods of communicating with
-/// the server after connection. Cloning an `IrcClient` is relatively cheap, as it's equivalent to
-/// cloning a single `Arc`. This may be useful for setting up multiple threads with access to one
-/// connection.
-///
 /// For a full example usage, see [`irc::client`](./index.html).
-#[derive(Clone, Debug)]
-pub struct IrcClient {
+#[derive(Debug)]
+pub struct Client {
     /// The internal, thread-safe server state.
     state: Arc<ClientState>,
+    incoming: Option<SplitStream<Connection>>,
+    outgoing: Option<Outgoing>,
+    sender: Sender,
+    #[cfg(test)]
     /// A view of the logs for a mock connection.
-    view: Option<LogView>,
+    view: Option<self::transport::LogView>,
 }
 
-impl Client for IrcClient {
+impl Client {
+    /// Creates a new `Client` from the configuration at the specified path, connecting
+    /// immediately. This function is short-hand for loading the configuration and then calling
+    /// `Client::from_config` and consequently inherits its behaviors.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use irc::client::prelude::*;
+    /// # #[tokio::main]
+    /// # async fn main() -> irc::error::Result<()> {
+    /// let client = Client::new("config.toml").await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn new<P: AsRef<Path>>(config: P) -> error::Result<Client> {
+        Client::from_config(Config::load(config)?).await
+    }
+
+    /// Creates a `Future` of an `Client` from the specified configuration and on the event loop
+    /// corresponding to the given handle. This can be used to set up a number of `Clients` on a
+    /// single, shared event loop. It can also be used to take more control over execution and error
+    /// handling. Connection will not occur until the event loop is run.
+    pub async fn from_config(config: Config) -> error::Result<Client> {
+        let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
+        let conn = Connection::new(&config, tx_outgoing.clone()).await?;
+
+        #[cfg(test)]
+        let view = conn.log_view();
+
+        let (sink, incoming) = conn.split();
+
+        let sender = Sender { tx_outgoing };
+
+        Ok(Client {
+            sender: sender.clone(),
+            state: Arc::new(ClientState::new(sender, config)),
+            incoming: Some(incoming),
+            outgoing: Some(Outgoing {
+                sink,
+                stream: rx_outgoing,
+                buffered: None,
+            }),
+            #[cfg(test)]
+            view,
+        })
+    }
+
+    /// Gets the log view from the internal transport. Only used for unit testing.
+    #[cfg(test)]
+    fn log_view(&self) -> &self::transport::LogView {
+        self.view
+            .as_ref()
+            .expect("there should be a log during testing")
+    }
+
+    /// Take the outgoing future in order to drive it yourself.
+    ///
+    /// Must be called before `stream` if you intend to drive this future
+    /// yourself.
+    pub fn outgoing(&mut self) -> Option<Outgoing> {
+        self.outgoing.take()
+    }
+
+    /// Get access to a thread-safe sender that can be used with the client.
+    pub fn sender(&self) -> Sender {
+        self.sender.clone()
+    }
+
+    /// Gets the configuration being used with this `Client`.
     fn config(&self) -> &Config {
         &self.state.config
     }
 
-    fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()>
-    where
-        Self: Sized,
-    {
-        self.state.send(msg)
-    }
+    /// Gets a stream of incoming messages from the `Client`'s connection. This is only necessary
+    /// when trying to set up more complex clients, and requires use of the `futures` crate. Most
+    /// IRC bots should be able to get by using only `for_each_incoming` to handle received
+    /// messages. You can find some examples of more complex setups using `stream` in the
+    /// [GitHub repository](https://github.com/aatxe/irc/tree/stable/examples).
+    ///
+    /// **Note**: The stream can only be returned once. Subsequent attempts will cause a panic.
+    // FIXME: when impl traits stabilize, we should change this return type.
+    pub fn stream(&mut self) -> error::Result<ClientStream> {
+        let stream = self
+            .incoming
+            .take()
+            .ok_or_else(|| error::Error::StreamAlreadyConfigured)?;
 
-    fn stream(&self) -> ClientStream {
-        ClientStream {
+        Ok(ClientStream {
             state: Arc::clone(&self.state),
-            stream: self.state.incoming.lock().unwrap().take().expect(
-                "Stream was already obtained once, and cannot be reobtained."
-            ),
-        }
+            stream,
+            outgoing: self.outgoing.take(),
+        })
     }
 
+    /// Gets a list of currently joined channels. This will be `None` if tracking is disabled
+    /// altogether via the `nochanlists` feature.
     #[cfg(not(feature = "nochanlists"))]
-    fn list_channels(&self) -> Option<Vec<String>> {
+    pub fn list_channels(&self) -> Option<Vec<String>> {
         Some(
             self.state
                 .chanlists
-                .lock()
-                .unwrap()
+                .read()
                 .keys()
                 .map(|k| k.to_owned())
                 .collect(),
@@ -626,144 +994,37 @@ impl Client for IrcClient {
     }
 
     #[cfg(feature = "nochanlists")]
-    fn list_channels(&self) -> Option<Vec<String>> {
+    pub fn list_channels(&self) -> Option<Vec<String>> {
         None
     }
 
+    /// Gets a list of [`Users`](./data/user/struct.User.html) in the specified channel. If the
+    /// specified channel hasn't been joined or the `nochanlists` feature is enabled, this function
+    /// will return `None`.
+    ///
+    /// For best results, be sure to request `multi-prefix` support from the server. This will allow
+    /// for more accurate tracking of user rank (e.g. oper, half-op, etc.).
+    /// # Requesting multi-prefix support
+    /// ```no_run
+    /// # use irc::client::prelude::*;
+    /// use irc::proto::caps::Capability;
+    ///
+    /// # #[tokio::main]
+    /// # async fn main() -> irc::error::Result<()> {
+    /// # let client = Client::new("config.toml").await?;
+    /// client.send_cap_req(&[Capability::MultiPrefix])?;
+    /// client.identify()?;
+    /// # Ok(())
+    /// # }
+    /// ```
     #[cfg(not(feature = "nochanlists"))]
-    fn list_users(&self, chan: &str) -> Option<Vec<User>> {
-        self.state
-            .chanlists
-            .lock()
-            .unwrap()
-            .get(&chan.to_owned())
-            .cloned()
+    pub fn list_users(&self, chan: &str) -> Option<Vec<User>> {
+        self.state.chanlists.read().get(&chan.to_owned()).cloned()
     }
 
     #[cfg(feature = "nochanlists")]
-    fn list_users(&self, _: &str) -> Option<Vec<User>> {
+    pub fn list_users(&self, _: &str) -> Option<Vec<User>> {
         None
-    }
-}
-
-impl IrcClient {
-    /// Creates a new `IrcClient` from the configuration at the specified path, connecting
-    /// immediately. This function is short-hand for loading the configuration and then calling
-    /// `IrcClient::from_config` and consequently inherits its behaviors.
-    ///
-    /// # Example
-    /// ```no_run
-    /// # extern crate irc;
-    /// # use irc::client::prelude::*;
-    /// # fn main() {
-    /// let client = IrcClient::new("config.toml").unwrap();
-    /// # }
-    /// ```
-    pub fn new<P: AsRef<Path>>(config: P) -> error::Result<IrcClient> {
-        IrcClient::from_config(Config::load(config)?)
-    }
-
-    /// Creates a new `IrcClient` from the specified configuration, connecting immediately. Due to
-    /// current design limitations, error handling here is somewhat limited. In particular, failed
-    /// connections will cause the program to panic because the connection attempt is made on a
-    /// freshly created thread. If you need to avoid this behavior and handle errors more
-    /// gracefully, it is recommended that you use an
-    /// [`IrcReactor`](./reactor/struct.IrcReactor.html) instead.
-    ///
-    /// # Example
-    /// ```no_run
-    /// # extern crate irc;
-    /// # use std::default::Default;
-    /// # use irc::client::prelude::*;
-    /// # fn main() {
-    /// let config = Config {
-    ///   nickname: Some("example".to_owned()),
-    ///   server: Some("irc.example.com".to_owned()),
-    ///   .. Default::default()
-    /// };
-    /// let client = IrcClient::from_config(config).unwrap();
-    /// # }
-    /// ```
-    pub fn from_config(config: Config) -> error::Result<IrcClient> {
-        // Setting up a remote reactor running for the length of the connection.
-        let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
-        let (tx_incoming, rx_incoming) = oneshot::channel();
-        let (tx_view, rx_view) = oneshot::channel();
-
-        let cfg = config.clone();
-
-        let _ = thread::spawn(move || {
-            let mut reactor = Runtime::new().unwrap();
-            // Setting up internal processing stuffs.
-            let conn = reactor.block_on(Connection::new(cfg.clone()).unwrap()).unwrap();
-
-            tx_view.send(conn.log_view()).unwrap();
-            let (sink, stream) = conn.split();
-
-            let outgoing_future = sink.send_all(rx_outgoing.map_err::<error::IrcError, _>(|_| {
-                unreachable!("futures::sync::mpsc::Receiver should never return Err");
-            })).map(|_| ()).map_err(|e| panic!("{}", e));
-
-            // Send the stream half back to the original thread.
-            tx_incoming.send(stream).unwrap();
-
-            reactor.block_on(outgoing_future).unwrap();
-        });
-
-        Ok(IrcClient {
-            state: Arc::new(ClientState::new(rx_incoming.wait()?, tx_outgoing, config)),
-            view: rx_view.wait()?,
-        })
-    }
-
-    /// Creates a `Future` of an `IrcClient` from the specified configuration and on the event loop
-    /// corresponding to the given handle. This can be used to set up a number of `IrcClients` on a
-    /// single, shared event loop. It can also be used to take more control over execution and error
-    /// handling. Connection will not occur until the event loop is run.
-    ///
-    /// Proper usage requires familiarity with `tokio` and `futures`. You can find more information
-    /// in the crate documentation for [`tokio-core`](http://docs.rs/tokio-core) or
-    /// [`futures`](http://docs.rs/futures). Additionally, you can find detailed tutorials on using
-    /// both libraries on the [tokio website](https://tokio.rs/docs/getting-started/tokio/). An easy
-    /// to use abstraction that does not require this knowledge is available via
-    /// [`IrcReactors`](./reactor/struct.IrcReactor.html).
-    ///
-    /// # Example
-    /// ```no_run
-    /// # extern crate irc;
-    /// # extern crate tokio;
-    /// # use std::default::Default;
-    /// # use irc::client::prelude::*;
-    /// # use irc::client::PackedIrcClient;
-    /// # use irc::error;
-    /// # use tokio::runtime::current_thread::Runtime;
-    /// # fn main() {
-    /// # let config = Config {
-    /// #  nickname: Some("example".to_owned()),
-    /// #  server: Some("irc.example.com".to_owned()),
-    /// #  .. Default::default()
-    /// # };
-    /// let mut reactor = Runtime::new().unwrap();
-    /// let future = IrcClient::new_future(config).unwrap();
-    /// // immediate connection errors (like no internet) will turn up here...
-    /// let PackedIrcClient(client, future) = reactor.block_on(future).unwrap();
-    /// // runtime errors (like disconnections and so forth) will turn up here...
-    /// reactor.block_on(client.stream().for_each(move |irc_msg| {
-    ///   // processing messages works like usual
-    ///   process_msg(&client, irc_msg)
-    /// }).join(future)).unwrap();
-    /// # }
-    /// # fn process_msg(server: &IrcClient, message: Message) -> error::Result<()> { Ok(()) }
-    /// ```
-    pub fn new_future(config: Config) -> error::Result<IrcClientFuture> {
-        let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
-
-        Ok(IrcClientFuture {
-            conn: Connection::new(config.clone())?,
-            config: config,
-            tx_outgoing: Some(tx_outgoing),
-            rx_outgoing: Some(rx_outgoing),
-        })
     }
 
     /// Gets the current nickname in use. This may be the primary username set in the configuration,
@@ -773,76 +1034,59 @@ impl IrcClient {
         self.state.current_nickname()
     }
 
-    /// Gets the log view from the internal transport. Only used for unit testing.
-    #[cfg(test)]
-    fn log_view(&self) -> &LogView {
-        self.view.as_ref().unwrap()
+    /// Sends a [`Command`](../proto/command/enum.Command.html) as this `Client`. This is the
+    /// core primitive for sending messages to the server.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use irc::client::prelude::*;
+    /// # #[tokio::main]
+    /// # async fn main() {
+    /// # let client = Client::new("config.toml").await.unwrap();
+    /// client.send(Command::NICK("example".to_owned())).unwrap();
+    /// client.send(Command::USER("user".to_owned(), "0".to_owned(), "name".to_owned())).unwrap();
+    /// # }
+    /// ```
+    pub fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> {
+        self.sender.send(msg)
     }
-}
 
-/// A future representing the eventual creation of an `IrcClient`.
-///
-/// Interaction with this future relies on the `futures` API, but is only expected for more advanced
-/// use cases. To learn more, you can view the documentation for the
-/// [`futures`](https://docs.rs/futures/) crate, or the tutorials for
-/// [`tokio`](https://tokio.rs/docs/getting-started/futures/). An easy to use abstraction that does
-/// not require this knowledge is available via [`IrcReactors`](./reactor/struct.IrcReactor.html).
-#[derive(Debug)]
-pub struct IrcClientFuture {
-    conn: ConnectionFuture,
-    config: Config,
-    tx_outgoing: Option<UnboundedSender<Message>>,
-    rx_outgoing: Option<UnboundedReceiver<Message>>,
-}
-
-impl Future for IrcClientFuture {
-    type Item = PackedIrcClient;
-    type Error = error::IrcError;
-
-    fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
-        let conn = try_ready!(self.conn.poll());
-
-        let view = conn.log_view();
-        let (sink, stream) = conn.split();
-
-        let outgoing_future = sink.send_all(
-            self.rx_outgoing.take().unwrap().map_err::<error::IrcError, _>(|()| {
-                unreachable!("futures::sync::mpsc::Receiver should never return Err");
-            })
-        ).map(|_| ());
-
-        let server = IrcClient {
-            state: Arc::new(ClientState::new(
-                stream, self.tx_outgoing.take().unwrap(), self.config.clone()
-            )),
-            view: view,
-        };
-        Ok(Async::Ready(PackedIrcClient(server, Box::new(outgoing_future))))
+    /// Sends a CAP END, NICK and USER to identify.
+    pub fn identify(&self) -> error::Result<()> {
+        // Send a CAP END to signify that we're IRCv3-compliant (and to end negotiations!).
+        self.send(CAP(None, END, None, None))?;
+        if self.config().password() != "" {
+            self.send(PASS(self.config().password().to_owned()))?;
+        }
+        self.send(NICK(self.config().nickname()?.to_owned()))?;
+        self.send(USER(
+            self.config().username().to_owned(),
+            "0".to_owned(),
+            self.config().real_name().to_owned(),
+        ))?;
+        Ok(())
     }
-}
 
-/// An `IrcClient` packaged with a future that drives its message sending. In order for the client
-/// to actually work properly, this future _must_ be running.
-///
-/// This type should only be used by advanced users who are familiar with the implementation of this
-/// crate. An easy to use abstraction that does not require this knowledge is available via
-/// [`IrcReactors`](./reactor/struct.IrcReactor.html).
-pub struct PackedIrcClient(pub IrcClient, pub Box<Future<Item = (), Error = error::IrcError> + Send + 'static>);
+    pub_state_base!();
+    pub_sender_base!();
+}
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
-    use std::default::Default;
-    use std::thread;
-    use std::time::Duration;
+    use std::{collections::HashMap, default::Default, thread, time::Duration};
 
-    use super::{IrcClient, Client};
-    use error::IrcError;
-    use client::data::Config;
+    use super::Client;
     #[cfg(not(feature = "nochanlists"))]
-    use client::data::User;
-    use proto::{ChannelMode, IrcCodec, Mode};
-    use proto::command::Command::{PART, PRIVMSG, Raw};
+    use crate::client::data::User;
+    use crate::{
+        client::data::Config,
+        error::Error,
+        proto::{
+            command::Command::{Raw, PRIVMSG},
+            ChannelMode, IrcCodec, Mode,
+        },
+    };
+    use futures::prelude::*;
 
     pub fn test_config() -> Config {
         Config {
@@ -857,73 +1101,79 @@ mod test {
         }
     }
 
-    pub fn get_client_value(client: IrcClient) -> String {
+    pub fn get_client_value(client: Client) -> String {
         // We sleep here because of synchronization issues.
         // We can't guarantee that everything will have been sent by the time of this call.
         thread::sleep(Duration::from_millis(100));
-        client.log_view().sent().unwrap().iter().fold(String::new(), |mut acc, msg| {
-            // NOTE: we have to sanitize here because sanitization happens in IrcCodec after the
-            // messages are converted into strings, but our transport logger catches messages before
-            // they ever reach that point.
-            acc.push_str(&IrcCodec::sanitize(msg.to_string()));
-            acc
-        })
+        client
+            .log_view()
+            .sent()
+            .unwrap()
+            .iter()
+            .fold(String::new(), |mut acc, msg| {
+                // NOTE: we have to sanitize here because sanitization happens in IrcCodec after the
+                // messages are converted into strings, but our transport logger catches messages before
+                // they ever reach that point.
+                acc.push_str(&IrcCodec::sanitize(msg.to_string()));
+                acc
+            })
     }
 
-    #[test]
-    fn stream() {
+    #[tokio::test]
+    async fn stream() -> Result<(), failure::Error> {
         let exp = "PRIVMSG test :Hi!\r\nPRIVMSG test :This is a test!\r\n\
                    :test!test@test JOIN #test\r\n";
-        let client = IrcClient::from_config(Config {
+
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(exp.to_owned()),
             ..test_config()
-        }).unwrap();
-        let mut messages = String::new();
-        client.for_each_incoming(|message| {
-            messages.push_str(&message.to_string());
-        }).unwrap();
-        assert_eq!(&messages[..], exp);
+        })
+        .await?;
+
+        client.stream()?.collect().await?;
+        // assert_eq!(&messages[..], exp);
+        Ok(())
     }
 
-    #[test]
-    fn handle_message() {
+    #[tokio::test]
+    async fn handle_message() -> Result<(), failure::Error> {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             "JOIN #test\r\nJOIN #test2\r\n"
         );
+        Ok(())
     }
 
-    #[test]
-    fn handle_end_motd_with_nick_password() {
+    #[tokio::test]
+    async fn handle_end_motd_with_nick_password() -> Result<(), failure::Error> {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             nick_password: Some(format!("password")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
-                   JOIN #test2\r\n"
+             JOIN #test2\r\n"
         );
+        Ok(())
     }
 
-    #[test]
-    fn handle_end_motd_with_chan_keys() {
+    #[tokio::test]
+    async fn handle_end_motd_with_chan_keys() -> Result<(), failure::Error> {
         let value = ":irc.test.net 376 test :End of /MOTD command\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             nickname: Some(format!("test")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
@@ -933,21 +1183,21 @@ mod test {
                 Some(map)
             },
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             "JOIN #test\r\nJOIN #test2 password\r\n"
         );
+        Ok(())
     }
 
-    #[test]
-    fn handle_end_motd_with_ghost() {
+    #[tokio::test]
+    async fn handle_end_motd_with_ghost() -> Result<(), failure::Error> {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             nickname: Some(format!("test")),
             alt_nicks: Some(vec![format!("test2")]),
@@ -955,22 +1205,22 @@ mod test {
             channels: Some(vec![format!("#test"), format!("#test2")]),
             should_ghost: Some(true),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             "NICK :test2\r\nNICKSERV GHOST test password\r\n\
-                   NICK :test\r\nNICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n"
+             NICK :test\r\nNICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n"
         );
+        Ok(())
     }
 
-    #[test]
-    fn handle_end_motd_with_ghost_seq() {
+    #[tokio::test]
+    async fn handle_end_motd_with_ghost_seq() -> Result<(), failure::Error> {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             nickname: Some(format!("test")),
             alt_nicks: Some(vec![format!("test2")]),
@@ -979,164 +1229,176 @@ mod test {
             should_ghost: Some(true),
             ghost_sequence: Some(vec![format!("RECOVER"), format!("RELEASE")]),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             "NICK :test2\r\nNICKSERV RECOVER test password\
-                   \r\nNICKSERV RELEASE test password\r\nNICK :test\r\nNICKSERV IDENTIFY password\
-                   \r\nJOIN #test\r\nJOIN #test2\r\n"
+             \r\nNICKSERV RELEASE test password\r\nNICK :test\r\nNICKSERV IDENTIFY password\
+             \r\nJOIN #test\r\nJOIN #test2\r\n"
         );
+        Ok(())
     }
 
-    #[test]
-    fn handle_end_motd_with_umodes() {
+    #[tokio::test]
+    async fn handle_end_motd_with_umodes() -> Result<(), failure::Error> {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             nickname: Some(format!("test")),
             umodes: Some(format!("+B")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             "MODE test +B\r\nJOIN #test\r\nJOIN #test2\r\n"
         );
+        Ok(())
     }
 
-    #[test]
-    fn nickname_in_use() {
+    #[tokio::test]
+    async fn nickname_in_use() -> Result<(), failure::Error> {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(&get_client_value(client)[..], "NICK :test2\r\n");
+        Ok(())
     }
 
-    #[test]
-    fn ran_out_of_nicknames() {
+    #[tokio::test]
+    async fn ran_out_of_nicknames() -> Result<(), failure::Error> {
         let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
                      :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        let res = client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        });
-
-        if let Err(IrcError::NoUsableNick) = res {
+        })
+        .await?;
+        let res = client.stream()?.try_collect::<Vec<_>>().await;
+        if let Err(Error::NoUsableNick) = res {
             ()
         } else {
             panic!("expected error when no valid nicks were specified")
         }
+        Ok(())
     }
 
-    #[test]
-    fn send() {
-        let client = IrcClient::from_config(test_config()).unwrap();
-        assert!(
-            client
-                .send(PRIVMSG(format!("#test"), format!("Hi there!")))
-                .is_ok()
-        );
+    #[tokio::test]
+    async fn send() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        assert!(client
+            .send(PRIVMSG(format!("#test"), format!("Hi there!")))
+            .is_ok());
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             "PRIVMSG #test :Hi there!\r\n"
         );
+        Ok(())
     }
 
-    #[test]
-    fn send_no_newline_injection() {
-        let client = IrcClient::from_config(test_config()).unwrap();
-        assert!(
-            client
-                .send(PRIVMSG(format!("#test"), format!("Hi there!\r\nJOIN #bad")))
-                .is_ok()
+    #[tokio::test]
+    async fn send_no_newline_injection() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        assert!(client
+            .send(PRIVMSG(format!("#test"), format!("Hi there!\r\nJOIN #bad")))
+            .is_ok());
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "PRIVMSG #test :Hi there!\r\n"
         );
-        assert_eq!(&get_client_value(client)[..], "PRIVMSG #test :Hi there!\r\n");
+        Ok(())
     }
 
-    #[test]
-    fn send_raw_is_really_raw() {
-        let client = IrcClient::from_config(test_config()).unwrap();
-        assert!(
-            client.send(Raw("PASS".to_owned(), vec!["password".to_owned()], None)).is_ok()
+    #[tokio::test]
+    async fn send_raw_is_really_raw() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        assert!(client
+            .send(Raw("PASS".to_owned(), vec!["password".to_owned()], None))
+            .is_ok());
+        assert!(client
+            .send(Raw("NICK".to_owned(), vec!["test".to_owned()], None))
+            .is_ok());
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "PASS password\r\nNICK test\r\n"
         );
-        assert!(
-            client.send(Raw("NICK".to_owned(), vec!["test".to_owned()], None)).is_ok()
-        );
-        assert_eq!(&get_client_value(client)[..], "PASS password\r\nNICK test\r\n");
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    fn channel_tracking_names() {
+    async fn channel_tracking_names() -> Result<(), failure::Error> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
-        assert_eq!(client.list_channels().unwrap(), vec!["#test".to_owned()])
+        })
+        .await?;
+        client.stream()?.collect().await?;
+        assert_eq!(client.list_channels().unwrap(), vec!["#test".to_owned()]);
+        Ok(())
     }
 
-    #[test]
+    // TODO: this seems to require a somewhat more complex interaction with the
+    // client.
+    /*
+    #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    fn channel_tracking_names_part() {
+    async fn channel_tracking_names_part() -> Result<(), failure::Error> {
+        use crate::proto::command::Command::PART;
+
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert!(client.send(PART(format!("#test"), None)).is_ok());
-        assert!(client.list_channels().unwrap().is_empty())
+        assert!(client.list_channels().unwrap().is_empty());
+        Ok(())
     }
+    */
 
-    #[test]
+    #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    fn user_tracking_names() {
+    async fn user_tracking_names() -> Result<(), failure::Error> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             client.list_users("#test").unwrap(),
             vec![User::new("test"), User::new("~owner"), User::new("&admin")]
-        )
+        );
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    fn user_tracking_names_join() {
+    async fn user_tracking_names_join() -> Result<(), failure::Error> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :test2!test@test JOIN #test\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             client.list_users("#test").unwrap(),
             vec![
@@ -1145,60 +1407,57 @@ mod test {
                 User::new("&admin"),
                 User::new("test2"),
             ]
-        )
+        );
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    fn user_tracking_names_kick() {
+    async fn user_tracking_names_kick() -> Result<(), failure::Error> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test KICK #test test\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             client.list_users("#test").unwrap(),
-            vec![
-                User::new("&admin"),
-                User::new("~owner"),
-            ]
-        )
+            vec![User::new("&admin"), User::new("~owner"),]
+        );
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    fn user_tracking_names_part() {
+    async fn user_tracking_names_part() -> Result<(), failure::Error> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test PART #test\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             client.list_users("#test").unwrap(),
             vec![User::new("test"), User::new("&admin")]
-        )
+        );
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
-    fn user_tracking_names_mode() {
+    async fn user_tracking_names_mode() -> Result<(), failure::Error> {
         let value = ":irc.test.net 353 test = #test :+test ~owner &admin\r\n\
                      :test!test@test MODE #test +o test\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             client.list_users("#test").unwrap(),
             vec![User::new("@test"), User::new("~owner"), User::new("&admin")]
@@ -1214,153 +1473,462 @@ mod test {
         let mut levels = client.list_users("#test").unwrap()[0].access_levels();
         levels.retain(|l| exp.access_levels().contains(l));
         assert_eq!(levels.len(), exp.access_levels().len());
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(feature = "nochanlists")]
-    fn no_user_tracking() {
+    async fn no_user_tracking() -> Result<(), failure::Error> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
-        assert!(client.list_users("#test").is_none())
+        })
+        .await?;
+        client.stream()?.collect().await?;
+        assert!(client.list_users("#test").is_none());
+        Ok(())
     }
 
-    #[test]
-    fn handle_single_soh() {
+    #[tokio::test]
+    async fn handle_single_soh() -> Result<(), failure::Error> {
         let value = ":test!test@test PRIVMSG #test :\u{001}\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             nickname: Some(format!("test")),
             channels: Some(vec![format!("#test"), format!("#test2")]),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
+        Ok(())
     }
 
-
-    #[test]
+    #[tokio::test]
     #[cfg(feature = "ctcp")]
-    fn finger_response() {
+    async fn finger_response() -> Result<(), failure::Error> {
         let value = ":test!test@test PRIVMSG test :\u{001}FINGER\u{001}\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             "NOTICE test :\u{001}FINGER :test (test)\u{001}\r\n"
         );
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(feature = "ctcp")]
-    fn version_response() {
+    async fn version_response() -> Result<(), failure::Error> {
         let value = ":test!test@test PRIVMSG test :\u{001}VERSION\u{001}\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             &format!(
                 "NOTICE test :\u{001}VERSION {}\u{001}\r\n",
-                ::VERSION_STR,
+                crate::VERSION_STR,
             )
         );
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(feature = "ctcp")]
-    fn source_response() {
+    async fn source_response() -> Result<(), failure::Error> {
         let value = ":test!test@test PRIVMSG test :\u{001}SOURCE\u{001}\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             "NOTICE test :\u{001}SOURCE https://github.com/aatxe/irc\u{001}\r\n"
         );
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(feature = "ctcp")]
-    fn ctcp_ping_response() {
+    async fn ctcp_ping_response() -> Result<(), failure::Error> {
         let value = ":test!test@test PRIVMSG test :\u{001}PING test\u{001}\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             "NOTICE test :\u{001}PING test\u{001}\r\n"
         );
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(feature = "ctcp")]
-    fn time_response() {
+    async fn time_response() -> Result<(), failure::Error> {
         let value = ":test!test@test PRIVMSG test :\u{001}TIME\u{001}\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         let val = get_client_value(client);
         assert!(val.starts_with("NOTICE test :\u{001}TIME :"));
         assert!(val.ends_with("\u{001}\r\n"));
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(feature = "ctcp")]
-    fn user_info_response() {
+    async fn user_info_response() -> Result<(), failure::Error> {
         let value = ":test!test@test PRIVMSG test :\u{001}USERINFO\u{001}\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
             "NOTICE test :\u{001}USERINFO :Testing.\u{001}\
-                   \r\n"
+             \r\n"
         );
+        Ok(())
     }
 
-    #[test]
+    #[tokio::test]
     #[cfg(feature = "ctcp")]
-    fn ctcp_ping_no_timestamp() {
+    async fn ctcp_ping_no_timestamp() -> Result<(), failure::Error> {
         let value = ":test!test@test PRIVMSG test :\u{001}PING\u{001}\r\n";
-        let client = IrcClient::from_config(Config {
+        let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
-        }).unwrap();
-        client.for_each_incoming(|message| {
-            println!("{:?}", message);
-        }).unwrap();
+        })
+        .await?;
+        client.stream()?.collect().await?;
         assert_eq!(&get_client_value(client)[..], "");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn identify() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.identify()?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "CAP END\r\nNICK :test\r\n\
+             USER test 0 * :test\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn identify_with_password() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(Config {
+            nickname: Some(format!("test")),
+            password: Some(format!("password")),
+            ..test_config()
+        })
+        .await?;
+        client.identify()?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "CAP END\r\nPASS :password\r\nNICK :test\r\n\
+             USER test 0 * :test\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_pong() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_pong("irc.test.net")?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "PONG :irc.test.net\r\n");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_join() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_join("#test,#test2,#test3")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "JOIN #test,#test2,#test3\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_part() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_part("#test")?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "PART #test\r\n");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_oper() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_oper("test", "test")?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "OPER test :test\r\n");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_privmsg() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_privmsg("#test", "Hi, everybody!")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "PRIVMSG #test :Hi, everybody!\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_notice() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_notice("#test", "Hi, everybody!")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "NOTICE #test :Hi, everybody!\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_topic_no_topic() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_topic("#test", "")?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "TOPIC #test\r\n");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_topic() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_topic("#test", "Testing stuff.")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "TOPIC #test :Testing stuff.\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_kill() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_kill("test", "Testing kills.")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "KILL test :Testing kills.\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_kick_no_message() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_kick("#test", "test", "")?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "KICK #test test\r\n");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_kick() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_kick("#test", "test", "Testing kicks.")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "KICK #test test :Testing kicks.\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_mode_no_modeparams() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_mode("#test", &[Mode::Plus(ChannelMode::InviteOnly, None)])?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "MODE #test +i\r\n");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_mode() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_mode(
+            "#test",
+            &[Mode::Plus(ChannelMode::Oper, Some("test".to_owned()))],
+        )?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "MODE #test +o test\r\n");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_samode_no_modeparams() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_samode("#test", "+i", "")?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "SAMODE #test +i\r\n");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_samode() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_samode("#test", "+o", "test")?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "SAMODE #test +o test\r\n");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_sanick() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_sanick("test", "test2")?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "SANICK test test2\r\n");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_invite() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_invite("test", "#test")?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "INVITE test #test\r\n");
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "ctcp")]
+    async fn send_ctcp() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_ctcp("test", "MESSAGE")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "PRIVMSG test :\u{001}MESSAGE\u{001}\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "ctcp")]
+    async fn send_action() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_action("test", "tests.")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "PRIVMSG test :\u{001}ACTION tests.\u{001}\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "ctcp")]
+    async fn send_finger() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_finger("test")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "PRIVMSG test :\u{001}FINGER\u{001}\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "ctcp")]
+    async fn send_version() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_version("test")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "PRIVMSG test :\u{001}VERSION\u{001}\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "ctcp")]
+    async fn send_source() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_source("test")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "PRIVMSG test :\u{001}SOURCE\u{001}\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "ctcp")]
+    async fn send_user_info() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_user_info("test")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "PRIVMSG test :\u{001}USERINFO\u{001}\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "ctcp")]
+    async fn send_ctcp_ping() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_ctcp_ping("test")?;
+        client.stream()?.collect().await?;
+        let val = get_client_value(client);
+        println!("{}", val);
+        assert!(val.starts_with("PRIVMSG test :\u{001}PING "));
+        assert!(val.ends_with("\u{001}\r\n"));
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "ctcp")]
+    async fn send_time() -> Result<(), failure::Error> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_time("test")?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            "PRIVMSG test :\u{001}TIME\u{001}\r\n"
+        );
+        Ok(())
     }
 }

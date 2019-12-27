@@ -21,11 +21,10 @@
 //! dealing with IRC channel and user modes. They appear in methods for sending mode commands,
 //! as well as in the parsed form of received mode commands.
 
-pub use client::data::Config;
-pub use client::reactor::IrcReactor;
-pub use client::{EachIncomingExt, IrcClient, Client};
-pub use client::ext::ClientExt;
-pub use proto::{Capability, ChannelExt, Command, Message, Prefix, NegotiationVersion, Response};
-pub use proto::{ChannelMode, Mode, UserMode};
-
-pub use futures::{Future, Stream};
+pub use crate::{
+    client::{data::Config, Client, Sender},
+    proto::{
+        Capability, ChannelExt, ChannelMode, Command, Message, Mode, NegotiationVersion, Prefix,
+        Response, UserMode,
+    },
+};

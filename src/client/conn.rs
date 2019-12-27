@@ -1,31 +1,35 @@
 //! A module providing IRC connections for use by `IrcServer`s.
-use std::fs::File;
-use std::fmt;
-use std::io::Read;
-
-use encoding::EncoderTrap;
-use encoding::label::encoding_from_whatwg_label;
-use futures::{Async, Poll, Future, Sink, StartSend, Stream};
-use native_tls::{Certificate, TlsConnector, Identity};
-use tokio_codec::Decoder;
-use tokio::net::{TcpStream};
-use tokio::net::tcp::ConnectFuture;
-use tokio_mockstream::MockStream;
+use futures_channel::mpsc::UnboundedSender;
+use futures_util::{sink::Sink, stream::Stream};
+use native_tls::{Certificate, Identity, TlsConnector};
+use std::{
+    fmt,
+    fs::File,
+    io::Read,
+    pin::Pin,
+    task::{Context, Poll},
+};
+use tokio::net::TcpStream;
 use tokio_tls::{self, TlsStream};
+use tokio_util::codec::Decoder;
 
-use error;
-use client::data::Config;
-use client::transport::{IrcTransport, LogView, Logged};
-use proto::{IrcCodec, Message};
+use crate::{
+    client::{
+        data::Config,
+        transport::{LogView, Logged, Transport},
+    },
+    error,
+    proto::{IrcCodec, Message},
+};
 
 /// An IRC connection used internally by `IrcServer`.
 pub enum Connection {
     #[doc(hidden)]
-    Unsecured(IrcTransport<TcpStream>),
+    Unsecured(Transport<TcpStream>),
     #[doc(hidden)]
-    Secured(IrcTransport<TlsStream<TcpStream>>),
+    Secured(Transport<TlsStream<TcpStream>>),
     #[doc(hidden)]
-    Mock(Logged<MockStream>),
+    Mock(Logged<crate::client::mock::MockStream>),
 }
 
 impl fmt::Debug for Connection {
@@ -42,102 +46,49 @@ impl fmt::Debug for Connection {
     }
 }
 
-/// A convenient type alias representing the `TlsStream` future.
-type TlsFuture = Box<Future<Error = error::IrcError, Item = TlsStream<TcpStream>> + Send>;
-
-/// A future representing an eventual `Connection`.
-pub enum ConnectionFuture {
-    #[doc(hidden)]
-    Unsecured(Config, ConnectFuture),
-    #[doc(hidden)]
-    Secured(Config, TlsFuture),
-    #[doc(hidden)]
-    Mock(Config),
-}
-
-impl fmt::Debug for ConnectionFuture {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}({:?}, ...)",
-            match *self {
-                ConnectionFuture::Unsecured(_, _) => "ConnectionFuture::Unsecured",
-                ConnectionFuture::Secured(_, _) => "ConnectionFuture::Secured",
-                ConnectionFuture::Mock(_) => "ConnectionFuture::Mock",
-            },
-            match *self {
-                ConnectionFuture::Unsecured(ref cfg, _) |
-                ConnectionFuture::Secured(ref cfg, _) |
-                ConnectionFuture::Mock(ref cfg) => cfg,
-            }
-        )
-    }
-}
-
-impl Future for ConnectionFuture {
-    type Item = Connection;
-    type Error = error::IrcError;
-
-    fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
-        match *self {
-            ConnectionFuture::Unsecured(ref config, ref mut inner) => {
-                let stream = try_ready!(inner.poll());
-                let framed = IrcCodec::new(config.encoding())?.framed(stream);
-                let transport = IrcTransport::new(&config, framed);
-
-                Ok(Async::Ready(Connection::Unsecured(transport)))
-            }
-            ConnectionFuture::Secured(ref config, ref mut inner) => {
-                let stream = try_ready!(inner.poll());
-                let framed = IrcCodec::new(config.encoding())?.framed(stream);
-                let transport = IrcTransport::new(&config, framed);
-
-                Ok(Async::Ready(Connection::Secured(transport)))
-            }
-            ConnectionFuture::Mock(ref config) => {
-                let enc: error::Result<_> = encoding_from_whatwg_label(
-                    config.encoding()
-                ).ok_or_else(|| error::IrcError::UnknownCodec {
-                    codec: config.encoding().to_owned(),
-                });
-                let encoding = enc?;
-                let init_str = config.mock_initial_value();
-                let initial: error::Result<_> = {
-                    encoding.encode(init_str, EncoderTrap::Replace).map_err(|data| {
-                        error::IrcError::CodecFailed {
-                            codec: encoding.name(),
-                            data: data.into_owned(),
-                        }
-                    })
-                };
-
-                let stream = MockStream::new(&initial?);
-                let framed = IrcCodec::new(config.encoding())?.framed(stream);
-                let transport = IrcTransport::new(&config, framed);
-
-                Ok(Async::Ready(Connection::Mock(Logged::wrap(transport))))
-            }
-        }
-    }
-}
-
 impl Connection {
     /// Creates a new `Connection` using the specified `Config`
-    pub fn new(config: Config) -> error::Result<ConnectionFuture> {
+    pub(crate) async fn new(
+        config: &Config,
+        tx: UnboundedSender<Message>,
+    ) -> error::Result<Connection> {
         if config.use_mock_connection() {
-            Ok(ConnectionFuture::Mock(config))
-        } else if config.use_ssl() {
+            use encoding::{label::encoding_from_whatwg_label, EncoderTrap};
+
+            let encoding = encoding_from_whatwg_label(config.encoding()).ok_or_else(|| {
+                error::Error::UnknownCodec {
+                    codec: config.encoding().to_owned(),
+                }
+            })?;
+
+            let init_str = config.mock_initial_value();
+            let initial = encoding
+                .encode(init_str, EncoderTrap::Replace)
+                .map_err(|data| error::Error::CodecFailed {
+                    codec: encoding.name(),
+                    data: data.into_owned(),
+                })?;
+
+            let stream = crate::client::mock::MockStream::new(&initial);
+            let framed = IrcCodec::new(config.encoding())?.framed(stream);
+            let transport = Transport::new(&config, framed, tx);
+            return Ok(Connection::Mock(Logged::wrap(transport)));
+        }
+
+        if config.use_ssl() {
             let domain = format!("{}", config.server()?);
-            info!("Connecting via SSL to {}.", domain);
+            log::info!("Connecting via SSL to {}.", domain);
             let mut builder = TlsConnector::builder();
+
             if let Some(cert_path) = config.cert_path() {
                 let mut file = File::open(cert_path)?;
                 let mut cert_data = vec![];
                 file.read_to_end(&mut cert_data)?;
                 let cert = Certificate::from_der(&cert_data)?;
                 builder.add_root_certificate(cert);
-                info!("Added {} to trusted certificates.", cert_path);
+                log::info!("Added {} to trusted certificates.", cert_path);
             }
+
             if let Some(client_cert_path) = config.client_cert_path() {
                 let client_cert_pass = config.client_cert_pass();
                 let mut file = File::open(client_cert_path)?;
@@ -145,25 +96,27 @@ impl Connection {
                 file.read_to_end(&mut client_cert_data)?;
                 let pkcs12_archive = Identity::from_pkcs12(&client_cert_data, &client_cert_pass)?;
                 builder.identity(pkcs12_archive);
-                info!("Using {} for client certificate authentication.", client_cert_path);
+                log::info!(
+                    "Using {} for client certificate authentication.",
+                    client_cert_path
+                );
             }
             let connector: tokio_tls::TlsConnector = builder.build()?.into();
-            let stream = Box::new(TcpStream::connect(&config.socket_addr()?).map_err(|e| {
-                let res: error::IrcError = e.into();
-                res
-            }).and_then(move |socket| {
-                connector.connect(&domain, socket).map_err(
-                    |e| e.into(),
-                )
-            }));
-            Ok(ConnectionFuture::Secured(config, stream))
+
+            let socket = TcpStream::connect(&config.socket_addr()?).await?;
+            let stream = connector.connect(&domain, socket).await?;
+            let framed = IrcCodec::new(config.encoding())?.framed(stream);
+            let transport = Transport::new(&config, framed, tx);
+
+            Ok(Connection::Secured(transport))
         } else {
-            info!("Connecting to {}.", config.server()?);
+            log::info!("Connecting to {}.", config.server()?);
             let addr = config.socket_addr()?;
-            Ok(ConnectionFuture::Unsecured(
-                config,
-                TcpStream::connect(&addr),
-            ))
+            let stream = TcpStream::connect(&addr).await?;
+            let framed = IrcCodec::new(config.encoding())?.framed(stream);
+            let transport = Transport::new(&config, framed, tx);
+
+            Ok(Connection::Unsecured(transport))
         }
     }
 
@@ -178,35 +131,49 @@ impl Connection {
 }
 
 impl Stream for Connection {
-    type Item = Message;
-    type Error = error::IrcError;
+    type Item = error::Result<Message>;
 
-    fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
-        match *self {
-            Connection::Unsecured(ref mut inner) => inner.poll(),
-            Connection::Secured(ref mut inner) => inner.poll(),
-            Connection::Mock(ref mut inner) => inner.poll(),
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        match &mut *self {
+            Connection::Unsecured(inner) => Pin::new(inner).poll_next(cx),
+            Connection::Secured(inner) => Pin::new(inner).poll_next(cx),
+            Connection::Mock(inner) => Pin::new(inner).poll_next(cx),
         }
     }
 }
 
-impl Sink for Connection {
-    type SinkItem = Message;
-    type SinkError = error::IrcError;
+impl Sink<Message> for Connection {
+    type Error = error::Error;
 
-    fn start_send(&mut self, item: Self::SinkItem) -> StartSend<Self::SinkItem, Self::SinkError> {
-        match *self {
-            Connection::Unsecured(ref mut inner) => inner.start_send(item),
-            Connection::Secured(ref mut inner) => inner.start_send(item),
-            Connection::Mock(ref mut inner) => inner.start_send(item),
+    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        match &mut *self {
+            Connection::Unsecured(inner) => Pin::new(inner).poll_ready(cx),
+            Connection::Secured(inner) => Pin::new(inner).poll_ready(cx),
+            Connection::Mock(inner) => Pin::new(inner).poll_ready(cx),
         }
     }
 
-    fn poll_complete(&mut self) -> Poll<(), Self::SinkError> {
-        match *self {
-            Connection::Unsecured(ref mut inner) => inner.poll_complete(),
-            Connection::Secured(ref mut inner) => inner.poll_complete(),
-            Connection::Mock(ref mut inner) => inner.poll_complete(),
+    fn start_send(mut self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
+        match &mut *self {
+            Connection::Unsecured(inner) => Pin::new(inner).start_send(item),
+            Connection::Secured(inner) => Pin::new(inner).start_send(item),
+            Connection::Mock(inner) => Pin::new(inner).start_send(item),
+        }
+    }
+
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        match &mut *self {
+            Connection::Unsecured(inner) => Pin::new(inner).poll_flush(cx),
+            Connection::Secured(inner) => Pin::new(inner).poll_flush(cx),
+            Connection::Mock(inner) => Pin::new(inner).poll_flush(cx),
+        }
+    }
+
+    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        match &mut *self {
+            Connection::Unsecured(inner) => Pin::new(inner).poll_close(cx),
+            Connection::Secured(inner) => Pin::new(inner).poll_close(cx),
+            Connection::Mock(inner) => Pin::new(inner).poll_close(cx),
         }
     }
 }

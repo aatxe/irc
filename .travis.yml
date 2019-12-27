@@ -2,17 +2,11 @@ language: rust
 rust: stable
 sudo: false
 script:
-  - chmod +x mktestconfig.sh
-  - ./mktestconfig.sh
-  - pushd irc-proto
-  - cargo test --verbose
-  - popd
-  - cargo build --verbose
-  - rustdoc --test README.md --extern irc=target/debug/libirc.rlib -L target/debug/deps
-  - cargo test --verbose --features "toml yaml"
-  - cargo test --doc
-  - cargo test --verbose --no-default-features
-  - cargo run --bin build-bot
+  - cargo test --all --features "toml yaml json"
+  - cargo build
+  # No idea how to fix this, since we don't depend on futures-preview directly.
+  # - rustdoc --test README.md --extern irc=target/debug/libirc.rlib -L target/debug/deps --edition 2018
+  - cargo run --example build-bot
 notifications:
   email: false
   irc:

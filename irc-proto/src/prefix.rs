@@ -1,6 +1,6 @@
 //! A module providing an enum for a message prefix.
-use std::str::FromStr;
 use std::fmt;
+use std::str::FromStr;
 
 /// The Prefix indicates "the true origin of the message", according to the server.
 #[derive(Clone, Eq, PartialEq, Debug)]
@@ -50,12 +50,12 @@ impl Prefix {
                 '!' if active == Active::Name => {
                     is_server = false;
                     active = Active::User;
-                },
+                }
 
                 '@' if active != Active::Host => {
                     is_server = false;
                     active = Active::Host;
-                },
+                }
 
                 _ => {
                     // Push onto the active buffer
@@ -63,7 +63,8 @@ impl Prefix {
                         Active::Name => &mut name,
                         Active::User => &mut user,
                         Active::Host => &mut host,
-                    }.push(c)
+                    }
+                    .push(c)
                 }
             }
         }
@@ -109,7 +110,7 @@ impl<'a> From<&'a str> for Prefix {
 
 #[cfg(test)]
 mod test {
-    use super::Prefix::{self, ServerName, Nickname};
+    use super::Prefix::{self, Nickname, ServerName};
 
     // Checks that str -> parsed -> Display doesn't lose data
     fn test_parse(s: &str) -> Prefix {
@@ -139,10 +140,7 @@ mod test {
 
     #[test]
     fn parse_host() {
-        assert_eq!(
-            test_parse("host.tld"),
-            ServerName("host.tld".into())
-        )
+        assert_eq!(test_parse("host.tld"), ServerName("host.tld".into()))
     }
 
     #[test]

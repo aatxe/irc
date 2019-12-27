@@ -1,27 +1,31 @@
-extern crate irc;
-
-use std::default::Default;
-use std::thread;
-use std::time::Duration;
+use futures::prelude::*;
 use irc::client::prelude::*;
+use std::time::Duration;
 
 // NOTE: you can find an asynchronous version of this example with `IrcReactor` in `tooter.rs`.
-fn main() {
+#[tokio::main]
+async fn main() -> irc::error::Result<()> {
     let config = Config {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.mozilla.org".to_owned()),
         channels: Some(vec!["#rust-spam".to_owned()]),
         ..Default::default()
     };
-    let client = IrcClient::from_config(config).unwrap();
-    client.identify().unwrap();
-    let client2 = client.clone();
-    // Let's set up a loop that just prints the messages.
-    thread::spawn(move || {
-        client2.stream().map(|m| print!("{}", m)).wait().count();
-    });
+
+    let mut client = Client::from_config(config).await?;
+    client.identify()?;
+
+    let mut stream = client.stream()?;
+    let mut interval = tokio::time::interval(Duration::from_secs(10)).fuse();
+
     loop {
-        client.send_privmsg("#rust-spam", "TWEET TWEET").unwrap();
-        thread::sleep(Duration::new(10, 0));
+        futures::select! {
+            m = stream.select_next_some() => {
+                println!("{}", m?);
+            }
+            _ = interval.select_next_some() => {
+                client.send_privmsg("#rust-spam", "TWEET TWEET")?;
+            }
+        }
     }
 }

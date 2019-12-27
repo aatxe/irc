@@ -1,9 +1,8 @@
-extern crate irc;
-
-use std::default::Default;
+use futures::prelude::*;
 use irc::client::prelude::*;
 
-fn main() {
+#[tokio::main]
+async fn main() -> irc::error::Result<()> {
     let config = Config {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.mozilla.org".to_owned()),
@@ -12,15 +11,17 @@ fn main() {
         ..Default::default()
     };
 
-    let client = IrcClient::from_config(config).unwrap();
-    client.identify().unwrap();
+    let mut client = Client::from_config(config).await?;
+    let mut stream = client.stream()?;
+    let sender = client.sender();
 
-    client.for_each_incoming(|message| {
-        print!("{}", message);
+    loop {
+        let message = stream.select_next_some().await?;
+
         if let Command::PRIVMSG(ref target, ref msg) = message.command {
             if msg.contains("pickles") {
-                client.send_privmsg(target, "Hi!").unwrap();
+                sender.send_privmsg(target, "Hi!")?;
             }
         }
-    }).unwrap();
+    }
 }

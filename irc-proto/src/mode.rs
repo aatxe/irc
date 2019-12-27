@@ -1,10 +1,10 @@
 //! A module defining an API for IRC user and channel modes.
 use std::fmt;
 
+use command::Command;
 use error::MessageParseError;
 use error::MessageParseError::InvalidModeString;
 use error::ModeParseError::*;
-use command::Command;
 
 /// A marker trait for different kinds of Modes.
 pub trait ModeType: fmt::Display + fmt::Debug + Clone + PartialEq {
@@ -71,17 +71,21 @@ impl fmt::Display for UserMode {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use self::UserMode::*;
 
-        write!(f, "{}", match *self {
-            Away => 'a',
-            Invisible => 'i',
-            Wallops => 'w',
-            Restricted => 'r',
-            Oper => 'o',
-            LocalOper => 'O',
-            ServerNotices => 's',
-            MaskedHost => 'x',
-            Unknown(c) => c,
-        })
+        write!(
+            f,
+            "{}",
+            match *self {
+                Away => 'a',
+                Invisible => 'i',
+                Wallops => 'w',
+                Restricted => 'r',
+                Oper => 'o',
+                LocalOper => 'O',
+                ServerNotices => 's',
+                MaskedHost => 'x',
+                Unknown(c) => c,
+            }
+        )
     }
 }
 
@@ -135,8 +139,8 @@ impl ModeType for ChannelMode {
         use self::ChannelMode::*;
 
         match *self {
-            Ban | Exception | Limit | InviteException | Key | Founder | Admin | Oper | Halfop |
-            Voice => true,
+            Ban | Exception | Limit | InviteException | Key | Founder | Admin | Oper | Halfop
+            | Voice => true,
             _ => false,
         }
     }
@@ -172,25 +176,29 @@ impl fmt::Display for ChannelMode {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use self::ChannelMode::*;
 
-        write!(f, "{}", match *self {
-            Ban => 'b',
-            Exception => 'e',
-            Limit => 'l',
-            InviteOnly => 'i',
-            InviteException => 'I',
-            Key => 'k',
-            Moderated => 'm',
-            RegisteredOnly => 'r',
-            Secret => 's',
-            ProtectedTopic => 't',
-            NoExternalMessages => 'n',
-            Founder => 'q',
-            Admin => 'a',
-            Oper => 'o',
-            Halfop => 'h',
-            Voice => 'v',
-            Unknown(c) => c,
-        })
+        write!(
+            f,
+            "{}",
+            match *self {
+                Ban => 'b',
+                Exception => 'e',
+                Limit => 'l',
+                InviteOnly => 'i',
+                InviteException => 'I',
+                Key => 'k',
+                Moderated => 'm',
+                RegisteredOnly => 'r',
+                Secret => 's',
+                ProtectedTopic => 't',
+                NoExternalMessages => 'n',
+                Founder => 'q',
+                Admin => 'a',
+                Oper => 'o',
+                Halfop => 'h',
+                Voice => 'v',
+                Unknown(c) => c,
+            }
+        )
     }
 }
 
@@ -257,14 +265,18 @@ impl Mode<UserMode> {
                 let init = match chars.next() {
                     Some('+') => Plus,
                     Some('-') => Minus,
-                    Some(c) => return Err(InvalidModeString {
-                        string: s.to_owned(),
-                        cause: InvalidModeModifier { modifier: c },
-                    }),
-                    None => return Err(InvalidModeString {
-                        string: s.to_owned(),
-                        cause: MissingModeModifier,
-                    }),
+                    Some(c) => {
+                        return Err(InvalidModeString {
+                            string: s.to_owned(),
+                            cause: InvalidModeModifier { modifier: c },
+                        })
+                    }
+                    None => {
+                        return Err(InvalidModeString {
+                            string: s.to_owned(),
+                            cause: MissingModeModifier,
+                        })
+                    }
                 };
 
                 for c in chars {
@@ -303,14 +315,18 @@ impl Mode<ChannelMode> {
                 let init = match chars.next() {
                     Some('+') => Plus,
                     Some('-') => Minus,
-                    Some(c) => return Err(InvalidModeString {
-                        string: s.to_owned(),
-                        cause: InvalidModeModifier { modifier: c },
-                    }),
-                    None => return Err(InvalidModeString {
-                        string: s.to_owned(),
-                        cause: MissingModeModifier,
-                    }),
+                    Some(c) => {
+                        return Err(InvalidModeString {
+                            string: s.to_owned(),
+                            cause: InvalidModeModifier { modifier: c },
+                        })
+                    }
+                    None => {
+                        return Err(InvalidModeString {
+                            string: s.to_owned(),
+                            cause: MissingModeModifier,
+                        })
+                    }
                 };
 
                 for c in chars {
