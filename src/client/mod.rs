@@ -1350,13 +1350,11 @@ mod test {
         Ok(())
     }
 
-    // TODO: this seems to require a somewhat more complex interaction with the
-    // client.
-    /*
     #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
     async fn channel_tracking_names_part() -> Result<(), failure::Error> {
         use crate::proto::command::Command::PART;
+        use futures::prelude::*;
 
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
@@ -1364,12 +1362,35 @@ mod test {
             ..test_config()
         })
         .await?;
-        client.stream()?.collect().await?;
+
+        let mut stream = client.stream()?;
+        let (shutdown_tx, shutdown_rx) = futures::channel::oneshot::channel();
+
+        // TODO: Add the necessary testing hooks to drive this more
+        // deterministically, like "wait until one outgoing message has been
+        // processed". We currently more-or-less rely on the test executor being
+        // singlethreaded (tokio without rt-threaded feature), but even that is
+        // a bit shaky.
+        let task = tokio::spawn(async move {
+            let mut shutdown_rx = shutdown_rx.fuse();
+
+            loop {
+                futures::select! {
+                    _ = stream.next() => {
+                    }
+                    _ = shutdown_rx => {
+                        break;
+                    }
+                }
+            }
+        });
+
         assert!(client.send(PART(format!("#test"), None)).is_ok());
         assert!(client.list_channels().unwrap().is_empty());
+        shutdown_tx.send(()).expect("send to work");
+        task.await?;
         Ok(())
     }
-    */
 
     #[tokio::test]
     #[cfg(not(feature = "nochanlists"))]
