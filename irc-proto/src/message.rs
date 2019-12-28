@@ -136,7 +136,16 @@ impl Message {
                 ret.push_str(&tag.0);
                 if let Some(ref value) = tag.1 {
                     ret.push('=');
-                    ret.push_str(value);
+                    for c in value.chars() {
+                        match c {
+                            ';' => ret.push_str("\\:"),
+                            ' ' => ret.push_str("\\s"),
+                            '\\' => ret.push_str("\\\\"),
+                            '\r' => ret.push_str("\\r"),
+                            '\n' => ret.push_str("\\n"),
+                            c => ret.push(c),
+                        }
+                    }
                 }
                 ret.push(';');
             }
@@ -185,7 +194,27 @@ impl FromStr for Message {
                     .map(|s: &str| {
                         let mut iter = s.splitn(2, '=');
                         let (fst, snd) = (iter.next(), iter.next());
-                        Tag(fst.unwrap_or("").to_owned(), snd.map(|s| s.to_owned()))
+                        let snd = snd.map(|snd| {
+                            let mut unescaped = String::with_capacity(snd.len());
+                            let mut iter = snd.chars();
+                            while let Some(c) = iter.next() {
+                                if c == '\\' {
+                                    match iter.next() {
+                                        Some(':') => unescaped.push(';'),
+                                        Some('s') => unescaped.push(' '),
+                                        Some('\\') => unescaped.push('\\'),
+                                        Some('r') => unescaped.push('\r'),
+                                        Some('n') => unescaped.push('\n'),
+                                        Some(c) => unescaped.push(c),
+                                        None => break,
+                                    }
+                                } else {
+                                    unescaped.push(c);
+                                }
+                            }
+                            unescaped
+                        });
+                        Tag(fst.unwrap_or("").to_owned(), snd)
                     })
                     .collect::<Vec<_>>()
             })
@@ -488,5 +517,30 @@ mod test {
     #[should_panic]
     fn to_message_invalid_format() {
         let _: Message = ":invalid :message".into();
+    }
+
+    #[test]
+    fn to_message_tags_escapes() {
+        let msg = "@tag=\\:\\s\\\\\\r\\n\\a\\ :test PRIVMSG #test :test\r\n"
+            .parse::<Message>()
+            .unwrap();
+        let message = Message {
+            tags: Some(vec![Tag("tag".to_string(), Some("; \\\r\na".to_string()))]),
+            prefix: Some("test".into()),
+            command: PRIVMSG("#test".to_string(), "test".to_string()),
+        };
+        assert_eq!(msg, message);
+    }
+
+    #[test]
+    fn to_string_tags_escapes() {
+        let msg = Message {
+            tags: Some(vec![Tag("tag".to_string(), Some("; \\\r\na".to_string()))]),
+            prefix: Some("test".into()),
+            command: PRIVMSG("#test".to_string(), "test".to_string()),
+        }
+        .to_string();
+        let message = "@tag=\\:\\s\\\\\\r\\na :test PRIVMSG #test :test\r\n";
+        assert_eq!(msg, message);
     }
 }
