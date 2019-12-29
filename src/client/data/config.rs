@@ -4,9 +4,9 @@ use std::{
     collections::HashMap,
     fs::File,
     io::prelude::*,
-    net::{SocketAddr, ToSocketAddrs},
     path::{Path, PathBuf},
 };
+use tokio::net::ToSocketAddrs;
 
 #[cfg(feature = "json")]
 use serde_json;
@@ -420,13 +420,11 @@ impl Config {
             .unwrap_or(if self.use_ssl() { 6697 } else { 6667 })
     }
 
-    /// Gets the server and port as a `SocketAddr`.
-    /// This panics when server is not specified or the address is malformed.
-    pub fn socket_addr(&self) -> Result<SocketAddr> {
-        format!("{}:{}", self.server()?, self.port())
-            .to_socket_addrs()
-            .map(|mut i| i.next().unwrap())
-            .map_err(|e| e.into())
+    /// Return something that can be converted into a socket address by tokio.
+    pub(crate) fn to_socket_addrs(&self) -> Result<impl ToSocketAddrs + '_> {
+        let server = self.server()?;
+        let port = self.port();
+        Ok((server, port))
     }
 
     /// Gets the server password specified in the configuration.
