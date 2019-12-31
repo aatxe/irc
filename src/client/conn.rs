@@ -103,7 +103,7 @@ impl Connection {
             }
             let connector: tokio_tls::TlsConnector = builder.build()?.into();
 
-            let socket = TcpStream::connect(&config.socket_addr()?).await?;
+            let socket = TcpStream::connect(config.to_socket_addrs()?).await?;
             let stream = connector.connect(&domain, socket).await?;
             let framed = IrcCodec::new(config.encoding())?.framed(stream);
             let transport = Transport::new(&config, framed, tx);
@@ -111,8 +111,7 @@ impl Connection {
             Ok(Connection::Secured(transport))
         } else {
             log::info!("Connecting to {}.", config.server()?);
-            let addr = config.socket_addr()?;
-            let stream = TcpStream::connect(&addr).await?;
+            let stream = TcpStream::connect(config.to_socket_addrs()?).await?;
             let framed = IrcCodec::new(config.encoding())?.framed(stream);
             let transport = Transport::new(&config, framed, tx);
 
