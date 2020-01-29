@@ -1489,7 +1489,7 @@ mod test {
     #[tokio::test]
     #[cfg(feature = "nochanlists")]
     async fn no_user_tracking() -> Result<()> {
-        let value = ":irc.test.net 353 test = #test :test ~owner &admin";
+        let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
