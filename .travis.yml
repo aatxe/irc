@@ -2,7 +2,7 @@ language: rust
 rust: stable
 sudo: false
 script:
-  - cargo test --all --features "toml yaml json"
+  - cargo test --all --features "toml_config yaml_config json_config"
   - cargo build
   # No idea how to fix this, since we don't depend on futures-preview directly.
   # - rustdoc --test README.md --extern irc=target/debug/libirc.rlib -L target/debug/deps --edition 2018

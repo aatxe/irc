@@ -94,17 +94,17 @@ pub enum Error {
 #[derive(Debug, Error)]
 pub enum ConfigError {
     /// Failed to parse as TOML.
-    #[cfg(feature = "toml")]
+    #[cfg(feature = "toml_config")]
     #[error("invalid toml")]
     InvalidToml(#[source] TomlError),
 
     /// Failed to parse as JSON.
-    #[cfg(feature = "json")]
+    #[cfg(feature = "json_config")]
     #[error("invalid json")]
     InvalidJson(#[source] serde_json::Error),
 
     /// Failed to parse as YAML.
-    #[cfg(feature = "yaml")]
+    #[cfg(feature = "yaml_config")]
     #[error("invalid yaml")]
     InvalidYaml(#[source] serde_yaml::Error),
 
@@ -136,7 +136,7 @@ pub enum ConfigError {
 }
 
 /// A wrapper that combines toml's serialization and deserialization errors.
-#[cfg(feature = "toml")]
+#[cfg(feature = "toml_config")]
 #[derive(Debug, Error)]
 pub enum TomlError {
     /// A TOML deserialization error.

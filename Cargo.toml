@@ -20,11 +20,16 @@ is-it-maintained-open-issues = { repository = "aatxe/irc" }
 members = [ "./", "irc-proto" ]
 
 [features]
-default = ["ctcp", "toml"]
+default = ["ctcp", "toml_config"]
 ctcp = []
 nochanlists = []
-json = ["serde_json"]
-yaml = ["serde_yaml"]
+json_config = ["serde", "serde_derive", "serde_json"]
+toml_config = ["serde", "serde_derive", "toml"]
+yaml_config = ["serde", "serde_derive", "serde_yaml"]
+
+# Temporary transitionary features
+json = ["json_config"]
+yaml = ["yaml_config"]
 
 [dependencies]
 thiserror = "1.0.2"
@@ -35,8 +40,8 @@ encoding = "0.2"
 irc-proto = { version = "*", path = "irc-proto" }
 log = "0.4"
 native-tls = "0.2"
-serde = { version = "1.0", features = ["derive"] }
-serde_derive = "1.0"
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_derive = { version = "1.0", optional = true }
 tokio = { version = "0.2.4", features = ["time", "net", "stream", "macros", "stream"] }
 tokio-util = { version = "0.2.0", features = ["codec"] }
 tokio-tls = "0.3.0"
