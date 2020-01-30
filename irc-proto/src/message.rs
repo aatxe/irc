@@ -136,16 +136,7 @@ impl Message {
                 ret.push_str(&tag.0);
                 if let Some(ref value) = tag.1 {
                     ret.push('=');
-                    for c in value.chars() {
-                        match c {
-                            ';' => ret.push_str("\\:"),
-                            ' ' => ret.push_str("\\s"),
-                            '\\' => ret.push_str("\\\\"),
-                            '\r' => ret.push_str("\\r"),
-                            '\n' => ret.push_str("\\n"),
-                            c => ret.push(c),
-                        }
-                    }
+                    escape_tag_value(&mut ret, &value);
                 }
                 ret.push(';');
             }
@@ -194,26 +185,7 @@ impl FromStr for Message {
                     .map(|s: &str| {
                         let mut iter = s.splitn(2, '=');
                         let (fst, snd) = (iter.next(), iter.next());
-                        let snd = snd.map(|snd| {
-                            let mut unescaped = String::with_capacity(snd.len());
-                            let mut iter = snd.chars();
-                            while let Some(c) = iter.next() {
-                                if c == '\\' {
-                                    match iter.next() {
-                                        Some(':') => unescaped.push(';'),
-                                        Some('s') => unescaped.push(' '),
-                                        Some('\\') => unescaped.push('\\'),
-                                        Some('r') => unescaped.push('\r'),
-                                        Some('n') => unescaped.push('\n'),
-                                        Some(c) => unescaped.push(c),
-                                        None => break,
-                                    }
-                                } else {
-                                    unescaped.push(c);
-                                }
-                            }
-                            unescaped
-                        });
+                        let snd = snd.map(unescape_tag_value);
                         Tag(fst.unwrap_or("").to_owned(), snd)
                     })
                     .collect::<Vec<_>>()
@@ -301,6 +273,40 @@ impl Display for Message {
 /// information to a message under IRCv3.
 #[derive(Clone, PartialEq, Debug)]
 pub struct Tag(pub String, pub Option<String>);
+
+fn escape_tag_value(msg: &mut String, value: &str) {
+    for c in value.chars() {
+        match c {
+            ';' => msg.push_str("\\:"),
+            ' ' => msg.push_str("\\s"),
+            '\\' => msg.push_str("\\\\"),
+            '\r' => msg.push_str("\\r"),
+            '\n' => msg.push_str("\\n"),
+            c => msg.push(c),
+        }
+    }
+}
+
+fn unescape_tag_value(value: &str) -> String {
+    let mut unescaped = String::with_capacity(value.len());
+    let mut iter = value.chars();
+    while let Some(c) = iter.next() {
+        if c == '\\' {
+            match iter.next() {
+                Some(':') => unescaped.push(';'),
+                Some('s') => unescaped.push(' '),
+                Some('\\') => unescaped.push('\\'),
+                Some('r') => unescaped.push('\r'),
+                Some('n') => unescaped.push('\n'),
+                Some(c) => unescaped.push(c),
+                None => break,
+            }
+        } else {
+            unescaped.push(c);
+        }
+    }
+    unescaped
+}
 
 #[cfg(test)]
 mod test {
