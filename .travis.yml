@@ -1,15 +1,59 @@
 language: rust
-rust: stable
 sudo: false
-script:
-  - cargo test --all --features "toml yaml json"
-  - cargo build
-  # No idea how to fix this, since we don't depend on futures-preview directly.
-  # - rustdoc --test README.md --extern irc=target/debug/libirc.rlib -L target/debug/deps --edition 2018
-  - cargo run --example build-bot
+
+jobs:
+  allow_failures:
+    - stage: test
+      rust: beta
+      env: FEATURES=default
+    - stage: test
+      rust: nightly
+      env: FEATURES=default
+
+  include:
+    # Default features
+    - &test
+      rust: stable
+      env: FEATURES=default
+      script:
+        - cargo test --all --no-default-features --features "$FEATURES"
+        - cargo build --no-default-features --features "$FEATURES"
+        - cargo run --no-default-features --features "$FEATURES" --example build-bot
+
+    # No features
+    - <<: *test
+      env: FEATURES=
+
+    # CTCP on without toml
+    - <<: *test
+      env: FEATURES=ctcp
+    # CTCP on w/toml (this is the same as default)
+    #- <<: *test
+    #  env: FEATURES=ctcp toml_config
+    # nochanlists on without toml
+    - <<: *test
+      env: FEATURES=nochanlists
+    # nochanlists on w/toml
+    - <<: *test
+      env: FEATURES=nochanlists toml_config
+
+    # Beta
+    - <<: *test
+      rust: beta
+      env: FEATURES=default
+    # Nightly
+    - <<: *test
+      rust: nightly
+      env: FEATURES=default
+
+# No idea how to fix this, since we don't depend on futures-preview directly.
+# - rustdoc --test README.md --extern irc=target/debug/libirc.rlib -L target/debug/deps --edition 2018
+
 notifications:
   email: false
   irc:
+    on_failure: always
+    on_success: never
     channels:
       - "ircs://irc.pdgn.co:6697/#commits"
     template:

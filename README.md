@@ -86,9 +86,9 @@ programmatic configuration. Runtime loading is done via the function `Config::lo
 sufficient for most IRC bots. Programmatic configuration is convenient for writing tests, but can
 also be useful when defining your own custom configuration format that can be converted to `Config`.
 The primary configuration format is TOML, but if you are so inclined, you can use JSON and/or YAML
-via the optional `json` and `yaml` features respectively. At the minimum, a configuration requires
-`nickname` and `server` to be defined, and all other fields are optional. You can find detailed
-explanations of the various fields on [docs.rs][config-fields].
+via the optional `json_config` and `yaml_config` features respectively. At the minimum, a configuration
+requires `nickname` and `server` to be defined, and all other fields are optional. You can find
+detailed explanations of the various fields on [docs.rs][config-fields].
 
 [config-fields]: https://docs.rs/irc/*/irc/client/data/config/struct.Config.html#fields
 
