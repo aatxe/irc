@@ -134,7 +134,7 @@ impl Message {
                 ret.push_str(&tag.0);
                 if let Some(ref value) = tag.1 {
                     ret.push('=');
-                    ret.push_str(value);
+                    escape_tag_value(&mut ret, &value);
                 }
                 ret.push(';');
             }
@@ -183,7 +183,8 @@ impl FromStr for Message {
                     .map(|s: &str| {
                         let mut iter = s.splitn(2, '=');
                         let (fst, snd) = (iter.next(), iter.next());
-                        Tag(fst.unwrap_or("").to_owned(), snd.map(|s| s.to_owned()))
+                        let snd = snd.map(unescape_tag_value);
+                        Tag(fst.unwrap_or("").to_owned(), snd)
                     })
                     .collect::<Vec<_>>()
             })
@@ -273,6 +274,40 @@ impl Display for Message {
 /// information to a message under IRCv3.
 #[derive(Clone, PartialEq, Debug)]
 pub struct Tag(pub String, pub Option<String>);
+
+fn escape_tag_value(msg: &mut String, value: &str) {
+    for c in value.chars() {
+        match c {
+            ';' => msg.push_str("\\:"),
+            ' ' => msg.push_str("\\s"),
+            '\\' => msg.push_str("\\\\"),
+            '\r' => msg.push_str("\\r"),
+            '\n' => msg.push_str("\\n"),
+            c => msg.push(c),
+        }
+    }
+}
+
+fn unescape_tag_value(value: &str) -> String {
+    let mut unescaped = String::with_capacity(value.len());
+    let mut iter = value.chars();
+    while let Some(c) = iter.next() {
+        if c == '\\' {
+            match iter.next() {
+                Some(':') => unescaped.push(';'),
+                Some('s') => unescaped.push(' '),
+                Some('\\') => unescaped.push('\\'),
+                Some('r') => unescaped.push('\r'),
+                Some('n') => unescaped.push('\n'),
+                Some(c) => unescaped.push(c),
+                None => break,
+            }
+        } else {
+            unescaped.push(c);
+        }
+    }
+    unescaped
+}
 
 #[cfg(test)]
 mod test {
@@ -488,5 +523,30 @@ mod test {
     #[should_panic]
     fn to_message_invalid_format() {
         let _: Message = ":invalid :message".into();
+    }
+
+    #[test]
+    fn to_message_tags_escapes() {
+        let msg = "@tag=\\:\\s\\\\\\r\\n\\a\\ :test PRIVMSG #test :test\r\n"
+            .parse::<Message>()
+            .unwrap();
+        let message = Message {
+            tags: Some(vec![Tag("tag".to_string(), Some("; \\\r\na".to_string()))]),
+            prefix: Some("test".into()),
+            command: PRIVMSG("#test".to_string(), "test".to_string()),
+        };
+        assert_eq!(msg, message);
+    }
+
+    #[test]
+    fn to_string_tags_escapes() {
+        let msg = Message {
+            tags: Some(vec![Tag("tag".to_string(), Some("; \\\r\na".to_string()))]),
+            prefix: Some("test".into()),
+            command: PRIVMSG("#test".to_string(), "test".to_string()),
+        }
+        .to_string();
+        let message = "@tag=\\:\\s\\\\\\r\\na :test PRIVMSG #test :test\r\n";
+        assert_eq!(msg, message);
     }
 }
