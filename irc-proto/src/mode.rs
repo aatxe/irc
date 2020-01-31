@@ -13,6 +13,9 @@ pub trait ModeType: fmt::Display + fmt::Debug + Clone + PartialEq {
 
     /// Returns true if this mode takes an argument, and false otherwise.
     fn takes_arg(&self) -> bool;
+
+    /// Creates a Mode from a given char.
+    fn from_char(c: char) -> Self;
 }
 
 /// User modes for the MODE command.
@@ -47,9 +50,7 @@ impl ModeType for UserMode {
     fn takes_arg(&self) -> bool {
         false
     }
-}
 
-impl UserMode {
     fn from_char(c: char) -> UserMode {
         use self::UserMode::*;
 
@@ -144,9 +145,7 @@ impl ModeType for ChannelMode {
             _ => false,
         }
     }
-}
 
-impl ChannelMode {
     fn from_char(c: char) -> ChannelMode {
         use self::ChannelMode::*;
 
@@ -252,49 +251,8 @@ enum PlusMinus {
 impl Mode<UserMode> {
     // TODO: turning more edge cases into errors.
     /// Parses the specified mode string as user modes.
-    pub fn as_user_modes(s: &str) -> Result<Vec<Mode<UserMode>>, MessageParseError> {
-        use self::PlusMinus::*;
-
-        let mut res = vec![];
-        let mut pieces = s.split(' ');
-        for term in pieces.clone() {
-            if term.starts_with('+') || term.starts_with('-') {
-                let _ = pieces.next();
-
-                let mut chars = term.chars();
-                let init = match chars.next() {
-                    Some('+') => Plus,
-                    Some('-') => Minus,
-                    Some(c) => {
-                        return Err(InvalidModeString {
-                            string: s.to_owned(),
-                            cause: InvalidModeModifier { modifier: c },
-                        })
-                    }
-                    None => {
-                        return Err(InvalidModeString {
-                            string: s.to_owned(),
-                            cause: MissingModeModifier,
-                        })
-                    }
-                };
-
-                for c in chars {
-                    let mode = UserMode::from_char(c);
-                    let arg = if mode.takes_arg() {
-                        pieces.next()
-                    } else {
-                        None
-                    };
-                    res.push(match init {
-                        Plus => Mode::Plus(mode, arg.map(|s| s.to_owned())),
-                        Minus => Mode::Minus(mode, arg.map(|s| s.to_owned())),
-                    })
-                }
-            }
-        }
-
-        Ok(res)
+    pub fn as_user_modes(pieces: &[&str]) -> Result<Vec<Mode<UserMode>>, MessageParseError> {
+        parse_modes(pieces)
     }
 }
 
@@ -302,48 +260,67 @@ impl Mode<UserMode> {
 impl Mode<ChannelMode> {
     // TODO: turning more edge cases into errors.
     /// Parses the specified mode string as channel modes.
-    pub fn as_channel_modes(s: &str) -> Result<Vec<Mode<ChannelMode>>, MessageParseError> {
-        use self::PlusMinus::*;
+    pub fn as_channel_modes(pieces: &[&str]) -> Result<Vec<Mode<ChannelMode>>, MessageParseError> {
+        parse_modes(pieces)
+    }
+}
 
-        let mut res = vec![];
-        let mut pieces = s.split(' ');
-        for term in pieces.clone() {
-            if term.starts_with('+') || term.starts_with('-') {
-                let _ = pieces.next();
+fn parse_modes<T>(pieces: &[&str]) -> Result<Vec<Mode<T>>, MessageParseError>
+where
+    T: ModeType,
+{
+    use self::PlusMinus::*;
 
-                let mut chars = term.chars();
-                let init = match chars.next() {
-                    Some('+') => Plus,
-                    Some('-') => Minus,
-                    Some(c) => {
-                        return Err(InvalidModeString {
-                            string: s.to_owned(),
-                            cause: InvalidModeModifier { modifier: c },
-                        })
-                    }
-                    None => {
-                        return Err(InvalidModeString {
-                            string: s.to_owned(),
-                            cause: MissingModeModifier,
-                        })
-                    }
-                };
+    let mut res = vec![];
 
-                for c in chars {
-                    let mode = ChannelMode::from_char(c);
+    if let Some((first, rest)) = pieces.split_first() {
+        let mut modes = first.chars();
+        let mut args = rest.iter();
+
+        let mut cur_mod = match modes.next() {
+            Some('+') => Plus,
+            Some('-') => Minus,
+            Some(c) => {
+                return Err(InvalidModeString {
+                    string: pieces.join(" ").to_owned(),
+                    cause: InvalidModeModifier { modifier: c },
+                })
+            }
+            None => {
+                return Err(InvalidModeString {
+                    string: pieces.join(" ").to_owned(),
+                    cause: MissingModeModifier,
+                })
+            }
+        };
+
+        for c in modes {
+            match c {
+                '+' => cur_mod = Plus,
+                '-' => cur_mod = Minus,
+                _ => {
+                    let mode = T::from_char(c);
                     let arg = if mode.takes_arg() {
-                        pieces.next()
+                        // TODO: if there's no arg, this should error
+                        args.next()
                     } else {
                         None
                     };
-                    res.push(match init {
-                        Plus => Mode::Plus(mode, arg.map(|s| s.to_owned())),
-                        Minus => Mode::Minus(mode, arg.map(|s| s.to_owned())),
+                    res.push(match cur_mod {
+                        Plus => Mode::Plus(mode, arg.map(|s| s.to_string())),
+                        Minus => Mode::Minus(mode, arg.map(|s| s.to_string())),
                     })
                 }
             }
         }
 
+        // TODO: if there are extra args left, this should error
+
         Ok(res)
+    } else {
+        Err(InvalidModeString {
+            string: pieces.join(" ").to_owned(),
+            cause: MissingModeModifier,
+        })
     }
 }
