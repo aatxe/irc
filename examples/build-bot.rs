@@ -29,7 +29,7 @@ async fn main() -> irc::error::Result<()> {
 
     while let Some(message) = stream.next().await.transpose()? {
         match message.command {
-            Command::Response(Response::RPL_ISUPPORT, _, _) => {
+            Command::Response(Response::RPL_ISUPPORT, _) => {
                 client.send_privmsg(
                     "#commits",
                     format!(

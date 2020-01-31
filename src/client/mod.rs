@@ -570,11 +570,9 @@ impl ClientState {
                     }
                 }
             }
-            Command::Response(Response::RPL_NAMREPLY, ref args, ref suffix) => {
-                self.handle_namreply(args, suffix)
-            }
-            Command::Response(Response::RPL_ENDOFMOTD, _, _)
-            | Command::Response(Response::ERR_NOMOTD, _, _) => {
+            Command::Response(Response::RPL_NAMREPLY, ref args) => self.handle_namreply(args),
+            Command::Response(Response::RPL_ENDOFMOTD, _)
+            | Command::Response(Response::ERR_NOMOTD, _) => {
                 self.send_nick_password()?;
                 self.send_umodes()?;
 
@@ -593,8 +591,8 @@ impl ClientState {
                     self.send_join(chan)?
                 }
             }
-            Command::Response(Response::ERR_NICKNAMEINUSE, _, _)
-            | Command::Response(Response::ERR_ERRONEOUSNICKNAME, _, _) => {
+            Command::Response(Response::ERR_NICKNAMEINUSE, _)
+            | Command::Response(Response::ERR_ERRONEOUSNICKNAME, _) => {
                 let alt_nicks = self.config().alternate_nicknames();
                 let mut index = self.alt_nick_index.write();
 
@@ -623,20 +621,19 @@ impl ClientState {
                 };
 
                 for s in seq {
-                    self.send(NICKSERV(format!(
-                        "{} {} {}",
-                        s,
-                        self.config().nickname()?,
-                        self.config().nick_password()
+                    self.send(NICKSERV(vec!(
+                        s.to_string(),
+                        self.config().nickname()?.to_string(),
+                        self.config().nick_password().to_string(),
                     )))?;
                 }
                 *index = 0;
                 self.send(NICK(self.config().nickname()?.to_owned()))?
             }
 
-            self.send(NICKSERV(format!(
-                "IDENTIFY {}",
-                self.config().nick_password()
+            self.send(NICKSERV(vec!(
+                "IDENTIFY".to_string(),
+                self.config().nick_password().to_string()
             )))
         }
     }
@@ -647,15 +644,20 @@ impl ClientState {
         } else {
             self.send_mode(
                 self.current_nickname(),
-                &Mode::as_user_modes(self.config().umodes()).map_err(|e| {
-                    error::Error::InvalidMessage {
-                        string: format!(
-                            "MODE {} {}",
-                            self.current_nickname(),
-                            self.config().umodes()
-                        ),
-                        cause: e,
-                    }
+                &Mode::as_user_modes(
+                    self.config()
+                        .umodes()
+                        .split(' ')
+                        .collect::<Vec<_>>()
+                        .as_ref(),
+                )
+                .map_err(|e| error::Error::InvalidMessage {
+                    string: format!(
+                        "MODE {} {}",
+                        self.current_nickname(),
+                        self.config().umodes()
+                    ),
+                    cause: e,
                 })?,
             )
         }
@@ -740,20 +742,18 @@ impl ClientState {
     }
 
     #[cfg(feature = "nochanlists")]
-    fn handle_namreply(&self, _: &[String], _: &Option<String>) {}
+    fn handle_namreply(&self, _: &[String]) {}
 
     #[cfg(not(feature = "nochanlists"))]
-    fn handle_namreply(&self, args: &[String], suffix: &Option<String>) {
-        if let Some(ref users) = *suffix {
-            if args.len() == 3 {
-                let chan = &args[2];
-                for user in users.split(' ') {
-                    self.chanlists
-                        .write()
-                        .entry(chan.clone())
-                        .or_insert_with(Vec::new)
-                        .push(User::new(user))
-                }
+    fn handle_namreply(&self, args: &[String]) {
+        if args.len() == 4 {
+            let chan = &args[2];
+            for user in args[3].split(' ') {
+                self.chanlists
+                    .write()
+                    .entry(chan.clone())
+                    .or_insert_with(Vec::new)
+                    .push(User::new(user))
             }
         }
     }
@@ -1219,8 +1219,8 @@ mod test {
         client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
-            "NICK :test2\r\nNICKSERV GHOST test password\r\n\
-             NICK :test\r\nNICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n"
+            "NICK test2\r\nNICKSERV GHOST test password\r\n\
+             NICK test\r\nNICKSERV IDENTIFY password\r\nJOIN #test\r\nJOIN #test2\r\n"
         );
         Ok(())
     }
@@ -1243,8 +1243,8 @@ mod test {
         client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
-            "NICK :test2\r\nNICKSERV RECOVER test password\
-             \r\nNICKSERV RELEASE test password\r\nNICK :test\r\nNICKSERV IDENTIFY password\
+            "NICK test2\r\nNICKSERV RECOVER test password\
+             \r\nNICKSERV RELEASE test password\r\nNICK test\r\nNICKSERV IDENTIFY password\
              \r\nJOIN #test\r\nJOIN #test2\r\n"
         );
         Ok(())
@@ -1278,7 +1278,7 @@ mod test {
         })
         .await?;
         client.stream()?.collect().await?;
-        assert_eq!(&get_client_value(client)[..], "NICK :test2\r\n");
+        assert_eq!(&get_client_value(client)[..], "NICK test2\r\n");
         Ok(())
     }
 
@@ -1332,10 +1332,10 @@ mod test {
     async fn send_raw_is_really_raw() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
-            .send(Raw("PASS".to_owned(), vec!["password".to_owned()], None))
+            .send(Raw("PASS".to_owned(), vec!["password".to_owned()]))
             .is_ok());
         assert!(client
-            .send(Raw("NICK".to_owned(), vec!["test".to_owned()], None))
+            .send(Raw("NICK".to_owned(), vec!["test".to_owned()]))
             .is_ok());
         client.stream()?.collect().await?;
         assert_eq!(
@@ -1622,7 +1622,7 @@ mod test {
     #[tokio::test]
     #[cfg(feature = "ctcp")]
     async fn ctcp_ping_no_timestamp() -> Result<()> {
-        let value = ":test!test@test PRIVMSG test :\u{001}PING\u{001}\r\n";
+        let value = ":test!test@test PRIVMSG test \u{001}PING\u{001}\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
@@ -1640,8 +1640,8 @@ mod test {
         client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
-            "CAP END\r\nNICK :test\r\n\
-             USER test 0 * :test\r\n"
+            "CAP END\r\nNICK test\r\n\
+             USER test 0 * test\r\n"
         );
         Ok(())
     }
@@ -1658,8 +1658,8 @@ mod test {
         client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
-            "CAP END\r\nPASS :password\r\nNICK :test\r\n\
-             USER test 0 * :test\r\n"
+            "CAP END\r\nPASS password\r\nNICK test\r\n\
+             USER test 0 * test\r\n"
         );
         Ok(())
     }
@@ -1669,7 +1669,7 @@ mod test {
         let mut client = Client::from_config(test_config()).await?;
         client.send_pong("irc.test.net")?;
         client.stream()?.collect().await?;
-        assert_eq!(&get_client_value(client)[..], "PONG :irc.test.net\r\n");
+        assert_eq!(&get_client_value(client)[..], "PONG irc.test.net\r\n");
         Ok(())
     }
 
@@ -1699,7 +1699,7 @@ mod test {
         let mut client = Client::from_config(test_config()).await?;
         client.send_oper("test", "test")?;
         client.stream()?.collect().await?;
-        assert_eq!(&get_client_value(client)[..], "OPER test :test\r\n");
+        assert_eq!(&get_client_value(client)[..], "OPER test test\r\n");
         Ok(())
     }
 
@@ -1846,7 +1846,7 @@ mod test {
         client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
-            "PRIVMSG test :\u{001}MESSAGE\u{001}\r\n"
+            "PRIVMSG test \u{001}MESSAGE\u{001}\r\n"
         );
         Ok(())
     }
@@ -1872,7 +1872,7 @@ mod test {
         client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
-            "PRIVMSG test :\u{001}FINGER\u{001}\r\n"
+            "PRIVMSG test \u{001}FINGER\u{001}\r\n"
         );
         Ok(())
     }
@@ -1885,7 +1885,7 @@ mod test {
         client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
-            "PRIVMSG test :\u{001}VERSION\u{001}\r\n"
+            "PRIVMSG test \u{001}VERSION\u{001}\r\n"
         );
         Ok(())
     }
@@ -1898,7 +1898,7 @@ mod test {
         client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
-            "PRIVMSG test :\u{001}SOURCE\u{001}\r\n"
+            "PRIVMSG test \u{001}SOURCE\u{001}\r\n"
         );
         Ok(())
     }
@@ -1911,7 +1911,7 @@ mod test {
         client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
-            "PRIVMSG test :\u{001}USERINFO\u{001}\r\n"
+            "PRIVMSG test \u{001}USERINFO\u{001}\r\n"
         );
         Ok(())
     }
@@ -1937,7 +1937,7 @@ mod test {
         client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
-            "PRIVMSG test :\u{001}TIME\u{001}\r\n"
+            "PRIVMSG test \u{001}TIME\u{001}\r\n"
         );
         Ok(())
     }
