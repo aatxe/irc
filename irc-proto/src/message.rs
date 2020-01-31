@@ -546,7 +546,7 @@ mod test {
             command: PRIVMSG("#test".to_string(), "test".to_string()),
         }
         .to_string();
-        let message = "@tag=\\:\\s\\\\\\r\\na :test PRIVMSG #test :test\r\n";
+        let message = "@tag=\\:\\s\\\\\\r\\na :test PRIVMSG #test test\r\n";
         assert_eq!(msg, message);
     }
 }
