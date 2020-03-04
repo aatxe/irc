@@ -17,7 +17,6 @@ async fn main() -> irc::error::Result<()> {
         nickname: Some("irc-crate-ci".to_owned()),
         server: Some("irc.pdgn.co".to_owned()),
         alt_nicks: vec!["[irc-crate-ci]".to_owned()],
-        use_ssl: true,
         ..Default::default()
     };
 

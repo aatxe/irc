@@ -7,7 +7,6 @@ async fn main() -> irc::error::Result<()> {
         nickname: Some("repeater".to_owned()),
         alt_nicks: vec!["blaster".to_owned(), "smg".to_owned()],
         server: Some("irc.mozilla.org".to_owned()),
-        use_ssl: true,
         channels: vec!["#rust-spam".to_owned()],
         burst_window_length: Some(4),
         max_messages_in_burst: Some(4),

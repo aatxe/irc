@@ -7,7 +7,6 @@ use std::{
     io::prelude::*,
     path::{Path, PathBuf},
 };
-use tokio::net::ToSocketAddrs;
 
 #[cfg(feature = "json_config")]
 use serde_json;
@@ -15,6 +14,9 @@ use serde_json;
 use serde_yaml;
 #[cfg(feature = "toml_config")]
 use toml;
+
+#[cfg(feature = "proxy")]
+use crate::client::data::proxy::ProxyType;
 
 use crate::error::Error::InvalidConfig;
 #[cfg(feature = "toml_config")]
@@ -98,11 +100,30 @@ pub struct Config {
     /// The password to connect to the server.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub password: Option<String>,
+    /// The proxy type to connect to.
+    #[cfg(feature = "proxy")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub proxy_type: Option<ProxyType>,
+    /// The proxy server to connect to.
+    #[cfg(feature = "proxy")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub proxy_server: Option<String>,
+    /// The proxy port to connect on.
+    #[cfg(feature = "proxy")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub proxy_port: Option<u16>,
+    /// The username to connect to the proxy server.
+    #[cfg(feature = "proxy")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub proxy_username: Option<String>,
+    /// The password to connect to the proxy server.
+    #[cfg(feature = "proxy")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub proxy_password: Option<String>,
     /// Whether or not to use SSL.
     /// Clients will automatically panic if this is enabled without SSL support.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "is_false"))]
-    #[cfg_attr(feature = "serde", serde(default))]
-    pub use_ssl: bool,
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub use_ssl: Option<bool>,
     /// The path to the SSL certificate for this server in DER format.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cert_path: Option<String>,
@@ -415,31 +436,64 @@ impl Config {
     }
 
     /// Gets the port of the server specified in the configuration.
-    /// This defaults to 6667 (or 6697 if use_ssl is specified as true) when not specified.
+    /// This defaults to 6697 (or 6667 if use_ssl is specified as false) when not specified.
     pub fn port(&self) -> u16 {
         self.port
             .as_ref()
             .cloned()
-            .unwrap_or(if self.use_ssl() { 6697 } else { 6667 })
-    }
-
-    /// Return something that can be converted into a socket address by tokio.
-    pub(crate) fn to_socket_addrs(&self) -> Result<impl ToSocketAddrs + '_> {
-        let server = self.server()?;
-        let port = self.port();
-        Ok((server, port))
+            .unwrap_or(match self.use_ssl() {
+                true => 6697,
+                false => 6667
+            })
     }
 
     /// Gets the server password specified in the configuration.
-    /// This defaults to a blank string when not specified.
+    /// This defaults to an empty string when not specified.
     pub fn password(&self) -> &str {
         self.password.as_ref().map_or("", String::as_str)
     }
 
+    /// Gets the type of the proxy specified in the configuration.
+    /// This defaults to a None ProxyType when not specified.
+    #[cfg(feature = "proxy")]
+    pub fn proxy_type(&self) -> ProxyType {
+        self.proxy_type.as_ref().cloned().unwrap_or(ProxyType::None)
+    }
+
+    /// Gets the address of the proxy specified in the configuration.
+    /// This defaults to "localhost" string when not specified.
+    #[cfg(feature = "proxy")]
+    pub fn proxy_server(&self) -> &str {
+        self.proxy_server
+            .as_ref()
+            .map_or("localhost", String::as_str)
+    }
+
+    /// Gets the port of the proxy specified in the configuration.
+    /// This defaults to 1080 when not specified.
+    #[cfg(feature = "proxy")]
+    pub fn proxy_port(&self) -> u16 {
+        self.proxy_port.as_ref().cloned().unwrap_or(1080)
+    }
+
+    /// Gets the username of the proxy specified in the configuration.
+    /// This defaults to an empty string when not specified.
+    #[cfg(feature = "proxy")]
+    pub fn proxy_username(&self) -> &str {
+        self.proxy_username.as_ref().map_or("", String::as_str)
+    }
+
+    /// Gets the password of the proxy specified in the configuration.
+    /// This defaults to an empty string when not specified.
+    #[cfg(feature = "proxy")]
+    pub fn proxy_password(&self) -> &str {
+        self.proxy_password.as_ref().map_or("", String::as_str)
+    }
+
     /// Gets whether or not to use SSL with this connection.
-    /// This defaults to false when not specified.
+    /// This defaults to true when not specified.
     pub fn use_ssl(&self) -> bool {
-        self.use_ssl
+        self.use_ssl.as_ref().cloned().map_or(true, |s| s)
     }
 
     /// Gets the path to the SSL certificate in DER format if specified.
