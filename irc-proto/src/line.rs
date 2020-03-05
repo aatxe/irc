@@ -63,8 +63,7 @@ impl Decoder for LineCodec {
     }
 }
 
-impl Encoder for LineCodec {
-    type Item = String;
+impl Encoder<String> for LineCodec {
     type Error = error::ProtocolError;
 
     fn encode(&mut self, msg: String, dst: &mut BytesMut) -> error::Result<()> {
