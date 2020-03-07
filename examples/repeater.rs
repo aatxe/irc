@@ -4,9 +4,8 @@ use irc::client::prelude::*;
 #[tokio::main]
 async fn main() -> irc::error::Result<()> {
     let config = Config {
-        nickname: Some("repeater".to_owned()),
-        alt_nicks: vec!["blaster".to_owned(), "smg".to_owned()],
-        server: Some("irc.mozilla.org".to_owned()),
+        nickname: Some("pickles".to_owned()),
+        server: Some("irc.pdgn.co".to_owned()),
         channels: vec!["#rust-spam".to_owned()],
         burst_window_length: Some(4),
         max_messages_in_burst: Some(4),
@@ -17,6 +16,7 @@ async fn main() -> irc::error::Result<()> {
     client.identify()?;
 
     let mut stream = client.stream()?;
+    let sender = client.sender();
 
     loop {
         let message = stream.select_next_some().await?;
@@ -28,7 +28,7 @@ async fn main() -> irc::error::Result<()> {
                     let n = tokens[0].len() + tokens[1].len() + 2;
                     if let Ok(count) = tokens[1].parse::<u8>() {
                         for _ in 0..count {
-                            client.send_privmsg(
+                            sender.send_privmsg(
                                 message.response_target().unwrap_or(target),
                                 &msg[n..],
                             )?;

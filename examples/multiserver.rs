@@ -1,5 +1,3 @@
-extern crate irc;
-
 use futures::prelude::*;
 use irc::{client::prelude::*, error};
 
@@ -9,21 +7,21 @@ async fn main() -> irc::error::Result<()> {
 
     let cfg1 = Config {
         nickname: Some("pickles".to_owned()),
-        server: Some("irc.mozilla.org".to_owned()),
+        server: Some("irc.pdgn.co".to_owned()),
         channels: vec!["#rust-spam".to_owned()],
         ..Default::default()
     };
 
     let cfg2 = Config {
         nickname: Some("bananas".to_owned()),
-        server: Some("irc.mozilla.org".to_owned()),
+        server: Some("irc.pdgn.co".to_owned()),
         channels: vec!["#rust-spam".to_owned()],
         ..Default::default()
     };
 
     let configs = vec![cfg1, cfg2];
-    let mut senders = Vec::new();
     let mut streams = Vec::new();
+    let mut senders = Vec::new();
 
     for config in configs {
         // Immediate errors like failure to resolve the server's domain or to establish any connection will
@@ -31,8 +29,8 @@ async fn main() -> irc::error::Result<()> {
         let mut client = Client::from_config(config).await?;
         client.identify()?;
 
-        senders.push(client.sender());
         streams.push(client.stream()?);
+        senders.push(client.sender());
     }
 
     loop {
@@ -45,7 +43,7 @@ async fn main() -> irc::error::Result<()> {
 }
 
 fn process_msg(sender: &Sender, message: Message) -> error::Result<()> {
-    // print!("{}", message);
+    print!("{}", message);
 
     match message.command {
         Command::PRIVMSG(ref target, ref msg) => {

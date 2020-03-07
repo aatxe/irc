@@ -621,20 +621,20 @@ impl ClientState {
                 };
 
                 for s in seq {
-                    self.send(NICKSERV(vec!(
+                    self.send(NICKSERV(vec![
                         s.to_string(),
                         self.config().nickname()?.to_string(),
                         self.config().nick_password().to_string(),
-                    )))?;
+                    ]))?;
                 }
                 *index = 0;
                 self.send(NICK(self.config().nickname()?.to_owned()))?
             }
 
-            self.send(NICKSERV(vec!(
+            self.send(NICKSERV(vec![
                 "IDENTIFY".to_string(),
-                self.config().nick_password().to_string()
-            )))
+                self.config().nick_password().to_string(),
+            ]))
         }
     }
 

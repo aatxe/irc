@@ -36,6 +36,9 @@ jobs:
     # nochanlists on w/toml
     - <<: *test
       env: FEATURES=nochanlists toml_config
+    # tls-rust
+    - <<: *test
+      env: FEATURES=tls-rust
 
     # Beta
     - <<: *test

@@ -120,17 +120,21 @@ pub struct Config {
     #[cfg(feature = "proxy")]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub proxy_password: Option<String>,
-    /// Whether or not to use SSL.
-    /// Clients will automatically panic if this is enabled without SSL support.
+    /// Whether or not to use TLS.
+    /// Clients will automatically panic if this is enabled without TLS support.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub use_ssl: Option<bool>,
-    /// The path to the SSL certificate for this server in DER format.
+    pub use_tls: Option<bool>,
+    /// The path to the TLS certificate for this server in DER format.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cert_path: Option<String>,
-    /// The path to a SSL certificate to use for CertFP client authentication in DER format.
+    /// The path to a TLS certificate to use for CertFP client authentication in DER format.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub client_cert_path: Option<String>,
     /// The password for the certificate to use in CertFP authentication.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub client_cert_pass: Option<String>,
     /// The encoding type used for this connection.
@@ -436,15 +440,20 @@ impl Config {
     }
 
     /// Gets the port of the server specified in the configuration.
-    /// This defaults to 6697 (or 6667 if use_ssl is specified as false) when not specified.
+    /// This defaults to 6697 (or 6667 if use_tls is specified as false) when not specified.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn port(&self) -> u16 {
-        self.port
-            .as_ref()
-            .cloned()
-            .unwrap_or(match self.use_ssl() {
-                true => 6697,
-                false => 6667
-            })
+        self.port.as_ref().cloned().unwrap_or(match self.use_tls() {
+            true => 6697,
+            false => 6667,
+        })
+    }
+
+    /// Gets the port of the server specified in the configuration.
+    /// This defaults to 6667 when not specified.
+    #[cfg(not(any(feature = "tls-native", feature = "tls-rust")))]
+    pub fn port(&self) -> u16 {
+        self.port.as_ref().cloned().unwrap_or(6667)
     }
 
     /// Gets the server password specified in the configuration.
@@ -490,23 +499,27 @@ impl Config {
         self.proxy_password.as_ref().map_or("", String::as_str)
     }
 
-    /// Gets whether or not to use SSL with this connection.
+    /// Gets whether or not to use TLS with this connection.
     /// This defaults to true when not specified.
-    pub fn use_ssl(&self) -> bool {
-        self.use_ssl.as_ref().cloned().map_or(true, |s| s)
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
+    pub fn use_tls(&self) -> bool {
+        self.use_tls.as_ref().cloned().map_or(true, |s| s)
     }
 
-    /// Gets the path to the SSL certificate in DER format if specified.
+    /// Gets the path to the TLS certificate in DER format if specified.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn cert_path(&self) -> Option<&str> {
         self.cert_path.as_ref().map(String::as_str)
     }
 
     /// Gets the path to the client authentication certificate in DER format if specified.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn client_cert_path(&self) -> Option<&str> {
         self.client_cert_path.as_ref().map(String::as_str)
     }
 
     /// Gets the password to the client authentication certificate.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn client_cert_pass(&self) -> &str {
         self.client_cert_pass.as_ref().map_or("", String::as_str)
     }
@@ -618,8 +631,15 @@ impl Config {
 
 #[cfg(test)]
 mod test {
-    use super::{Config, Result};
+    use super::Config;
     use std::collections::HashMap;
+
+    #[cfg(any(
+        feature = "json_config",
+        feature = "toml_config",
+        feature = "yaml_config"
+    ))]
+    use super::Result;
 
     #[allow(unused)]
     fn test_config() -> Config {
