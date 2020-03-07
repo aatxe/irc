@@ -44,8 +44,7 @@ impl Decoder for IrcCodec {
     }
 }
 
-impl Encoder for IrcCodec {
-    type Item = Message;
+impl Encoder<Message> for IrcCodec {
     type Error = error::ProtocolError;
 
     fn encode(&mut self, msg: Message, dst: &mut BytesMut) -> error::Result<()> {
