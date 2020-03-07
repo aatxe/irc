@@ -8,7 +8,6 @@
   "password": "",
   "server": "irc.test.net",
   "port": 6667,
-  "use_ssl": false,
   "encoding": "UTF-8",
   "channels": [
     "#test",

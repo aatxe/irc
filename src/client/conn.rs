@@ -13,6 +13,12 @@ use tokio::net::TcpStream;
 use tokio_tls::{self, TlsStream};
 use tokio_util::codec::Decoder;
 
+#[cfg(feature = "proxy")]
+use tokio_socks::tcp::Socks5Stream;
+
+#[cfg(feature = "proxy")]
+use crate::client::data::ProxyType;
+
 use crate::{
     client::{
         data::Config,
@@ -76,8 +82,8 @@ impl Connection {
         }
 
         if config.use_ssl() {
-            let domain = format!("{}", config.server()?);
-            log::info!("Connecting via SSL to {}.", domain);
+            log::info!("Building SSL connection.");
+
             let mut builder = TlsConnector::builder();
 
             if let Some(cert_path) = config.cert_path() {
@@ -103,19 +109,72 @@ impl Connection {
             }
             let connector: tokio_tls::TlsConnector = builder.build()?.into();
 
-            let socket = TcpStream::connect(config.to_socket_addrs()?).await?;
-            let stream = connector.connect(&domain, socket).await?;
+            let socket = Self::new_conn(config).await?;
+            let stream = connector.connect(config.server()?, socket).await?;
             let framed = IrcCodec::new(config.encoding())?.framed(stream);
             let transport = Transport::new(&config, framed, tx);
 
             Ok(Connection::Secured(transport))
         } else {
-            log::info!("Connecting to {}.", config.server()?);
-            let stream = TcpStream::connect(config.to_socket_addrs()?).await?;
+            let stream = Self::new_conn(config).await?;
             let framed = IrcCodec::new(config.encoding())?.framed(stream);
             let transport = Transport::new(&config, framed, tx);
 
             Ok(Connection::Unsecured(transport))
+        }
+    }
+
+    #[cfg(not(feature = "proxy"))]
+    async fn new_conn(config: &Config) -> error::Result<TcpStream> {
+        let server = config.server()?;
+        let port = config.port();
+        let address = (server, port);
+
+        log::info!(
+            "Connecting to {:?} using SSL: {}",
+            address,
+            config.use_ssl()
+        );
+
+        Ok(TcpStream::connect(address).await?)
+    }
+
+    #[cfg(feature = "proxy")]
+    async fn new_conn(config: &Config) -> error::Result<TcpStream> {
+        let server = config.server()?;
+        let port = config.port();
+        let address = (server, port);
+
+        log::info!(
+            "Connecting to {:?} using SSL: {}",
+            address,
+            config.use_ssl()
+        );
+
+        match config.proxy_type() {
+            ProxyType::None => Ok(TcpStream::connect(address).await?),
+            _ => {
+                let proxy_server = config.proxy_server();
+                let proxy_port = config.proxy_port();
+                let proxy_username = config.proxy_username();
+                let proxy_password = config.proxy_password();
+                let proxy = (proxy_server, proxy_port);
+
+                log::info!("Setup proxy {:?}.", proxy);
+
+                if !proxy_username.is_empty() || !proxy_password.is_empty() {
+                    return Ok(Socks5Stream::connect_with_password(
+                        proxy,
+                        address,
+                        proxy_username,
+                        proxy_password,
+                    )
+                    .await?
+                    .into_inner());
+                }
+
+                Ok(Socks5Stream::connect(proxy, address).await?.into_inner())
+            }
         }
     }
 

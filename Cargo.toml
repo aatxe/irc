@@ -26,6 +26,7 @@ nochanlists = []
 json_config = ["serde", "serde_derive", "serde_json"]
 toml_config = ["serde", "serde_derive", "toml"]
 yaml_config = ["serde", "serde_derive", "serde_yaml"]
+proxy = ["tokio-socks"]
 
 # Temporary transitionary features
 json = ["json_config"]
@@ -44,6 +45,7 @@ serde = { version = "1.0", features = ["derive"], optional = true }
 serde_derive = { version = "1.0", optional = true }
 tokio = { version = "0.2.4", features = ["time", "net", "stream", "macros"] }
 tokio-util = { version = "0.3.0", features = ["codec"] }
+tokio-socks = { version = "0.2.0", optional = true }
 tokio-tls = "0.3.0"
 serde_json = { version = "1.0", optional = true }
 serde_yaml = { version = "0.8", optional = true }
@@ -59,3 +61,8 @@ anyhow = "1.0.13"
 args = "2.0"
 getopts = "0.2"
 env_logger = "0.7"
+
+[[example]]
+name = "proxy"
+path = "examples/proxy.rs"
+required-features = ["proxy"]

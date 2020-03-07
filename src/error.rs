@@ -21,6 +21,11 @@ pub enum Error {
     #[error("an io error occurred")]
     Io(#[source] IoError),
 
+    /// An internal proxy error.
+    #[cfg(feature = "proxy")]
+    #[error("a proxy error occurred")]
+    Proxy(tokio_socks::Error),
+
     /// An internal TLS error.
     #[error("a TLS error occurred")]
     Tls(#[source] native_tls::Error),
@@ -161,6 +166,13 @@ impl From<ProtocolError> for Error {
 impl From<IoError> for Error {
     fn from(e: IoError) -> Error {
         Error::Io(e)
+    }
+}
+
+#[cfg(feature = "proxy")]
+impl From<tokio_socks::Error> for Error {
+    fn from(e: tokio_socks::Error) -> Error {
+        Error::Proxy(e)
     }
 }
 

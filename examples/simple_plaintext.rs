@@ -7,7 +7,7 @@ async fn main() -> irc::error::Result<()> {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.mozilla.org".to_owned()),
         channels: vec!["#rust-spam".to_owned()],
-        use_ssl: true,
+        use_ssl: Some(false),
         ..Default::default()
     };
 
