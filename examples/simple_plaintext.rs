@@ -5,23 +5,30 @@ use irc::client::prelude::*;
 async fn main() -> irc::error::Result<()> {
     let config = Config {
         nickname: Some("pickles".to_owned()),
-        server: Some("irc.mozilla.org".to_owned()),
+        server: Some("irc.pdgn.co".to_owned()),
         channels: vec!["#rust-spam".to_owned()],
-        use_ssl: Some(false),
+        use_tls: Some(false),
         ..Default::default()
     };
 
     let mut client = Client::from_config(config).await?;
+    client.identify()?;
+
     let mut stream = client.stream()?;
     let sender = client.sender();
 
-    loop {
-        let message = stream.select_next_some().await?;
+    while let Some(message) = stream.next().await.transpose()? {
+        print!("{}", message);
 
-        if let Command::PRIVMSG(ref target, ref msg) = message.command {
-            if msg.contains("pickles") {
-                sender.send_privmsg(target, "Hi!")?;
+        match message.command {
+            Command::PRIVMSG(ref target, ref msg) => {
+                if msg.contains(client.current_nickname()) {
+                    sender.send_privmsg(target, "Hi!")?;
+                }
             }
+            _ => (),
         }
     }
+
+    Ok(())
 }

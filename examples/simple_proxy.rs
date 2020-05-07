@@ -1,13 +1,11 @@
 use futures::prelude::*;
-use irc::client::data::ProxyType;
 use irc::client::prelude::*;
 
 #[tokio::main]
 async fn main() -> irc::error::Result<()> {
     let config = Config {
-        nickname: Some("rust-irc-bot".to_owned()),
-        alt_nicks: vec!["bananas".to_owned(), "apples".to_owned()],
-        server: Some("irc.oftc.net".to_owned()),
+        nickname: Some("pickles".to_owned()),
+        server: Some("irc.pdgn.co".to_owned()),
         channels: vec!["#rust-spam".to_owned()],
         proxy_type: Some(ProxyType::Socks5),
         proxy_server: Some("127.0.0.1".to_owned()),
@@ -19,9 +17,19 @@ async fn main() -> irc::error::Result<()> {
     client.identify()?;
 
     let mut stream = client.stream()?;
+    let sender = client.sender();
 
     while let Some(message) = stream.next().await.transpose()? {
         print!("{}", message);
+
+        match message.command {
+            Command::PRIVMSG(ref target, ref msg) => {
+                if msg.contains(client.current_nickname()) {
+                    sender.send_privmsg(target, "Hi!")?;
+                }
+            }
+            _ => (),
+        }
     }
 
     Ok(())

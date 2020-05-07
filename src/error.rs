@@ -9,6 +9,9 @@ use futures_channel::{
 };
 use thiserror::Error;
 
+#[cfg(feature = "tls-rust")]
+use tokio_rustls::webpki::InvalidDNSNameError;
+
 use crate::proto::error::{MessageParseError, ProtocolError};
 
 /// A specialized `Result` type for the `irc` crate.
@@ -27,8 +30,14 @@ pub enum Error {
     Proxy(tokio_socks::Error),
 
     /// An internal TLS error.
+    #[cfg(feature = "tls-native")]
     #[error("a TLS error occurred")]
     Tls(#[source] native_tls::Error),
+
+    /// An internal DNS error.
+    #[cfg(feature = "tls-rust")]
+    #[error("a DNS error occurred")]
+    Dns(#[source] InvalidDNSNameError),
 
     /// An internal synchronous channel closed.
     #[error("a sync channel closed")]
@@ -176,9 +185,17 @@ impl From<tokio_socks::Error> for Error {
     }
 }
 
+#[cfg(feature = "tls-native")]
 impl From<native_tls::Error> for Error {
     fn from(e: native_tls::Error) -> Error {
         Error::Tls(e)
+    }
+}
+
+#[cfg(feature = "tls-rust")]
+impl From<InvalidDNSNameError> for Error {
+    fn from(e: InvalidDNSNameError) -> Error {
+        Error::Dns(e)
     }
 }
 

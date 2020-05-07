@@ -247,11 +247,9 @@ impl FromStr for Message {
             args.push(suffix);
         }
 
-        Message::with_tags(tags, prefix, command, args).map_err(|e| {
-            ProtocolError::InvalidMessage {
-                string: s.to_owned(),
-                cause: e,
-            }
+        Message::with_tags(tags, prefix, command, args).map_err(|e| ProtocolError::InvalidMessage {
+            string: s.to_owned(),
+            cause: e,
         })
     }
 }

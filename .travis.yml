@@ -36,6 +36,9 @@ jobs:
     # nochanlists on w/toml
     - <<: *test
       env: FEATURES=nochanlists toml_config
+    # tls-rust: disabled until testing server supports TLS 1.3
+    # - <<: *test
+    #  env: FEATURES=tls-rust
 
     # Beta
     - <<: *test

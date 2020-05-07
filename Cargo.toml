@@ -11,58 +11,81 @@ repository = "https://github.com/aatxe/irc"
 readme = "README.md"
 edition = "2018"
 
+
 [badges]
 travis-ci = { repository = "aatxe/irc" }
 is-it-maintained-issue-resolution = { repository = "aatxe/irc" }
 is-it-maintained-open-issues = { repository = "aatxe/irc" }
 
+
 [workspace]
-members = [ "./", "irc-proto" ]
+members = [ "./", "irc-proto/" ]
+
 
 [features]
-default = ["ctcp", "toml_config"]
+default = ["ctcp", "tls-native", "toml_config"]
 ctcp = []
 nochanlists = []
-json_config = ["serde", "serde_derive", "serde_json"]
-toml_config = ["serde", "serde_derive", "toml"]
-yaml_config = ["serde", "serde_derive", "serde_yaml"]
-proxy = ["tokio-socks"]
 
+json_config = ["serde", "serde/derive", "serde_derive", "serde_json"]
+toml_config = ["serde", "serde/derive", "serde_derive", "toml"]
+yaml_config = ["serde", "serde/derive", "serde_derive", "serde_yaml"]
 # Temporary transitionary features
 json = ["json_config"]
 yaml = ["yaml_config"]
 
+proxy = ["tokio-socks"]
+
+tls-native = ["native-tls", "tokio-tls"]
+tls-rust = ["tokio-rustls", "webpki-roots"]
+
+
 [dependencies]
-thiserror = "1.0.2"
-bufstream = "0.1"
-bytes = "0.5"
-chrono = "0.4"
-encoding = "0.2"
-irc-proto = { version = "*", path = "irc-proto" }
-log = "0.4"
-native-tls = "0.2"
-serde = { version = "1.0", features = ["derive"], optional = true }
-serde_derive = { version = "1.0", optional = true }
-tokio = { version = "0.2.4", features = ["time", "net", "stream", "macros"] }
-tokio-util = { version = "0.3.0", features = ["codec"] }
-tokio-socks = { version = "0.2.0", optional = true }
-tokio-tls = "0.3.0"
-serde_json = { version = "1.0", optional = true }
-serde_yaml = { version = "0.8", optional = true }
-toml = { version = "0.5", optional = true }
-pin-utils = "0.1.0-alpha.4"
+bufstream = "0.1.0"
+bytes = "0.5.0"
+chrono = "0.4.0"
+encoding = "0.2.0"
+futures-channel = "0.3.0"
+futures-util = { version = "0.3.0", features = ["sink"] }
+irc-proto = { path = "irc-proto" }
+log = "0.4.0"
 parking_lot = "0.10.0"
-futures-channel = "0.3.1"
-futures-util = { version = "0.3.1", features = ["sink"] }
+pin-utils = "0.1.0-alpha.4"
+thiserror = "1.0.0"
+tokio = { version = "0.2.0", features = ["macros", "net", "stream", "time"] }
+tokio-util = { version = "0.3.0", features = ["codec"] }
+
+# Feature - Config
+serde = { version = "1.0.0", optional = true }
+serde_derive = { version = "1.0.0", optional = true }
+serde_json = { version = "1.0.0", optional = true }
+serde_yaml = { version = "0.8.0", optional = true }
+toml = { version = "0.5.0", optional = true }
+
+# Feature - Proxy
+tokio-socks = { version = "0.2.0", optional = true }
+
+# Feature - TLS
+native-tls = { version = "0.2.0", optional = true }
+tokio-rustls = { version = "0.13.0", optional = true }
+tokio-tls = { version = "0.3.0", optional = true }
+webpki-roots = { version = "0.19.0", optional = true }
+
 
 [dev-dependencies]
-futures = "0.3.1"
-anyhow = "1.0.13"
-args = "2.0"
-getopts = "0.2"
-env_logger = "0.7"
+anyhow = "1.0.0"
+args = "2.0.0"
+env_logger = "0.7.0"
+futures = "0.3.0"
+getopts = "0.2.0"
+
 
 [[example]]
-name = "proxy"
-path = "examples/proxy.rs"
+name = "simple_proxy"
+path = "examples/simple_proxy.rs"
 required-features = ["proxy"]
+
+[[example]]
+name = "simple_plaintext"
+path = "examples/simple_plaintext.rs"
+required-features = ["tls-native"]
