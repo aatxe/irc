@@ -1,4 +1,5 @@
 //! JSON configuration files using serde
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -6,17 +7,19 @@ use std::{
     io::prelude::*,
     path::{Path, PathBuf},
 };
-use tokio::net::ToSocketAddrs;
 
-#[cfg(feature = "json")]
+#[cfg(feature = "json_config")]
 use serde_json;
-#[cfg(feature = "yaml")]
+#[cfg(feature = "yaml_config")]
 use serde_yaml;
-#[cfg(feature = "toml")]
+#[cfg(feature = "toml_config")]
 use toml;
 
+#[cfg(feature = "proxy")]
+use crate::client::data::proxy::ProxyType;
+
 use crate::error::Error::InvalidConfig;
-#[cfg(feature = "toml")]
+#[cfg(feature = "toml_config")]
 use crate::error::TomlError;
 use crate::error::{ConfigError, Result};
 
@@ -65,127 +68,152 @@ use crate::error::{ConfigError, Result};
 /// let config = Config::load("config.toml").unwrap();
 /// # }
 /// ```
-#[derive(Clone, Deserialize, Serialize, Default, PartialEq, Debug)]
+#[derive(Clone, Default, PartialEq, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Config {
     /// A list of the owners of the client by nickname (for bots).
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty"))]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub owners: Vec<String>,
     /// The client's nickname.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub nickname: Option<String>,
     /// The client's NICKSERV password.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub nick_password: Option<String>,
     /// Alternative nicknames for the client, if the default is taken.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty"))]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub alt_nicks: Vec<String>,
     /// The client's username.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub username: Option<String>,
     /// The client's real name.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub realname: Option<String>,
     /// The server to connect to.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub server: Option<String>,
     /// The port to connect on.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub port: Option<u16>,
     /// The password to connect to the server.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub password: Option<String>,
-    /// Whether or not to use SSL.
-    /// Clients will automatically panic if this is enabled without SSL support.
-    #[serde(skip_serializing_if = "is_false")]
-    #[serde(default)]
-    pub use_ssl: bool,
-    /// The path to the SSL certificate for this server in DER format.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// The proxy type to connect to.
+    #[cfg(feature = "proxy")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub proxy_type: Option<ProxyType>,
+    /// The proxy server to connect to.
+    #[cfg(feature = "proxy")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub proxy_server: Option<String>,
+    /// The proxy port to connect on.
+    #[cfg(feature = "proxy")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub proxy_port: Option<u16>,
+    /// The username to connect to the proxy server.
+    #[cfg(feature = "proxy")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub proxy_username: Option<String>,
+    /// The password to connect to the proxy server.
+    #[cfg(feature = "proxy")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub proxy_password: Option<String>,
+    /// Whether or not to use TLS.
+    /// Clients will automatically panic if this is enabled without TLS support.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub use_tls: Option<bool>,
+    /// The path to the TLS certificate for this server in DER format.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cert_path: Option<String>,
-    /// The path to a SSL certificate to use for CertFP client authentication in DER format.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// The path to a TLS certificate to use for CertFP client authentication in DER format.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub client_cert_path: Option<String>,
     /// The password for the certificate to use in CertFP authentication.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub client_cert_pass: Option<String>,
     /// The encoding type used for this connection.
     /// This is typically UTF-8, but could be something else.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub encoding: Option<String>,
     /// A list of channels to join on connection.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty"))]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub channels: Vec<String>,
     /// User modes to set on connect. Example: "+RB -x"
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub umodes: Option<String>,
     /// The text that'll be sent in response to CTCP USERINFO requests.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub user_info: Option<String>,
     /// The text that'll be sent in response to CTCP VERSION requests.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub version: Option<String>,
     /// The text that'll be sent in response to CTCP SOURCE requests.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub source: Option<String>,
     /// The amount of inactivity in seconds before the client will ping the server.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub ping_time: Option<u32>,
     /// The amount of time in seconds for a client to reconnect due to no ping response.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub ping_timeout: Option<u32>,
     /// The length in seconds of a rolling window for message throttling. If more than
     /// `max_messages_in_burst` messages are sent within `burst_window_length` seconds, additional
     /// messages will be delayed automatically as appropriate. In particular, in the past
     /// `burst_window_length` seconds, there will never be more than `max_messages_in_burst` messages
     /// sent.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub burst_window_length: Option<u32>,
     /// The maximum number of messages that can be sent in a burst window before they'll be delayed.
     /// Messages are automatically delayed as appropriate.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub max_messages_in_burst: Option<u32>,
     /// Whether the client should use NickServ GHOST to reclaim its primary nickname if it is in
     /// use. This has no effect if `nick_password` is not set.
-    #[serde(skip_serializing_if = "is_false")]
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "is_false"))]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub should_ghost: bool,
     /// The command(s) that should be sent to NickServ to recover a nickname. The nickname and
     /// password will be appended in that order after the command.
     /// E.g. `["RECOVER", "RELEASE"]` means `RECOVER nick pass` and `RELEASE nick pass` will be sent
     /// in that order.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub ghost_sequence: Option<Vec<String>>,
     /// Whether or not to use a fake connection for testing purposes. You probably will never want
     /// to enable this, but it is used in unit testing for the `irc` crate.
-    #[serde(skip_serializing_if = "is_false")]
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "is_false"))]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub use_mock_connection: bool,
     /// The initial value used by the fake connection for testing. You probably will never need to
     /// set this, but it is used in unit testing for the `irc` crate.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub mock_initial_value: Option<String>,
 
     /// A mapping of channel names to keys for join-on-connect.
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "HashMap::is_empty"))]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub channel_keys: HashMap<String, String>,
     /// A map of additional options to be stored in config.
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "HashMap::is_empty"))]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub options: HashMap<String, String>,
 
     /// The path that this configuration was loaded from.
     ///
     /// This should not be specified in any configuration. It will automatically be handled by the library.
-    #[serde(skip_serializing)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
     #[doc(hidden)]
     pub path: Option<PathBuf>,
 }
 
+#[cfg(feature = "serde")]
 fn is_false(v: &bool) -> bool {
     !v
 }
@@ -230,7 +258,7 @@ impl Config {
         res.map(|config| config.with_path(path))
     }
 
-    #[cfg(feature = "json")]
+    #[cfg(feature = "json_config")]
     fn load_json<P: AsRef<Path>>(path: P, data: &str) -> Result<Config> {
         serde_json::from_str(data).map_err(|e| InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -238,7 +266,7 @@ impl Config {
         })
     }
 
-    #[cfg(not(feature = "json"))]
+    #[cfg(not(feature = "json_config"))]
     fn load_json<P: AsRef<Path>>(path: P, _: &str) -> Result<Config> {
         Err(InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -246,7 +274,7 @@ impl Config {
         })
     }
 
-    #[cfg(feature = "toml")]
+    #[cfg(feature = "toml_config")]
     fn load_toml<P: AsRef<Path>>(path: P, data: &str) -> Result<Config> {
         toml::from_str(data).map_err(|e| InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -254,7 +282,7 @@ impl Config {
         })
     }
 
-    #[cfg(not(feature = "toml"))]
+    #[cfg(not(feature = "toml_config"))]
     fn load_toml<P: AsRef<Path>>(path: P, _: &str) -> Result<Config> {
         Err(InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -262,7 +290,7 @@ impl Config {
         })
     }
 
-    #[cfg(feature = "yaml")]
+    #[cfg(feature = "yaml_config")]
     fn load_yaml<P: AsRef<Path>>(path: P, data: &str) -> Result<Config> {
         serde_yaml::from_str(data).map_err(|e| InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -270,7 +298,7 @@ impl Config {
         })
     }
 
-    #[cfg(not(feature = "yaml"))]
+    #[cfg(not(feature = "yaml_config"))]
     fn load_yaml<P: AsRef<Path>>(path: P, _: &str) -> Result<Config> {
         Err(InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -308,7 +336,7 @@ impl Config {
         Ok(())
     }
 
-    #[cfg(feature = "json")]
+    #[cfg(feature = "json_config")]
     fn save_json<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
         serde_json::to_string(self).map_err(|e| InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -316,7 +344,7 @@ impl Config {
         })
     }
 
-    #[cfg(not(feature = "json"))]
+    #[cfg(not(feature = "json_config"))]
     fn save_json<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
         Err(InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -324,7 +352,7 @@ impl Config {
         })
     }
 
-    #[cfg(feature = "toml")]
+    #[cfg(feature = "toml_config")]
     fn save_toml<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
         toml::to_string(self).map_err(|e| InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -332,7 +360,7 @@ impl Config {
         })
     }
 
-    #[cfg(not(feature = "toml"))]
+    #[cfg(not(feature = "toml_config"))]
     fn save_toml<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
         Err(InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -340,7 +368,7 @@ impl Config {
         })
     }
 
-    #[cfg(feature = "yaml")]
+    #[cfg(feature = "yaml_config")]
     fn save_yaml<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
         serde_yaml::to_string(self).map_err(|e| InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -348,7 +376,7 @@ impl Config {
         })
     }
 
-    #[cfg(not(feature = "yaml"))]
+    #[cfg(not(feature = "yaml_config"))]
     fn save_yaml<P: AsRef<Path>>(&self, path: &P) -> Result<String> {
         Err(InvalidConfig {
             path: path.as_ref().to_string_lossy().into_owned(),
@@ -412,44 +440,86 @@ impl Config {
     }
 
     /// Gets the port of the server specified in the configuration.
-    /// This defaults to 6667 (or 6697 if use_ssl is specified as true) when not specified.
+    /// This defaults to 6697 (or 6667 if use_tls is specified as false) when not specified.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn port(&self) -> u16 {
-        self.port
-            .as_ref()
-            .cloned()
-            .unwrap_or(if self.use_ssl() { 6697 } else { 6667 })
+        self.port.as_ref().cloned().unwrap_or(match self.use_tls() {
+            true => 6697,
+            false => 6667,
+        })
     }
 
-    /// Return something that can be converted into a socket address by tokio.
-    pub(crate) fn to_socket_addrs(&self) -> Result<impl ToSocketAddrs + '_> {
-        let server = self.server()?;
-        let port = self.port();
-        Ok((server, port))
+    /// Gets the port of the server specified in the configuration.
+    /// This defaults to 6667 when not specified.
+    #[cfg(not(any(feature = "tls-native", feature = "tls-rust")))]
+    pub fn port(&self) -> u16 {
+        self.port.as_ref().cloned().unwrap_or(6667)
     }
 
     /// Gets the server password specified in the configuration.
-    /// This defaults to a blank string when not specified.
+    /// This defaults to an empty string when not specified.
     pub fn password(&self) -> &str {
         self.password.as_ref().map_or("", String::as_str)
     }
 
-    /// Gets whether or not to use SSL with this connection.
-    /// This defaults to false when not specified.
-    pub fn use_ssl(&self) -> bool {
-        self.use_ssl
+    /// Gets the type of the proxy specified in the configuration.
+    /// This defaults to a None ProxyType when not specified.
+    #[cfg(feature = "proxy")]
+    pub fn proxy_type(&self) -> ProxyType {
+        self.proxy_type.as_ref().cloned().unwrap_or(ProxyType::None)
     }
 
-    /// Gets the path to the SSL certificate in DER format if specified.
+    /// Gets the address of the proxy specified in the configuration.
+    /// This defaults to "localhost" string when not specified.
+    #[cfg(feature = "proxy")]
+    pub fn proxy_server(&self) -> &str {
+        self.proxy_server
+            .as_ref()
+            .map_or("localhost", String::as_str)
+    }
+
+    /// Gets the port of the proxy specified in the configuration.
+    /// This defaults to 1080 when not specified.
+    #[cfg(feature = "proxy")]
+    pub fn proxy_port(&self) -> u16 {
+        self.proxy_port.as_ref().cloned().unwrap_or(1080)
+    }
+
+    /// Gets the username of the proxy specified in the configuration.
+    /// This defaults to an empty string when not specified.
+    #[cfg(feature = "proxy")]
+    pub fn proxy_username(&self) -> &str {
+        self.proxy_username.as_ref().map_or("", String::as_str)
+    }
+
+    /// Gets the password of the proxy specified in the configuration.
+    /// This defaults to an empty string when not specified.
+    #[cfg(feature = "proxy")]
+    pub fn proxy_password(&self) -> &str {
+        self.proxy_password.as_ref().map_or("", String::as_str)
+    }
+
+    /// Gets whether or not to use TLS with this connection.
+    /// This defaults to true when not specified.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
+    pub fn use_tls(&self) -> bool {
+        self.use_tls.as_ref().cloned().map_or(true, |s| s)
+    }
+
+    /// Gets the path to the TLS certificate in DER format if specified.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn cert_path(&self) -> Option<&str> {
         self.cert_path.as_ref().map(String::as_str)
     }
 
     /// Gets the path to the client authentication certificate in DER format if specified.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn client_cert_path(&self) -> Option<&str> {
         self.client_cert_path.as_ref().map(String::as_str)
     }
 
     /// Gets the password to the client authentication certificate.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn client_cert_pass(&self) -> &str {
         self.client_cert_pass.as_ref().map_or("", String::as_str)
     }
@@ -562,8 +632,14 @@ impl Config {
 #[cfg(test)]
 mod test {
     use super::Config;
-    use anyhow::Result;
     use std::collections::HashMap;
+
+    #[cfg(any(
+        feature = "json_config",
+        feature = "toml_config",
+        feature = "yaml_config"
+    ))]
+    use super::Result;
 
     #[allow(unused)]
     fn test_config() -> Config {
@@ -609,7 +685,7 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "json")]
+    #[cfg(feature = "json_config")]
     fn load_from_json() -> Result<()> {
         const DATA: &str = include_str!("client_config.json");
         assert_eq!(
@@ -620,7 +696,7 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "toml")]
+    #[cfg(feature = "toml_config")]
     fn load_from_toml() -> Result<()> {
         const DATA: &str = include_str!("client_config.toml");
         assert_eq!(
@@ -631,7 +707,7 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "yaml")]
+    #[cfg(feature = "yaml_config")]
     fn load_from_yaml() -> Result<()> {
         const DATA: &str = include_str!("client_config.yaml");
         assert_eq!(

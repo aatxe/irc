@@ -7,6 +7,7 @@ async fn main() -> irc::error::Result<()> {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.pdgn.co".to_owned()),
         channels: vec!["#rust-spam".to_owned()],
+        use_tls: Some(false),
         ..Default::default()
     };
 

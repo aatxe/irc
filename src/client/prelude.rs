@@ -21,6 +21,9 @@
 //! dealing with IRC channel and user modes. They appear in methods for sending mode commands,
 //! as well as in the parsed form of received mode commands.
 
+#[cfg(feature = "proxy")]
+pub use crate::client::data::ProxyType;
+
 pub use crate::{
     client::{data::Config, Client, Sender},
     proto::{

@@ -36,7 +36,7 @@ impl Message {
     /// # use irc_proto::Message;
     /// # fn main() {
     /// let message = Message::new(
-    ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"], None
+    ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"]
     /// ).unwrap();
     /// # }
     /// ```
@@ -44,9 +44,8 @@ impl Message {
         prefix: Option<&str>,
         command: &str,
         args: Vec<&str>,
-        suffix: Option<&str>,
     ) -> Result<Message, MessageParseError> {
-        Message::with_tags(None, prefix, command, args, suffix)
+        Message::with_tags(None, prefix, command, args)
     }
 
     /// Creates a new IRCv3.2 message from the given components, including message tags. These tags
@@ -57,12 +56,11 @@ impl Message {
         prefix: Option<&str>,
         command: &str,
         args: Vec<&str>,
-        suffix: Option<&str>,
     ) -> Result<Message, error::MessageParseError> {
         Ok(Message {
             tags: tags,
             prefix: prefix.map(|p| p.into()),
-            command: Command::new(command, args, suffix)?,
+            command: Command::new(command, args)?,
         })
     }
 
@@ -74,7 +72,7 @@ impl Message {
     /// # use irc_proto::Message;
     /// # fn main() {
     /// let message = Message::new(
-    ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"], None
+    ///     Some("nickname!username@hostname"), "JOIN", vec!["#channel"]
     /// ).unwrap();
     /// assert_eq!(message.source_nickname(), Some("nickname"));
     /// # }
@@ -98,11 +96,11 @@ impl Message {
     /// # use irc_proto::Message;
     /// # fn main() {
     /// let msg1 = Message::new(
-    ///     Some("ada"), "PRIVMSG", vec!["#channel"], Some("Hi, everyone!")
+    ///     Some("ada"), "PRIVMSG", vec!["#channel", "Hi, everyone!"]
     /// ).unwrap();
     /// assert_eq!(msg1.response_target(), Some("#channel"));
     /// let msg2 = Message::new(
-    ///     Some("ada"), "PRIVMSG", vec!["betsy"], Some("betsy: hi")
+    ///     Some("ada"), "PRIVMSG", vec!["betsy", "betsy: hi"]
     /// ).unwrap();
     /// assert_eq!(msg2.response_target(), Some("ada"));
     /// # }
@@ -123,7 +121,7 @@ impl Message {
     /// # use irc_proto::Message;
     /// # fn main() {
     /// let msg = Message::new(
-    ///     Some("ada"), "PRIVMSG", vec!["#channel"], Some("Hi, everyone!")
+    ///     Some("ada"), "PRIVMSG", vec!["#channel", "Hi, everyone!"]
     /// ).unwrap();
     /// assert_eq!(msg.to_string(), ":ada PRIVMSG #channel :Hi, everyone!\r\n");
     /// # }
@@ -136,7 +134,7 @@ impl Message {
                 ret.push_str(&tag.0);
                 if let Some(ref value) = tag.1 {
                     ret.push('=');
-                    ret.push_str(value);
+                    escape_tag_value(&mut ret, &value);
                 }
                 ret.push(';');
             }
@@ -185,7 +183,8 @@ impl FromStr for Message {
                     .map(|s: &str| {
                         let mut iter = s.splitn(2, '=');
                         let (fst, snd) = (iter.next(), iter.next());
-                        Tag(fst.unwrap_or("").to_owned(), snd.map(|s| s.to_owned()))
+                        let snd = snd.map(unescape_tag_value);
+                        Tag(fst.unwrap_or("").to_owned(), snd)
                     })
                     .collect::<Vec<_>>()
             })
@@ -243,13 +242,14 @@ impl FromStr for Message {
             }
         };
 
-        let args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
+        let mut args: Vec<_> = state.splitn(14, ' ').filter(|s| !s.is_empty()).collect();
+        if let Some(suffix) = suffix {
+            args.push(suffix);
+        }
 
-        Message::with_tags(tags, prefix, command, args, suffix).map_err(|e| {
-            ProtocolError::InvalidMessage {
-                string: s.to_owned(),
-                cause: e,
-            }
+        Message::with_tags(tags, prefix, command, args).map_err(|e| ProtocolError::InvalidMessage {
+            string: s.to_owned(),
+            cause: e,
         })
     }
 }
@@ -273,6 +273,40 @@ impl Display for Message {
 #[derive(Clone, PartialEq, Debug)]
 pub struct Tag(pub String, pub Option<String>);
 
+fn escape_tag_value(msg: &mut String, value: &str) {
+    for c in value.chars() {
+        match c {
+            ';' => msg.push_str("\\:"),
+            ' ' => msg.push_str("\\s"),
+            '\\' => msg.push_str("\\\\"),
+            '\r' => msg.push_str("\\r"),
+            '\n' => msg.push_str("\\n"),
+            c => msg.push(c),
+        }
+    }
+}
+
+fn unescape_tag_value(value: &str) -> String {
+    let mut unescaped = String::with_capacity(value.len());
+    let mut iter = value.chars();
+    while let Some(c) = iter.next() {
+        if c == '\\' {
+            match iter.next() {
+                Some(':') => unescaped.push(';'),
+                Some('s') => unescaped.push(' '),
+                Some('\\') => unescaped.push('\\'),
+                Some('r') => unescaped.push('\r'),
+                Some('n') => unescaped.push('\n'),
+                Some(c) => unescaped.push(c),
+                None => break,
+            }
+        } else {
+            unescaped.push(c);
+        }
+    }
+    unescaped
+}
+
 #[cfg(test)]
 mod test {
     use super::{Message, Tag};
@@ -286,7 +320,7 @@ mod test {
             command: PRIVMSG(format!("test"), format!("Testing!")),
         };
         assert_eq!(
-            Message::new(None, "PRIVMSG", vec!["test"], Some("Testing!")).unwrap(),
+            Message::new(None, "PRIVMSG", vec!["test", "Testing!"]).unwrap(),
             message
         )
     }
@@ -294,56 +328,56 @@ mod test {
     #[test]
     fn source_nickname() {
         assert_eq!(
-            Message::new(None, "PING", vec![], Some("data"))
+            Message::new(None, "PING", vec!["data"])
                 .unwrap()
                 .source_nickname(),
             None
         );
 
         assert_eq!(
-            Message::new(Some("irc.test.net"), "PING", vec![], Some("data"))
+            Message::new(Some("irc.test.net"), "PING", vec!["data"])
                 .unwrap()
                 .source_nickname(),
             None
         );
 
         assert_eq!(
-            Message::new(Some("test!test@test"), "PING", vec![], Some("data"))
+            Message::new(Some("test!test@test"), "PING", vec!["data"])
                 .unwrap()
                 .source_nickname(),
             Some("test")
         );
 
         assert_eq!(
-            Message::new(Some("test@test"), "PING", vec![], Some("data"))
+            Message::new(Some("test@test"), "PING", vec!["data"])
                 .unwrap()
                 .source_nickname(),
             Some("test")
         );
 
         assert_eq!(
-            Message::new(Some("test!test@irc.test.com"), "PING", vec![], Some("data"))
+            Message::new(Some("test!test@irc.test.com"), "PING", vec!["data"])
                 .unwrap()
                 .source_nickname(),
             Some("test")
         );
 
         assert_eq!(
-            Message::new(Some("test!test@127.0.0.1"), "PING", vec![], Some("data"))
+            Message::new(Some("test!test@127.0.0.1"), "PING", vec!["data"])
                 .unwrap()
                 .source_nickname(),
             Some("test")
         );
 
         assert_eq!(
-            Message::new(Some("test@test.com"), "PING", vec![], Some("data"))
+            Message::new(Some("test@test.com"), "PING", vec!["data"])
                 .unwrap()
                 .source_nickname(),
             Some("test")
         );
 
         assert_eq!(
-            Message::new(Some("test"), "PING", vec![], Some("data"))
+            Message::new(Some("test"), "PING", vec!["data"])
                 .unwrap()
                 .source_nickname(),
             Some("test")
@@ -357,7 +391,7 @@ mod test {
             prefix: None,
             command: PRIVMSG(format!("test"), format!("Testing!")),
         };
-        assert_eq!(&message.to_string()[..], "PRIVMSG test :Testing!\r\n");
+        assert_eq!(&message.to_string()[..], "PRIVMSG test Testing!\r\n");
         let message = Message {
             tags: None,
             prefix: Some("test!test@test".into()),
@@ -465,8 +499,7 @@ mod test {
             prefix: Some("test!test@test".into()),
             command: Raw(
                 format!("COMMAND"),
-                vec![format!("ARG:test")],
-                Some(format!("Testing!")),
+                vec![format!("ARG:test"), format!("Testing!")],
             ),
         };
         let msg: Message = ":test!test@test COMMAND ARG:test :Testing!\r\n".into();
@@ -488,5 +521,30 @@ mod test {
     #[should_panic]
     fn to_message_invalid_format() {
         let _: Message = ":invalid :message".into();
+    }
+
+    #[test]
+    fn to_message_tags_escapes() {
+        let msg = "@tag=\\:\\s\\\\\\r\\n\\a\\ :test PRIVMSG #test :test\r\n"
+            .parse::<Message>()
+            .unwrap();
+        let message = Message {
+            tags: Some(vec![Tag("tag".to_string(), Some("; \\\r\na".to_string()))]),
+            prefix: Some("test".into()),
+            command: PRIVMSG("#test".to_string(), "test".to_string()),
+        };
+        assert_eq!(msg, message);
+    }
+
+    #[test]
+    fn to_string_tags_escapes() {
+        let msg = Message {
+            tags: Some(vec![Tag("tag".to_string(), Some("; \\\r\na".to_string()))]),
+            prefix: Some("test".into()),
+            command: PRIVMSG("#test".to_string(), "test".to_string()),
+        }
+        .to_string();
+        let message = "@tag=\\:\\s\\\\\\r\\na :test PRIVMSG #test test\r\n";
+        assert_eq!(msg, message);
     }
 }

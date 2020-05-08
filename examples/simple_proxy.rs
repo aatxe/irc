@@ -7,6 +7,9 @@ async fn main() -> irc::error::Result<()> {
         nickname: Some("pickles".to_owned()),
         server: Some("irc.pdgn.co".to_owned()),
         channels: vec!["#rust-spam".to_owned()],
+        proxy_type: Some(ProxyType::Socks5),
+        proxy_server: Some("127.0.0.1".to_owned()),
+        proxy_port: Some(9050),
         ..Default::default()
     };
 

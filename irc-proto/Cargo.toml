@@ -1,6 +1,6 @@
 [package]
 name = "irc-proto"
-version = "0.0.0"
+version = "0.14.0"
 description = "The IRC protocol distilled."
 authors = ["Aaron Weiss <awe@pdgn.co>"]
 license = "MPL-2.0"
@@ -14,11 +14,12 @@ edition = "2018"
 travis-ci = { repository = "aatxe/irc" }
 
 [features]
-default = ["tokio", "tokio-util", "bytes"]
+default = ["bytes", "tokio", "tokio-util"]
 
 [dependencies]
-bytes = { version = "0.5", optional = true }
-encoding = "0.2"
-thiserror = "1.0.2"
-tokio-util = { version = "0.2.0", optional = true }
+encoding = "0.2.0"
+thiserror = "1.0.0"
+
+bytes = { version = "0.5.0", optional = true }
 tokio = { version = "0.2.0", optional = true }
+tokio-util = { version = "0.3.0", features = ["codec"], optional = true }

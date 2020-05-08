@@ -11,11 +11,12 @@ async fn main() -> irc::error::Result<()> {
     let branch = env::var("TRAVIS_BRANCH").unwrap();
     let commit = env::var("TRAVIS_COMMIT").unwrap();
     let commit_message = env::var("TRAVIS_COMMIT_MESSAGE").unwrap();
+    let features = env::var("FEATURES").unwrap();
 
     let config = Config {
         nickname: Some("irc-crate-ci".to_owned()),
         server: Some("irc.pdgn.co".to_owned()),
-        use_ssl: true,
+        alt_nicks: vec!["[irc-crate-ci]".to_owned()],
         ..Default::default()
     };
 
@@ -27,15 +28,16 @@ async fn main() -> irc::error::Result<()> {
 
     while let Some(message) = stream.next().await.transpose()? {
         match message.command {
-            Command::Response(Response::RPL_ISUPPORT, _, _) => {
+            Command::Response(Response::RPL_ISUPPORT, _) => {
                 client.send_privmsg(
                     "#commits",
                     format!(
-                        "[{}/{}] ({}) {}",
+                        "[{}/{}] ({}) {} [{}]",
                         repository_slug,
                         branch,
                         &commit[..7],
-                        commit_message
+                        commit_message,
+                        features,
                     ),
                 )?;
 

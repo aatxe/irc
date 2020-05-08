@@ -9,6 +9,9 @@ use futures_channel::{
 };
 use thiserror::Error;
 
+#[cfg(feature = "tls-rust")]
+use tokio_rustls::webpki::InvalidDNSNameError;
+
 use crate::proto::error::{MessageParseError, ProtocolError};
 
 /// A specialized `Result` type for the `irc` crate.
@@ -21,9 +24,20 @@ pub enum Error {
     #[error("an io error occurred")]
     Io(#[source] IoError),
 
+    /// An internal proxy error.
+    #[cfg(feature = "proxy")]
+    #[error("a proxy error occurred")]
+    Proxy(tokio_socks::Error),
+
     /// An internal TLS error.
+    #[cfg(feature = "tls-native")]
     #[error("a TLS error occurred")]
     Tls(#[source] native_tls::Error),
+
+    /// An internal DNS error.
+    #[cfg(feature = "tls-rust")]
+    #[error("a DNS error occurred")]
+    Dns(#[source] InvalidDNSNameError),
 
     /// An internal synchronous channel closed.
     #[error("a sync channel closed")]
@@ -94,17 +108,17 @@ pub enum Error {
 #[derive(Debug, Error)]
 pub enum ConfigError {
     /// Failed to parse as TOML.
-    #[cfg(feature = "toml")]
+    #[cfg(feature = "toml_config")]
     #[error("invalid toml")]
     InvalidToml(#[source] TomlError),
 
     /// Failed to parse as JSON.
-    #[cfg(feature = "json")]
+    #[cfg(feature = "json_config")]
     #[error("invalid json")]
     InvalidJson(#[source] serde_json::Error),
 
     /// Failed to parse as YAML.
-    #[cfg(feature = "yaml")]
+    #[cfg(feature = "yaml_config")]
     #[error("invalid yaml")]
     InvalidYaml(#[source] serde_yaml::Error),
 
@@ -136,7 +150,7 @@ pub enum ConfigError {
 }
 
 /// A wrapper that combines toml's serialization and deserialization errors.
-#[cfg(feature = "toml")]
+#[cfg(feature = "toml_config")]
 #[derive(Debug, Error)]
 pub enum TomlError {
     /// A TOML deserialization error.
@@ -164,9 +178,24 @@ impl From<IoError> for Error {
     }
 }
 
+#[cfg(feature = "proxy")]
+impl From<tokio_socks::Error> for Error {
+    fn from(e: tokio_socks::Error) -> Error {
+        Error::Proxy(e)
+    }
+}
+
+#[cfg(feature = "tls-native")]
 impl From<native_tls::Error> for Error {
     fn from(e: native_tls::Error) -> Error {
         Error::Tls(e)
+    }
+}
+
+#[cfg(feature = "tls-rust")]
+impl From<InvalidDNSNameError> for Error {
+    fn from(e: InvalidDNSNameError) -> Error {
+        Error::Dns(e)
     }
 }
 
