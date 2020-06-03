@@ -137,6 +137,13 @@ pub struct Config {
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub client_cert_pass: Option<String>,
+    /// On `true`, all certificate validations are skipped. Defaults to `false`.
+    ///
+    /// # Warning
+    /// You should think very carefully before using this method. If invalid hostnames are trusted, *any* valid
+    /// certificate for *any* site will be trusted for use. This introduces significant vulnerabilities, and should
+    /// only be used as a last resort.
+    pub dangerously_accept_invalid_certs: Option<bool>,
     /// The encoding type used for this connection.
     /// This is typically UTF-8, but could be something else.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -511,6 +518,12 @@ impl Config {
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn cert_path(&self) -> Option<&str> {
         self.cert_path.as_ref().map(String::as_str)
+    }
+
+    /// Gets whether or not to dangerously accept invalid certificates.
+    /// This defaults to `false` when not specified.
+    pub fn dangerously_accept_invalid_certs(&self) -> bool {
+        self.dangerously_accept_invalid_certs.as_ref().cloned().unwrap_or(false)
     }
 
     /// Gets the path to the client authentication certificate in DER format if specified.
