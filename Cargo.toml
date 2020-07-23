@@ -2,7 +2,7 @@
 name = "irc"
 version = "0.14.0"
 description = "the irc crate – usable, async IRC for Rust "
-authors = ["Aaron Weiss <awe@pdgn.co>"]
+authors = ["Aaron Weiss <aweiss@hey.com>"]
 license = "MPL-2.0"
 keywords = ["irc", "client", "thread-safe", "async", "tokio"]
 categories = ["asynchronous", "network-programming"]
