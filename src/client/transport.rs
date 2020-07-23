@@ -37,13 +37,14 @@ struct Pinger {
 impl Pinger {
     /// Construct a new pinger helper.
     pub fn new(tx: UnboundedSender<Message>, config: &Config) -> Pinger {
+        let ping_time = Duration::from_secs(u64::from(config.ping_time()));
         let ping_timeout = Duration::from_secs(u64::from(config.ping_timeout()));
 
         Self {
             tx,
             ping_timeout,
             ping_deadline: None,
-            ping_interval: time::interval(ping_timeout / 2),
+            ping_interval: time::interval(ping_time),
         }
     }
 
