@@ -15,7 +15,7 @@ async fn main() -> irc::error::Result<()> {
 
     let config = Config {
         nickname: Some("irc-crate-ci".to_owned()),
-        server: Some("irc.pdgn.co".to_owned()),
+        server: Some("chat.freenode.net".to_owned()),
         alt_nicks: vec!["[irc-crate-ci]".to_owned()],
         ..Default::default()
     };

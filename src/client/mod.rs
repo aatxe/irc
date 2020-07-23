@@ -1208,7 +1208,7 @@ mod test {
 
     #[tokio::test]
     async fn handle_end_motd_with_ghost() -> Result<()> {
-        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
+        let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1231,7 +1231,7 @@ mod test {
 
     #[tokio::test]
     async fn handle_end_motd_with_ghost_seq() -> Result<()> {
-        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
+        let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1275,7 +1275,7 @@ mod test {
 
     #[tokio::test]
     async fn nickname_in_use() -> Result<()> {
-        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n";
+        let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
@@ -1288,8 +1288,8 @@ mod test {
 
     #[tokio::test]
     async fn ran_out_of_nicknames() -> Result<()> {
-        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
-                     :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
+        let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n\
+                     :irc.test.net 433 * test2 :Nickname is already in use.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()

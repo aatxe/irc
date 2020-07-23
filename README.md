@@ -61,7 +61,7 @@ async fn main() -> Result<(), failure::Error> {
     // We can also load the Config at runtime via Config::load("path/to/config.toml")
     let config = Config {
         nickname: Some("the-irc-crate".to_owned()),
-        server: Some("irc.pdgn.co".to_owned()),
+        server: Some("chat.freenode.net".to_owned()),
         channels: Some(vec!["#test".to_owned()]),
         ..Config::default()
     };
