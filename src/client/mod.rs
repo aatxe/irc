@@ -336,7 +336,11 @@ macro_rules! pub_sender_base {
         S1: fmt::Display,
         S2: fmt::Display,
     {
-        self.send_privmsg(target, &format!("\u{001}{}\u{001}", msg.to_string())[..])
+        let msg = msg.to_string();
+        for line in msg.split("\r\n") {
+            self.send(PRIVMSG(target.to_string(), format!("\u{001}{}\u{001}", line)))?
+        }
+        Ok(())
     }
 
     /// Sends an action command to the specified target.
@@ -1204,7 +1208,7 @@ mod test {
 
     #[tokio::test]
     async fn handle_end_motd_with_ghost() -> Result<()> {
-        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
+        let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1227,7 +1231,7 @@ mod test {
 
     #[tokio::test]
     async fn handle_end_motd_with_ghost_seq() -> Result<()> {
-        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
+        let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
@@ -1271,7 +1275,7 @@ mod test {
 
     #[tokio::test]
     async fn nickname_in_use() -> Result<()> {
-        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n";
+        let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
@@ -1284,8 +1288,8 @@ mod test {
 
     #[tokio::test]
     async fn ran_out_of_nicknames() -> Result<()> {
-        let value = ":irc.pdgn.co 433 * test :Nickname is already in use.\r\n\
-                     :irc.pdgn.co 433 * test2 :Nickname is already in use.\r\n";
+        let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n\
+                     :irc.test.net 433 * test2 :Nickname is already in use.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
             ..test_config()
@@ -1842,11 +1846,11 @@ mod test {
     #[cfg(feature = "ctcp")]
     async fn send_ctcp() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
-        client.send_ctcp("test", "MESSAGE")?;
+        client.send_ctcp("test", "LINE1\r\nLINE2\r\nLINE3")?;
         client.stream()?.collect().await?;
         assert_eq!(
             &get_client_value(client)[..],
-            "PRIVMSG test \u{001}MESSAGE\u{001}\r\n"
+            "PRIVMSG test \u{001}LINE1\u{001}\r\nPRIVMSG test \u{001}LINE2\u{001}\r\nPRIVMSG test \u{001}LINE3\u{001}\r\n"
         );
         Ok(())
     }

@@ -5,7 +5,7 @@ use irc::client::prelude::*;
 async fn main() -> irc::error::Result<()> {
     let config = Config {
         nickname: Some("pickles".to_owned()),
-        server: Some("irc.pdgn.co".to_owned()),
+        server: Some("chat.freenode.net".to_owned()),
         channels: vec!["#rust-spam".to_owned()],
         proxy_type: Some(ProxyType::Socks5),
         proxy_server: Some("127.0.0.1".to_owned()),

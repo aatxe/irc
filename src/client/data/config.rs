@@ -578,7 +578,7 @@ impl Config {
     /// response.
     /// This defaults to 10 seconds when not specified.
     pub fn ping_timeout(&self) -> u32 {
-        self.ping_timeout.as_ref().cloned().unwrap_or(10)
+        self.ping_timeout.as_ref().cloned().unwrap_or(20)
     }
 
     /// The amount of time in seconds to consider a window for burst messages. The message throttling

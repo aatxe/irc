@@ -7,7 +7,7 @@ use std::time::Duration;
 async fn main() -> irc::error::Result<()> {
     let config = Config {
         nickname: Some("mastodon".to_owned()),
-        server: Some("irc.pdgn.co".to_owned()),
+        server: Some("chat.freenode.net".to_owned()),
         channels: vec!["#rust-spam".to_owned()],
         ..Default::default()
     };

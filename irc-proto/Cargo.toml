@@ -2,7 +2,7 @@
 name = "irc-proto"
 version = "0.14.0"
 description = "The IRC protocol distilled."
-authors = ["Aaron Weiss <awe@pdgn.co>"]
+authors = ["Aaron Weiss <aweiss@hey.com>"]
 license = "MPL-2.0"
 keywords = ["irc", "protocol", "tokio"]
 categories = ["network-programming"]
