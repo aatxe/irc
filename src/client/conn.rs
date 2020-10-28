@@ -1,5 +1,4 @@
 //! A module providing IRC connections for use by `IrcServer`s.
-use futures_channel::mpsc::UnboundedSender;
 use futures_util::{sink::Sink, stream::Stream};
 use std::{
     fmt,
@@ -7,6 +6,7 @@ use std::{
     task::{Context, Poll},
 };
 use tokio::net::TcpStream;
+use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::codec::Framed;
 
 #[cfg(feature = "proxy")]

@@ -9,8 +9,8 @@ use std::{
 };
 
 use chrono::prelude::*;
-use futures_channel::mpsc::UnboundedSender;
 use futures_util::{future::Future, ready, sink::Sink, stream::Stream};
+use tokio::sync::mpsc::UnboundedSender;
 use tokio::{
     io::{AsyncRead, AsyncWrite},
     time::{self, Interval, Sleep},
@@ -77,8 +77,7 @@ impl Pinger {
 
     /// Send a pong.
     fn send_pong(&mut self, data: &str) -> error::Result<()> {
-        self.tx
-            .unbounded_send(Command::PONG(data.to_owned(), None).into())?;
+        self.tx.send(Command::PONG(data.to_owned(), None).into())?;
         Ok(())
     }
 
@@ -89,8 +88,7 @@ impl Pinger {
         // Creates new ping data using the local timestamp.
         let data = format!("{}", Local::now().timestamp());
 
-        self.tx
-            .unbounded_send(Command::PING(data.clone(), None).into())?;
+        self.tx.send(Command::PING(data.clone(), None).into())?;
 
         Ok(())
     }

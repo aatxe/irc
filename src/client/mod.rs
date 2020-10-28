@@ -49,7 +49,6 @@
 
 #[cfg(feature = "ctcp")]
 use chrono::prelude::*;
-use futures_channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
 use futures_util::{
     future::{FusedFuture, Future},
     ready,
@@ -68,6 +67,7 @@ use std::{
     sync::Arc,
     task::{Context, Poll},
 };
+use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 
 use crate::{
     client::{
@@ -825,7 +825,7 @@ pub struct Sender {
 impl Sender {
     /// Send a single message to the unbounded queue.
     pub fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> {
-        Ok(self.tx_outgoing.unbounded_send(msg.into())?)
+        Ok(self.tx_outgoing.send(msg.into())?)
     }
 
     pub_state_base!();
@@ -932,7 +932,7 @@ impl Client {
     /// single, shared event loop. It can also be used to take more control over execution and error
     /// handling. Connection will not occur until the event loop is run.
     pub async fn from_config(config: Config) -> error::Result<Client> {
-        let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
+        let (tx_outgoing, rx_outgoing) = mpsc::unbounded_channel();
         let conn = Connection::new(&config, tx_outgoing.clone()).await?;
 
         #[cfg(test)]
