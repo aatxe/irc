@@ -13,7 +13,7 @@ use futures_channel::mpsc::UnboundedSender;
 use futures_util::{future::Future, ready, sink::Sink, stream::Stream};
 use tokio::{
     io::{AsyncRead, AsyncWrite},
-    time::{self, Delay, Interval},
+    time::{self, Interval, Sleep},
 };
 use tokio_util::codec::Framed;
 
@@ -31,7 +31,7 @@ struct Pinger {
     /// The amount of time to wait before timing out from no ping response.
     ping_timeout: Duration,
     /// The instant that the last ping was sent to the server.
-    ping_deadline: Option<Delay>,
+    ping_deadline: Option<Sleep>,
     /// The interval at which to send pings.
     ping_interval: Interval,
 }
@@ -98,7 +98,7 @@ impl Pinger {
     /// Set the ping deadline.
     fn set_deadline(&mut self) {
         if self.ping_deadline.is_none() {
-            let ping_deadline = time::delay_for(self.ping_timeout);
+            let ping_deadline = time::sleep(self.ping_timeout);
             self.ping_deadline = Some(ping_deadline);
         }
     }

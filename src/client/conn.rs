@@ -7,7 +7,7 @@ use std::{
     task::{Context, Poll},
 };
 use tokio::net::TcpStream;
-use tokio_util::codec::Decoder;
+use tokio_util::codec::Framed;
 
 #[cfg(feature = "proxy")]
 use tokio_socks::tcp::Socks5Stream;
@@ -22,7 +22,7 @@ use std::{fs::File, io::Read};
 use native_tls::{Certificate, Identity, TlsConnector};
 
 #[cfg(feature = "tls-native")]
-use tokio_tls::{self, TlsStream};
+use tokio_native_tls::{self, TlsStream};
 
 #[cfg(feature = "tls-rust")]
 use std::{
@@ -150,7 +150,7 @@ impl Connection {
         tx: UnboundedSender<Message>,
     ) -> error::Result<Transport<TcpStream>> {
         let stream = Self::new_stream(config).await?;
-        let framed = IrcCodec::new(config.encoding())?.framed(stream);
+        let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
         Ok(Transport::new(&config, framed, tx))
     }
@@ -184,12 +184,12 @@ impl Connection {
             );
         }
 
-        let connector: tokio_tls::TlsConnector = builder.build()?.into();
+        let connector: tokio_native_tls::TlsConnector = builder.build()?.into();
         let domain = config.server()?;
 
         let stream = Self::new_stream(config).await?;
         let stream = connector.connect(domain, stream).await?;
-        let framed = IrcCodec::new(config.encoding())?.framed(stream);
+        let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
         Ok(Transport::new(&config, framed, tx))
     }
@@ -236,7 +236,7 @@ impl Connection {
 
         let stream = Self::new_stream(config).await?;
         let stream = connector.connect(domain, stream).await?;
-        let framed = IrcCodec::new(config.encoding())?.framed(stream);
+        let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
         Ok(Transport::new(&config, framed, tx))
     }
@@ -262,7 +262,7 @@ impl Connection {
             })?;
 
         let stream = MockStream::new(&initial);
-        let framed = IrcCodec::new(config.encoding())?.framed(stream);
+        let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
         Ok(Transport::new(&config, framed, tx))
     }
