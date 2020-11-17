@@ -20,12 +20,14 @@ use tokio_util::codec::Framed;
 use crate::{
     client::data::Config,
     error,
-    proto::{Command, IrcCodec, Message},
+    proto::{Command, Response, IrcCodec, Message},
 };
 
 /// Pinger-based futures helper.
 struct Pinger {
     tx: UnboundedSender<Message>,
+    // Whether this pinger pings.
+    enabled: bool,
     /// The amount of time to wait before timing out from no ping response.
     ping_timeout: Duration,
     /// The instant that the last ping was sent to the server.
@@ -42,6 +44,7 @@ impl Pinger {
 
         Self {
             tx,
+            enabled: false,
             ping_timeout,
             ping_deadline: None,
             ping_interval: time::interval(ping_time),
@@ -51,6 +54,10 @@ impl Pinger {
     /// Handle an incoming message.
     fn handle_message(&mut self, message: &Message) -> error::Result<()> {
         match message.command {
+            Command::Response(Response::RPL_ENDOFMOTD, _)
+            | Command::Response(Response::ERR_NOMOTD, _) => {
+                self.enabled = true;
+            }
             // On receiving a `PING` message from the server, we automatically respond with
             // the appropriate `PONG` message to keep the connection alive for transport.
             Command::PING(ref data, _) => {
@@ -109,8 +116,10 @@ impl Future for Pinger {
         }
 
         if let Poll::Ready(_) = Pin::new(&mut self.as_mut().ping_interval).poll_next(cx) {
-            self.as_mut().send_ping()?;
-            self.as_mut().set_deadline();
+            if self.enabled {
+                self.as_mut().send_ping()?;
+                self.as_mut().set_deadline();
+            }
         }
 
         Poll::Pending
