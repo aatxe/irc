@@ -20,7 +20,7 @@ use tokio_util::codec::Framed;
 use crate::{
     client::data::Config,
     error,
-    proto::{Command, Response, IrcCodec, Message},
+    proto::{Command, IrcCodec, Message, Response},
 };
 
 /// Pinger-based futures helper.
