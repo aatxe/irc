@@ -9,18 +9,18 @@ use std::{
 };
 
 use chrono::prelude::*;
-use futures_channel::mpsc::UnboundedSender;
 use futures_util::{future::Future, ready, sink::Sink, stream::Stream};
+use tokio::sync::mpsc::UnboundedSender;
 use tokio::{
     io::{AsyncRead, AsyncWrite},
-    time::{self, Delay, Interval},
+    time::{self, Interval, Sleep},
 };
 use tokio_util::codec::Framed;
 
 use crate::{
     client::data::Config,
     error,
-    proto::{Command, Response, IrcCodec, Message},
+    proto::{Command, IrcCodec, Message, Response},
 };
 
 /// Pinger-based futures helper.
@@ -31,7 +31,7 @@ struct Pinger {
     /// The amount of time to wait before timing out from no ping response.
     ping_timeout: Duration,
     /// The instant that the last ping was sent to the server.
-    ping_deadline: Option<Delay>,
+    ping_deadline: Option<Sleep>,
     /// The interval at which to send pings.
     ping_interval: Interval,
 }
@@ -77,8 +77,7 @@ impl Pinger {
 
     /// Send a pong.
     fn send_pong(&mut self, data: &str) -> error::Result<()> {
-        self.tx
-            .unbounded_send(Command::PONG(data.to_owned(), None).into())?;
+        self.tx.send(Command::PONG(data.to_owned(), None).into())?;
         Ok(())
     }
 
@@ -89,8 +88,7 @@ impl Pinger {
         // Creates new ping data using the local timestamp.
         let data = format!("{}", Local::now().timestamp());
 
-        self.tx
-            .unbounded_send(Command::PING(data.clone(), None).into())?;
+        self.tx.send(Command::PING(data.clone(), None).into())?;
 
         Ok(())
     }
@@ -98,7 +96,7 @@ impl Pinger {
     /// Set the ping deadline.
     fn set_deadline(&mut self) {
         if self.ping_deadline.is_none() {
-            let ping_deadline = time::delay_for(self.ping_timeout);
+            let ping_deadline = time::sleep(self.ping_timeout);
             self.ping_deadline = Some(ping_deadline);
         }
     }
