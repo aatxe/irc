@@ -287,10 +287,8 @@ where
                 })
             }
             None => {
-                return Err(InvalidModeString {
-                    string: pieces.join(" ").to_owned(),
-                    cause: MissingModeModifier,
-                })
+                // No modifier
+                return Ok(res);
             }
         };
 
@@ -318,9 +316,32 @@ where
 
         Ok(res)
     } else {
-        Err(InvalidModeString {
-            string: pieces.join(" ").to_owned(),
-            cause: MissingModeModifier,
-        })
+        // No modifier
+        Ok(res)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{ChannelMode, Mode};
+    use crate::Command;
+    use crate::Message;
+
+    #[test]
+    fn parse_channel_mode() {
+        let cmd = "MODE #foo +r".parse::<Message>().unwrap().command;
+        assert_eq!(
+            Command::ChannelMODE(
+                "#foo".to_string(),
+                vec![Mode::Plus(ChannelMode::RegisteredOnly, None)]
+            ),
+            cmd
+        );
+    }
+
+    #[test]
+    fn parse_no_mode() {
+        let cmd = "MODE #foo".parse::<Message>().unwrap().command;
+        assert_eq!(Command::ChannelMODE("#foo".to_string(), vec![]), cmd);
     }
 }
