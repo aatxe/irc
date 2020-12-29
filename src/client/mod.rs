@@ -879,7 +879,7 @@ impl Future for Outgoing {
         }
 
         loop {
-            match this.stream.poll_next_unpin(cx) {
+            match this.stream.poll_recv(cx) {
                 Poll::Ready(Some(message)) => ready!(this.try_start_send(cx, message))?,
                 Poll::Ready(None) => {
                     ready!(Pin::new(&mut this.sink).poll_flush(cx))?;
