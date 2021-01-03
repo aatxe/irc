@@ -48,8 +48,10 @@ irc-proto = { version = "0.14.0", path = "irc-proto" }
 log = "0.4.0"
 parking_lot = "0.11.0"
 thiserror = "1.0.0"
-tokio = { version = "0.3.0", features = ["net", "stream", "time", "sync"] }
-tokio-util = { version = "0.4.0", features = ["codec"] }
+pin-project = "1.0.2"
+tokio = { version = "1.0.0", features = ["net", "time", "sync"] }
+tokio-stream = "0.1.0"
+tokio-util = { version = "0.6.0", features = ["codec"] }
 
 # Feature - Config
 serde = { version = "1.0.0", optional = true }
@@ -59,12 +61,12 @@ serde_yaml = { version = "0.8.0", optional = true }
 toml = { version = "0.5.0", optional = true }
 
 # Feature - Proxy
-tokio-socks = { version = "0.3.0", optional = true }
+tokio-socks = { version = "0.5.1", optional = true }
 
 # Feature - TLS
 native-tls = { version = "0.2.0", optional = true }
-tokio-rustls = { version = "0.20.0", optional = true }
-tokio-native-tls = { version = "0.2.0", optional = true }
+tokio-rustls = { version = "0.22.0", optional = true }
+tokio-native-tls = { version = "0.3.0", optional = true }
 webpki-roots = { version = "0.20.0", optional = true }
 
 
@@ -74,7 +76,7 @@ args = "2.0.0"
 env_logger = "0.7.0"
 futures = "0.3.0"
 getopts = "0.2.0"
-tokio = { version = "0.3.0", features = ["rt", "rt-multi-thread", "macros", "net", "stream", "time"] }
+tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros", "net", "time"] }
 
 
 [[example]]
