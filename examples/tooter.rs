@@ -1,4 +1,3 @@
-use futures::prelude::*;
 use irc::client::prelude::*;
 use std::time::Duration;
 
@@ -15,10 +14,10 @@ async fn main() -> irc::error::Result<()> {
     let client = Client::from_config(config).await?;
     let sender = client.sender();
 
-    let mut interval = tokio::time::interval(Duration::from_secs(1)).fuse();
+    let mut interval = tokio::time::interval(Duration::from_secs(1));
 
     loop {
-        let _ = interval.select_next_some().await;
+        let _ = interval.tick().await;
         sender.send_privmsg("#rust-spam", "AWOOOOOOOOOO")?;
     }
 }

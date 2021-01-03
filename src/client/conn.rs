@@ -1,5 +1,6 @@
 //! A module providing IRC connections for use by `IrcServer`s.
 use futures_util::{sink::Sink, stream::Stream};
+use pin_project::pin_project;
 use std::{
     fmt,
     pin::Pin,
@@ -53,14 +54,15 @@ use crate::{
 };
 
 /// An IRC connection used internally by `IrcServer`.
+#[pin_project(project = ConnectionProj)]
 pub enum Connection {
     #[doc(hidden)]
-    Unsecured(Transport<TcpStream>),
+    Unsecured(#[pin] Transport<TcpStream>),
     #[doc(hidden)]
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
-    Secured(Transport<TlsStream<TcpStream>>),
+    Secured(#[pin] Transport<TlsStream<TcpStream>>),
     #[doc(hidden)]
-    Mock(Logged<MockStream>),
+    Mock(#[pin] Logged<MockStream>),
 }
 
 impl fmt::Debug for Connection {
@@ -280,12 +282,12 @@ impl Connection {
 impl Stream for Connection {
     type Item = error::Result<Message>;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        match &mut *self {
-            Connection::Unsecured(inner) => Pin::new(inner).poll_next(cx),
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        match self.project() {
+            ConnectionProj::Unsecured(inner) => inner.poll_next(cx),
             #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
-            Connection::Secured(inner) => Pin::new(inner).poll_next(cx),
-            Connection::Mock(inner) => Pin::new(inner).poll_next(cx),
+            ConnectionProj::Secured(inner) => inner.poll_next(cx),
+            ConnectionProj::Mock(inner) => inner.poll_next(cx),
         }
     }
 }
@@ -293,39 +295,39 @@ impl Stream for Connection {
 impl Sink<Message> for Connection {
     type Error = error::Error;
 
-    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        match &mut *self {
-            Connection::Unsecured(inner) => Pin::new(inner).poll_ready(cx),
+    fn poll_ready(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        match self.project() {
+            ConnectionProj::Unsecured(inner) => inner.poll_ready(cx),
             #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
-            Connection::Secured(inner) => Pin::new(inner).poll_ready(cx),
-            Connection::Mock(inner) => Pin::new(inner).poll_ready(cx),
+            ConnectionProj::Secured(inner) => inner.poll_ready(cx),
+            ConnectionProj::Mock(inner) => inner.poll_ready(cx),
         }
     }
 
-    fn start_send(mut self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
-        match &mut *self {
-            Connection::Unsecured(inner) => Pin::new(inner).start_send(item),
+    fn start_send(self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
+        match self.project() {
+            ConnectionProj::Unsecured(inner) => inner.start_send(item),
             #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
-            Connection::Secured(inner) => Pin::new(inner).start_send(item),
-            Connection::Mock(inner) => Pin::new(inner).start_send(item),
+            ConnectionProj::Secured(inner) => inner.start_send(item),
+            ConnectionProj::Mock(inner) => inner.start_send(item),
         }
     }
 
-    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        match &mut *self {
-            Connection::Unsecured(inner) => Pin::new(inner).poll_flush(cx),
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        match self.project() {
+            ConnectionProj::Unsecured(inner) => inner.poll_flush(cx),
             #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
-            Connection::Secured(inner) => Pin::new(inner).poll_flush(cx),
-            Connection::Mock(inner) => Pin::new(inner).poll_flush(cx),
+            ConnectionProj::Secured(inner) => inner.poll_flush(cx),
+            ConnectionProj::Mock(inner) => inner.poll_flush(cx),
         }
     }
 
-    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        match &mut *self {
-            Connection::Unsecured(inner) => Pin::new(inner).poll_close(cx),
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        match self.project() {
+            ConnectionProj::Unsecured(inner) => inner.poll_close(cx),
             #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
-            Connection::Secured(inner) => Pin::new(inner).poll_close(cx),
-            Connection::Mock(inner) => Pin::new(inner).poll_close(cx),
+            ConnectionProj::Secured(inner) => inner.poll_close(cx),
+            ConnectionProj::Mock(inner) => inner.poll_close(cx),
         }
     }
 }
