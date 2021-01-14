@@ -224,7 +224,8 @@ impl Config {
         self
     }
 
-    fn path(&self) -> String {
+    /// Returns the location this Config was loaded from or `<none>`.
+    pub(crate) fn path(&self) -> String {
         self.path
             .as_ref()
             .map(|buf| buf.to_string_lossy().into_owned())
