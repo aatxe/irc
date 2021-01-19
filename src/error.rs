@@ -144,6 +144,13 @@ pub enum ConfigError {
     /// Configuration does not specify a server.
     #[error("server not specified")]
     ServerNotSpecified,
+
+    /// The specified file could not be read.
+    #[error("could not read file {}", file)]
+    FileMissing {
+        /// The supposed location of the file.
+        file: String,
+    },
 }
 
 /// A wrapper that combines toml's serialization and deserialization errors.

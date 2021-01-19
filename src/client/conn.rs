@@ -165,25 +165,41 @@ impl Connection {
         let mut builder = TlsConnector::builder();
 
         if let Some(cert_path) = config.cert_path() {
-            let mut file = File::open(cert_path)?;
-            let mut cert_data = vec![];
-            file.read_to_end(&mut cert_data)?;
-            let cert = Certificate::from_der(&cert_data)?;
-            builder.add_root_certificate(cert);
-            log::info!("Added {} to trusted certificates.", cert_path);
+            if let Ok(mut file) = File::open(cert_path) {
+                let mut cert_data = vec![];
+                file.read_to_end(&mut cert_data)?;
+                let cert = Certificate::from_der(&cert_data)?;
+                builder.add_root_certificate(cert);
+                log::info!("Added {} to trusted certificates.", cert_path);
+            } else {
+                return Err(error::Error::InvalidConfig {
+                    path: config.path(),
+                    cause: error::ConfigError::FileMissing {
+                        file: cert_path.to_string(),
+                    },
+                });
+            }
         }
 
         if let Some(client_cert_path) = config.client_cert_path() {
-            let client_cert_pass = config.client_cert_pass();
-            let mut file = File::open(client_cert_path)?;
-            let mut client_cert_data = vec![];
-            file.read_to_end(&mut client_cert_data)?;
-            let pkcs12_archive = Identity::from_pkcs12(&client_cert_data, &client_cert_pass)?;
-            builder.identity(pkcs12_archive);
-            log::info!(
-                "Using {} for client certificate authentication.",
-                client_cert_path
-            );
+            if let Ok(mut file) = File::open(client_cert_path) {
+                let mut client_cert_data = vec![];
+                file.read_to_end(&mut client_cert_data)?;
+                let client_cert_pass = config.client_cert_pass();
+                let pkcs12_archive = Identity::from_pkcs12(&client_cert_data, &client_cert_pass)?;
+                builder.identity(pkcs12_archive);
+                log::info!(
+                    "Using {} for client certificate authentication.",
+                    client_cert_path
+                );
+            } else {
+                return Err(error::Error::InvalidConfig {
+                    path: config.path(),
+                    cause: error::ConfigError::FileMissing {
+                        file: client_cert_path.to_string(),
+                    },
+                });
+            }
         }
 
         let connector: tokio_native_tls::TlsConnector = builder.build()?.into();
@@ -207,30 +223,46 @@ impl Connection {
             .add_server_trust_anchors(&TLS_SERVER_ROOTS);
 
         if let Some(cert_path) = config.cert_path() {
-            let file = File::open(cert_path)?;
-            let mut cert_data = BufReader::new(file);
-            builder
-                .root_store
-                .add_pem_file(&mut cert_data)
-                .map_err(|_| {
-                    error::Error::Io(Error::new(ErrorKind::InvalidInput, "invalid cert"))
-                })?;
-            log::info!("Added {} to trusted certificates.", cert_path);
+            if let Ok(mut file) = File::open(cert_path) {
+                let mut cert_data = BufReader::new(file);
+                builder
+                    .root_store
+                    .add_pem_file(&mut cert_data)
+                    .map_err(|_| {
+                        error::Error::Io(Error::new(ErrorKind::InvalidInput, "invalid cert"))
+                    })?;
+                log::info!("Added {} to trusted certificates.", cert_path);
+            } else {
+                return Err(error::Error::InvalidConfig {
+                    path: config.path(),
+                    cause: error::ConfigError::FileMissing {
+                        file: cert_path.to_string(),
+                    },
+                });
+            }
         }
 
         if let Some(client_cert_path) = config.client_cert_path() {
-            let client_cert_pass = PrivateKey(Vec::from(config.client_cert_pass()));
-            let file = File::open(client_cert_path)?;
-            let client_cert_data = certs(&mut BufReader::new(file)).map_err(|_| {
-                error::Error::Io(Error::new(ErrorKind::InvalidInput, "invalid cert"))
-            })?;
-            builder
-                .set_single_client_cert(client_cert_data, client_cert_pass)
-                .map_err(|err| error::Error::Io(Error::new(ErrorKind::InvalidInput, err)))?;
-            log::info!(
-                "Using {} for client certificate authentication.",
-                client_cert_path
-            );
+            if let Ok(mut file) = File::open(client_cert_path) {
+                let client_cert_data = certs(&mut BufReader::new(file)).map_err(|_| {
+                    error::Error::Io(Error::new(ErrorKind::InvalidInput, "invalid cert"))
+                })?;
+                let client_cert_pass = PrivateKey(Vec::from(config.client_cert_pass()));
+                builder
+                    .set_single_client_cert(client_cert_data, client_cert_pass)
+                    .map_err(|err| error::Error::Io(Error::new(ErrorKind::InvalidInput, err)))?;
+                log::info!(
+                    "Using {} for client certificate authentication.",
+                    client_cert_path
+                );
+            } else {
+                return Err(error::Error::InvalidConfig {
+                    path: config.path(),
+                    cause: error::ConfigError::FileMissing {
+                        file: client_cert_path.to_string(),
+                    },
+                });
+            }
         }
 
         let connector = TlsConnector::from(Arc::new(builder));
