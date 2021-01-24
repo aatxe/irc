@@ -9,28 +9,34 @@ use std::{
 };
 
 use chrono::prelude::*;
-use futures_channel::mpsc::UnboundedSender;
 use futures_util::{future::Future, ready, sink::Sink, stream::Stream};
+use pin_project::pin_project;
+use tokio::sync::mpsc::UnboundedSender;
 use tokio::{
     io::{AsyncRead, AsyncWrite},
-    time::{self, Delay, Interval},
+    time::{self, Interval, Sleep},
 };
 use tokio_util::codec::Framed;
 
 use crate::{
     client::data::Config,
     error,
-    proto::{Command, IrcCodec, Message},
+    proto::{Command, IrcCodec, Message, Response},
 };
 
 /// Pinger-based futures helper.
+#[pin_project]
 struct Pinger {
     tx: UnboundedSender<Message>,
+    // Whether this pinger pings.
+    enabled: bool,
     /// The amount of time to wait before timing out from no ping response.
     ping_timeout: Duration,
     /// The instant that the last ping was sent to the server.
-    ping_deadline: Option<Delay>,
+    #[pin]
+    ping_deadline: Option<Sleep>,
     /// The interval at which to send pings.
+    #[pin]
     ping_interval: Interval,
 }
 
@@ -42,6 +48,7 @@ impl Pinger {
 
         Self {
             tx,
+            enabled: false,
             ping_timeout,
             ping_deadline: None,
             ping_interval: time::interval(ping_time),
@@ -49,8 +56,12 @@ impl Pinger {
     }
 
     /// Handle an incoming message.
-    fn handle_message(&mut self, message: &Message) -> error::Result<()> {
+    fn handle_message(self: Pin<&mut Self>, message: &Message) -> error::Result<()> {
         match message.command {
+            Command::Response(Response::RPL_ENDOFMOTD, _)
+            | Command::Response(Response::ERR_NOMOTD, _) => {
+                *self.project().enabled = true;
+            }
             // On receiving a `PING` message from the server, we automatically respond with
             // the appropriate `PONG` message to keep the connection alive for transport.
             Command::PING(ref data, _) => {
@@ -60,7 +71,7 @@ impl Pinger {
             // last instant that the pong was received. This will prevent timeout.
             Command::PONG(_, None) | Command::PONG(_, Some(_)) => {
                 log::trace!("Received PONG");
-                self.ping_deadline.take();
+                self.project().ping_deadline.set(None);
             }
             _ => (),
         }
@@ -69,31 +80,30 @@ impl Pinger {
     }
 
     /// Send a pong.
-    fn send_pong(&mut self, data: &str) -> error::Result<()> {
-        self.tx
-            .unbounded_send(Command::PONG(data.to_owned(), None).into())?;
+    fn send_pong(self: Pin<&mut Self>, data: &str) -> error::Result<()> {
+        self.project()
+            .tx
+            .send(Command::PONG(data.to_owned(), None).into())?;
         Ok(())
     }
 
     /// Sends a ping via the transport.
-    fn send_ping(&mut self) -> error::Result<()> {
+    fn send_ping(self: Pin<&mut Self>) -> error::Result<()> {
         log::trace!("Sending PING");
 
         // Creates new ping data using the local timestamp.
         let data = format!("{}", Local::now().timestamp());
 
-        self.tx
-            .unbounded_send(Command::PING(data.clone(), None).into())?;
+        let mut this = self.project();
+
+        this.tx.send(Command::PING(data.clone(), None).into())?;
+
+        if this.ping_deadline.is_none() {
+            let ping_deadline = time::sleep(*this.ping_timeout);
+            this.ping_deadline.set(Some(ping_deadline));
+        }
 
         Ok(())
-    }
-
-    /// Set the ping deadline.
-    fn set_deadline(&mut self) {
-        if self.ping_deadline.is_none() {
-            let ping_deadline = time::delay_for(self.ping_timeout);
-            self.ping_deadline = Some(ping_deadline);
-        }
     }
 }
 
@@ -101,16 +111,17 @@ impl Future for Pinger {
     type Output = Result<(), error::Error>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        if let Some(ping_deadline) = self.as_mut().ping_deadline.as_mut() {
-            match Pin::new(ping_deadline).poll(cx) {
+        if let Some(ping_deadline) = self.as_mut().project().ping_deadline.as_pin_mut() {
+            match ping_deadline.poll(cx) {
                 Poll::Ready(()) => return Poll::Ready(Err(error::Error::PingTimeout)),
                 Poll::Pending => (),
             }
         }
 
-        if let Poll::Ready(_) = Pin::new(&mut self.as_mut().ping_interval).poll_next(cx) {
-            self.as_mut().send_ping()?;
-            self.as_mut().set_deadline();
+        if let Poll::Ready(_) = self.as_mut().project().ping_interval.poll_tick(cx) {
+            if *self.as_mut().project().enabled {
+                self.as_mut().send_ping()?;
+            }
         }
 
         Poll::Pending
@@ -120,14 +131,15 @@ impl Future for Pinger {
 /// An IRC transport that handles core functionality for the IRC protocol. This is used in the
 /// implementation of `Connection` and ultimately `IrcServer`, and plays an important role in
 /// handling connection timeouts, message throttling, and ping response.
+#[pin_project]
 pub struct Transport<T> {
     /// The inner connection framed with an `IrcCodec`.
+    #[pin]
     inner: Framed<T, IrcCodec>,
     /// Helper for handle pinging.
+    #[pin]
     pinger: Option<Pinger>,
 }
-
-impl<T> Unpin for Transport<T> where T: Unpin {}
 
 impl<T> Transport<T>
 where
@@ -157,21 +169,21 @@ where
     type Item = Result<Message, error::Error>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        if let Some(pinger) = self.as_mut().pinger.as_mut() {
-            match Pin::new(pinger).poll(cx) {
+        if let Some(pinger) = self.as_mut().project().pinger.as_pin_mut() {
+            match pinger.poll(cx) {
                 Poll::Ready(result) => result?,
                 Poll::Pending => (),
             }
         }
 
-        let result = ready!(Pin::new(&mut self.as_mut().inner).poll_next(cx));
+        let result = ready!(self.as_mut().project().inner.poll_next(cx));
 
         let message = match result {
             None => return Poll::Ready(None),
             Some(message) => message?,
         };
 
-        if let Some(pinger) = self.as_mut().pinger.as_mut() {
+        if let Some(pinger) = self.as_mut().project().pinger.as_pin_mut() {
             pinger.handle_message(&message)?;
         }
 
@@ -185,24 +197,24 @@ where
 {
     type Error = error::Error;
 
-    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        ready!(Pin::new(&mut self.as_mut().inner).poll_ready(cx))?;
+    fn poll_ready(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        ready!(self.project().inner.poll_ready(cx))?;
         Poll::Ready(Ok(()))
     }
 
-    fn start_send(mut self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
+    fn start_send(self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
         log::trace!("[SEND] {}", item);
-        Pin::new(&mut self.as_mut().inner).start_send(item)?;
+        self.project().inner.start_send(item)?;
         Ok(())
     }
 
-    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        ready!(Pin::new(&mut self.as_mut().inner).poll_flush(cx))?;
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        ready!(self.project().inner.poll_flush(cx))?;
         Poll::Ready(Ok(()))
     }
 
-    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        ready!(Pin::new(&mut self.as_mut().inner).poll_close(cx))?;
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        ready!(self.project().inner.poll_close(cx))?;
         Poll::Ready(Ok(()))
     }
 }
@@ -228,12 +240,12 @@ impl LogView {
 
 /// A logged version of the `Transport` that records all sent and received messages.
 /// Note: this will introduce some performance overhead by cloning all messages.
+#[pin_project]
 pub struct Logged<T> {
+    #[pin]
     inner: Transport<T>,
     view: LogView,
 }
-
-impl<T> Unpin for Logged<T> where T: Unpin {}
 
 impl<T> Logged<T>
 where
@@ -262,12 +274,14 @@ where
 {
     type Item = Result<Message, error::Error>;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        match ready!(Pin::new(&mut self.as_mut().inner).poll_next(cx)) {
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let this = self.project();
+
+        match ready!(this.inner.poll_next(cx)) {
             Some(msg) => {
                 let msg = msg?;
 
-                self.view
+                this.view
                     .received
                     .write()
                     .map_err(|_| error::Error::PoisonedLog)?
@@ -286,18 +300,20 @@ where
 {
     type Error = error::Error;
 
-    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        Pin::new(&mut self.as_mut().inner).poll_ready(cx)
+    fn poll_ready(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.project().inner.poll_ready(cx)
     }
 
-    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        Pin::new(&mut self.as_mut().inner).poll_close(cx)
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.project().inner.poll_close(cx)
     }
 
-    fn start_send(mut self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
-        Pin::new(&mut self.as_mut().inner).start_send(item.clone())?;
+    fn start_send(self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
+        let this = self.project();
 
-        self.view
+        this.inner.start_send(item.clone())?;
+
+        this.view
             .sent
             .write()
             .map_err(|_| error::Error::PoisonedLog)?
@@ -306,7 +322,7 @@ where
         Ok(())
     }
 
-    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        Pin::new(&mut self.as_mut().inner).poll_flush(cx)
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.project().inner.poll_flush(cx)
     }
 }

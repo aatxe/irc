@@ -3,7 +3,7 @@ use std::{
     pin::Pin,
     task::{Context, Poll},
 };
-use tokio::io::{AsyncRead, AsyncWrite};
+use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
 /// A fake stream for testing network applications backed by buffers.
 #[derive(Clone, Debug)]
@@ -41,9 +41,11 @@ impl AsyncRead for MockStream {
     fn poll_read(
         mut self: Pin<&mut Self>,
         _: &mut Context<'_>,
-        buf: &mut [u8],
-    ) -> Poll<io::Result<usize>> {
-        Poll::Ready(self.as_mut().received.read(buf))
+        buf: &mut ReadBuf<'_>,
+    ) -> Poll<io::Result<()>> {
+        let n = self.as_mut().received.read(buf.initialize_unfilled())?;
+        buf.advance(n);
+        Poll::Ready(Ok(()))
     }
 }
 

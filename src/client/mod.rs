@@ -49,7 +49,6 @@
 
 #[cfg(feature = "ctcp")]
 use chrono::prelude::*;
-use futures_channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
 use futures_util::{
     future::{FusedFuture, Future},
     ready,
@@ -68,6 +67,7 @@ use std::{
     sync::Arc,
     task::{Context, Poll},
 };
+use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 
 use crate::{
     client::{
@@ -95,326 +95,338 @@ pub mod transport;
 
 macro_rules! pub_state_base {
     () => {
-    /// Changes the modes for the specified target.
-    pub fn send_mode<S, T>(&self, target: S, modes: &[Mode<T>]) -> error::Result<()>
-    where
-        S: fmt::Display,
-        T: ModeType,
-    {
-        self.send(T::mode(&target.to_string(), modes))
-    }
-
-    /// Joins the specified channel or chanlist.
-    pub fn send_join<S>(&self, chanlist: S) -> error::Result<()>
-    where
-        S: fmt::Display,
-    {
-        self.send(JOIN(chanlist.to_string(), None, None))
-    }
-
-    /// Joins the specified channel or chanlist using the specified key or keylist.
-    pub fn send_join_with_keys<S1, S2>(&self, chanlist: &str, keylist: &str) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-    {
-        self.send(JOIN(chanlist.to_string(), Some(keylist.to_string()), None))
-    }
-
-    /// Sends a notice to the specified target.
-    pub fn send_notice<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-    {
-        let message = message.to_string();
-        for line in message.split("\r\n") {
-            self.send(NOTICE(target.to_string(), line.to_string()))?
+        /// Changes the modes for the specified target.
+        pub fn send_mode<S, T>(&self, target: S, modes: &[Mode<T>]) -> error::Result<()>
+        where
+            S: fmt::Display,
+            T: ModeType,
+        {
+            self.send(T::mode(&target.to_string(), modes))
         }
-        Ok(())
-    }
-    }
+
+        /// Joins the specified channel or chanlist.
+        pub fn send_join<S>(&self, chanlist: S) -> error::Result<()>
+        where
+            S: fmt::Display,
+        {
+            self.send(JOIN(chanlist.to_string(), None, None))
+        }
+
+        /// Joins the specified channel or chanlist using the specified key or keylist.
+        pub fn send_join_with_keys<S1, S2>(
+            &self,
+            chanlist: &str,
+            keylist: &str,
+        ) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+        {
+            self.send(JOIN(chanlist.to_string(), Some(keylist.to_string()), None))
+        }
+
+        /// Sends a notice to the specified target.
+        pub fn send_notice<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+        {
+            let message = message.to_string();
+            for line in message.split("\r\n") {
+                self.send(NOTICE(target.to_string(), line.to_string()))?
+            }
+            Ok(())
+        }
+    };
 }
 
 macro_rules! pub_sender_base {
     () => {
-    /// Sends a request for a list of server capabilities for a specific IRCv3 version.
-    pub fn send_cap_ls(&self, version: NegotiationVersion) -> error::Result<()> {
-        self.send(Command::CAP(
-            None,
-            LS,
-            match version {
-                NegotiationVersion::V301 => None,
-                NegotiationVersion::V302 => Some("302".to_owned()),
-            },
-            None,
-        ))
-    }
-
-    /// Sends an IRCv3 capabilities request for the specified extensions.
-    pub fn send_cap_req(&self, extensions: &[Capability]) -> error::Result<()> {
-        let append = |mut s: String, c| {
-            s.push_str(c);
-            s.push(' ');
-            s
-        };
-        let mut exts = extensions
-            .iter()
-            .map(|c| c.as_ref())
-            .fold(String::new(), append);
-        let len = exts.len() - 1;
-        exts.truncate(len);
-        self.send(CAP(None, REQ, None, Some(exts)))
-    }
-
-    /// Sends a SASL AUTHENTICATE message with the specified data.
-    pub fn send_sasl<S: fmt::Display>(&self, data: S) -> error::Result<()> {
-        self.send(AUTHENTICATE(data.to_string()))
-    }
-
-    /// Sends a SASL AUTHENTICATE request to use the PLAIN mechanism.
-    pub fn send_sasl_plain(&self) -> error::Result<()> {
-        self.send_sasl("PLAIN")
-    }
-
-    /// Sends a SASL AUTHENTICATE request to use the EXTERNAL mechanism.
-    pub fn send_sasl_external(&self) -> error::Result<()> {
-        self.send_sasl("EXTERNAL")
-    }
-
-    /// Sends a SASL AUTHENTICATE request to abort authentication.
-    pub fn send_sasl_abort(&self) -> error::Result<()> {
-        self.send_sasl("*")
-    }
-
-    /// Sends a PONG with the specified message.
-    pub fn send_pong<S>(&self, msg: S) -> error::Result<()>
-    where
-        S: fmt::Display,
-    {
-        self.send(PONG(msg.to_string(), None))
-    }
-
-    /// Parts the specified channel or chanlist.
-    pub fn send_part<S>(&self, chanlist: S) -> error::Result<()>
-    where
-        S: fmt::Display,
-    {
-        self.send(PART(chanlist.to_string(), None))
-    }
-
-    /// Attempts to oper up using the specified username and password.
-    pub fn send_oper<S1, S2>(&self, username: S1, password: S2) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-    {
-        self.send(OPER(username.to_string(), password.to_string()))
-    }
-
-    /// Sends a message to the specified target. If the message contains IRC newlines (`\r\n`), it
-    /// will automatically be split and sent as multiple separate `PRIVMSG`s to the specified
-    /// target. If you absolutely must avoid this behavior, you can do
-    /// `client.send(PRIVMSG(target, message))` directly.
-    pub fn send_privmsg<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-    {
-        let message = message.to_string();
-        for line in message.split("\r\n") {
-            self.send(PRIVMSG(target.to_string(), line.to_string()))?
+        /// Sends a request for a list of server capabilities for a specific IRCv3 version.
+        pub fn send_cap_ls(&self, version: NegotiationVersion) -> error::Result<()> {
+            self.send(Command::CAP(
+                None,
+                LS,
+                match version {
+                    NegotiationVersion::V301 => None,
+                    NegotiationVersion::V302 => Some("302".to_owned()),
+                },
+                None,
+            ))
         }
-        Ok(())
-    }
 
-    /// Sets the topic of a channel or requests the current one.
-    /// If `topic` is an empty string, it won't be included in the message.
-    pub fn send_topic<S1, S2>(&self, channel: S1, topic: S2) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-    {
-        let topic = topic.to_string();
-        self.send(TOPIC(
-            channel.to_string(),
-            if topic.is_empty() { None } else { Some(topic) },
-        ))
-    }
-
-    /// Kills the target with the provided message.
-    pub fn send_kill<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-    {
-        self.send(KILL(target.to_string(), message.to_string()))
-    }
-
-    /// Kicks the listed nicknames from the listed channels with a comment.
-    /// If `message` is an empty string, it won't be included in the message.
-    pub fn send_kick<S1, S2, S3>(
-        &self,
-        chanlist: S1,
-        nicklist: S2,
-        message: S3,
-    ) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-        S3: fmt::Display,
-    {
-        let message = message.to_string();
-        self.send(KICK(
-            chanlist.to_string(),
-            nicklist.to_string(),
-            if message.is_empty() {
-                None
-            } else {
-                Some(message)
-            },
-        ))
-    }
-
-    /// Changes the mode of the target by force.
-    /// If `modeparams` is an empty string, it won't be included in the message.
-    pub fn send_samode<S1, S2, S3>(&self, target: S1, mode: S2, modeparams: S3) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-        S3: fmt::Display,
-    {
-        let modeparams = modeparams.to_string();
-        self.send(SAMODE(
-            target.to_string(),
-            mode.to_string(),
-            if modeparams.is_empty() {
-                None
-            } else {
-                Some(modeparams)
-            },
-        ))
-    }
-
-    /// Forces a user to change from the old nickname to the new nickname.
-    pub fn send_sanick<S1, S2>(&self, old_nick: S1, new_nick: S2) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-    {
-        self.send(SANICK(old_nick.to_string(), new_nick.to_string()))
-    }
-
-    /// Invites a user to the specified channel.
-    pub fn send_invite<S1, S2>(&self, nick: S1, chan: S2) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-    {
-        self.send(INVITE(nick.to_string(), chan.to_string()))
-    }
-
-    /// Quits the server entirely with a message.
-    /// This defaults to `Powered by Rust.` if none is specified.
-    pub fn send_quit<S>(&self, msg: S) -> error::Result<()>
-    where
-        S: fmt::Display,
-    {
-        let msg = msg.to_string();
-        self.send(QUIT(Some(if msg.is_empty() {
-            "Powered by Rust.".to_string()
-        } else {
-            msg
-        })))
-    }
-
-    /// Sends a CTCP-escaped message to the specified target.
-    /// This requires the CTCP feature to be enabled.
-    #[cfg(feature = "ctcp")]
-    pub fn send_ctcp<S1, S2>(&self, target: S1, msg: S2) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-    {
-        let msg = msg.to_string();
-        for line in msg.split("\r\n") {
-            self.send(PRIVMSG(target.to_string(), format!("\u{001}{}\u{001}", line)))?
+        /// Sends an IRCv3 capabilities request for the specified extensions.
+        pub fn send_cap_req(&self, extensions: &[Capability]) -> error::Result<()> {
+            let append = |mut s: String, c| {
+                s.push_str(c);
+                s.push(' ');
+                s
+            };
+            let mut exts = extensions
+                .iter()
+                .map(|c| c.as_ref())
+                .fold(String::new(), append);
+            let len = exts.len() - 1;
+            exts.truncate(len);
+            self.send(CAP(None, REQ, None, Some(exts)))
         }
-        Ok(())
-    }
 
-    /// Sends an action command to the specified target.
-    /// This requires the CTCP feature to be enabled.
-    #[cfg(feature = "ctcp")]
-    pub fn send_action<S1, S2>(&self, target: S1, msg: S2) -> error::Result<()>
-    where
-        S1: fmt::Display,
-        S2: fmt::Display,
-    {
-        self.send_ctcp(target, &format!("ACTION {}", msg.to_string())[..])
-    }
+        /// Sends a SASL AUTHENTICATE message with the specified data.
+        pub fn send_sasl<S: fmt::Display>(&self, data: S) -> error::Result<()> {
+            self.send(AUTHENTICATE(data.to_string()))
+        }
 
-    /// Sends a finger request to the specified target.
-    /// This requires the CTCP feature to be enabled.
-    #[cfg(feature = "ctcp")]
-    pub fn send_finger<S: fmt::Display>(&self, target: S) -> error::Result<()>
-    where
-        S: fmt::Display,
-    {
-        self.send_ctcp(target, "FINGER")
-    }
+        /// Sends a SASL AUTHENTICATE request to use the PLAIN mechanism.
+        pub fn send_sasl_plain(&self) -> error::Result<()> {
+            self.send_sasl("PLAIN")
+        }
 
-    /// Sends a version request to the specified target.
-    /// This requires the CTCP feature to be enabled.
-    #[cfg(feature = "ctcp")]
-    pub fn send_version<S>(&self, target: S) -> error::Result<()>
-    where
-        S: fmt::Display,
-    {
-        self.send_ctcp(target, "VERSION")
-    }
+        /// Sends a SASL AUTHENTICATE request to use the EXTERNAL mechanism.
+        pub fn send_sasl_external(&self) -> error::Result<()> {
+            self.send_sasl("EXTERNAL")
+        }
 
-    /// Sends a source request to the specified target.
-    /// This requires the CTCP feature to be enabled.
-    #[cfg(feature = "ctcp")]
-    pub fn send_source<S>(&self, target: S) -> error::Result<()>
-    where
-        S: fmt::Display,
-    {
-        self.send_ctcp(target, "SOURCE")
-    }
+        /// Sends a SASL AUTHENTICATE request to abort authentication.
+        pub fn send_sasl_abort(&self) -> error::Result<()> {
+            self.send_sasl("*")
+        }
 
-    /// Sends a user info request to the specified target.
-    /// This requires the CTCP feature to be enabled.
-    #[cfg(feature = "ctcp")]
-    pub fn send_user_info<S>(&self, target: S) -> error::Result<()>
-    where
-        S: fmt::Display,
-    {
-        self.send_ctcp(target, "USERINFO")
-    }
+        /// Sends a PONG with the specified message.
+        pub fn send_pong<S>(&self, msg: S) -> error::Result<()>
+        where
+            S: fmt::Display,
+        {
+            self.send(PONG(msg.to_string(), None))
+        }
 
-    /// Sends a finger request to the specified target.
-    /// This requires the CTCP feature to be enabled.
-    #[cfg(feature = "ctcp")]
-    pub fn send_ctcp_ping<S>(&self, target: S) -> error::Result<()>
-    where
-        S: fmt::Display,
-    {
-        let time = Local::now();
-        self.send_ctcp(target, &format!("PING {}", time.timestamp())[..])
-    }
+        /// Parts the specified channel or chanlist.
+        pub fn send_part<S>(&self, chanlist: S) -> error::Result<()>
+        where
+            S: fmt::Display,
+        {
+            self.send(PART(chanlist.to_string(), None))
+        }
 
-    /// Sends a time request to the specified target.
-    /// This requires the CTCP feature to be enabled.
-    #[cfg(feature = "ctcp")]
-    pub fn send_time<S>(&self, target: S) -> error::Result<()>
-    where
-        S: fmt::Display,
-    {
-        self.send_ctcp(target, "TIME")
-    }
-    }
+        /// Attempts to oper up using the specified username and password.
+        pub fn send_oper<S1, S2>(&self, username: S1, password: S2) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+        {
+            self.send(OPER(username.to_string(), password.to_string()))
+        }
+
+        /// Sends a message to the specified target. If the message contains IRC newlines (`\r\n`), it
+        /// will automatically be split and sent as multiple separate `PRIVMSG`s to the specified
+        /// target. If you absolutely must avoid this behavior, you can do
+        /// `client.send(PRIVMSG(target, message))` directly.
+        pub fn send_privmsg<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+        {
+            let message = message.to_string();
+            for line in message.split("\r\n") {
+                self.send(PRIVMSG(target.to_string(), line.to_string()))?
+            }
+            Ok(())
+        }
+
+        /// Sets the topic of a channel or requests the current one.
+        /// If `topic` is an empty string, it won't be included in the message.
+        pub fn send_topic<S1, S2>(&self, channel: S1, topic: S2) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+        {
+            let topic = topic.to_string();
+            self.send(TOPIC(
+                channel.to_string(),
+                if topic.is_empty() { None } else { Some(topic) },
+            ))
+        }
+
+        /// Kills the target with the provided message.
+        pub fn send_kill<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+        {
+            self.send(KILL(target.to_string(), message.to_string()))
+        }
+
+        /// Kicks the listed nicknames from the listed channels with a comment.
+        /// If `message` is an empty string, it won't be included in the message.
+        pub fn send_kick<S1, S2, S3>(
+            &self,
+            chanlist: S1,
+            nicklist: S2,
+            message: S3,
+        ) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+            S3: fmt::Display,
+        {
+            let message = message.to_string();
+            self.send(KICK(
+                chanlist.to_string(),
+                nicklist.to_string(),
+                if message.is_empty() {
+                    None
+                } else {
+                    Some(message)
+                },
+            ))
+        }
+
+        /// Changes the mode of the target by force.
+        /// If `modeparams` is an empty string, it won't be included in the message.
+        pub fn send_samode<S1, S2, S3>(
+            &self,
+            target: S1,
+            mode: S2,
+            modeparams: S3,
+        ) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+            S3: fmt::Display,
+        {
+            let modeparams = modeparams.to_string();
+            self.send(SAMODE(
+                target.to_string(),
+                mode.to_string(),
+                if modeparams.is_empty() {
+                    None
+                } else {
+                    Some(modeparams)
+                },
+            ))
+        }
+
+        /// Forces a user to change from the old nickname to the new nickname.
+        pub fn send_sanick<S1, S2>(&self, old_nick: S1, new_nick: S2) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+        {
+            self.send(SANICK(old_nick.to_string(), new_nick.to_string()))
+        }
+
+        /// Invites a user to the specified channel.
+        pub fn send_invite<S1, S2>(&self, nick: S1, chan: S2) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+        {
+            self.send(INVITE(nick.to_string(), chan.to_string()))
+        }
+
+        /// Quits the server entirely with a message.
+        /// This defaults to `Powered by Rust.` if none is specified.
+        pub fn send_quit<S>(&self, msg: S) -> error::Result<()>
+        where
+            S: fmt::Display,
+        {
+            let msg = msg.to_string();
+            self.send(QUIT(Some(if msg.is_empty() {
+                "Powered by Rust.".to_string()
+            } else {
+                msg
+            })))
+        }
+
+        /// Sends a CTCP-escaped message to the specified target.
+        /// This requires the CTCP feature to be enabled.
+        #[cfg(feature = "ctcp")]
+        pub fn send_ctcp<S1, S2>(&self, target: S1, msg: S2) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+        {
+            let msg = msg.to_string();
+            for line in msg.split("\r\n") {
+                self.send(PRIVMSG(
+                    target.to_string(),
+                    format!("\u{001}{}\u{001}", line),
+                ))?
+            }
+            Ok(())
+        }
+
+        /// Sends an action command to the specified target.
+        /// This requires the CTCP feature to be enabled.
+        #[cfg(feature = "ctcp")]
+        pub fn send_action<S1, S2>(&self, target: S1, msg: S2) -> error::Result<()>
+        where
+            S1: fmt::Display,
+            S2: fmt::Display,
+        {
+            self.send_ctcp(target, &format!("ACTION {}", msg.to_string())[..])
+        }
+
+        /// Sends a finger request to the specified target.
+        /// This requires the CTCP feature to be enabled.
+        #[cfg(feature = "ctcp")]
+        pub fn send_finger<S: fmt::Display>(&self, target: S) -> error::Result<()>
+        where
+            S: fmt::Display,
+        {
+            self.send_ctcp(target, "FINGER")
+        }
+
+        /// Sends a version request to the specified target.
+        /// This requires the CTCP feature to be enabled.
+        #[cfg(feature = "ctcp")]
+        pub fn send_version<S>(&self, target: S) -> error::Result<()>
+        where
+            S: fmt::Display,
+        {
+            self.send_ctcp(target, "VERSION")
+        }
+
+        /// Sends a source request to the specified target.
+        /// This requires the CTCP feature to be enabled.
+        #[cfg(feature = "ctcp")]
+        pub fn send_source<S>(&self, target: S) -> error::Result<()>
+        where
+            S: fmt::Display,
+        {
+            self.send_ctcp(target, "SOURCE")
+        }
+
+        /// Sends a user info request to the specified target.
+        /// This requires the CTCP feature to be enabled.
+        #[cfg(feature = "ctcp")]
+        pub fn send_user_info<S>(&self, target: S) -> error::Result<()>
+        where
+            S: fmt::Display,
+        {
+            self.send_ctcp(target, "USERINFO")
+        }
+
+        /// Sends a finger request to the specified target.
+        /// This requires the CTCP feature to be enabled.
+        #[cfg(feature = "ctcp")]
+        pub fn send_ctcp_ping<S>(&self, target: S) -> error::Result<()>
+        where
+            S: fmt::Display,
+        {
+            let time = Local::now();
+            self.send_ctcp(target, &format!("PING {}", time.timestamp())[..])
+        }
+
+        /// Sends a time request to the specified target.
+        /// This requires the CTCP feature to be enabled.
+        #[cfg(feature = "ctcp")]
+        pub fn send_time<S>(&self, target: S) -> error::Result<()>
+        where
+            S: fmt::Display,
+        {
+            self.send_ctcp(target, "TIME")
+        }
+    };
 }
 
 /// A stream of `Messages` received from an IRC server via an `Client`.
@@ -813,7 +825,7 @@ pub struct Sender {
 impl Sender {
     /// Send a single message to the unbounded queue.
     pub fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> {
-        Ok(self.tx_outgoing.unbounded_send(msg.into())?)
+        Ok(self.tx_outgoing.send(msg.into())?)
     }
 
     pub_state_base!();
@@ -867,7 +879,7 @@ impl Future for Outgoing {
         }
 
         loop {
-            match this.stream.poll_next_unpin(cx) {
+            match this.stream.poll_recv(cx) {
                 Poll::Ready(Some(message)) => ready!(this.try_start_send(cx, message))?,
                 Poll::Ready(None) => {
                     ready!(Pin::new(&mut this.sink).poll_flush(cx))?;
@@ -920,7 +932,7 @@ impl Client {
     /// single, shared event loop. It can also be used to take more control over execution and error
     /// handling. Connection will not occur until the event loop is run.
     pub async fn from_config(config: Config) -> error::Result<Client> {
-        let (tx_outgoing, rx_outgoing) = mpsc::unbounded();
+        let (tx_outgoing, rx_outgoing) = mpsc::unbounded_channel();
         let conn = Connection::new(&config, tx_outgoing.clone()).await?;
 
         #[cfg(test)]

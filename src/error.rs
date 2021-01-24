@@ -3,11 +3,8 @@
 use std::io::Error as IoError;
 use std::sync::mpsc::RecvError;
 
-use futures_channel::{
-    mpsc::{SendError, TrySendError},
-    oneshot::Canceled,
-};
 use thiserror::Error;
+use tokio::sync::mpsc::error::{SendError, TrySendError};
 
 #[cfg(feature = "tls-rust")]
 use tokio_rustls::webpki::InvalidDNSNameError;
@@ -45,11 +42,11 @@ pub enum Error {
 
     /// An internal asynchronous channel closed.
     #[error("an async channel closed")]
-    AsyncChannelClosed(#[source] SendError),
+    AsyncChannelClosed,
 
     /// An internal oneshot channel closed.
     #[error("a oneshot channel closed")]
-    OneShotCanceled(#[source] Canceled),
+    OneShotCanceled,
 
     /// Error for invalid configurations.
     #[error("invalid config: {}", path)]
@@ -147,6 +144,13 @@ pub enum ConfigError {
     /// Configuration does not specify a server.
     #[error("server not specified")]
     ServerNotSpecified,
+
+    /// The specified file could not be read.
+    #[error("could not read file {}", file)]
+    FileMissing {
+        /// The supposed location of the file.
+        file: String,
+    },
 }
 
 /// A wrapper that combines toml's serialization and deserialization errors.
@@ -205,20 +209,14 @@ impl From<RecvError> for Error {
     }
 }
 
-impl From<SendError> for Error {
-    fn from(e: SendError) -> Error {
-        Error::AsyncChannelClosed(e)
+impl<T> From<SendError<T>> for Error {
+    fn from(_: SendError<T>) -> Error {
+        Error::AsyncChannelClosed
     }
 }
 
 impl<T> From<TrySendError<T>> for Error {
-    fn from(e: TrySendError<T>) -> Error {
-        Error::AsyncChannelClosed(e.into_send_error())
-    }
-}
-
-impl From<Canceled> for Error {
-    fn from(e: Canceled) -> Error {
-        Error::OneShotCanceled(e)
+    fn from(_: TrySendError<T>) -> Error {
+        Error::AsyncChannelClosed
     }
 }

@@ -20,6 +20,6 @@ default = ["bytes", "tokio", "tokio-util"]
 encoding = "0.2.0"
 thiserror = "1.0.0"
 
-bytes = { version = "0.5.0", optional = true }
-tokio = { version = "0.2.0", optional = true }
-tokio-util = { version = "0.3.0", features = ["codec"], optional = true }
+bytes = { version = "1.0.0", optional = true }
+tokio = { version = "1.0.0", optional = true }
+tokio-util = { version = "0.6.0", features = ["codec"], optional = true }
