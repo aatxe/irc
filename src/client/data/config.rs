@@ -577,7 +577,7 @@ impl Config {
 
     /// Gets the amount of time in seconds for the client to disconnect after not receiving a ping
     /// response.
-    /// This defaults to 10 seconds when not specified.
+    /// This defaults to 20 seconds when not specified.
     pub fn ping_timeout(&self) -> u32 {
         self.ping_timeout.as_ref().cloned().unwrap_or(20)
     }
