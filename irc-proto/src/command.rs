@@ -209,7 +209,7 @@ fn stringify(cmd: &str, args: &[&str]) -> String {
         Some((suffix, args)) => {
             let args = args.join(" ");
             let sp = if args.is_empty() { "" } else { " " };
-            let co = if suffix.is_empty() || suffix.contains(' ') {
+            let co = if suffix.is_empty() || suffix.contains(' ') || suffix.starts_with(':') {
                 ":"
             } else {
                 ""
