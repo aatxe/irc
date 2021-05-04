@@ -547,4 +547,29 @@ mod test {
         let message = "@tag=\\:\\s\\\\\\r\\na :test PRIVMSG #test test\r\n";
         assert_eq!(msg, message);
     }
+
+    #[test]
+    fn to_message_with_colon_in_suffix() {
+        let msg = "PRIVMSG #test ::test"
+            .parse::<Message>()
+            .unwrap();
+        let message = Message {
+            tags: None,
+            prefix: None,
+            command: PRIVMSG("#test".to_string(), ":test".to_string())
+        };
+        assert_eq!(msg, message);
+    }
+
+    #[test]
+    fn to_string_with_colon_in_suffix() {
+        let msg = Message {
+            tags: None,
+            prefix: None,
+            command: PRIVMSG("#test".to_string(), ":test".to_string()),
+        }
+        .to_string();
+        let message = "PRIVMSG #test ::test\r\n";
+        assert_eq!(msg, message);
+    }
 }
