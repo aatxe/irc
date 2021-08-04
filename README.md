@@ -8,7 +8,7 @@
 [doc-badge]: https://docs.rs/irc/badge.svg
 [doc]: https://docs.rs/irc
 
-[rfc2812]: http://tools.ietf.org/html/rfc2812
+[rfc2812]: http://datatracker.ietf.org/doc/html/rfc2812
 [ircv3.1]: http://ircv3.net/irc/3.1.html
 [ircv3.2]: http://ircv3.net/irc/3.2.html
 
