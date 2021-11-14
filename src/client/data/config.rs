@@ -661,16 +661,16 @@ mod test {
     #[allow(unused)]
     fn test_config() -> Config {
         Config {
-            owners: vec![format!("test")],
-            nickname: Some(format!("test")),
-            username: Some(format!("test")),
-            realname: Some(format!("test")),
+            owners: vec!["test".to_string()],
+            nickname: Some("test".to_string()),
+            username: Some("test".to_string()),
+            realname: Some("test".to_string()),
             password: Some(String::new()),
-            umodes: Some(format!("+BR")),
-            server: Some(format!("irc.test.net")),
+            umodes: Some("+BR".to_string()),
+            server: Some("irc.test.net".to_string()),
             port: Some(6667),
-            encoding: Some(format!("UTF-8")),
-            channels: vec![format!("#test"), format!("#test2")],
+            encoding: Some("UTF-8".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
 
             ..Default::default()
         }
@@ -679,7 +679,7 @@ mod test {
     #[test]
     fn is_owner() {
         let cfg = Config {
-            owners: vec![format!("test"), format!("test2")],
+            owners: vec!["test".to_string(), "test2".to_string()],
             ..Default::default()
         };
         assert!(cfg.is_owner("test"));
@@ -692,7 +692,7 @@ mod test {
         let cfg = Config {
             options: {
                 let mut map = HashMap::new();
-                map.insert(format!("testing"), format!("test"));
+                map.insert("testing".to_string(), "test".to_string());
                 map
             },
             ..Default::default()

@@ -248,7 +248,7 @@ mod test {
     fn create_user() {
         let user = User::new("~owner");
         let exp = User {
-            nickname: format!("owner"),
+            nickname: "owner".to_string(),
             username: None,
             hostname: None,
             highest_access_level: Owner,
@@ -263,7 +263,7 @@ mod test {
     fn create_user_complex() {
         let user = User::new("~&+user");
         let exp = User {
-            nickname: format!("user"),
+            nickname: "user".to_string(),
             username: None,
             hostname: None,
             highest_access_level: Owner,
