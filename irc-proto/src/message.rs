@@ -290,19 +290,20 @@ fn unescape_tag_value(value: &str) -> String {
     let mut unescaped = String::with_capacity(value.len());
     let mut iter = value.chars();
     while let Some(c) = iter.next() {
-        if c == '\\' {
+        let r = if c == '\\' {
             match iter.next() {
-                Some(':') => unescaped.push(';'),
-                Some('s') => unescaped.push(' '),
-                Some('\\') => unescaped.push('\\'),
-                Some('r') => unescaped.push('\r'),
-                Some('n') => unescaped.push('\n'),
-                Some(c) => unescaped.push(c),
+                Some(':') => ';',
+                Some('s') => ' ',
+                Some('\\') => '\\',
+                Some('r') => '\r',
+                Some('n') => '\n',
+                Some(c) => c,
                 None => break,
             }
         } else {
-            unescaped.push(c);
-        }
+            c
+        };
+        unescaped.push(r);
     }
     unescaped
 }
