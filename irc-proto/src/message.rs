@@ -112,43 +112,6 @@ impl Message {
             _ => self.source_nickname(),
         }
     }
-
-    /// Converts a Message into a String according to the IRC protocol.
-    ///
-    /// # Example
-    /// ```
-    /// # extern crate irc_proto;
-    /// # use irc_proto::Message;
-    /// # fn main() {
-    /// let msg = Message::new(
-    ///     Some("ada"), "PRIVMSG", vec!["#channel", "Hi, everyone!"]
-    /// ).unwrap();
-    /// assert_eq!(msg.to_string(), ":ada PRIVMSG #channel :Hi, everyone!\r\n");
-    /// # }
-    /// ```
-    pub fn to_string(&self) -> String {
-        let mut ret = String::new();
-        if let Some(ref tags) = self.tags {
-            ret.push('@');
-            for tag in tags {
-                ret.push_str(&tag.0);
-                if let Some(ref value) = tag.1 {
-                    ret.push('=');
-                    escape_tag_value(&mut ret, value);
-                }
-                ret.push(';');
-            }
-            ret.pop();
-            ret.push(' ');
-        }
-        if let Some(ref prefix) = self.prefix {
-            write!(ret, ":{} ", prefix).unwrap();
-        }
-        let cmd: String = From::from(&self.command);
-        ret.push_str(&cmd);
-        ret.push_str("\r\n");
-        ret
-    }
 }
 
 impl From<Command> for Message {
@@ -261,8 +224,38 @@ impl<'a> From<&'a str> for Message {
 }
 
 impl Display for Message {
+    /// Converts a Message into a String according to the IRC protocol.
+    ///
+    /// # Example
+    /// ```
+    /// # extern crate irc_proto;
+    /// # use irc_proto::Message;
+    /// # fn main() {
+    /// let msg = Message::new(
+    ///     Some("ada"), "PRIVMSG", vec!["#channel", "Hi, everyone!"]
+    /// ).unwrap();
+    /// assert_eq!(msg.to_string(), ":ada PRIVMSG #channel :Hi, everyone!\r\n");
+    /// # }
+    /// ```
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", self.to_string())
+        if let Some(ref tags) = self.tags {
+            f.write_char('@')?;
+            for (i, tag) in tags.iter().enumerate() {
+                if i > 0 {
+                    f.write_char(';')?;
+                }
+                f.write_str(&tag.0)?;
+                if let Some(ref value) = tag.1 {
+                    f.write_char('=')?;
+                    escape_tag_value(f, value)?;
+                }
+            }
+            f.write_char(' ')?;
+        }
+        if let Some(ref prefix) = self.prefix {
+            write!(f, ":{} ", prefix)?
+        }
+        write!(f, "{}\r\n", String::from(&self.command))
     }
 }
 
@@ -273,17 +266,18 @@ impl Display for Message {
 #[derive(Clone, PartialEq, Debug)]
 pub struct Tag(pub String, pub Option<String>);
 
-fn escape_tag_value(msg: &mut String, value: &str) {
+fn escape_tag_value(f: &mut dyn Write, value: &str) -> FmtResult {
     for c in value.chars() {
         match c {
-            ';' => msg.push_str("\\:"),
-            ' ' => msg.push_str("\\s"),
-            '\\' => msg.push_str("\\\\"),
-            '\r' => msg.push_str("\\r"),
-            '\n' => msg.push_str("\\n"),
-            c => msg.push(c),
+            ';' => f.write_str("\\:")?,
+            ' ' => f.write_str("\\s")?,
+            '\\' => f.write_str("\\\\")?,
+            '\r' => f.write_str("\\r")?,
+            '\n' => f.write_str("\\n")?,
+            c => f.write_char(c)?,
         }
     }
+    Ok(())
 }
 
 fn unescape_tag_value(value: &str) -> String {
