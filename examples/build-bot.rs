@@ -27,23 +27,20 @@ async fn main() -> irc::error::Result<()> {
     let mut stream = client.stream()?;
 
     while let Some(message) = stream.next().await.transpose()? {
-        match message.command {
-            Command::Response(Response::RPL_ISUPPORT, _) => {
-                client.send_privmsg(
-                    "#commits",
-                    format!(
-                        "[{}/{}] ({}) {} [{}]",
-                        repository_slug,
-                        branch,
-                        &commit[..7],
-                        commit_message,
-                        features,
-                    ),
-                )?;
+        if let Command::Response(Response::RPL_ISUPPORT, _) = message.command {
+            client.send_privmsg(
+                "#commits",
+                format!(
+                    "[{}/{}] ({}) {} [{}]",
+                    repository_slug,
+                    branch,
+                    &commit[..7],
+                    commit_message,
+                    features,
+                ),
+            )?;
 
-                client.send_quit("QUIT")?;
-            }
-            _ => (),
+            client.send_quit("QUIT")?;
         }
     }
 
