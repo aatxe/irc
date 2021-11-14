@@ -96,7 +96,7 @@ impl Pinger {
 
         let mut this = self.project();
 
-        this.tx.send(Command::PING(data.clone(), None).into())?;
+        this.tx.send(Command::PING(data, None).into())?;
 
         if this.ping_deadline.is_none() {
             let ping_deadline = time::sleep(*this.ping_timeout);
@@ -118,10 +118,8 @@ impl Future for Pinger {
             }
         }
 
-        if let Poll::Ready(_) = self.as_mut().project().ping_interval.poll_tick(cx) {
-            if *self.as_mut().project().enabled {
-                self.as_mut().send_ping()?;
-            }
+        if self.as_mut().project().ping_interval.poll_tick(cx).is_ready() && *self.as_mut().project().enabled {
+            self.as_mut().send_ping()?;
         }
 
         Poll::Pending

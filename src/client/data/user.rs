@@ -31,9 +31,9 @@ impl User {
         let username = state.find('@').map(|i| state[..i].to_owned());
         let hostname = state.find('@').map(|i| state[i + 1..].to_owned());
         User {
-            nickname: nickname,
-            username: username,
-            hostname: hostname,
+            nickname,
+            username,
+            hostname,
             access_levels: {
                 let mut ranks = ranks.clone();
                 ranks.push(AccessLevel::Member);

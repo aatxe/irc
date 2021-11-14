@@ -394,14 +394,12 @@ impl Config {
 
     /// Determines whether or not the nickname provided is the owner of the bot.
     pub fn is_owner(&self, nickname: &str) -> bool {
-        self.owners.iter().find(|n| *n == nickname).is_some()
+        self.owners.iter().any(|n| n == nickname)
     }
 
     /// Gets the nickname specified in the configuration.
     pub fn nickname(&self) -> Result<&str> {
-        self.nickname
-            .as_ref()
-            .map(String::as_str)
+        self.nickname.as_deref()
             .ok_or_else(|| InvalidConfig {
                 path: self.path(),
                 cause: ConfigError::NicknameNotSpecified,
@@ -425,7 +423,7 @@ impl Config {
     pub fn username(&self) -> &str {
         self.username
             .as_ref()
-            .map_or(self.nickname().unwrap_or("user"), |s| &s)
+            .map_or(self.nickname().unwrap_or("user"), |s| s)
     }
 
     /// Gets the real name specified in the configuration.
@@ -433,14 +431,12 @@ impl Config {
     pub fn real_name(&self) -> &str {
         self.realname
             .as_ref()
-            .map_or(self.nickname().unwrap_or("irc"), |s| &s)
+            .map_or(self.nickname().unwrap_or("irc"), |s| s)
     }
 
     /// Gets the address of the server specified in the configuration.
     pub fn server(&self) -> Result<&str> {
-        self.server
-            .as_ref()
-            .map(String::as_str)
+        self.server.as_deref()
             .ok_or_else(|| InvalidConfig {
                 path: self.path(),
                 cause: ConfigError::ServerNotSpecified,
@@ -517,7 +513,7 @@ impl Config {
     /// Gets the path to the TLS certificate in DER format if specified.
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn cert_path(&self) -> Option<&str> {
-        self.cert_path.as_ref().map(String::as_str)
+        self.cert_path.as_deref()
     }
 
     /// Gets whether or not to dangerously accept invalid certificates.
@@ -532,7 +528,7 @@ impl Config {
     /// Gets the path to the client authentication certificate in DER format if specified.
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn client_cert_path(&self) -> Option<&str> {
-        self.client_cert_path.as_ref().map(String::as_str)
+        self.client_cert_path.as_deref()
     }
 
     /// Gets the password to the client authentication certificate.
@@ -544,7 +540,7 @@ impl Config {
     /// Gets the encoding to use for this connection. This requires the encode feature to work.
     /// This defaults to UTF-8 when not specified.
     pub fn encoding(&self) -> &str {
-        self.encoding.as_ref().map_or("UTF-8", |s| &s)
+        self.encoding.as_ref().map_or("UTF-8", |s| s)
     }
 
     /// Gets the channels to join upon connection.
@@ -574,7 +570,7 @@ impl Config {
     /// This defaults to `irc:version:env` when not specified.
     /// For example, `irc:0.12.0:Compiled with rustc`
     pub fn version(&self) -> &str {
-        self.version.as_ref().map_or(crate::VERSION_STR, |s| &s)
+        self.version.as_ref().map_or(crate::VERSION_STR, |s| s)
     }
 
     /// Gets the string to be sent in response to CTCP SOURCE requests.
@@ -624,7 +620,7 @@ impl Config {
     /// Gets the NickServ command sequence to recover a nickname.
     /// This defaults to `["GHOST"]` when not specified.
     pub fn ghost_sequence(&self) -> Option<&[String]> {
-        self.ghost_sequence.as_ref().map(Vec::as_slice)
+        self.ghost_sequence.as_deref()
     }
 
     /// Looks up the specified string in the options map.
@@ -642,7 +638,7 @@ impl Config {
     /// This defaults to false when not specified.
     /// This has no effect if `use_mock_connection` is not `true`.
     pub fn mock_initial_value(&self) -> &str {
-        self.mock_initial_value.as_ref().map_or("", |s| &s)
+        self.mock_initial_value.as_ref().map_or("", |s| s)
     }
 }
 

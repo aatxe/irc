@@ -156,7 +156,7 @@ impl Connection {
         let stream = Self::new_stream(config).await?;
         let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
-        Ok(Transport::new(&config, framed, tx))
+        Ok(Transport::new(config, framed, tx))
     }
 
     #[cfg(all(feature = "tls-native", not(feature = "tls-rust")))]
@@ -188,7 +188,7 @@ impl Connection {
                 let mut client_cert_data = vec![];
                 file.read_to_end(&mut client_cert_data)?;
                 let client_cert_pass = config.client_cert_pass();
-                let pkcs12_archive = Identity::from_pkcs12(&client_cert_data, &client_cert_pass)?;
+                let pkcs12_archive = Identity::from_pkcs12(&client_cert_data, client_cert_pass)?;
                 builder.identity(pkcs12_archive);
                 log::info!(
                     "Using {} for client certificate authentication.",
@@ -215,7 +215,7 @@ impl Connection {
         let stream = connector.connect(domain, stream).await?;
         let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
-        Ok(Transport::new(&config, framed, tx))
+        Ok(Transport::new(config, framed, tx))
     }
 
     #[cfg(feature = "tls-rust")]
@@ -337,7 +337,7 @@ impl Connection {
         let stream = connector.connect(domain, stream).await?;
         let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
-        Ok(Transport::new(&config, framed, tx))
+        Ok(Transport::new(config, framed, tx))
     }
 
     async fn new_mocked_transport(
@@ -363,7 +363,7 @@ impl Connection {
         let stream = MockStream::new(&initial);
         let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
-        Ok(Transport::new(&config, framed, tx))
+        Ok(Transport::new(config, framed, tx))
     }
 
     /// Gets a view of the internal logging if and only if this connection is using a mock stream.

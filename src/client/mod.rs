@@ -487,7 +487,7 @@ impl Stream for ClientStream {
         match ready!(Pin::new(&mut self.as_mut().stream).poll_next(cx)) {
             Some(Ok(msg)) => {
                 self.state.handle_message(&msg)?;
-                return Poll::Ready(Some(Ok(msg)));
+                Poll::Ready(Some(Ok(msg)))
             }
             other => Poll::Ready(other),
         }
@@ -526,7 +526,7 @@ impl ClientState {
     fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> {
         let msg = msg.into();
         self.handle_sent_message(&msg)?;
-        Ok(self.sender.send(msg)?)
+        self.sender.send(msg)
     }
 
     /// Gets the current nickname in use.
@@ -547,11 +547,8 @@ impl ClientState {
     fn handle_sent_message(&self, msg: &Message) -> error::Result<()> {
         log::trace!("[SENT] {}", msg.to_string());
 
-        match msg.command {
-            PART(ref chan, _) => {
-                let _ = self.chanlists.write().remove(chan);
-            }
-            _ => (),
+        if let PART(ref chan, _) = msg.command {
+            let _ = self.chanlists.write().remove(chan);
         }
 
         Ok(())
@@ -602,7 +599,7 @@ impl ClientState {
                 let joined_chans = self.chanlists.read();
                 for chan in joined_chans
                     .keys()
-                    .filter(|x| config_chans.iter().find(|c| c == x).is_none())
+                    .filter(|x| !config_chans.iter().any(|c| c == *x))
                 {
                     self.send_join(chan)?
                 }
@@ -805,7 +802,7 @@ impl ClientState {
 
     #[cfg(feature = "ctcp")]
     fn send_ctcp_internal(&self, target: &str, msg: &str) -> error::Result<()> {
-        self.send_notice(target, &format!("\u{001}{}\u{001}", msg))
+        self.send_notice(target, format!("\u{001}{}\u{001}", msg))
     }
 
     #[cfg(not(feature = "ctcp"))]
@@ -993,7 +990,7 @@ impl Client {
         let stream = self
             .incoming
             .take()
-            .ok_or_else(|| error::Error::StreamAlreadyConfigured)?;
+            .ok_or(error::Error::StreamAlreadyConfigured)?;
 
         Ok(ClientStream {
             state: Arc::clone(&self.state),
@@ -1308,7 +1305,7 @@ mod test {
         .await?;
         let res = client.stream()?.try_collect::<Vec<_>>().await;
         if let Err(Error::NoUsableNick) = res {
-            ()
+            
         } else {
             panic!("expected error when no valid nicks were specified")
         }
