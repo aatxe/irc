@@ -139,7 +139,18 @@ impl ModeType for ChannelMode {
     fn takes_arg(&self) -> bool {
         use self::ChannelMode::*;
 
-        matches!(*self, Ban | Exception | Limit | InviteException | Key | Founder | Admin | Oper | Halfop | Voice)
+        matches!(
+            *self,
+            Ban | Exception
+                | Limit
+                | InviteException
+                | Key
+                | Founder
+                | Admin
+                | Oper
+                | Halfop
+                | Voice
+        )
     }
 
     fn from_char(c: char) -> ChannelMode {
