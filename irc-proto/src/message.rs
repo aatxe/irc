@@ -58,7 +58,7 @@ impl Message {
         args: Vec<&str>,
     ) -> Result<Message, error::MessageParseError> {
         Ok(Message {
-            tags: tags,
+            tags,
             prefix: prefix.map(|p| p.into()),
             command: Command::new(command, args)?,
         })
@@ -134,7 +134,7 @@ impl Message {
                 ret.push_str(&tag.0);
                 if let Some(ref value) = tag.1 {
                     ret.push('=');
-                    escape_tag_value(&mut ret, &value);
+                    escape_tag_value(&mut ret, value);
                 }
                 ret.push(';');
             }

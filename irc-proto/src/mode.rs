@@ -139,11 +139,7 @@ impl ModeType for ChannelMode {
     fn takes_arg(&self) -> bool {
         use self::ChannelMode::*;
 
-        match *self {
-            Ban | Exception | Limit | InviteException | Key | Founder | Admin | Oper | Halfop
-            | Voice => true,
-            _ => false,
-        }
+        matches!(*self, Ban | Exception | Limit | InviteException | Key | Founder | Admin | Oper | Halfop | Voice)
     }
 
     fn from_char(c: char) -> ChannelMode {
@@ -234,10 +230,10 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Mode::Plus(ref mode, Some(ref arg)) => write!(f, "{}{} {}", "+", mode, arg),
-            Mode::Minus(ref mode, Some(ref arg)) => write!(f, "{}{} {}", "-", mode, arg),
-            Mode::Plus(ref mode, None) => write!(f, "{}{}", "+", mode),
-            Mode::Minus(ref mode, None) => write!(f, "{}{}", "-", mode),
+            Mode::Plus(ref mode, Some(ref arg)) => write!(f, "+{} {}", mode, arg),
+            Mode::Minus(ref mode, Some(ref arg)) => write!(f, "-{} {}", mode, arg),
+            Mode::Plus(ref mode, None) => write!(f, "+{}", mode),
+            Mode::Minus(ref mode, None) => write!(f, "-{}", mode),
         }
     }
 }
@@ -282,7 +278,7 @@ where
             Some('-') => Minus,
             Some(c) => {
                 return Err(InvalidModeString {
-                    string: pieces.join(" ").to_owned(),
+                    string: pieces.join(" "),
                     cause: InvalidModeModifier { modifier: c },
                 })
             }
@@ -313,12 +309,11 @@ where
         }
 
         // TODO: if there are extra args left, this should error
-
-        Ok(res)
     } else {
         // No modifier
-        Ok(res)
-    }
+    };
+
+    Ok(res)
 }
 
 #[cfg(test)]
