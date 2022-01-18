@@ -4,6 +4,7 @@ use std::io::Error as IoError;
 use std::sync::mpsc::RecvError;
 
 use thiserror::Error;
+use time::error::Format;
 use tokio::sync::mpsc::error::{SendError, TrySendError};
 
 #[cfg(feature = "tls-rust")]
@@ -99,6 +100,10 @@ pub enum Error {
     /// Stream has already been configured.
     #[error("stream has already been configured")]
     StreamAlreadyConfigured,
+
+    /// Could not format the current time. This should not happen, since we have full control over the value that is formatted.
+    #[error("failed to format current time - this indicates a bug in the `time` crate")]
+    TimeFormattingFailed,
 }
 
 /// Errors that occur with configurations.
@@ -218,5 +223,14 @@ impl<T> From<SendError<T>> for Error {
 impl<T> From<TrySendError<T>> for Error {
     fn from(_: TrySendError<T>) -> Error {
         Error::AsyncChannelClosed
+    }
+}
+
+impl From<Format> for Error {
+    fn from(e: Format) -> Self {
+        match e {
+            Format::StdIo(err) => Error::Io(err),
+            _ => Error::TimeFormattingFailed,
+        }
     }
 }
