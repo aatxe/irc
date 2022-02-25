@@ -38,7 +38,7 @@ use webpki_roots::TLS_SERVER_ROOTS;
 #[cfg(feature = "tls-rust")]
 use tokio_rustls::{
     client::TlsStream,
-    rustls::{internal::pemfile::certs, ClientConfig, PrivateKey},
+    rustls::{self, internal::pemfile::certs, ClientConfig, PrivateKey},
     webpki::DNSNameRef,
     TlsConnector,
 };
@@ -202,6 +202,10 @@ impl Connection {
             }
         }
 
+        if config.dangerously_accept_invalid_certs() {
+            builder.danger_accept_invalid_certs(true);
+        }
+
         let connector: tokio_native_tls::TlsConnector = builder.build()?.into();
         let domain = config.server()?;
 
@@ -263,6 +267,10 @@ impl Connection {
                     },
                 });
             }
+        }
+
+        if config.dangerously_accept_invalid_certs() {
+            builder.dangerous().set_certificate_verifier(Arc::new(DangerousAcceptAllVerifier));
         }
 
         let connector = TlsConnector::from(Arc::new(builder));
@@ -361,5 +369,21 @@ impl Sink<Message> for Connection {
             ConnectionProj::Secured(inner) => inner.poll_close(cx),
             ConnectionProj::Mock(inner) => inner.poll_close(cx),
         }
+    }
+}
+
+#[cfg(feature = "tls-rust")]
+struct DangerousAcceptAllVerifier;
+
+#[cfg(feature = "tls-rust")]
+impl rustls::ServerCertVerifier for DangerousAcceptAllVerifier {
+    fn verify_server_cert(
+        &self,
+        _: &rustls::RootCertStore,
+        _: &[rustls::Certificate],
+        _: DNSNameRef,
+        _: &[u8]
+    ) -> Result<rustls::ServerCertVerified, rustls::TLSError> {
+        return Ok(rustls::ServerCertVerified::assertion());
     }
 }
