@@ -280,7 +280,7 @@ where
 
         let stream = Self::new_stream(config).await?;
         let stream = connector.connect(domain, stream).await?;
-        let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
+        let framed = Framed::new(stream, Codec::try_new(config.encoding())?);
 
         Ok(Transport::new(&config, framed, tx))
     }
