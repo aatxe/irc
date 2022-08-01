@@ -93,6 +93,9 @@ mod mock;
 pub mod prelude;
 pub mod transport;
 
+/// The IRC Codec that this crate uses by default.
+type DefaultCodec = irc_proto::IrcCodec;
+
 macro_rules! pub_state_base {
     () => {
         /// Changes the modes for the specified target.
@@ -438,7 +441,7 @@ macro_rules! pub_sender_base {
 #[derive(Debug)]
 pub struct ClientStream {
     state: Arc<ClientState>,
-    stream: SplitStream<Connection>,
+    stream: SplitStream<Connection<DefaultCodec>>,
     // In case the client stream also handles outgoing messages.
     outgoing: Option<Outgoing>,
 }
@@ -837,7 +840,7 @@ impl Sender {
 /// Note: this is essentially the same as a version of [SendAll](https://github.com/rust-lang-nursery/futures-rs/blob/master/futures-util/src/sink/send_all.rs) that owns it's sink and stream.
 #[derive(Debug)]
 pub struct Outgoing {
-    sink: SplitSink<Connection, Message>,
+    sink: SplitSink<Connection<DefaultCodec>, Message>,
     stream: UnboundedReceiver<Message>,
     buffered: Option<Message>,
 }
@@ -901,12 +904,14 @@ impl Future for Outgoing {
 pub struct Client {
     /// The internal, thread-safe server state.
     state: Arc<ClientState>,
-    incoming: Option<SplitStream<Connection>>,
+    incoming: Option<SplitStream<Connection<DefaultCodec>>>,
     outgoing: Option<Outgoing>,
     sender: Sender,
     #[cfg(test)]
     /// A view of the logs for a mock connection.
-    view: Option<self::transport::LogView>,
+    view: Option<
+        self::transport::LogView<<DefaultCodec as self::data::codec::MessageCodec>::MsgItem>,
+    >,
 }
 
 impl Client {
@@ -958,7 +963,9 @@ impl Client {
 
     /// Gets the log view from the internal transport. Only used for unit testing.
     #[cfg(test)]
-    fn log_view(&self) -> &self::transport::LogView {
+    fn log_view(
+        &self,
+    ) -> &self::transport::LogView<<DefaultCodec as self::data::codec::MessageCodec>::MsgItem> {
         self.view
             .as_ref()
             .expect("there should be a log during testing")
