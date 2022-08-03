@@ -95,7 +95,7 @@ where
     pub(crate) async fn new(
         config: &Config,
         tx: UnboundedSender<Codec::MsgItem>,
-    ) -> error::Result<Connection<Codec>> {
+    ) -> error::Result<Self> {
         if config.use_mock_connection() {
             log::info!("Connecting via mock to {}.", config.server()?);
             return Ok(Connection::Mock(Logged::wrap(

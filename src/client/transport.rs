@@ -43,7 +43,7 @@ where
     Msg: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
 {
     /// Construct a new pinger helper.
-    pub fn new(tx: UnboundedSender<Msg>, config: &Config) -> Pinger<Msg> {
+    pub fn new(tx: UnboundedSender<Msg>, config: &Config) -> Self {
         let ping_time = Duration::from_secs(u64::from(config.ping_time()));
         let ping_timeout = Duration::from_secs(u64::from(config.ping_timeout()));
 
@@ -76,9 +76,7 @@ where
 
     /// Send a pong.
     fn send_pong(self: Pin<&mut Self>, data: &str) -> error::Result<()> {
-        self.project()
-            .tx
-            .send(Msg::new_pong(data.to_owned(), None))?;
+        self.project().tx.send(Msg::new_pong(data.to_owned()))?;
         Ok(())
     }
 
@@ -91,7 +89,7 @@ where
 
         let mut this = self.project();
 
-        this.tx.send(Msg::new_ping(data, None))?;
+        this.tx.send(Msg::new_ping(data))?;
 
         if this.ping_deadline.is_none() {
             let ping_deadline = time::sleep(*this.ping_timeout);

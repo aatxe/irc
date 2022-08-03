@@ -22,6 +22,7 @@ async fn main() -> irc::error::Result<()> {
         match message.command {
             Command::PRIVMSG(ref target, ref msg) => {
                 if msg.contains(client.current_nickname()) {
+                    #[cfg(feature = "essentials")]
                     sender.send_privmsg(target, "Hi!")?;
                 }
             }

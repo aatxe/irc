@@ -29,6 +29,7 @@
 //!
 //! let mut stream = client.stream()?;
 //!
+//! # #[cfg(feature = "essentials")]
 //! while let Some(message) = stream.next().await.transpose()? {
 //!     if let Command::PRIVMSG(channel, message) = message.command {
 //!         if message.contains(&*client.current_nickname()) {

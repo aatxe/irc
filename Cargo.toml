@@ -19,13 +19,15 @@ is-it-maintained-open-issues = { repository = "aatxe/irc" }
 
 
 [workspace]
-members = [ "./", "irc-proto/" ]
+members = ["./", "irc-proto/"]
 
 
 [features]
-default = ["ctcp", "tls-native", "toml_config"]
+# warning: adding the `essentials` feature to default breaks semver. I should turn this into a reductive feature once I know that the code works. I'm just using a normal feature temporarily because otherwise VS Code won't show errors properly.
+default = ["ctcp", "tls-native", "toml_config", "essentials"]
 ctcp = []
 nochanlists = []
+essentials = []
 
 json_config = ["serde", "serde/derive", "serde_derive", "serde_json"]
 toml_config = ["serde", "serde/derive", "serde_derive", "toml"]
@@ -82,9 +84,34 @@ tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros", "net
 [[example]]
 name = "simple_proxy"
 path = "examples/simple_proxy.rs"
-required-features = ["proxy"]
+required-features = ["proxy", "essentials"]
 
 [[example]]
 name = "simple_plaintext"
 path = "examples/simple_plaintext.rs"
-required-features = ["tls-native"]
+required-features = ["tls-native", "essentials"]
+
+[[example]]
+name = "tweeter"
+path = "examples/tweeter.rs"
+required-features = ["essentials"]
+
+[[example]]
+name = "tooter"
+path = "examples/tooter.rs"
+required-features = ["essentials"]
+
+[[example]]
+name = "repeater"
+path = "examples/repeater.rs"
+required-features = ["essentials"]
+
+[[example]]
+name = "build_bot"
+path = "examples/build-bot.rs"
+required-features = ["essentials"]
+
+[[example]]
+name = "multiserver"
+path = "examples/multiserver.rs"
+required-features = ["essentials"]
