@@ -20,7 +20,10 @@ use tokio_util::codec::{Decoder, Encoder, Framed};
 
 use crate::{client::data::Config, error};
 
-use super::data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing, MessageCodec};
+use super::{
+    data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing, MessageCodec},
+    DefaultCodec,
+};
 
 /// Pinger-based futures helper.
 #[pin_project]
@@ -128,7 +131,7 @@ where
 /// implementation of `Connection` and ultimately `IrcServer`, and plays an important role in
 /// handling connection timeouts, message throttling, and ping response.
 #[pin_project]
-pub struct Transport<T, Codec>
+pub struct Transport<T, Codec = DefaultCodec>
 where
     Codec: MessageCodec,
 {
@@ -228,7 +231,7 @@ where
 
 /// A view of the logs from a particular `Logged` transport.
 #[derive(Clone, Debug)]
-pub struct LogView<Msg> {
+pub struct LogView<Msg = <DefaultCodec as MessageCodec>::MsgItem> {
     sent: Arc<RwLock<Vec<Msg>>>,
     received: Arc<RwLock<Vec<Msg>>>,
 }
@@ -248,7 +251,7 @@ impl<Msg> LogView<Msg> {
 /// A logged version of the `Transport` that records all sent and received messages.
 /// Note: this will introduce some performance overhead by cloning all messages.
 #[pin_project]
-pub struct Logged<T, Codec>
+pub struct Logged<T, Codec = DefaultCodec>
 where
     Codec: MessageCodec,
 {

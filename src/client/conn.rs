@@ -52,11 +52,11 @@ use crate::{
     error,
 };
 
-use super::data::codec::MessageCodec;
+use super::{data::codec::MessageCodec, DefaultCodec};
 
 /// An IRC connection used internally by `IrcServer`.
 #[pin_project(project = ConnectionProj)]
-pub enum Connection<Codec>
+pub enum Connection<Codec = DefaultCodec>
 where
     Codec: MessageCodec,
 {

@@ -1082,7 +1082,7 @@ where
 {
     /// Creates a new `Client` from the configuration at the specified path, connecting
     /// immediately. This function is short-hand for loading the configuration and then calling
-    /// `Client::from_config` and consequently inherits its behaviors.
+    /// `Client::from_config_with_codec` and consequently inherits its behaviors.
     ///
     /// # Example
     /// ```no_run
