@@ -1,5 +1,6 @@
 //! A module providing IRC connections for use by `IrcServer`s.
 use futures_util::{sink::Sink, stream::Stream};
+use irc_interface::{Decoder, Encoder, Framed, MessageCodec};
 use pin_project::pin_project;
 use std::{
     fmt,
@@ -8,7 +9,6 @@ use std::{
 };
 use tokio::net::TcpStream;
 use tokio::sync::mpsc::UnboundedSender;
-use tokio_util::codec::{Decoder, Encoder, Framed};
 
 #[cfg(feature = "proxy")]
 use tokio_socks::tcp::Socks5Stream;
@@ -52,13 +52,15 @@ use crate::{
     error,
 };
 
-use super::{data::codec::MessageCodec, DefaultCodec};
+use super::data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing};
+use super::DefaultCodec;
 
 /// An IRC connection used internally by `IrcServer`.
 #[pin_project(project = ConnectionProj)]
 pub enum Connection<Codec = DefaultCodec>
 where
     Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     #[doc(hidden)]
     Unsecured(#[pin] Transport<TcpStream, Codec>),
@@ -72,6 +74,7 @@ where
 impl<Codec> fmt::Debug for Connection<Codec>
 where
     Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
@@ -90,6 +93,8 @@ where
 impl<Codec> Connection<Codec>
 where
     Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+    error::Error: From<<Codec as MessageCodec>::Error>,
 {
     /// Creates a new `Connection` using the specified `Config`
     pub(crate) async fn new(
@@ -325,6 +330,7 @@ impl<Codec> Stream for Connection<Codec>
 where
     Codec: MessageCodec,
     error::Error: From<<Codec as Decoder>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     type Item = error::Result<Codec::MsgItem>;
 
@@ -342,6 +348,7 @@ impl<Codec> Sink<Codec::MsgItem> for Connection<Codec>
 where
     Codec: MessageCodec,
     error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     type Error = error::Error;
 

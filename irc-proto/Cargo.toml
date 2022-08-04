@@ -15,11 +15,11 @@ travis-ci = { repository = "aatxe/irc" }
 
 [features]
 default = ["bytes", "tokio", "tokio-util"]
+tokio-util = []
 
 [dependencies]
 encoding = "0.2.0"
 thiserror = "1.0.0"
-
+irc-interface = { version = "0.0.1", path = "../irc-interface" }
 bytes = { version = "1.0.0", optional = true }
 tokio = { version = "1.0.0", optional = true }
-tokio-util = { version = "0.6.0", features = ["codec"], optional = true }

@@ -59,6 +59,7 @@ use futures_util::{
     sink::Sink as _,
     stream::{SplitSink, SplitStream, StreamExt as _},
 };
+use irc_interface::{Decoder, Encoder, MessageCodec};
 use parking_lot::RwLock;
 use std::{
     collections::HashMap,
@@ -69,15 +70,11 @@ use std::{
     task::{Context, Poll},
 };
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
-use tokio_util::codec::{Decoder, Encoder};
 
 use crate::{
     client::{
         conn::Connection,
-        data::{
-            codec::{InternalIrcMessageOutgoing, MessageCodec},
-            Config, User,
-        },
+        data::{Config, User},
     },
     error,
 };
@@ -94,7 +91,9 @@ use crate::proto::{
     Message, Mode, NegotiationVersion, Response,
 };
 
-use self::data::codec::InternalIrcMessageIncoming;
+// we use our own feature-dependent extension of the traits
+use self::data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing};
+use irc_interface::InternalIrcMessageOutgoing as _;
 
 pub mod conn;
 pub mod data;
@@ -467,6 +466,7 @@ pub struct ClientStream<Codec = DefaultCodec>
 where
     Codec: MessageCodec,
     error::Error: From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     state: Arc<ClientState<Codec>>,
     stream: SplitStream<Connection<Codec>>,
@@ -478,6 +478,7 @@ impl<Codec> ClientStream<Codec>
 where
     Codec: MessageCodec,
     error::Error: From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     /// collect stream and collect all messages available.
     pub async fn collect(mut self) -> error::Result<Vec<Codec::MsgItem>> {
@@ -498,6 +499,7 @@ impl<Codec> FusedStream for ClientStream<Codec>
 where
     Codec: MessageCodec,
     error::Error: From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     fn is_terminated(&self) -> bool {
         false
@@ -508,6 +510,7 @@ impl<Codec> Stream for ClientStream<Codec>
 where
     Codec: MessageCodec,
     error::Error: From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     type Item = Result<Codec::MsgItem, error::Error>;
 
@@ -543,6 +546,7 @@ struct ClientState<Codec = DefaultCodec>
 where
     Codec: MessageCodec,
     error::Error: From<<Codec as Decoder>::Error>,
+    Codec::MsgItem: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
 {
     sender: Sender<Codec::MsgItem>,
     /// The configuration used with this connection.
@@ -926,6 +930,7 @@ pub struct Outgoing<Codec = DefaultCodec>
 where
     Codec: MessageCodec,
     error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     sink: SplitSink<Connection<Codec>, Codec::MsgItem>,
     stream: UnboundedReceiver<Codec::MsgItem>,
@@ -936,6 +941,7 @@ impl<Codec> Outgoing<Codec>
 where
     Codec: MessageCodec,
     error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     fn try_start_send(
         &mut self,
@@ -957,6 +963,7 @@ where
 impl<Codec> FusedFuture for Outgoing<Codec>
 where
     Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
     error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
 {
     fn is_terminated(&self) -> bool {
@@ -970,6 +977,7 @@ impl<Codec> Future for Outgoing<Codec>
 where
     Codec: MessageCodec,
     error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     type Output = error::Result<()>;
 
@@ -1077,7 +1085,9 @@ impl Client<DefaultCodec> {
 impl<Codec> Client<Codec>
 where
     Codec: MessageCodec,
-    error::Error: From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    error::Error: From<<Codec as Decoder>::Error>
+        + From<<Codec as Encoder<Codec::MsgItem>>::Error>
+        + From<<Codec as MessageCodec>::Error>,
     Codec::MsgItem: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
 {
     /// Creates a new `Client` from the configuration at the specified path, connecting
@@ -1278,13 +1288,14 @@ pub mod codec_tests {
     #![allow(missing_docs)]
 
     use anyhow::Result;
+    use irc_interface::{Decoder, Encoder};
     use std::thread;
     use std::time::Duration;
-    use tokio_util::codec::{Decoder, Encoder};
 
     use crate::client::{Client, Config, MessageCodec};
 
     use super::data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing};
+    use irc_interface::InternalIrcMessageOutgoing as _;
 
     pub fn test_config() -> Config {
         Config {
@@ -1307,8 +1318,9 @@ pub mod codec_tests {
     impl<Codec> TestSuite<Codec>
     where
         Codec: MessageCodec,
-        crate::error::Error:
-            From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+        crate::error::Error: From<<Codec as Decoder>::Error>
+            + From<<Codec as Encoder<Codec::MsgItem>>::Error>
+            + From<<Codec as MessageCodec>::Error>,
         Codec::MsgItem: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
     {
         pub fn get_client_value(client: Client<Codec>) -> String {

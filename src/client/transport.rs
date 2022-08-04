@@ -10,24 +10,27 @@ use std::{
 
 use chrono::prelude::*;
 use futures_util::{future::Future, ready, sink::Sink, stream::Stream};
+use irc_interface::{Decoder, Encoder, Framed, MessageCodec};
 use pin_project::pin_project;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::{
     io::{AsyncRead, AsyncWrite},
     time::{self, Interval, Sleep},
 };
-use tokio_util::codec::{Decoder, Encoder, Framed};
 
 use crate::{client::data::Config, error};
 
 use super::{
-    data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing, MessageCodec},
+    data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing},
     DefaultCodec,
 };
 
 /// Pinger-based futures helper.
 #[pin_project]
-struct Pinger<Msg> {
+struct Pinger<Msg>
+where
+    Msg: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
     tx: UnboundedSender<Msg>,
     // Whether this pinger pings.
     enabled: bool,
@@ -134,6 +137,7 @@ where
 pub struct Transport<T, Codec = DefaultCodec>
 where
     Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     /// The inner connection framed with a Codec that implements [`MessageCodec`]. By default, this is [`IrcCodec`].
     #[pin]
@@ -147,6 +151,7 @@ impl<T, Codec> Transport<T, Codec>
 where
     T: Unpin + AsyncRead + AsyncWrite,
     Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     /// Creates a new `Transport` from the given IRC stream.
     pub fn new(
@@ -170,6 +175,7 @@ where
     T: Unpin + AsyncRead + AsyncWrite,
     Codec: MessageCodec,
     error::Error: From<<Codec as Decoder>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     type Item = Result<Codec::MsgItem, error::Error>;
 
@@ -204,6 +210,7 @@ where
     T: Unpin + AsyncRead + AsyncWrite,
     Codec: MessageCodec,
     error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     type Error = error::Error;
 
@@ -254,6 +261,7 @@ impl<Msg> LogView<Msg> {
 pub struct Logged<T, Codec = DefaultCodec>
 where
     Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     #[pin]
     inner: Transport<T, Codec>,
@@ -264,6 +272,7 @@ impl<T, Codec> Logged<T, Codec>
 where
     T: AsyncRead + AsyncWrite,
     Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     /// Wraps the given `Transport` in logging.
     pub fn wrap(inner: Transport<T, Codec>) -> Logged<T, Codec> {
@@ -287,6 +296,7 @@ where
     T: Unpin + AsyncRead + AsyncWrite,
     Codec: MessageCodec,
     error::Error: From<<Codec as Decoder>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     type Item = Result<Codec::MsgItem, error::Error>;
 
@@ -315,6 +325,7 @@ where
     T: Unpin + AsyncRead + AsyncWrite,
     Codec: MessageCodec,
     error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     type Error = error::Error;
 

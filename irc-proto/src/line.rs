@@ -5,7 +5,7 @@ use std::io;
 use bytes::BytesMut;
 use encoding::label::encoding_from_whatwg_label;
 use encoding::{DecoderTrap, EncoderTrap, EncodingRef};
-use tokio_util::codec::{Decoder, Encoder};
+use irc_interface::{Decoder, Encoder};
 
 use crate::error;
 

@@ -26,7 +26,7 @@ async fn main() -> irc::error::Result<()> {
                     sender.send_privmsg(target, "Hi!")?;
                     #[cfg(not(feature = "essentials"))]
                     sender.send(
-                        <irc_proto::Message as irc::client::data::codec::InternalIrcMessageOutgoing>::new_raw(
+                        <irc_proto::Message as irc_interface::InternalIrcMessageOutgoing>::new_raw(
                             "PRIVMSG".to_owned(),
                             vec![target.to_owned(), "Hi!".to_owned()],
                         ),
