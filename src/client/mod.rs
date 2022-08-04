@@ -1011,7 +1011,7 @@ where
     incoming: Option<SplitStream<Connection<Codec>>>,
     outgoing: Option<Outgoing<Codec>>,
     sender: Sender<Codec::MsgItem>,
-    #[cfg(test)]
+    #[cfg(feature = "codec-tests")]
     /// A view of the logs for a mock connection.
     view: Option<self::transport::LogView<Codec::MsgItem>>,
 }
@@ -1052,7 +1052,7 @@ impl Client<DefaultCodec> {
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded_channel();
         let conn = Connection::new(&config, tx_outgoing.clone()).await?;
 
-        #[cfg(test)]
+        #[cfg(feature = "codec-tests")]
         let view = conn.log_view();
 
         let (sink, incoming) = conn.split();
@@ -1068,7 +1068,7 @@ impl Client<DefaultCodec> {
                 stream: rx_outgoing,
                 buffered: None,
             }),
-            #[cfg(test)]
+            #[cfg(feature = "codec-tests")]
             view,
         })
     }
@@ -1106,7 +1106,7 @@ where
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded_channel();
         let conn = Connection::new(&config, tx_outgoing.clone()).await?;
 
-        #[cfg(test)]
+        #[cfg(feature = "codec-tests")]
         let view = conn.log_view();
 
         let (sink, incoming) = conn.split();
@@ -1122,13 +1122,13 @@ where
                 stream: rx_outgoing,
                 buffered: None,
             }),
-            #[cfg(test)]
+            #[cfg(feature = "codec-tests")]
             view,
         })
     }
 
     /// Gets the log view from the internal transport. Only used for unit testing.
-    #[cfg(test)]
+    #[cfg(feature = "codec-tests")]
     fn log_view(&self) -> &self::transport::LogView<Codec::MsgItem> {
         self.view
             .as_ref()
@@ -1271,6 +1271,177 @@ where
     pub_sender_base!(<Codec as MessageCodec>::MsgItem);
 }
 
+/// Tests that rely on the implementation details of the message codec.
+/// These tests can be accessed from wthin codec crates to make sure that they work as expected.
+pub mod codec_tests {
+    #![cfg(feature = "codec-tests")]
+    #![allow(missing_docs)]
+
+    use anyhow::Result;
+    use std::thread;
+    use std::time::Duration;
+    use tokio_util::codec::{Decoder, Encoder};
+
+    use crate::client::{Client, Config, MessageCodec};
+
+    use super::data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing};
+
+    pub fn test_config() -> Config {
+        Config {
+            owners: vec![format!("test")],
+            nickname: Some(format!("test")),
+            alt_nicks: vec![format!("test2")],
+            server: Some(format!("irc.test.net")),
+            channels: vec![format!("#test"), format!("#test2")],
+            user_info: Some(format!("Testing.")),
+            use_mock_connection: true,
+            ..Default::default()
+        }
+    }
+
+    /// Provides functions that can be used as tests for the message interpretation.
+    pub struct TestSuite<Codec> {
+        _phantom_marker: std::marker::PhantomData<Codec>,
+    }
+
+    impl<Codec> TestSuite<Codec>
+    where
+        Codec: MessageCodec,
+        crate::error::Error:
+            From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+        Codec::MsgItem: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
+    {
+        pub fn get_client_value(client: Client<Codec>) -> String {
+            // We sleep here because of synchronization issues.
+            // We can't guarantee that everything will have been sent by the time of this call.
+            thread::sleep(Duration::from_millis(100));
+            client
+                .log_view()
+                .sent()
+                .unwrap()
+                .iter()
+                .fold(String::new(), |mut acc, msg| {
+                    // NOTE: we have to sanitize here because sanitization happens in IrcCodec after the
+                    // messages are converted into strings, but our transport logger catches messages before
+                    // they ever reach that point.
+                    acc.push_str(&Codec::sanitize(msg.to_string()));
+                    acc
+                })
+        }
+
+        pub async fn handle_end_motd() -> Result<()> {
+            let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
+            let mut client = Client::<Codec>::from_config_with_codec(Config {
+                mock_initial_value: Some(value.to_owned()),
+                ..test_config()
+            })
+            .await?;
+            client.stream()?.collect().await?;
+            assert_eq!(
+                &Self::get_client_value(client)[..],
+                "JOIN #test\r\nJOIN #test2\r\n"
+            );
+            Ok(())
+        }
+
+        pub async fn handle_end_motd_with_nick_password() -> Result<()> {
+            let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
+            let mut client = Client::<Codec>::from_config_with_codec(Config {
+                mock_initial_value: Some(value.to_owned()),
+                nick_password: Some(format!("password")),
+                channels: vec![format!("#test"), format!("#test2")],
+                ..test_config()
+            })
+            .await?;
+            client.stream()?.collect().await?;
+            assert_eq!(
+                &Self::get_client_value(client)[..],
+                "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
+             JOIN #test2\r\n"
+            );
+            Ok(())
+        }
+
+        pub async fn identify() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(test_config()).await?;
+            client.identify()?;
+            client.stream()?.collect().await?;
+            assert_eq!(
+                &Self::get_client_value(client)[..],
+                "CAP END\r\nNICK test\r\n\
+             USER test 0 * test\r\n"
+            );
+            Ok(())
+        }
+
+        pub async fn identify_with_password() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(Config {
+                nickname: Some(format!("test")),
+                password: Some(format!("password")),
+                ..test_config()
+            })
+            .await?;
+            client.identify()?;
+            client.stream()?.collect().await?;
+            assert_eq!(
+                &Self::get_client_value(client)[..],
+                "CAP END\r\nPASS password\r\nNICK test\r\n\
+             USER test 0 * test\r\n"
+            );
+            Ok(())
+        }
+
+        pub async fn send_pong() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(test_config()).await?;
+            client.send_pong("irc.test.net")?;
+            client.stream()?.collect().await?;
+            assert_eq!(&Self::get_client_value(client)[..], "PONG irc.test.net\r\n");
+            Ok(())
+        }
+
+        pub async fn send_join() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(test_config()).await?;
+            client.send_join("#test,#test2,#test3")?;
+            client.stream()?.collect().await?;
+            assert_eq!(
+                &Self::get_client_value(client)[..],
+                "JOIN #test,#test2,#test3\r\n"
+            );
+            Ok(())
+        }
+
+        pub async fn send_part() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(test_config()).await?;
+            client.send_part("#test")?;
+            client.stream()?.collect().await?;
+            assert_eq!(&Self::get_client_value(client)[..], "PART #test\r\n");
+            Ok(())
+        }
+
+        pub async fn send_raw_is_really_raw() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(test_config()).await?;
+            assert!(client
+                .send(Codec::MsgItem::new_raw(
+                    "PASS".to_owned(),
+                    vec!["password".to_owned()]
+                ))
+                .is_ok());
+            assert!(client
+                .send(Codec::MsgItem::new_raw(
+                    "NICK".to_owned(),
+                    vec!["test".to_owned()]
+                ))
+                .is_ok());
+            client.stream()?.collect().await?;
+            assert_eq!(
+                &Self::get_client_value(client)[..],
+                "PASS password\r\nNICK test\r\n"
+            );
+            Ok(())
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use std::{default::Default, thread, time::Duration};
@@ -1280,12 +1451,11 @@ mod test {
     #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     use crate::client::data::User;
 
+    use super::{codec_tests::TestSuite, DefaultCodec};
+
     use crate::{
         client::data::Config,
-        proto::{
-            command::Command::{Raw, PRIVMSG},
-            IrcCodec,
-        },
+        proto::{command::Command::PRIVMSG, IrcCodec},
     };
     use anyhow::Result;
     #[cfg(feature = "essentials")]
@@ -1346,38 +1516,13 @@ mod test {
     }
 
     #[tokio::test]
-    async fn handle_message() -> Result<()> {
-        let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-        let mut client = Client::from_config(Config {
-            mock_initial_value: Some(value.to_owned()),
-            ..test_config()
-        })
-        .await?;
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "JOIN #test\r\nJOIN #test2\r\n"
-        );
-        Ok(())
+    async fn handle_end_motd() -> Result<()> {
+        TestSuite::<DefaultCodec>::handle_end_motd().await
     }
 
     #[tokio::test]
     async fn handle_end_motd_with_nick_password() -> Result<()> {
-        let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-        let mut client = Client::from_config(Config {
-            mock_initial_value: Some(value.to_owned()),
-            nick_password: Some(format!("password")),
-            channels: vec![format!("#test"), format!("#test2")],
-            ..test_config()
-        })
-        .await?;
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
-             JOIN #test2\r\n"
-        );
-        Ok(())
+        TestSuite::<DefaultCodec>::handle_end_motd_with_nick_password().await
     }
 
     #[tokio::test]
@@ -1508,6 +1653,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
@@ -1522,6 +1668,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_no_newline_injection() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
@@ -1537,19 +1684,7 @@ mod test {
 
     #[tokio::test]
     async fn send_raw_is_really_raw() -> Result<()> {
-        let mut client = Client::from_config(test_config()).await?;
-        assert!(client
-            .send(Raw("PASS".to_owned(), vec!["password".to_owned()]))
-            .is_ok());
-        assert!(client
-            .send(Raw("NICK".to_owned(), vec!["test".to_owned()]))
-            .is_ok());
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "PASS password\r\nNICK test\r\n"
-        );
-        Ok(())
+        TestSuite::<DefaultCodec>::send_raw_is_really_raw().await
     }
 
     #[tokio::test]
@@ -1842,63 +1977,27 @@ mod test {
 
     #[tokio::test]
     async fn identify() -> Result<()> {
-        let mut client = Client::from_config(test_config()).await?;
-        client.identify()?;
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "CAP END\r\nNICK test\r\n\
-             USER test 0 * test\r\n"
-        );
-        Ok(())
+        TestSuite::<DefaultCodec>::identify().await
     }
 
     #[tokio::test]
     async fn identify_with_password() -> Result<()> {
-        let mut client = Client::from_config(Config {
-            nickname: Some(format!("test")),
-            password: Some(format!("password")),
-            ..test_config()
-        })
-        .await?;
-        client.identify()?;
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "CAP END\r\nPASS password\r\nNICK test\r\n\
-             USER test 0 * test\r\n"
-        );
-        Ok(())
+        TestSuite::<DefaultCodec>::identify_with_password().await
     }
 
     #[tokio::test]
     async fn send_pong() -> Result<()> {
-        let mut client = Client::from_config(test_config()).await?;
-        client.send_pong("irc.test.net")?;
-        client.stream()?.collect().await?;
-        assert_eq!(&get_client_value(client)[..], "PONG irc.test.net\r\n");
-        Ok(())
+        TestSuite::<DefaultCodec>::send_pong().await
     }
 
     #[tokio::test]
     async fn send_join() -> Result<()> {
-        let mut client = Client::from_config(test_config()).await?;
-        client.send_join("#test,#test2,#test3")?;
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "JOIN #test,#test2,#test3\r\n"
-        );
-        Ok(())
+        TestSuite::<DefaultCodec>::send_join().await
     }
 
     #[tokio::test]
     async fn send_part() -> Result<()> {
-        let mut client = Client::from_config(test_config()).await?;
-        client.send_part("#test")?;
-        client.stream()?.collect().await?;
-        assert_eq!(&get_client_value(client)[..], "PART #test\r\n");
-        Ok(())
+        TestSuite::<DefaultCodec>::send_part().await
     }
 
     #[tokio::test]
