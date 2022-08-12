@@ -984,8 +984,7 @@ impl Client {
 
     /// Gets a stream of incoming messages from the `Client`'s connection. This is only necessary
     /// when trying to set up more complex clients, and requires use of the `futures` crate. Most
-    /// IRC bots should be able to get by using only `for_each_incoming` to handle received
-    /// messages. You can find some examples of more complex setups using `stream` in the
+    /// You can find some examples of setups using `stream` in the
     /// [GitHub repository](https://github.com/aatxe/irc/tree/stable/examples).
     ///
     /// **Note**: The stream can only be returned once. Subsequent attempts will cause a panic.
