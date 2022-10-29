@@ -19,14 +19,17 @@ is-it-maintained-open-issues = { repository = "aatxe/irc" }
 
 
 [workspace]
-members = ["./", "irc-proto/", "irc-interface/"]
+members = ["./", "irc-proto/", "irc-interface/", "no-parse-codec/"]
 
 
 [features]
 # warning: adding the `essentials` feature to default breaks semver. I should turn this into a reductive feature once I know that the code works. I'm just using a normal feature temporarily because otherwise VS Code won't show errors properly.
-default = ["ctcp", "tls-native", "toml_config", "essentials", "codec-tests"]
-ctcp = []
+default = ["ctcp", "tls-native", "toml_config", "codec-tests"]
+ctcp = ["essentials"]
 nochanlists = []
+# we differentiate between "barebones" mode and "essentials" mode. 
+# in "barebones" mode, the only supported features are those strictly required to run an IRC client
+# enabling the "essentials" feature provides other features that would be required from a useful IRC client
 essentials = []
 codec-tests = ["anyhow"]
 
@@ -82,7 +85,13 @@ env_logger = "0.7.0"
 futures = "0.3.0"
 getopts = "0.2.0"
 tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros", "net", "time"] }
+no-parse-codec = { path = "no-parse-codec" }
 
+
+[[example]]
+name = "no_parse_codec"
+path = "examples/no_parse_codec.rs"
+required-features = []
 
 [[example]]
 name = "simple_proxy"

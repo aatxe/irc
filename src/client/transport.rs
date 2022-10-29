@@ -168,6 +168,12 @@ where
     pub fn into_inner(self) -> Framed<T, Codec> {
         self.inner
     }
+
+    /// We don´t use the automatically created `project_ref` function, so this function exists to avoid a `dead_code` warning.
+    #[doc(hidden)]
+    pub fn _none(self: Pin<&Self>) {
+        let _ = self.project_ref();
+    }
 }
 
 impl<T, Codec> Stream for Transport<T, Codec>
@@ -288,6 +294,12 @@ where
     /// Gets a view of the logging for this transport.
     pub fn view(&self) -> LogView<Codec::MsgItem> {
         self.view.clone()
+    }
+
+    /// We don´t use the automatically created `project_ref` function, so this function exists to avoid a `dead_code` warning.
+    #[doc(hidden)]
+    pub fn _none(self: Pin<&Self>) {
+        let _ = self.project_ref();
     }
 }
 

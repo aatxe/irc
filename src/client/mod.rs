@@ -93,6 +93,8 @@ use crate::proto::{
 
 // we use our own feature-dependent extension of the traits
 use self::data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing};
+
+#[cfg(feature = "essentials")]
 use irc_interface::InternalIrcMessageOutgoing as _;
 
 pub mod conn;
@@ -1294,8 +1296,14 @@ pub mod codec_tests {
 
     use crate::client::{Client, Config, MessageCodec};
 
-    use super::data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing};
-    use irc_interface::InternalIrcMessageOutgoing as _;
+    #[cfg(not(feature = "essentials"))]
+    use irc_interface::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing};
+
+    #[cfg(feature = "essentials")]
+    use {
+        super::data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing},
+        irc_interface::InternalIrcMessageOutgoing as _,
+    };
 
     pub fn test_config() -> Config {
         Config {

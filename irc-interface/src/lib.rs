@@ -3,7 +3,10 @@
 
 use std::fmt::{Debug, Display};
 
+pub use line::LineCodec;
 pub use tokio_util::codec::{Decoder, Encoder, Framed};
+
+pub mod line;
 
 /// A codec that can be used to encode or decode IRC messages.
 pub trait MessageCodec:
