@@ -10,7 +10,10 @@ pub mod line;
 
 /// A codec that can be used to encode or decode IRC messages.
 pub trait MessageCodec:
-    Decoder<Item = <Self as MessageCodec>::MsgItem> + Encoder<<Self as MessageCodec>::MsgItem> + Sized
+    Decoder<Item = <Self as MessageCodec>::MsgItem>
+    + Encoder<<Self as MessageCodec>::MsgItem>
+    + Debug
+    + Sized
 {
     /// The type of the message that this codec expects for messages that we want to send.
     type MsgItem: Display

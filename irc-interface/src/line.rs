@@ -56,6 +56,12 @@ where
     }
 }
 
+impl<Msg> Debug for LineCodec<Msg> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "LineCodec")
+    }
+}
+
 impl<Msg> Encoder<Msg> for LineCodec<Msg>
 where
     Msg: LineMessage,

@@ -1,4 +1,6 @@
 //! Implementation of IRC codec for Tokio.
+use std::fmt::Debug;
+
 use bytes::BytesMut;
 use irc_interface::{Decoder, Encoder};
 
@@ -49,5 +51,11 @@ impl Encoder<Message> for IrcCodec {
 
     fn encode(&mut self, msg: Message, dst: &mut BytesMut) -> error::Result<()> {
         self.inner.encode(IrcCodec::sanitize(msg.to_string()), dst)
+    }
+}
+
+impl Debug for IrcCodec {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "IrcCodec")
     }
 }

@@ -63,7 +63,7 @@ use irc_interface::{Decoder, Encoder, MessageCodec};
 use parking_lot::RwLock;
 use std::{
     collections::HashMap,
-    fmt,
+    fmt::{self, Debug},
     path::Path,
     pin::Pin,
     sync::Arc,

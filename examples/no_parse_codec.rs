@@ -2,6 +2,8 @@
 //! This means that messages are received as Strings rather than [`irc_proto::Command`] objects.
 //! This only works if you run it with `--no-default-features`.
 
+// TODO: This should be an integration test for the `no_parse_codec` crate
+
 use futures::prelude::*;
 use irc::client::prelude::*;
 use no_parse_codec::*;
