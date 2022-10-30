@@ -24,6 +24,15 @@ impl FromStr for UnparsedMessage {
     }
 }
 
+impl<T> From<T> for UnparsedMessage
+where
+    T: Into<String>,
+{
+    fn from(item: T) -> Self {
+        Self(item.into())
+    }
+}
+
 impl LineMessage for UnparsedMessage {
     type Error = io::Error;
 }
