@@ -20,7 +20,7 @@ impl FromStr for UnparsedMessage {
     type Err = io::Error;
 
     fn from_str(s: &str) -> Result<Self, io::Error> {
-        Result::<Self, <Self as FromStr>::Err>::Ok(UnparsedMessage(s.to_string()))
+        Result::<Self, <Self as FromStr>::Err>::Ok(UnparsedMessage(s.into()))
     }
 }
 
@@ -29,7 +29,12 @@ where
     T: Into<String>,
 {
     fn from(item: T) -> Self {
-        Self(item.into())
+        let item: String = item.into();
+        if item.ends_with("\r\n") {
+            Self(item)
+        } else {
+            Self(format!("{item}\r\n"))
+        }
     }
 }
 
