@@ -65,6 +65,9 @@ mod regex {
         Lazy::new(|| Regex::new(r"^(:[^ ]* )?PING (?P<token>\S+)").unwrap());
 
     pub(super) static QUIT: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(:[^ ]* )?QUIT").unwrap());
+
+    pub(super) static CAP_LS: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"^(:[\S]* )?CAP \* LS :(?P<capabilities>.*)(\r\n)?$").unwrap());
 }
 
 // TODO: I could make this more efficient by adding a slice to the structure which only refers to the part of the string that contains the message (without prefix)
@@ -97,12 +100,24 @@ impl InternalIrcMessageIncoming for UnparsedMessage {
     }
 }
 
+impl UnparsedMessage {
+    /// Parse the capability list in a `CAP * LS` response.
+    pub fn as_cap_ls<'a>(&'a self) -> Option<&'a str> {
+        regex::CAP_LS.captures(&self.0).map(|captures| {
+            captures
+                .name("capabilities")
+                .unwrap_or_else(|| unreachable!())
+                .as_str()
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
     // WARNING: VS Code shows errors here, because it falsely assumes that the irc crate's `essential` feature is activated
 
-    use crate::NoParseCodec;
+    use crate::{NoParseCodec, UnparsedMessage};
     use anyhow::Result;
     use irc::client::codec_tests::TestSuite;
 
@@ -138,5 +153,18 @@ mod tests {
     #[tokio::test]
     async fn send_part() -> Result<()> {
         TestSuite::<NoParseCodec>::send_part().await
+    }
+
+    #[test]
+    fn as_cap_ls() {
+        let test_message_no_match =
+            ":testing.snowpoke.ink NOTICE * :*** Looking up your hostname...";
+        let test_message_match = ":testing.snowpoke.ink CAP * LS :echo-message inspircd.org/poison inspircd.org/standard-replies message-tags server-time";
+
+        let test_message_no_match: UnparsedMessage = test_message_no_match.into();
+        let test_message_match: UnparsedMessage = test_message_match.into();
+
+        assert_eq!(test_message_no_match.as_cap_ls(), None);
+        assert_eq!(test_message_match.as_cap_ls(), Some("echo-message inspircd.org/poison inspircd.org/standard-replies message-tags server-time"));
     }
 }
