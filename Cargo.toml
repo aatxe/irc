@@ -87,12 +87,6 @@ getopts = "0.2.0"
 tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros", "net", "time"] }
 no-parse-codec = { path = "no-parse-codec" }
 
-
-[[example]]
-name = "no_parse_codec"
-path = "examples/no_parse_codec.rs"
-required-features = []
-
 [[example]]
 name = "simple_proxy"
 path = "examples/simple_proxy.rs"

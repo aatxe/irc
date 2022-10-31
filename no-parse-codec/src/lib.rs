@@ -56,6 +56,9 @@ mod regex {
 
     pub(super) static PONG: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(:[^ ]* )?PONG").unwrap());
 
+    pub(super) static PING: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"^(:[^ ]* )?PING (?P<token>\S+)").unwrap());
+
     pub(super) static QUIT: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(:[^ ]* )?QUIT").unwrap());
 }
 
@@ -76,7 +79,12 @@ impl InternalIrcMessageIncoming for UnparsedMessage {
     }
 
     fn as_ping<'a>(&'a self) -> Option<&'a str> {
-        None
+        regex::PING.captures(&self.0).map(|captures| {
+            captures
+                .name("token")
+                .unwrap_or_else(|| unreachable!())
+                .as_str()
+        })
     }
 
     fn is_quit(&self) -> bool {

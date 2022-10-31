@@ -14,3 +14,5 @@ regex = "1.6.0"
 irc = { path = "../", default-features = false, features = ["codec-tests"] }
 anyhow = "1.0.0"
 tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros", "net", "time"] }
+env_logger = "0.9.1"
+futures-util = "0.3.25"

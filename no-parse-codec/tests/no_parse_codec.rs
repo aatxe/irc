@@ -2,14 +2,15 @@
 //! This means that messages are received as Strings rather than [`irc_proto::Command`] objects.
 //! This only works if you run it with `--no-default-features`.
 
-// TODO: This should be an integration test for the `no_parse_codec` crate
+#[allow(unused_imports)] // avoid false-positive in next line
+use futures_util::StreamExt;
 
-use futures::prelude::*;
 use irc::client::prelude::*;
 use no_parse_codec::*;
 
-#[tokio::main]
-async fn main() -> irc::error::Result<()> {
+#[tokio::test]
+async fn connect_to_server() -> irc::error::Result<()> {
+    env_logger::init();
     let config = Config {
         nickname: Some("pickles".to_owned()),
         server: Some("chat.freenode.net".to_owned()),
@@ -24,7 +25,10 @@ async fn main() -> irc::error::Result<()> {
 
     while let Some(message) = stream.next().await.transpose()? {
         print!("{}", message);
+        if message.to_string().contains("End of /NAMES list.") {
+            return Ok(());
+        }
     }
 
-    Ok(())
+    panic!("Failed to maintain connection");
 }
