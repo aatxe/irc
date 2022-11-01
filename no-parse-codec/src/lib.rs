@@ -54,20 +54,23 @@ mod regex {
     use regex::Regex;
 
     pub(super) static END_OF_MOTD: Lazy<Regex> =
-        Lazy::new(|| Regex::new(r"^(:[^ ]* )?376").unwrap());
+        Lazy::new(|| Regex::new(r"^(@[\S]* )?(:[\S]* )?376").unwrap());
 
     pub(super) static ERR_NO_MOTD: Lazy<Regex> =
-        Lazy::new(|| Regex::new(r"^(:[^ ]* )?422").unwrap());
+        Lazy::new(|| Regex::new(r"^(@[\S]* )?(:[\S]* )?422").unwrap());
 
-    pub(super) static PONG: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(:[^ ]* )?PONG").unwrap());
+    pub(super) static PONG: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"^(@[\S]* )?(:[\S]* )?PONG").unwrap());
 
     pub(super) static PING: Lazy<Regex> =
-        Lazy::new(|| Regex::new(r"^(:[^ ]* )?PING (?P<token>\S+)").unwrap());
+        Lazy::new(|| Regex::new(r"^(@[\S]* )?(:[\S]* )?PING (?P<token>\S+)").unwrap());
 
-    pub(super) static QUIT: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(:[^ ]* )?QUIT").unwrap());
+    pub(super) static QUIT: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"^(@[\S]* )?(:[\S]* )?QUIT").unwrap());
 
-    pub(super) static CAP_LS: Lazy<Regex> =
-        Lazy::new(|| Regex::new(r"^(:[\S]* )?CAP \* LS :(?P<capabilities>.*)(\r\n)?$").unwrap());
+    pub(super) static CAP_LS: Lazy<Regex> = Lazy::new(|| {
+        Regex::new(r"^(@[\S]* )?(:[\S]* )?CAP \* LS :(?P<capabilities>.*)(\r\n)?$").unwrap()
+    });
 }
 
 // TODO: I could make this more efficient by adding a slice to the structure which only refers to the part of the string that contains the message (without prefix)

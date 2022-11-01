@@ -1350,35 +1350,45 @@ pub mod codec_tests {
         }
 
         pub async fn handle_end_motd() -> Result<()> {
-            let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-            let mut client = Client::<Codec>::from_config_with_codec(Config {
-                mock_initial_value: Some(value.to_owned()),
-                ..test_config()
-            })
-            .await?;
-            client.stream()?.collect().await?;
-            assert_eq!(
-                &Self::get_client_value(client)[..],
-                "JOIN #test\r\nJOIN #test2\r\n"
-            );
+            let value_1 = ":irc.test.net 376 test :End of /MOTD command.\r\n";
+            let value_2 = ":*.freenode.net 376 pickles :End of message of the day.\r\n";
+            let value_3 = "@time=2022-11-01T00:11:42.987Z :testing.snowpoke.ink 376 irc-retriever-2 :End of message of the day.\r\n";
+
+            for value in [value_1, value_2, value_3] {
+                let mut client = Client::<Codec>::from_config_with_codec(Config {
+                    mock_initial_value: Some(value.to_owned()),
+                    ..test_config()
+                })
+                .await?;
+                client.stream()?.collect().await?;
+                assert_eq!(
+                    &Self::get_client_value(client)[..],
+                    "JOIN #test\r\nJOIN #test2\r\n"
+                );
+            }
             Ok(())
         }
 
         pub async fn handle_end_motd_with_nick_password() -> Result<()> {
-            let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-            let mut client = Client::<Codec>::from_config_with_codec(Config {
-                mock_initial_value: Some(value.to_owned()),
-                nick_password: Some(format!("password")),
-                channels: vec![format!("#test"), format!("#test2")],
-                ..test_config()
-            })
-            .await?;
-            client.stream()?.collect().await?;
-            assert_eq!(
-                &Self::get_client_value(client)[..],
-                "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
+            let value_1 = ":irc.test.net 376 test :End of /MOTD command.\r\n";
+            let value_2 = ":*.freenode.net 376 pickles :End of message of the day.\r\n";
+            let value_3 = "@time=2022-11-01T00:11:42.987Z :testing.snowpoke.ink 376 irc-retriever-2 :End of message of the day.\r\n";
+
+            for value in [value_1, value_2, value_3] {
+                let mut client = Client::<Codec>::from_config_with_codec(Config {
+                    mock_initial_value: Some(value.to_owned()),
+                    nick_password: Some(format!("password")),
+                    channels: vec![format!("#test"), format!("#test2")],
+                    ..test_config()
+                })
+                .await?;
+                client.stream()?.collect().await?;
+                assert_eq!(
+                    &Self::get_client_value(client)[..],
+                    "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
              JOIN #test2\r\n"
-            );
+                );
+            }
             Ok(())
         }
 
