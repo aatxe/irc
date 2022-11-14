@@ -89,7 +89,7 @@ impl InternalIrcMessageIncoming for UnparsedMessage {
         regex::PONG.is_match(&self.0)
     }
 
-    fn as_ping<'a>(&'a self) -> Option<&'a str> {
+    fn as_ping(&self) -> Option<&str> {
         regex::PING.captures(&self.0).map(|captures| {
             captures
                 .name("token")
@@ -105,13 +105,17 @@ impl InternalIrcMessageIncoming for UnparsedMessage {
 
 impl UnparsedMessage {
     /// Parse the capability list in a `CAP * LS` response.
-    pub fn as_cap_ls<'a>(&'a self) -> Option<&'a str> {
+    pub fn as_cap_ls(&self) -> Option<&str> {
         regex::CAP_LS.captures(&self.0).map(|captures| {
             captures
                 .name("capabilities")
                 .unwrap_or_else(|| unreachable!())
                 .as_str()
         })
+    }
+
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
     }
 }
 
