@@ -69,8 +69,13 @@ impl Parser {
                 self.state = Foreground1(cur);
                 false
             }
+            Foreground1('0') if cur.is_digit(10) => {
+                // can consume another digit if previous char was 0.
+                self.state = Foreground2;
+                false
+            }
             Foreground1('1') if cur.is_digit(6) => {
-                // can only consume another digit if previous char was 1.
+                // can consume another digit if previous char was 1.
                 self.state = Foreground2;
                 false
             }
@@ -97,7 +102,7 @@ impl Parser {
             }
             _ => {
                 self.state = Text;
-                true
+                !FORMAT_CHARACTERS.contains(&cur)
             }
         }
     }
@@ -161,10 +166,14 @@ mod test {
         bold_hangul("우왕\x02굳", should stripped into "우왕굳"),
         fg_color("l\x033ol", should stripped into "lol"),
         fg_color2("l\x0312ol", should stripped into "lol"),
+        fg_color3("l\x0302ol", should stripped into "lol"),
+        fg_color4("l\x030ol", should stripped into "lol"),
+        fg_color5("l\x0309ol", should stripped into "lol"),
         fg_bg_11("l\x031,2ol", should stripped into "lol"),
         fg_bg_21("l\x0312,3ol", should stripped into "lol"),
         fg_bg_12("l\x031,12ol", should stripped into "lol"),
         fg_bg_22("l\x0312,13ol", should stripped into "lol"),
+        fg_bold("l\x0309\x02ol", should stripped into "lol"),
         string_with_multiple_colors("hoo\x034r\x033a\x0312y", should stripped into "hooray"),
         string_with_digit_after_color("\x0344\x0355\x0366", should stripped into "456"),
         string_with_multiple_2digit_colors("hoo\x0310r\x0311a\x0312y", should stripped into "hooray"),
