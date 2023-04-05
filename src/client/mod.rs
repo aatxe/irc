@@ -36,6 +36,7 @@
 //! let mut stream = client.stream()?;
 //! client.identify()?;
 //!
+//! # #[cfg(feature = "essentials")]
 //! while let Some(message) = stream.next().await.transpose()? {
 //!     if let Command::PRIVMSG(channel, message) = message.command {
 //!         if message.contains(client.current_nickname()) {
@@ -58,10 +59,11 @@ use futures_util::{
     sink::Sink as _,
     stream::{SplitSink, SplitStream, StreamExt as _},
 };
+use irc_interface::{Decoder, Encoder, MessageCodec};
 use parking_lot::RwLock;
 use std::{
     collections::HashMap,
-    fmt,
+    fmt::{self, Debug},
     path::Path,
     pin::Pin,
     sync::Arc,
@@ -75,17 +77,25 @@ use crate::{
         data::{Config, User},
     },
     error,
-    proto::{
-        mode::ModeType,
-        CapSubCommand::{END, LS, REQ},
-        Capability, ChannelMode, Command,
-        Command::{
-            ChannelMODE, AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, NICK, NICKSERV, NOTICE, OPER,
-            PART, PASS, PONG, PRIVMSG, QUIT, SAMODE, SANICK, TOPIC, USER,
-        },
-        Message, Mode, NegotiationVersion, Response,
-    },
 };
+
+#[cfg(feature = "essentials")]
+use crate::proto::{
+    mode::ModeType,
+    CapSubCommand::{LS, REQ},
+    Capability, ChannelMode, Command,
+    Command::{
+        ChannelMODE, AUTHENTICATE, CAP, INVITE, JOIN, KICK, KILL, NICK, NOTICE, OPER, PART,
+        PRIVMSG, QUIT, SAMODE, SANICK, TOPIC,
+    },
+    Message, Mode, NegotiationVersion, Response,
+};
+
+// we use our own feature-dependent extension of the traits
+use self::data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing};
+
+#[cfg(feature = "essentials")]
+use irc_interface::InternalIrcMessageOutgoing as _;
 
 pub mod conn;
 pub mod data;
@@ -93,9 +103,13 @@ mod mock;
 pub mod prelude;
 pub mod transport;
 
+/// The IRC Codec that is used when no other codec is specified.
+type DefaultCodec = irc_proto::IrcCodec;
+
 macro_rules! pub_state_base {
-    () => {
+    ($msg_type:ty) => {
         /// Changes the modes for the specified target.
+        #[cfg(feature = "essentials")]
         pub fn send_mode<S, T>(&self, target: S, modes: &[Mode<T>]) -> error::Result<()>
         where
             S: fmt::Display,
@@ -109,7 +123,7 @@ macro_rules! pub_state_base {
         where
             S: fmt::Display,
         {
-            self.send(JOIN(chanlist.to_string(), None, None))
+            self.send(<$msg_type>::new_join(chanlist.to_string()))
         }
 
         /// Joins the specified channel or chanlist using the specified key or keylist.
@@ -122,10 +136,14 @@ macro_rules! pub_state_base {
             S1: fmt::Display,
             S2: fmt::Display,
         {
-            self.send(JOIN(chanlist.to_string(), Some(keylist.to_string()), None))
+            self.send(<$msg_type>::new_authenticated_join(
+                chanlist.to_string(),
+                keylist.to_string(),
+            ))
         }
 
         /// Sends a notice to the specified target.
+        #[cfg(all(feature = "ctcp", feature = "essentials"))]
         pub fn send_notice<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
         where
             S1: fmt::Display,
@@ -141,8 +159,9 @@ macro_rules! pub_state_base {
 }
 
 macro_rules! pub_sender_base {
-    () => {
+    ($msg_type:ty) => {
         /// Sends a request for a list of server capabilities for a specific IRCv3 version.
+        #[cfg(feature = "essentials")]
         pub fn send_cap_ls(&self, version: NegotiationVersion) -> error::Result<()> {
             self.send(Command::CAP(
                 None,
@@ -156,6 +175,7 @@ macro_rules! pub_sender_base {
         }
 
         /// Sends an IRCv3 capabilities request for the specified extensions.
+        #[cfg(feature = "essentials")]
         pub fn send_cap_req(&self, extensions: &[Capability]) -> error::Result<()> {
             let append = |mut s: String, c| {
                 s.push_str(c);
@@ -172,21 +192,25 @@ macro_rules! pub_sender_base {
         }
 
         /// Sends a SASL AUTHENTICATE message with the specified data.
+        #[cfg(feature = "essentials")]
         pub fn send_sasl<S: fmt::Display>(&self, data: S) -> error::Result<()> {
             self.send(AUTHENTICATE(data.to_string()))
         }
 
         /// Sends a SASL AUTHENTICATE request to use the PLAIN mechanism.
+        #[cfg(feature = "essentials")]
         pub fn send_sasl_plain(&self) -> error::Result<()> {
             self.send_sasl("PLAIN")
         }
 
         /// Sends a SASL AUTHENTICATE request to use the EXTERNAL mechanism.
+        #[cfg(feature = "essentials")]
         pub fn send_sasl_external(&self) -> error::Result<()> {
             self.send_sasl("EXTERNAL")
         }
 
         /// Sends a SASL AUTHENTICATE request to abort authentication.
+        #[cfg(feature = "essentials")]
         pub fn send_sasl_abort(&self) -> error::Result<()> {
             self.send_sasl("*")
         }
@@ -196,7 +220,7 @@ macro_rules! pub_sender_base {
         where
             S: fmt::Display,
         {
-            self.send(PONG(msg.to_string(), None))
+            self.send(<$msg_type>::new_pong(msg.to_string()))
         }
 
         /// Parts the specified channel or chanlist.
@@ -204,10 +228,11 @@ macro_rules! pub_sender_base {
         where
             S: fmt::Display,
         {
-            self.send(PART(chanlist.to_string(), None))
+            self.send(<$msg_type>::new_part(chanlist.to_string()))
         }
 
         /// Attempts to oper up using the specified username and password.
+        #[cfg(feature = "essentials")]
         pub fn send_oper<S1, S2>(&self, username: S1, password: S2) -> error::Result<()>
         where
             S1: fmt::Display,
@@ -220,6 +245,7 @@ macro_rules! pub_sender_base {
         /// will automatically be split and sent as multiple separate `PRIVMSG`s to the specified
         /// target. If you absolutely must avoid this behavior, you can do
         /// `client.send(PRIVMSG(target, message))` directly.
+        #[cfg(feature = "essentials")]
         pub fn send_privmsg<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
         where
             S1: fmt::Display,
@@ -234,6 +260,7 @@ macro_rules! pub_sender_base {
 
         /// Sets the topic of a channel or requests the current one.
         /// If `topic` is an empty string, it won't be included in the message.
+        #[cfg(feature = "essentials")]
         pub fn send_topic<S1, S2>(&self, channel: S1, topic: S2) -> error::Result<()>
         where
             S1: fmt::Display,
@@ -247,6 +274,7 @@ macro_rules! pub_sender_base {
         }
 
         /// Kills the target with the provided message.
+        #[cfg(feature = "essentials")]
         pub fn send_kill<S1, S2>(&self, target: S1, message: S2) -> error::Result<()>
         where
             S1: fmt::Display,
@@ -257,6 +285,7 @@ macro_rules! pub_sender_base {
 
         /// Kicks the listed nicknames from the listed channels with a comment.
         /// If `message` is an empty string, it won't be included in the message.
+        #[cfg(feature = "essentials")]
         pub fn send_kick<S1, S2, S3>(
             &self,
             chanlist: S1,
@@ -282,6 +311,7 @@ macro_rules! pub_sender_base {
 
         /// Changes the mode of the target by force.
         /// If `modeparams` is an empty string, it won't be included in the message.
+        #[cfg(feature = "essentials")]
         pub fn send_samode<S1, S2, S3>(
             &self,
             target: S1,
@@ -306,6 +336,7 @@ macro_rules! pub_sender_base {
         }
 
         /// Forces a user to change from the old nickname to the new nickname.
+        #[cfg(feature = "essentials")]
         pub fn send_sanick<S1, S2>(&self, old_nick: S1, new_nick: S2) -> error::Result<()>
         where
             S1: fmt::Display,
@@ -315,6 +346,7 @@ macro_rules! pub_sender_base {
         }
 
         /// Invites a user to the specified channel.
+        #[cfg(feature = "essentials")]
         pub fn send_invite<S1, S2>(&self, nick: S1, chan: S2) -> error::Result<()>
         where
             S1: fmt::Display,
@@ -330,11 +362,7 @@ macro_rules! pub_sender_base {
             S: fmt::Display,
         {
             let msg = msg.to_string();
-            self.send(QUIT(Some(if msg.is_empty() {
-                "Powered by Rust.".to_string()
-            } else {
-                msg
-            })))
+            self.send(<$msg_type>::new_quit(msg.to_string()))
         }
 
         /// Sends a CTCP-escaped message to the specified target.
@@ -436,16 +464,26 @@ macro_rules! pub_sender_base {
 /// [`futures`](https://docs.rs/futures/) crate, or the tutorials for
 /// [`tokio`](https://tokio.rs/docs/getting-started/futures/).
 #[derive(Debug)]
-pub struct ClientStream {
-    state: Arc<ClientState>,
-    stream: SplitStream<Connection>,
+pub struct ClientStream<Codec = DefaultCodec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
+    state: Arc<ClientState<Codec>>,
+    stream: SplitStream<Connection<Codec>>,
     // In case the client stream also handles outgoing messages.
-    outgoing: Option<Outgoing>,
+    outgoing: Option<Outgoing<Codec>>,
 }
 
-impl ClientStream {
+impl<Codec> ClientStream<Codec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
     /// collect stream and collect all messages available.
-    pub async fn collect(mut self) -> error::Result<Vec<Message>> {
+    pub async fn collect(mut self) -> error::Result<Vec<Codec::MsgItem>> {
         let mut output = Vec::new();
 
         while let Some(message) = self.next().await {
@@ -459,14 +497,24 @@ impl ClientStream {
     }
 }
 
-impl FusedStream for ClientStream {
+impl<Codec> FusedStream for ClientStream<Codec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
     fn is_terminated(&self) -> bool {
         false
     }
 }
 
-impl Stream for ClientStream {
-    type Item = Result<Message, error::Error>;
+impl<Codec> Stream for ClientStream<Codec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
+    type Item = Result<Codec::MsgItem, error::Error>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         if let Some(outgoing) = self.as_mut().outgoing.as_mut() {
@@ -496,8 +544,13 @@ impl Stream for ClientStream {
 
 /// Thread-safe internal state for an IRC server connection.
 #[derive(Debug)]
-struct ClientState {
-    sender: Sender,
+struct ClientState<Codec = DefaultCodec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Decoder>::Error>,
+    Codec::MsgItem: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
+{
+    sender: Sender<Codec::MsgItem>,
     /// The configuration used with this connection.
     config: Config,
     /// A thread-safe map of channels to the list of users in them.
@@ -508,8 +561,13 @@ struct ClientState {
     default_ghost_sequence: Vec<String>,
 }
 
-impl ClientState {
-    fn new(sender: Sender, config: Config) -> ClientState {
+impl<Codec> ClientState<Codec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Decoder>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
+    fn new(sender: Sender<Codec::MsgItem>, config: Config) -> ClientState<Codec> {
         ClientState {
             sender,
             config,
@@ -523,7 +581,7 @@ impl ClientState {
         &self.config
     }
 
-    fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> {
+    fn send<M: Into<Codec::MsgItem>>(&self, msg: M) -> error::Result<()> {
         let msg = msg.into();
         self.handle_sent_message(&msg)?;
         Ok(self.sender.send(msg)?)
@@ -544,22 +602,41 @@ impl ClientState {
     }
 
     /// Handles sent messages internally for basic client functionality.
-    fn handle_sent_message(&self, msg: &Message) -> error::Result<()> {
+    fn handle_sent_message(&self, msg: &Codec::MsgItem) -> error::Result<()> {
         log::trace!("[SENT] {}", msg.to_string());
 
-        match msg.command {
-            PART(ref chan, _) => {
-                let _ = self.chanlists.write().remove(chan);
+        #[cfg(feature = "essentials")]
+        {
+            let msg = <Codec::MsgItem as std::borrow::Borrow<Message>>::borrow(msg);
+            match msg.command {
+                PART(ref chan, _) => {
+                    let _ = self.chanlists.write().remove(chan);
+                }
+                _ => (),
             }
-            _ => (),
         }
 
         Ok(())
     }
 
     /// Handles received messages internally for basic client functionality.
-    fn handle_message(&self, msg: &Message) -> error::Result<()> {
+    #[cfg(not(feature = "essentials"))]
+    fn handle_message(&self, msg: &Codec::MsgItem) -> error::Result<()> {
         log::trace!("[RECV] {}", msg.to_string());
+        if msg.is_quit() {
+            self.handle_quit("")
+        } else if msg.is_end_of_motd() || msg.is_err_nomotd() {
+            self.handle_motd()?
+        }
+        Ok(())
+    }
+
+    /// Handles received messages internally for basic client functionality.
+    #[cfg(feature = "essentials")]
+    fn handle_message(&self, msg: &Codec::MsgItem) -> error::Result<()> {
+        log::trace!("[RECV] {}", msg.to_string());
+
+        let msg = <Codec::MsgItem as std::borrow::Borrow<Message>>::borrow(msg);
         match msg.command {
             JOIN(ref chan, _, _) => self.handle_join(msg.source_nickname().unwrap_or(""), chan),
             PART(ref chan, _) => self.handle_part(msg.source_nickname().unwrap_or(""), chan),
@@ -588,25 +665,7 @@ impl ClientState {
             }
             Command::Response(Response::RPL_NAMREPLY, ref args) => self.handle_namreply(args),
             Command::Response(Response::RPL_ENDOFMOTD, _)
-            | Command::Response(Response::ERR_NOMOTD, _) => {
-                self.send_nick_password()?;
-                self.send_umodes()?;
-
-                let config_chans = self.config().channels();
-                for chan in config_chans {
-                    match self.config().channel_key(chan) {
-                        Some(key) => self.send_join_with_keys::<&str, &str>(chan, key)?,
-                        None => self.send_join(chan)?,
-                    }
-                }
-                let joined_chans = self.chanlists.read();
-                for chan in joined_chans
-                    .keys()
-                    .filter(|x| config_chans.iter().find(|c| c == x).is_none())
-                {
-                    self.send_join(chan)?
-                }
-            }
+            | Command::Response(Response::ERR_NOMOTD, _) => self.handle_motd()?,
             Command::Response(Response::ERR_NICKNAMEINUSE, _)
             | Command::Response(Response::ERR_ERRONEOUSNICKNAME, _) => {
                 let alt_nicks = self.config().alternate_nicknames();
@@ -624,6 +683,30 @@ impl ClientState {
         Ok(())
     }
 
+    /// Send join messages after the MOTD has been received.
+    fn handle_motd(&self) -> error::Result<()> {
+        self.send_nick_password()?;
+        #[cfg(feature = "essentials")]
+        self.send_umodes()?;
+
+        let config_chans = self.config().channels();
+        for chan in config_chans {
+            match self.config().channel_key(chan) {
+                Some(key) => self.send_join_with_keys::<&str, &str>(chan, key)?,
+                None => self.send_join(chan)?,
+            }
+        }
+        let joined_chans = self.chanlists.read();
+        for chan in joined_chans
+            .keys()
+            .filter(|x| config_chans.iter().find(|c| c == x).is_none())
+        {
+            self.send_join(chan)?
+        }
+
+        Ok(())
+    }
+
     fn send_nick_password(&self) -> error::Result<()> {
         if self.config().nick_password().is_empty() {
             Ok(())
@@ -637,23 +720,26 @@ impl ClientState {
                 };
 
                 for s in seq {
-                    self.send(NICKSERV(vec![
+                    self.send(Codec::MsgItem::new_nickserv(vec![
                         s.to_string(),
                         self.config().nickname()?.to_string(),
                         self.config().nick_password().to_string(),
                     ]))?;
                 }
                 *index = 0;
-                self.send(NICK(self.config().nickname()?.to_owned()))?
+                self.send(Codec::MsgItem::new_nick(
+                    self.config().nickname()?.to_owned(),
+                ))?
             }
 
-            self.send(NICKSERV(vec![
+            self.send(Codec::MsgItem::new_nickserv(vec![
                 "IDENTIFY".to_string(),
                 self.config().nick_password().to_string(),
             ]))
         }
     }
 
+    #[cfg(feature = "essentials")]
     fn send_umodes(&self) -> error::Result<()> {
         if self.config().umodes().is_empty() {
             Ok(())
@@ -679,10 +765,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(any(feature = "nochanlists"))]
     fn handle_join(&self, _: &str, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     fn handle_join(&self, src: &str, chan: &str) {
         if let Some(vec) = self.chanlists.write().get_mut(&chan.to_owned()) {
             if !src.is_empty() {
@@ -691,10 +777,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(any(feature = "nochanlists"))]
     fn handle_part(&self, _: &str, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     fn handle_part(&self, src: &str, chan: &str) {
         if let Some(vec) = self.chanlists.write().get_mut(&chan.to_owned()) {
             if !src.is_empty() {
@@ -705,10 +791,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(any(feature = "nochanlists", not(feature = "essentials")))]
     fn handle_quit(&self, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     fn handle_quit(&self, src: &str) {
         if src.is_empty() {
             return;
@@ -721,10 +807,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(any(feature = "nochanlists"))]
     fn handle_nick_change(&self, _: &str, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     fn handle_nick_change(&self, old_nick: &str, new_nick: &str) {
         if old_nick.is_empty() || new_nick.is_empty() {
             return;
@@ -738,10 +824,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(any(feature = "nochanlists"))]
     fn handle_mode(&self, _: &str, _: &[Mode<ChannelMode>]) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     fn handle_mode(&self, chan: &str, modes: &[Mode<ChannelMode>]) {
         for mode in modes {
             match *mode {
@@ -757,10 +843,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(any(feature = "nochanlists"))]
     fn handle_namreply(&self, _: &[String]) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     fn handle_namreply(&self, args: &[String]) {
         if args.len() == 4 {
             let chan = &args[2];
@@ -774,7 +860,7 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "ctcp")]
+    #[cfg(all(feature = "ctcp", feature = "essentials"))]
     fn handle_ctcp(&self, resp: &str, tokens: &[&str]) -> error::Result<()> {
         if tokens.is_empty() {
             return Ok(());
@@ -803,50 +889,66 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "ctcp")]
+    #[cfg(all(feature = "ctcp", feature = "essentials"))]
     fn send_ctcp_internal(&self, target: &str, msg: &str) -> error::Result<()> {
         self.send_notice(target, &format!("\u{001}{}\u{001}", msg))
     }
 
-    #[cfg(not(feature = "ctcp"))]
+    #[cfg(all(not(feature = "ctcp"), feature = "essentials"))]
     fn handle_ctcp(&self, _: &str, _: &[&str]) -> error::Result<()> {
         Ok(())
     }
 
-    pub_state_base!();
+    pub_state_base!(<Codec as MessageCodec>::MsgItem);
 }
 
 /// Thread-safe sender that can be used with the client.
 #[derive(Debug, Clone)]
-pub struct Sender {
-    tx_outgoing: UnboundedSender<Message>,
+pub struct Sender<MsgItem = <DefaultCodec as MessageCodec>::MsgItem>
+where
+    MsgItem: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
+{
+    tx_outgoing: UnboundedSender<MsgItem>,
 }
 
-impl Sender {
+impl<MsgItem> Sender<MsgItem>
+where
+    MsgItem: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
+{
     /// Send a single message to the unbounded queue.
-    pub fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> {
+    pub fn send<M: Into<MsgItem>>(&self, msg: M) -> error::Result<()> {
         Ok(self.tx_outgoing.send(msg.into())?)
     }
 
-    pub_state_base!();
-    pub_sender_base!();
+    pub_state_base!(MsgItem);
+    pub_sender_base!(MsgItem);
 }
 
 /// Future to handle outgoing messages.
 ///
 /// Note: this is essentially the same as a version of [SendAll](https://github.com/rust-lang-nursery/futures-rs/blob/master/futures-util/src/sink/send_all.rs) that owns it's sink and stream.
 #[derive(Debug)]
-pub struct Outgoing {
-    sink: SplitSink<Connection, Message>,
-    stream: UnboundedReceiver<Message>,
-    buffered: Option<Message>,
+pub struct Outgoing<Codec = DefaultCodec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
+    sink: SplitSink<Connection<Codec>, Codec::MsgItem>,
+    stream: UnboundedReceiver<Codec::MsgItem>,
+    buffered: Option<Codec::MsgItem>,
 }
 
-impl Outgoing {
+impl<Codec> Outgoing<Codec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
     fn try_start_send(
         &mut self,
         cx: &mut Context<'_>,
-        message: Message,
+        message: Codec::MsgItem,
     ) -> Poll<Result<(), error::Error>> {
         debug_assert!(self.buffered.is_none());
 
@@ -860,7 +962,12 @@ impl Outgoing {
     }
 }
 
-impl FusedFuture for Outgoing {
+impl<Codec> FusedFuture for Outgoing<Codec>
+where
+    Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+    error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+{
     fn is_terminated(&self) -> bool {
         // NB: outgoing stream never terminates.
         // TODO: should it terminate if rx_outgoing is terminated?
@@ -868,7 +975,12 @@ impl FusedFuture for Outgoing {
     }
 }
 
-impl Future for Outgoing {
+impl<Codec> Future for Outgoing<Codec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
     type Output = error::Result<()>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
@@ -898,19 +1010,33 @@ impl Future for Outgoing {
 ///
 /// For a full example usage, see [`irc::client`](./index.html).
 #[derive(Debug)]
-pub struct Client {
+pub struct Client<Codec = DefaultCodec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Decoder>::Error> + From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
+{
     /// The internal, thread-safe server state.
-    state: Arc<ClientState>,
-    incoming: Option<SplitStream<Connection>>,
-    outgoing: Option<Outgoing>,
-    sender: Sender,
-    #[cfg(test)]
+    state: Arc<ClientState<Codec>>,
+    incoming: Option<SplitStream<Connection<Codec>>>,
+    outgoing: Option<Outgoing<Codec>>,
+    sender: Sender<Codec::MsgItem>,
+    #[cfg(feature = "codec-tests")]
     /// A view of the logs for a mock connection.
-    view: Option<self::transport::LogView>,
+    view: Option<self::transport::LogView<Codec::MsgItem>>,
 }
 
-impl Client {
-    /// Creates a new `Client` from the configuration at the specified path, connecting
+/*
+#HACK   The rust compiler is not able to infer Codec=DefaultCodec in code such as:
+#HACK   `let client = Client::new("config.toml").await?;`
+#HACK   and will instead demand that the user specify the type of Codec.
+#HACK   To make the code above work, we define the constructors `new` and `from_config`
+#HACK   only for the case of Codec=DefaultCodec.
+#HACK   If the user wants to specify a custom codec, they have to use a different constructor,
+#HACK   but at least we stay semver compatible.
+*/
+impl Client<DefaultCodec> {
+    /// Creates a new `Client` with default codec from the configuration at the specified path, connecting
     /// immediately. This function is short-hand for loading the configuration and then calling
     /// `Client::from_config` and consequently inherits its behaviors.
     ///
@@ -923,42 +1049,99 @@ impl Client {
     /// # Ok(())
     /// # }
     /// ```
-    pub async fn new<P: AsRef<Path>>(config: P) -> error::Result<Client> {
-        Client::from_config(Config::load(config)?).await
+    pub async fn new<P: AsRef<Path>>(config: P) -> error::Result<Self> {
+        Self::from_config(Config::load(config)?).await
+    }
+
+    /// Creates a `Future` of an `Client` with default codec from the specified configuration and on the event loop
+    /// corresponding to the given handle. This can be used to set up a number of `Clients` on a
+    /// single, shared event loop. It can also be used to take more control over execution and error
+    /// handling. Connection will not occur until the event loop is run.
+    pub async fn from_config(config: Config) -> error::Result<Self> {
+        type Codec = DefaultCodec;
+        let (tx_outgoing, rx_outgoing) = mpsc::unbounded_channel();
+        let conn = Connection::new(&config, tx_outgoing.clone()).await?;
+
+        #[cfg(feature = "codec-tests")]
+        let view = conn.log_view();
+
+        let (sink, incoming) = conn.split();
+
+        let sender = Sender::<<Codec as MessageCodec>::MsgItem> { tx_outgoing };
+
+        Ok(Self {
+            sender: sender.clone(),
+            state: Arc::new(ClientState::<Codec>::new(sender, config)),
+            incoming: Some(incoming),
+            outgoing: Some(Outgoing::<Codec> {
+                sink,
+                stream: rx_outgoing,
+                buffered: None,
+            }),
+            #[cfg(feature = "codec-tests")]
+            view,
+        })
+    }
+}
+
+impl<Codec> Client<Codec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Decoder>::Error>
+        + From<<Codec as Encoder<Codec::MsgItem>>::Error>
+        + From<<Codec as MessageCodec>::Error>,
+    Codec::MsgItem: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
+{
+    /// Creates a new `Client` from the configuration at the specified path, connecting
+    /// immediately. This function is short-hand for loading the configuration and then calling
+    /// `Client::from_config_with_codec` and consequently inherits its behaviors.
+    ///
+    /// # Example
+    /// ```no_run
+    /// # use irc::client::prelude::*;
+    /// # use irc_proto::IrcCodec;
+    /// # #[tokio::main]
+    /// # async fn main() -> irc::error::Result<()> {
+    /// let client = Client::<IrcCodec>::new_with_codec("config.toml").await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn new_with_codec<P: AsRef<Path>>(config: P) -> error::Result<Self> {
+        Self::from_config_with_codec(Config::load(config)?).await
     }
 
     /// Creates a `Future` of an `Client` from the specified configuration and on the event loop
     /// corresponding to the given handle. This can be used to set up a number of `Clients` on a
     /// single, shared event loop. It can also be used to take more control over execution and error
     /// handling. Connection will not occur until the event loop is run.
-    pub async fn from_config(config: Config) -> error::Result<Client> {
+    pub async fn from_config_with_codec(config: Config) -> error::Result<Self> {
         let (tx_outgoing, rx_outgoing) = mpsc::unbounded_channel();
         let conn = Connection::new(&config, tx_outgoing.clone()).await?;
 
-        #[cfg(test)]
+        #[cfg(feature = "codec-tests")]
         let view = conn.log_view();
 
         let (sink, incoming) = conn.split();
 
-        let sender = Sender { tx_outgoing };
+        let sender = Sender::<Codec::MsgItem> { tx_outgoing };
 
-        Ok(Client {
+        Ok(Self {
             sender: sender.clone(),
-            state: Arc::new(ClientState::new(sender, config)),
+            state: Arc::new(ClientState::<Codec>::new(sender, config)),
             incoming: Some(incoming),
-            outgoing: Some(Outgoing {
+            outgoing: Some(Outgoing::<Codec> {
                 sink,
                 stream: rx_outgoing,
                 buffered: None,
             }),
-            #[cfg(test)]
+            #[cfg(feature = "codec-tests")]
             view,
         })
     }
 
     /// Gets the log view from the internal transport. Only used for unit testing.
-    #[cfg(test)]
-    fn log_view(&self) -> &self::transport::LogView {
+    #[cfg(feature = "codec-tests")]
+    fn log_view(&self) -> &self::transport::LogView<Codec::MsgItem> {
         self.view
             .as_ref()
             .expect("there should be a log during testing")
@@ -968,12 +1151,12 @@ impl Client {
     ///
     /// Must be called before `stream` if you intend to drive this future
     /// yourself.
-    pub fn outgoing(&mut self) -> Option<Outgoing> {
+    pub fn outgoing(&mut self) -> Option<Outgoing<Codec>> {
         self.outgoing.take()
     }
 
     /// Get access to a thread-safe sender that can be used with the client.
-    pub fn sender(&self) -> Sender {
+    pub fn sender(&self) -> Sender<Codec::MsgItem> {
         self.sender.clone()
     }
 
@@ -989,13 +1172,13 @@ impl Client {
     ///
     /// **Note**: The stream can only be returned once. Subsequent attempts will cause a panic.
     // FIXME: when impl traits stabilize, we should change this return type.
-    pub fn stream(&mut self) -> error::Result<ClientStream> {
+    pub fn stream(&mut self) -> error::Result<ClientStream<Codec>> {
         let stream = self
             .incoming
             .take()
             .ok_or_else(|| error::Error::StreamAlreadyConfigured)?;
 
-        Ok(ClientStream {
+        Ok(ClientStream::<Codec> {
             state: Arc::clone(&self.state),
             stream,
             outgoing: self.outgoing.take(),
@@ -1004,7 +1187,7 @@ impl Client {
 
     /// Gets a list of currently joined channels. This will be `None` if tracking is disabled
     /// altogether via the `nochanlists` feature.
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     pub fn list_channels(&self) -> Option<Vec<String>> {
         Some(
             self.state
@@ -1016,7 +1199,8 @@ impl Client {
         )
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(any(feature = "nochanlists", not(feature = "essentials")))]
+    #[allow(missing_docs)]
     pub fn list_channels(&self) -> Option<Vec<String>> {
         None
     }
@@ -1040,12 +1224,13 @@ impl Client {
     /// # Ok(())
     /// # }
     /// ```
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     pub fn list_users(&self, chan: &str) -> Option<Vec<User>> {
         self.state.chanlists.read().get(&chan.to_owned()).cloned()
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(any(feature = "nochanlists", not(feature = "essentials")))]
+    #[allow(missing_docs)]
     pub fn list_users(&self, _: &str) -> Option<Vec<User>> {
         None
     }
@@ -1070,47 +1255,247 @@ impl Client {
     /// client.send(Command::USER("user".to_owned(), "0".to_owned(), "name".to_owned())).unwrap();
     /// # }
     /// ```
-    pub fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> {
+    pub fn send<M: Into<Codec::MsgItem>>(&self, msg: M) -> error::Result<()> {
         self.state.send(msg)
     }
 
     /// Sends a CAP END, NICK and USER to identify.
     pub fn identify(&self) -> error::Result<()> {
         // Send a CAP END to signify that we're IRCv3-compliant (and to end negotiations!).
-        self.send(CAP(None, END, None, None))?;
+        self.send(<Codec as MessageCodec>::MsgItem::new_cap_end())?;
         if self.config().password() != "" {
-            self.send(PASS(self.config().password().to_owned()))?;
+            self.send(<Codec as MessageCodec>::MsgItem::new_pass(
+                self.config().password().to_owned(),
+            ))?;
         }
-        self.send(NICK(self.config().nickname()?.to_owned()))?;
-        self.send(USER(
+        self.send(<Codec as MessageCodec>::MsgItem::new_nick(
+            self.config().nickname()?.to_owned(),
+        ))?;
+        self.send(<Codec as MessageCodec>::MsgItem::new_user(
             self.config().username().to_owned(),
-            "0".to_owned(),
             self.config().real_name().to_owned(),
         ))?;
         Ok(())
     }
 
-    pub_state_base!();
-    pub_sender_base!();
+    pub_state_base!(<Codec as MessageCodec>::MsgItem);
+    pub_sender_base!(<Codec as MessageCodec>::MsgItem);
+}
+
+/// Tests that rely on the implementation details of the message codec.
+/// These tests can be accessed from wthin codec crates to make sure that they work as expected.
+pub mod codec_tests {
+    #![cfg(feature = "codec-tests")]
+    #![allow(missing_docs)]
+
+    use anyhow::Result;
+    use irc_interface::{Decoder, Encoder};
+    use std::thread;
+    use std::time::Duration;
+
+    use crate::client::{Client, Config, MessageCodec};
+
+    #[cfg(not(feature = "essentials"))]
+    use irc_interface::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing};
+
+    #[cfg(feature = "essentials")]
+    use {
+        super::data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing},
+        irc_interface::InternalIrcMessageOutgoing as _,
+    };
+
+    pub fn test_config() -> Config {
+        Config {
+            owners: vec![format!("test")],
+            nickname: Some(format!("test")),
+            alt_nicks: vec![format!("test2")],
+            server: Some(format!("irc.test.net")),
+            channels: vec![format!("#test"), format!("#test2")],
+            user_info: Some(format!("Testing.")),
+            use_mock_connection: true,
+            ..Default::default()
+        }
+    }
+
+    /// Provides functions that can be used as tests for the message interpretation.
+    pub struct TestSuite<Codec> {
+        _phantom_marker: std::marker::PhantomData<Codec>,
+    }
+
+    impl<Codec> TestSuite<Codec>
+    where
+        Codec: MessageCodec,
+        crate::error::Error: From<<Codec as Decoder>::Error>
+            + From<<Codec as Encoder<Codec::MsgItem>>::Error>
+            + From<<Codec as MessageCodec>::Error>,
+        Codec::MsgItem: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
+    {
+        pub fn get_client_value(client: Client<Codec>) -> String {
+            // We sleep here because of synchronization issues.
+            // We can't guarantee that everything will have been sent by the time of this call.
+            thread::sleep(Duration::from_millis(100));
+            client
+                .log_view()
+                .sent()
+                .unwrap()
+                .iter()
+                .fold(String::new(), |mut acc, msg| {
+                    // NOTE: we have to sanitize here because sanitization happens in IrcCodec after the
+                    // messages are converted into strings, but our transport logger catches messages before
+                    // they ever reach that point.
+                    acc.push_str(&Codec::sanitize(msg.to_string()));
+                    acc
+                })
+        }
+
+        pub async fn handle_end_motd() -> Result<()> {
+            let value_1 = ":irc.test.net 376 test :End of /MOTD command.\r\n";
+            let value_2 = ":*.freenode.net 376 pickles :End of message of the day.\r\n";
+            let value_3 = "@time=2022-11-01T00:11:42.987Z :testing.snowpoke.ink 376 irc-retriever-2 :End of message of the day.\r\n";
+
+            for value in [value_1, value_2, value_3] {
+                let mut client = Client::<Codec>::from_config_with_codec(Config {
+                    mock_initial_value: Some(value.to_owned()),
+                    ..test_config()
+                })
+                .await?;
+                client.stream()?.collect().await?;
+                assert_eq!(
+                    &Self::get_client_value(client)[..],
+                    "JOIN #test\r\nJOIN #test2\r\n"
+                );
+            }
+            Ok(())
+        }
+
+        pub async fn handle_end_motd_with_nick_password() -> Result<()> {
+            let value_1 = ":irc.test.net 376 test :End of /MOTD command.\r\n";
+            let value_2 = ":*.freenode.net 376 pickles :End of message of the day.\r\n";
+            let value_3 = "@time=2022-11-01T00:11:42.987Z :testing.snowpoke.ink 376 irc-retriever-2 :End of message of the day.\r\n";
+
+            for value in [value_1, value_2, value_3] {
+                let mut client = Client::<Codec>::from_config_with_codec(Config {
+                    mock_initial_value: Some(value.to_owned()),
+                    nick_password: Some(format!("password")),
+                    channels: vec![format!("#test"), format!("#test2")],
+                    ..test_config()
+                })
+                .await?;
+                client.stream()?.collect().await?;
+                assert_eq!(
+                    &Self::get_client_value(client)[..],
+                    "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
+             JOIN #test2\r\n"
+                );
+            }
+            Ok(())
+        }
+
+        pub async fn identify() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(test_config()).await?;
+            client.identify()?;
+            client.stream()?.collect().await?;
+            assert_eq!(
+                &Self::get_client_value(client)[..],
+                "CAP END\r\nNICK test\r\n\
+             USER test 0 * test\r\n"
+            );
+            Ok(())
+        }
+
+        pub async fn identify_with_password() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(Config {
+                nickname: Some(format!("test")),
+                password: Some(format!("password")),
+                ..test_config()
+            })
+            .await?;
+            client.identify()?;
+            client.stream()?.collect().await?;
+            assert_eq!(
+                &Self::get_client_value(client)[..],
+                "CAP END\r\nPASS password\r\nNICK test\r\n\
+             USER test 0 * test\r\n"
+            );
+            Ok(())
+        }
+
+        pub async fn send_pong() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(test_config()).await?;
+            client.send_pong("irc.test.net")?;
+            client.stream()?.collect().await?;
+            assert_eq!(&Self::get_client_value(client)[..], "PONG irc.test.net\r\n");
+            Ok(())
+        }
+
+        pub async fn send_join() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(test_config()).await?;
+            client.send_join("#test,#test2,#test3")?;
+            client.stream()?.collect().await?;
+            assert_eq!(
+                &Self::get_client_value(client)[..],
+                "JOIN #test,#test2,#test3\r\n"
+            );
+            Ok(())
+        }
+
+        pub async fn send_part() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(test_config()).await?;
+            client.send_part("#test")?;
+            client.stream()?.collect().await?;
+            assert_eq!(&Self::get_client_value(client)[..], "PART #test\r\n");
+            Ok(())
+        }
+
+        pub async fn send_raw_is_really_raw() -> Result<()> {
+            let mut client = Client::<Codec>::from_config_with_codec(test_config()).await?;
+            assert!(client
+                .send(Codec::MsgItem::new_raw(
+                    "PASS".to_owned(),
+                    vec!["password".to_owned()]
+                ))
+                .is_ok());
+            assert!(client
+                .send(Codec::MsgItem::new_raw(
+                    "NICK".to_owned(),
+                    vec!["test".to_owned()]
+                ))
+                .is_ok());
+            client.stream()?.collect().await?;
+            assert_eq!(
+                &Self::get_client_value(client)[..],
+                "PASS password\r\nNICK test\r\n"
+            );
+            Ok(())
+        }
+    }
 }
 
 #[cfg(test)]
 mod test {
-    use std::{collections::HashMap, default::Default, thread, time::Duration};
+    use std::{default::Default, thread, time::Duration};
 
     use super::Client;
-    #[cfg(not(feature = "nochanlists"))]
+
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     use crate::client::data::User;
+
+    use super::{codec_tests::TestSuite, DefaultCodec};
+
     use crate::{
         client::data::Config,
-        error::Error,
-        proto::{
-            command::Command::{Raw, PRIVMSG},
-            ChannelMode, IrcCodec, Mode,
-        },
+        proto::{command::Command::PRIVMSG, IrcCodec},
     };
     use anyhow::Result;
-    use futures::prelude::*;
+    #[cfg(feature = "essentials")]
+    use {
+        crate::{
+            error::Error,
+            proto::{ChannelMode, Mode},
+        },
+        futures::prelude::*,
+        std::collections::HashMap,
+    };
 
     pub fn test_config() -> Config {
         Config {
@@ -1160,41 +1545,17 @@ mod test {
     }
 
     #[tokio::test]
-    async fn handle_message() -> Result<()> {
-        let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-        let mut client = Client::from_config(Config {
-            mock_initial_value: Some(value.to_owned()),
-            ..test_config()
-        })
-        .await?;
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "JOIN #test\r\nJOIN #test2\r\n"
-        );
-        Ok(())
+    async fn handle_end_motd() -> Result<()> {
+        TestSuite::<DefaultCodec>::handle_end_motd().await
     }
 
     #[tokio::test]
     async fn handle_end_motd_with_nick_password() -> Result<()> {
-        let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
-        let mut client = Client::from_config(Config {
-            mock_initial_value: Some(value.to_owned()),
-            nick_password: Some(format!("password")),
-            channels: vec![format!("#test"), format!("#test2")],
-            ..test_config()
-        })
-        .await?;
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "NICKSERV IDENTIFY password\r\nJOIN #test\r\n\
-             JOIN #test2\r\n"
-        );
-        Ok(())
+        TestSuite::<DefaultCodec>::handle_end_motd_with_nick_password().await
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn handle_end_motd_with_chan_keys() -> Result<()> {
         let value = ":irc.test.net 376 test :End of /MOTD command\r\n";
         let mut client = Client::from_config(Config {
@@ -1218,6 +1579,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn handle_end_motd_with_ghost() -> Result<()> {
         let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
@@ -1241,6 +1603,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn handle_end_motd_with_ghost_seq() -> Result<()> {
         let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
@@ -1266,6 +1629,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn handle_end_motd_with_umodes() -> Result<()> {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
@@ -1285,6 +1649,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn nickname_in_use() -> Result<()> {
         let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n";
         let mut client = Client::from_config(Config {
@@ -1298,6 +1663,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn ran_out_of_nicknames() -> Result<()> {
         let value = ":irc.test.net 433 * test :Nickname is already in use.\r\n\
                      :irc.test.net 433 * test2 :Nickname is already in use.\r\n";
@@ -1316,6 +1682,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
@@ -1330,6 +1697,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_no_newline_injection() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
@@ -1345,23 +1713,11 @@ mod test {
 
     #[tokio::test]
     async fn send_raw_is_really_raw() -> Result<()> {
-        let mut client = Client::from_config(test_config()).await?;
-        assert!(client
-            .send(Raw("PASS".to_owned(), vec!["password".to_owned()]))
-            .is_ok());
-        assert!(client
-            .send(Raw("NICK".to_owned(), vec!["test".to_owned()]))
-            .is_ok());
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "PASS password\r\nNICK test\r\n"
-        );
-        Ok(())
+        TestSuite::<DefaultCodec>::send_raw_is_really_raw().await
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     async fn channel_tracking_names() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
@@ -1375,7 +1731,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     async fn channel_tracking_names_part() -> Result<()> {
         use crate::proto::command::Command::PART;
 
@@ -1397,7 +1753,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     async fn user_tracking_names() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
@@ -1414,7 +1770,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     async fn user_tracking_names_join() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :test2!test@test JOIN #test\r\n";
@@ -1437,7 +1793,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     async fn user_tracking_names_kick() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test KICK #test test\r\n";
@@ -1455,7 +1811,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     async fn user_tracking_names_part() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test PART #test\r\n";
@@ -1473,7 +1829,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(all(not(feature = "nochanlists"), feature = "essentials"))]
     async fn user_tracking_names_mode() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :+test ~owner &admin\r\n\
                      :test!test@test MODE #test +o test\r\n";
@@ -1502,7 +1858,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(feature = "nochanlists")]
+    #[cfg(any(feature = "nochanlists", not(feature = "essentials")))]
     async fn no_user_tracking() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
@@ -1650,66 +2006,31 @@ mod test {
 
     #[tokio::test]
     async fn identify() -> Result<()> {
-        let mut client = Client::from_config(test_config()).await?;
-        client.identify()?;
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "CAP END\r\nNICK test\r\n\
-             USER test 0 * test\r\n"
-        );
-        Ok(())
+        TestSuite::<DefaultCodec>::identify().await
     }
 
     #[tokio::test]
     async fn identify_with_password() -> Result<()> {
-        let mut client = Client::from_config(Config {
-            nickname: Some(format!("test")),
-            password: Some(format!("password")),
-            ..test_config()
-        })
-        .await?;
-        client.identify()?;
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "CAP END\r\nPASS password\r\nNICK test\r\n\
-             USER test 0 * test\r\n"
-        );
-        Ok(())
+        TestSuite::<DefaultCodec>::identify_with_password().await
     }
 
     #[tokio::test]
     async fn send_pong() -> Result<()> {
-        let mut client = Client::from_config(test_config()).await?;
-        client.send_pong("irc.test.net")?;
-        client.stream()?.collect().await?;
-        assert_eq!(&get_client_value(client)[..], "PONG irc.test.net\r\n");
-        Ok(())
+        TestSuite::<DefaultCodec>::send_pong().await
     }
 
     #[tokio::test]
     async fn send_join() -> Result<()> {
-        let mut client = Client::from_config(test_config()).await?;
-        client.send_join("#test,#test2,#test3")?;
-        client.stream()?.collect().await?;
-        assert_eq!(
-            &get_client_value(client)[..],
-            "JOIN #test,#test2,#test3\r\n"
-        );
-        Ok(())
+        TestSuite::<DefaultCodec>::send_join().await
     }
 
     #[tokio::test]
     async fn send_part() -> Result<()> {
-        let mut client = Client::from_config(test_config()).await?;
-        client.send_part("#test")?;
-        client.stream()?.collect().await?;
-        assert_eq!(&get_client_value(client)[..], "PART #test\r\n");
-        Ok(())
+        TestSuite::<DefaultCodec>::send_part().await
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_oper() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_oper("test", "test")?;
@@ -1719,6 +2040,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_privmsg() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_privmsg("#test", "Hi, everybody!")?;
@@ -1731,6 +2053,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(all(feature = "ctcp", feature = "essentials"))]
     async fn send_notice() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_notice("#test", "Hi, everybody!")?;
@@ -1743,6 +2066,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_topic_no_topic() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_topic("#test", "")?;
@@ -1752,6 +2076,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_topic() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_topic("#test", "Testing stuff.")?;
@@ -1764,6 +2089,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_kill() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_kill("test", "Testing kills.")?;
@@ -1776,6 +2102,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_kick_no_message() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_kick("#test", "test", "")?;
@@ -1785,6 +2112,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_kick() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_kick("#test", "test", "Testing kicks.")?;
@@ -1797,6 +2125,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_mode_no_modeparams() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_mode("#test", &[Mode::Plus(ChannelMode::InviteOnly, None)])?;
@@ -1806,6 +2135,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_mode() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_mode(
@@ -1818,6 +2148,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_samode_no_modeparams() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_samode("#test", "+i", "")?;
@@ -1827,6 +2158,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_samode() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_samode("#test", "+o", "test")?;
@@ -1836,6 +2168,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_sanick() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_sanick("test", "test2")?;
@@ -1845,6 +2178,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[cfg(feature = "essentials")]
     async fn send_invite() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         client.send_invite("test", "#test")?;

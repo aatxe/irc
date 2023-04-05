@@ -1,0 +1,19 @@
+[package]
+name = "irc-interface"
+version = "0.0.1"
+description = "Interface to make `irc` compatible with multiple protocol implementations."
+authors = ["Aaron Weiss <aweiss@hey.com>", "snowpoke <hello@snowpoke.ink>"]
+license = "MPL-2.0"
+keywords = ["irc", "trait", "interface"]
+categories = ["network-programming"]
+documentation = "https://docs.rs/irc-proto/"
+repository = "https://github.com/aatxe/irc"
+edition = "2021"
+
+[badges]
+travis-ci = { repository = "aatxe/irc" }
+
+[dependencies]
+bytes = "1.2.1"
+encoding = "0.2.33"
+tokio-util = { version = "0.6.0", features = ["codec"] }

@@ -19,13 +19,19 @@ is-it-maintained-open-issues = { repository = "aatxe/irc" }
 
 
 [workspace]
-members = [ "./", "irc-proto/" ]
+members = ["./", "irc-proto/", "irc-interface/", "no-parse-codec/"]
 
 
 [features]
-default = ["ctcp", "tls-native", "toml_config"]
-ctcp = []
+# warning: adding the `essentials` feature to default breaks semver. I should turn this into a reductive feature once I know that the code works. I'm just using a normal feature temporarily because otherwise VS Code won't show errors properly.
+default = ["ctcp", "tls-native", "toml_config", "codec-tests"]
+ctcp = ["essentials"]
 nochanlists = []
+# we differentiate between "barebones" mode and "essentials" mode. 
+# in "barebones" mode, the only supported features are those strictly required to run an IRC client
+# enabling the "essentials" feature provides other features that would be required from a useful IRC client
+essentials = []
+codec-tests = ["anyhow"]
 
 json_config = ["serde", "serde/derive", "serde_derive", "serde_json"]
 toml_config = ["serde", "serde/derive", "serde_derive", "toml"]
@@ -45,13 +51,13 @@ chrono = { version = "0.4", default-features = false, features = ["clock", "std"
 encoding = "0.2.0"
 futures-util = { version = "0.3.0", default-features = false, features = ["alloc", "sink"] }
 irc-proto = { version = "0.15.0", path = "irc-proto" }
+irc-interface = { version = "0.0.1", path = "irc-interface" }
 log = "0.4.0"
 parking_lot = "0.11.0"
 thiserror = "1.0.0"
 pin-project = "1.0.2"
 tokio = { version = "1.0.0", features = ["net", "time", "sync"] }
 tokio-stream = "0.1.0"
-tokio-util = { version = "0.6.0", features = ["codec"] }
 
 # Feature - Config
 serde = { version = "1.0.0", optional = true }
@@ -69,6 +75,8 @@ tokio-rustls = { version = "0.22.0", features = ["dangerous_configuration"], opt
 tokio-native-tls = { version = "0.3.0", optional = true }
 webpki-roots = { version = "0.20.0", optional = true }
 
+# Feature - Test Suite
+anyhow = { version = "1.0.0", optional = true }
 
 [dev-dependencies]
 anyhow = "1.0.0"
@@ -77,14 +85,39 @@ env_logger = "0.7.0"
 futures = "0.3.0"
 getopts = "0.2.0"
 tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros", "net", "time"] }
-
+no-parse-codec = { path = "no-parse-codec" }
 
 [[example]]
 name = "simple_proxy"
 path = "examples/simple_proxy.rs"
-required-features = ["proxy"]
+required-features = ["proxy", "essentials"]
 
 [[example]]
 name = "simple_plaintext"
 path = "examples/simple_plaintext.rs"
-required-features = ["tls-native"]
+required-features = ["tls-native", "essentials"]
+
+[[example]]
+name = "tweeter"
+path = "examples/tweeter.rs"
+required-features = ["essentials"]
+
+[[example]]
+name = "tooter"
+path = "examples/tooter.rs"
+required-features = ["essentials"]
+
+[[example]]
+name = "repeater"
+path = "examples/repeater.rs"
+required-features = ["essentials"]
+
+[[example]]
+name = "build_bot"
+path = "examples/build-bot.rs"
+required-features = ["essentials"]
+
+[[example]]
+name = "multiserver"
+path = "examples/multiserver.rs"
+required-features = ["essentials"]

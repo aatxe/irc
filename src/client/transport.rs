@@ -10,24 +10,28 @@ use std::{
 
 use chrono::prelude::*;
 use futures_util::{future::Future, ready, sink::Sink, stream::Stream};
+use irc_interface::{Decoder, Encoder, Framed, MessageCodec};
 use pin_project::pin_project;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::{
     io::{AsyncRead, AsyncWrite},
     time::{self, Interval, Sleep},
 };
-use tokio_util::codec::Framed;
 
-use crate::{
-    client::data::Config,
-    error,
-    proto::{Command, IrcCodec, Message, Response},
+use crate::{client::data::Config, error};
+
+use super::{
+    data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing},
+    DefaultCodec,
 };
 
 /// Pinger-based futures helper.
 #[pin_project]
-struct Pinger {
-    tx: UnboundedSender<Message>,
+struct Pinger<Msg>
+where
+    Msg: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
+    tx: UnboundedSender<Msg>,
     // Whether this pinger pings.
     enabled: bool,
     /// The amount of time to wait before timing out from no ping response.
@@ -40,9 +44,12 @@ struct Pinger {
     ping_interval: Interval,
 }
 
-impl Pinger {
+impl<Msg> Pinger<Msg>
+where
+    Msg: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
+{
     /// Construct a new pinger helper.
-    pub fn new(tx: UnboundedSender<Message>, config: &Config) -> Pinger {
+    pub fn new(tx: UnboundedSender<Msg>, config: &Config) -> Self {
         let ping_time = Duration::from_secs(u64::from(config.ping_time()));
         let ping_timeout = Duration::from_secs(u64::from(config.ping_timeout()));
 
@@ -56,24 +63,18 @@ impl Pinger {
     }
 
     /// Handle an incoming message.
-    fn handle_message(self: Pin<&mut Self>, message: &Message) -> error::Result<()> {
-        match message.command {
-            Command::Response(Response::RPL_ENDOFMOTD, _)
-            | Command::Response(Response::ERR_NOMOTD, _) => {
-                *self.project().enabled = true;
-            }
+    fn handle_message(self: Pin<&mut Self>, message: &Msg) -> error::Result<()> {
+        if message.is_end_of_motd() || message.is_err_nomotd() {
+            *self.project().enabled = true;
+        } else if let Some(ping_payload) = message.as_ping() {
             // On receiving a `PING` message from the server, we automatically respond with
             // the appropriate `PONG` message to keep the connection alive for transport.
-            Command::PING(ref data, _) => {
-                self.send_pong(data)?;
-            }
+            self.send_pong(&ping_payload)?;
+        } else if message.is_pong() {
             // Check `PONG` responses from the server. If it matches, we will update the
             // last instant that the pong was received. This will prevent timeout.
-            Command::PONG(_, None) | Command::PONG(_, Some(_)) => {
-                log::trace!("Received PONG");
-                self.project().ping_deadline.set(None);
-            }
-            _ => (),
+            log::trace!("Received PONG");
+            self.project().ping_deadline.set(None);
         }
 
         Ok(())
@@ -81,9 +82,7 @@ impl Pinger {
 
     /// Send a pong.
     fn send_pong(self: Pin<&mut Self>, data: &str) -> error::Result<()> {
-        self.project()
-            .tx
-            .send(Command::PONG(data.to_owned(), None).into())?;
+        self.project().tx.send(Msg::new_pong(data.to_owned()))?;
         Ok(())
     }
 
@@ -96,7 +95,7 @@ impl Pinger {
 
         let mut this = self.project();
 
-        this.tx.send(Command::PING(data.clone(), None).into())?;
+        this.tx.send(Msg::new_ping(data))?;
 
         if this.ping_deadline.is_none() {
             let ping_deadline = time::sleep(*this.ping_timeout);
@@ -107,7 +106,10 @@ impl Pinger {
     }
 }
 
-impl Future for Pinger {
+impl<Msg> Future for Pinger<Msg>
+where
+    Msg: InternalIrcMessageOutgoing + InternalIrcMessageIncoming,
+{
     type Output = Result<(), error::Error>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
@@ -132,43 +134,61 @@ impl Future for Pinger {
 /// implementation of `Connection` and ultimately `IrcServer`, and plays an important role in
 /// handling connection timeouts, message throttling, and ping response.
 #[pin_project]
-pub struct Transport<T> {
-    /// The inner connection framed with an `IrcCodec`.
+pub struct Transport<T, Codec = DefaultCodec>
+where
+    Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
+    /// The inner connection framed with a Codec that implements [`MessageCodec`]. By default, this is [`IrcCodec`].
     #[pin]
-    inner: Framed<T, IrcCodec>,
+    inner: Framed<T, Codec>,
     /// Helper for handle pinging.
     #[pin]
-    pinger: Option<Pinger>,
+    pinger: Option<Pinger<Codec::MsgItem>>,
 }
 
-impl<T> Transport<T>
+impl<T, Codec> Transport<T, Codec>
 where
     T: Unpin + AsyncRead + AsyncWrite,
+    Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     /// Creates a new `Transport` from the given IRC stream.
     pub fn new(
         config: &Config,
-        inner: Framed<T, IrcCodec>,
-        tx: UnboundedSender<Message>,
-    ) -> Transport<T> {
+        inner: Framed<T, Codec>,
+        tx: UnboundedSender<Codec::MsgItem>,
+    ) -> Transport<T, Codec> {
         let pinger = Some(Pinger::new(tx, config));
 
         Transport { inner, pinger }
     }
 
     /// Gets the inner stream underlying the `Transport`.
-    pub fn into_inner(self) -> Framed<T, IrcCodec> {
+    pub fn into_inner(self) -> Framed<T, Codec> {
         self.inner
+    }
+
+    /// We don´t use the automatically created `project_ref` function, so this function exists to avoid a `dead_code` warning.
+    #[doc(hidden)]
+    pub fn _none(self: Pin<&Self>) {
+        let _ = self.project_ref();
     }
 }
 
-impl<T> Stream for Transport<T>
+impl<T, Codec> Stream for Transport<T, Codec>
 where
     T: Unpin + AsyncRead + AsyncWrite,
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Decoder>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
-    type Item = Result<Message, error::Error>;
+    type Item = Result<Codec::MsgItem, error::Error>;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+    fn poll_next(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<Option<<Self as Stream>::Item>> {
         if let Some(pinger) = self.as_mut().project().pinger.as_pin_mut() {
             match pinger.poll(cx) {
                 Poll::Ready(result) => result?,
@@ -191,9 +211,12 @@ where
     }
 }
 
-impl<T> Sink<Message> for Transport<T>
+impl<T, Codec> Sink<Codec::MsgItem> for Transport<T, Codec>
 where
     T: Unpin + AsyncRead + AsyncWrite,
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     type Error = error::Error;
 
@@ -202,7 +225,7 @@ where
         Poll::Ready(Ok(()))
     }
 
-    fn start_send(self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
+    fn start_send(self: Pin<&mut Self>, item: Codec::MsgItem) -> Result<(), Self::Error> {
         log::trace!("[SEND] {}", item);
         self.project().inner.start_send(item)?;
         Ok(())
@@ -221,19 +244,19 @@ where
 
 /// A view of the logs from a particular `Logged` transport.
 #[derive(Clone, Debug)]
-pub struct LogView {
-    sent: Arc<RwLock<Vec<Message>>>,
-    received: Arc<RwLock<Vec<Message>>>,
+pub struct LogView<Msg = <DefaultCodec as MessageCodec>::MsgItem> {
+    sent: Arc<RwLock<Vec<Msg>>>,
+    received: Arc<RwLock<Vec<Msg>>>,
 }
 
-impl LogView {
+impl<Msg> LogView<Msg> {
     /// Gets a read guard for all the messages sent on the transport.
-    pub fn sent(&self) -> error::Result<RwLockReadGuard<Vec<Message>>> {
+    pub fn sent(&self) -> error::Result<RwLockReadGuard<Vec<Msg>>> {
         self.sent.read().map_err(|_| error::Error::PoisonedLog)
     }
 
     /// Gets a read guard for all the messages received on the transport.
-    pub fn received(&self) -> error::Result<RwLockReadGuard<Vec<Message>>> {
+    pub fn received(&self) -> error::Result<RwLockReadGuard<Vec<Msg>>> {
         self.received.read().map_err(|_| error::Error::PoisonedLog)
     }
 }
@@ -241,18 +264,24 @@ impl LogView {
 /// A logged version of the `Transport` that records all sent and received messages.
 /// Note: this will introduce some performance overhead by cloning all messages.
 #[pin_project]
-pub struct Logged<T> {
+pub struct Logged<T, Codec = DefaultCodec>
+where
+    Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
     #[pin]
-    inner: Transport<T>,
-    view: LogView,
+    inner: Transport<T, Codec>,
+    view: LogView<Codec::MsgItem>,
 }
 
-impl<T> Logged<T>
+impl<T, Codec> Logged<T, Codec>
 where
     T: AsyncRead + AsyncWrite,
+    Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     /// Wraps the given `Transport` in logging.
-    pub fn wrap(inner: Transport<T>) -> Logged<T> {
+    pub fn wrap(inner: Transport<T, Codec>) -> Logged<T, Codec> {
         Logged {
             inner,
             view: LogView {
@@ -263,16 +292,25 @@ where
     }
 
     /// Gets a view of the logging for this transport.
-    pub fn view(&self) -> LogView {
+    pub fn view(&self) -> LogView<Codec::MsgItem> {
         self.view.clone()
+    }
+
+    /// We don´t use the automatically created `project_ref` function, so this function exists to avoid a `dead_code` warning.
+    #[doc(hidden)]
+    pub fn _none(self: Pin<&Self>) {
+        let _ = self.project_ref();
     }
 }
 
-impl<T> Stream for Logged<T>
+impl<T, Codec> Stream for Logged<T, Codec>
 where
     T: Unpin + AsyncRead + AsyncWrite,
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Decoder>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
-    type Item = Result<Message, error::Error>;
+    type Item = Result<Codec::MsgItem, error::Error>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let this = self.project();
@@ -294,9 +332,12 @@ where
     }
 }
 
-impl<T> Sink<Message> for Logged<T>
+impl<T, Codec> Sink<Codec::MsgItem> for Logged<T, Codec>
 where
     T: Unpin + AsyncRead + AsyncWrite,
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
 {
     type Error = error::Error;
 
@@ -308,7 +349,7 @@ where
         self.project().inner.poll_close(cx)
     }
 
-    fn start_send(self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
+    fn start_send(self: Pin<&mut Self>, item: Codec::MsgItem) -> Result<(), Self::Error> {
         let this = self.project();
 
         this.inner.start_send(item.clone())?;

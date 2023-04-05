@@ -1,5 +1,6 @@
 //! A module providing IRC connections for use by `IrcServer`s.
 use futures_util::{sink::Sink, stream::Stream};
+use irc_interface::{Decoder, Encoder, Framed, MessageCodec};
 use pin_project::pin_project;
 use std::{
     fmt,
@@ -8,7 +9,6 @@ use std::{
 };
 use tokio::net::TcpStream;
 use tokio::sync::mpsc::UnboundedSender;
-use tokio_util::codec::Framed;
 
 #[cfg(feature = "proxy")]
 use tokio_socks::tcp::Socks5Stream;
@@ -50,22 +50,32 @@ use crate::{
         transport::{LogView, Logged, Transport},
     },
     error,
-    proto::{IrcCodec, Message},
 };
+
+use super::data::codec::{InternalIrcMessageIncoming, InternalIrcMessageOutgoing};
+use super::DefaultCodec;
 
 /// An IRC connection used internally by `IrcServer`.
 #[pin_project(project = ConnectionProj)]
-pub enum Connection {
+pub enum Connection<Codec = DefaultCodec>
+where
+    Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
     #[doc(hidden)]
-    Unsecured(#[pin] Transport<TcpStream>),
+    Unsecured(#[pin] Transport<TcpStream, Codec>),
     #[doc(hidden)]
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
-    Secured(#[pin] Transport<TlsStream<TcpStream>>),
+    Secured(#[pin] Transport<TlsStream<TcpStream>, Codec>),
     #[doc(hidden)]
-    Mock(#[pin] Logged<MockStream>),
+    Mock(#[pin] Logged<MockStream, Codec>),
 }
 
-impl fmt::Debug for Connection {
+impl<Codec> fmt::Debug for Connection<Codec>
+where
+    Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
@@ -80,12 +90,17 @@ impl fmt::Debug for Connection {
     }
 }
 
-impl Connection {
+impl<Codec> Connection<Codec>
+where
+    Codec: MessageCodec,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+    error::Error: From<<Codec as MessageCodec>::Error>,
+{
     /// Creates a new `Connection` using the specified `Config`
     pub(crate) async fn new(
         config: &Config,
-        tx: UnboundedSender<Message>,
-    ) -> error::Result<Connection> {
+        tx: UnboundedSender<Codec::MsgItem>,
+    ) -> error::Result<Self> {
         if config.use_mock_connection() {
             log::info!("Connecting via mock to {}.", config.server()?);
             return Ok(Connection::Mock(Logged::wrap(
@@ -149,10 +164,10 @@ impl Connection {
 
     async fn new_unsecured_transport(
         config: &Config,
-        tx: UnboundedSender<Message>,
-    ) -> error::Result<Transport<TcpStream>> {
+        tx: UnboundedSender<Codec::MsgItem>,
+    ) -> error::Result<Transport<TcpStream, Codec>> {
         let stream = Self::new_stream(config).await?;
-        let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
+        let framed = Framed::new(stream, Codec::try_new(config.encoding())?);
 
         Ok(Transport::new(&config, framed, tx))
     }
@@ -160,8 +175,8 @@ impl Connection {
     #[cfg(feature = "tls-native")]
     async fn new_secured_transport(
         config: &Config,
-        tx: UnboundedSender<Message>,
-    ) -> error::Result<Transport<TlsStream<TcpStream>>> {
+        tx: UnboundedSender<Codec::MsgItem>,
+    ) -> error::Result<Transport<TlsStream<TcpStream>, Codec>> {
         let mut builder = TlsConnector::builder();
 
         if let Some(cert_path) = config.cert_path() {
@@ -211,7 +226,7 @@ impl Connection {
 
         let stream = Self::new_stream(config).await?;
         let stream = connector.connect(domain, stream).await?;
-        let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
+        let framed = Framed::new(stream, Codec::try_new(config.encoding())?);
 
         Ok(Transport::new(&config, framed, tx))
     }
@@ -219,8 +234,8 @@ impl Connection {
     #[cfg(feature = "tls-rust")]
     async fn new_secured_transport(
         config: &Config,
-        tx: UnboundedSender<Message>,
-    ) -> error::Result<Transport<TlsStream<TcpStream>>> {
+        tx: UnboundedSender<Codec::MsgItem>,
+    ) -> error::Result<Transport<TlsStream<TcpStream>>, Codec> {
         let mut builder = ClientConfig::default();
         builder
             .root_store
@@ -278,15 +293,15 @@ impl Connection {
 
         let stream = Self::new_stream(config).await?;
         let stream = connector.connect(domain, stream).await?;
-        let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
+        let framed = Framed::new(stream, Codec::try_new(config.encoding())?);
 
         Ok(Transport::new(&config, framed, tx))
     }
 
     async fn new_mocked_transport(
         config: &Config,
-        tx: UnboundedSender<Message>,
-    ) -> error::Result<Transport<MockStream>> {
+        tx: UnboundedSender<Codec::MsgItem>,
+    ) -> error::Result<Transport<MockStream, Codec>> {
         use encoding::{label::encoding_from_whatwg_label, EncoderTrap};
 
         let encoding = encoding_from_whatwg_label(config.encoding()).ok_or_else(|| {
@@ -304,14 +319,14 @@ impl Connection {
             })?;
 
         let stream = MockStream::new(&initial);
-        let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
+        let framed = Framed::new(stream, Codec::try_new(config.encoding())?);
 
         Ok(Transport::new(&config, framed, tx))
     }
 
     /// Gets a view of the internal logging if and only if this connection is using a mock stream.
     /// Otherwise, this will always return `None`. This is used for unit testing.
-    pub fn log_view(&self) -> Option<LogView> {
+    pub fn log_view(&self) -> Option<LogView<Codec::MsgItem>> {
         match *self {
             Connection::Mock(ref inner) => Some(inner.view()),
             _ => None,
@@ -319,8 +334,13 @@ impl Connection {
     }
 }
 
-impl Stream for Connection {
-    type Item = error::Result<Message>;
+impl<Codec> Stream for Connection<Codec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Decoder>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
+    type Item = error::Result<Codec::MsgItem>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         match self.project() {
@@ -332,7 +352,12 @@ impl Stream for Connection {
     }
 }
 
-impl Sink<Message> for Connection {
+impl<Codec> Sink<Codec::MsgItem> for Connection<Codec>
+where
+    Codec: MessageCodec,
+    error::Error: From<<Codec as Encoder<Codec::MsgItem>>::Error>,
+    Codec::MsgItem: InternalIrcMessageIncoming + InternalIrcMessageOutgoing,
+{
     type Error = error::Error;
 
     fn poll_ready(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
@@ -344,7 +369,7 @@ impl Sink<Message> for Connection {
         }
     }
 
-    fn start_send(self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
+    fn start_send(self: Pin<&mut Self>, item: Codec::MsgItem) -> Result<(), Self::Error> {
         match self.project() {
             ConnectionProj::Unsecured(inner) => inner.start_send(item),
             #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
