@@ -62,7 +62,7 @@ async fn main() -> Result<(), failure::Error> {
     let config = Config {
         nickname: Some("the-irc-crate".to_owned()),
         server: Some("chat.freenode.net".to_owned()),
-        channels: Some(vec!["#test".to_owned()]),
+        channels: vec!["#test".to_owned()],
         ..Config::default()
     };
 
@@ -77,6 +77,22 @@ async fn main() -> Result<(), failure::Error> {
 
     Ok(())
 }
+```
+
+Example Cargo.toml file:
+```rust,no_run,edition2018
+[package]
+name = "example"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+irc = "0.15.0"
+tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros", "net", "time"] }
+futures = "0.3.0"
+failure = "0.1.8"
 ```
 
 ## Configuring IRC Clients
