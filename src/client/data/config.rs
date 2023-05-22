@@ -523,7 +523,10 @@ impl Config {
     /// Gets whether or not to dangerously accept invalid certificates.
     /// This defaults to `false` when not specified.
     pub fn dangerously_accept_invalid_certs(&self) -> bool {
-        self.dangerously_accept_invalid_certs.as_ref().cloned().unwrap_or(false)
+        self.dangerously_accept_invalid_certs
+            .as_ref()
+            .cloned()
+            .unwrap_or(false)
     }
 
     /// Gets the path to the client authentication certificate in DER format if specified.
