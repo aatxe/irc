@@ -1,7 +1,7 @@
 # the irc crate [![Build Status][ci-badge]][ci] [![Crates.io][cr-badge]][cr] ![Downloads][dl-badge] [![Docs][doc-badge]][doc]
 
-[ci-badge]: https://travis-ci.org/aatxe/irc.svg?branch=stable
-[ci]: https://travis-ci.org/aatxe/irc
+[ci-badge]: https://github.com/aatxe/irc/actions/workflows/ci.yml/badge.svg
+[ci]: https://github.com/aatxe/irc/actions/workflows/ci.yml
 [cr-badge]: https://img.shields.io/crates/v/irc.svg
 [cr]: https://crates.io/crates/irc
 [dl-badge]: https://img.shields.io/crates/d/irc.svg
