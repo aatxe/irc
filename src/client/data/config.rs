@@ -399,11 +399,10 @@ impl Config {
 
     /// Gets the nickname specified in the configuration.
     pub fn nickname(&self) -> Result<&str> {
-        self.nickname.as_deref()
-            .ok_or_else(|| InvalidConfig {
-                path: self.path(),
-                cause: ConfigError::NicknameNotSpecified,
-            })
+        self.nickname.as_deref().ok_or_else(|| InvalidConfig {
+            path: self.path(),
+            cause: ConfigError::NicknameNotSpecified,
+        })
     }
 
     /// Gets the bot's nickserv password specified in the configuration.
@@ -436,11 +435,10 @@ impl Config {
 
     /// Gets the address of the server specified in the configuration.
     pub fn server(&self) -> Result<&str> {
-        self.server.as_deref()
-            .ok_or_else(|| InvalidConfig {
-                path: self.path(),
-                cause: ConfigError::ServerNotSpecified,
-            })
+        self.server.as_deref().ok_or_else(|| InvalidConfig {
+            path: self.path(),
+            cause: ConfigError::ServerNotSpecified,
+        })
     }
 
     /// Gets the port of the server specified in the configuration.

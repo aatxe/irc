@@ -118,7 +118,14 @@ impl Future for Pinger {
             }
         }
 
-        if self.as_mut().project().ping_interval.poll_tick(cx).is_ready() && *self.as_mut().project().enabled {
+        if self
+            .as_mut()
+            .project()
+            .ping_interval
+            .poll_tick(cx)
+            .is_ready()
+            && *self.as_mut().project().enabled
+        {
             self.as_mut().send_ping()?;
         }
 

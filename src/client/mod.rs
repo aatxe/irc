@@ -1305,7 +1305,6 @@ mod test {
         .await?;
         let res = client.stream()?.try_collect::<Vec<_>>().await;
         if let Err(Error::NoUsableNick) = res {
-            
         } else {
             panic!("expected error when no valid nicks were specified")
         }
