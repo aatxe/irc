@@ -113,11 +113,7 @@ macro_rules! pub_state_base {
         }
 
         /// Joins the specified channel or chanlist using the specified key or keylist.
-        pub fn send_join_with_keys<S1, S2>(
-            &self,
-            chanlist: &str,
-            keylist: &str,
-        ) -> error::Result<()>
+        pub fn send_join_with_keys<S1, S2>(&self, chanlist: S1, keylist: S2) -> error::Result<()>
         where
             S1: fmt::Display,
             S2: fmt::Display,
