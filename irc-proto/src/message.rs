@@ -58,7 +58,7 @@ impl Message {
         args: Vec<&str>,
     ) -> Result<Message, error::MessageParseError> {
         Ok(Message {
-            tags: tags,
+            tags,
             prefix: prefix.map(|p| p.into()),
             command: Command::new(command, args)?,
         })
@@ -111,43 +111,6 @@ impl Message {
             Command::NOTICE(ref target, _) if target.is_channel_name() => Some(target),
             _ => self.source_nickname(),
         }
-    }
-
-    /// Converts a Message into a String according to the IRC protocol.
-    ///
-    /// # Example
-    /// ```
-    /// # extern crate irc_proto;
-    /// # use irc_proto::Message;
-    /// # fn main() {
-    /// let msg = Message::new(
-    ///     Some("ada"), "PRIVMSG", vec!["#channel", "Hi, everyone!"]
-    /// ).unwrap();
-    /// assert_eq!(msg.to_string(), ":ada PRIVMSG #channel :Hi, everyone!\r\n");
-    /// # }
-    /// ```
-    pub fn to_string(&self) -> String {
-        let mut ret = String::new();
-        if let Some(ref tags) = self.tags {
-            ret.push('@');
-            for tag in tags {
-                ret.push_str(&tag.0);
-                if let Some(ref value) = tag.1 {
-                    ret.push('=');
-                    escape_tag_value(&mut ret, &value);
-                }
-                ret.push(';');
-            }
-            ret.pop();
-            ret.push(' ');
-        }
-        if let Some(ref prefix) = self.prefix {
-            write!(ret, ":{} ", prefix).unwrap();
-        }
-        let cmd: String = From::from(&self.command);
-        ret.push_str(&cmd);
-        ret.push_str("\r\n");
-        ret
     }
 }
 
@@ -261,8 +224,38 @@ impl<'a> From<&'a str> for Message {
 }
 
 impl Display for Message {
+    /// Converts a Message into a String according to the IRC protocol.
+    ///
+    /// # Example
+    /// ```
+    /// # extern crate irc_proto;
+    /// # use irc_proto::Message;
+    /// # fn main() {
+    /// let msg = Message::new(
+    ///     Some("ada"), "PRIVMSG", vec!["#channel", "Hi, everyone!"]
+    /// ).unwrap();
+    /// assert_eq!(msg.to_string(), ":ada PRIVMSG #channel :Hi, everyone!\r\n");
+    /// # }
+    /// ```
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}", self.to_string())
+        if let Some(ref tags) = self.tags {
+            f.write_char('@')?;
+            for (i, tag) in tags.iter().enumerate() {
+                if i > 0 {
+                    f.write_char(';')?;
+                }
+                f.write_str(&tag.0)?;
+                if let Some(ref value) = tag.1 {
+                    f.write_char('=')?;
+                    escape_tag_value(f, value)?;
+                }
+            }
+            f.write_char(' ')?;
+        }
+        if let Some(ref prefix) = self.prefix {
+            write!(f, ":{} ", prefix)?
+        }
+        write!(f, "{}\r\n", String::from(&self.command))
     }
 }
 
@@ -273,36 +266,38 @@ impl Display for Message {
 #[derive(Clone, PartialEq, Debug)]
 pub struct Tag(pub String, pub Option<String>);
 
-fn escape_tag_value(msg: &mut String, value: &str) {
+fn escape_tag_value(f: &mut dyn Write, value: &str) -> FmtResult {
     for c in value.chars() {
         match c {
-            ';' => msg.push_str("\\:"),
-            ' ' => msg.push_str("\\s"),
-            '\\' => msg.push_str("\\\\"),
-            '\r' => msg.push_str("\\r"),
-            '\n' => msg.push_str("\\n"),
-            c => msg.push(c),
+            ';' => f.write_str("\\:")?,
+            ' ' => f.write_str("\\s")?,
+            '\\' => f.write_str("\\\\")?,
+            '\r' => f.write_str("\\r")?,
+            '\n' => f.write_str("\\n")?,
+            c => f.write_char(c)?,
         }
     }
+    Ok(())
 }
 
 fn unescape_tag_value(value: &str) -> String {
     let mut unescaped = String::with_capacity(value.len());
     let mut iter = value.chars();
     while let Some(c) = iter.next() {
-        if c == '\\' {
+        let r = if c == '\\' {
             match iter.next() {
-                Some(':') => unescaped.push(';'),
-                Some('s') => unescaped.push(' '),
-                Some('\\') => unescaped.push('\\'),
-                Some('r') => unescaped.push('\r'),
-                Some('n') => unescaped.push('\n'),
-                Some(c) => unescaped.push(c),
+                Some(':') => ';',
+                Some('s') => ' ',
+                Some('\\') => '\\',
+                Some('r') => '\r',
+                Some('n') => '\n',
+                Some(c) => c,
                 None => break,
             }
         } else {
-            unescaped.push(c);
-        }
+            c
+        };
+        unescaped.push(r);
     }
     unescaped
 }

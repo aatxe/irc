@@ -45,13 +45,10 @@ async fn main() -> irc::error::Result<()> {
 fn process_msg(sender: &Sender, message: Message) -> error::Result<()> {
     print!("{}", message);
 
-    match message.command {
-        Command::PRIVMSG(ref target, ref msg) => {
-            if msg.contains("pickles") {
-                sender.send_privmsg(target, "Hi!")?;
-            }
+    if let Command::PRIVMSG(ref target, ref msg) = message.command {
+        if msg.contains("pickles") {
+            sender.send_privmsg(target, "Hi!")?;
         }
-        _ => (),
     }
 
     Ok(())
