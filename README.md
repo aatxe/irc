@@ -41,7 +41,7 @@ Making your own project? [Submit a pull request](https://github.com/aatxe/irc/pu
 
 ## Getting Started
 
-To start using the irc crate with cargo, you can add `irc = "0.13"` to your dependencies in
+To start using the irc crate with cargo, you can add `irc = "0.15"` to your dependencies in
 your Cargo.toml file. The high-level API can be found in [`irc::client::prelude`][irc-prelude].
 You'll find a number of examples to help you get started in `examples/`, throughout the
 documentation, and below.
