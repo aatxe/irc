@@ -13,7 +13,7 @@ use crate::prefix::Prefix;
 /// consists of a collection of IRCv3 tags, a prefix (describing the source of the message), and
 /// the protocol command. If the command is unknown, it is treated as a special raw command that
 /// consists of a collection of arguments and the special suffix argument. Otherwise, the command
-/// is parsed into a more useful form as described in [Command](../command/enum.Command.html).
+/// is parsed into a more useful form as described in [`Command`].
 #[derive(Clone, PartialEq, Debug)]
 pub struct Message {
     /// Message tags as defined by [IRCv3.2](http://ircv3.net/specs/core/message-tags-3.2.html).

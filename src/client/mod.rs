@@ -1,8 +1,8 @@
 //! A simple, thread-safe, and async-friendly IRC client library.
 //!
 //! This API provides the ability to connect to an IRC server via the
-//! [`Client`](struct.Client.html) type. The [`Client`](trait.Client.html) trait that
-//! [`Client`](struct.Client.html) implements provides methods for communicating with the
+//! [`Client`] type. The [`Client`] trait that
+//! [`Client`] implements provides methods for communicating with the
 //! server.
 //!
 //! # Examples
@@ -22,7 +22,7 @@
 //! # }
 //! ```
 //!
-//! We can then use functions from [`Client`](trait.Client.html) to receive messages from the
+//! We can then use functions from [`Client`] to receive messages from the
 //! server in a blocking fashion and perform any desired actions in response. The following code
 //! performs a simple call-and-response when the bot's name is mentioned in a channel.
 //!
@@ -889,7 +889,7 @@ impl Future for Outgoing {
 
 /// The canonical implementation of a connection to an IRC server.
 ///
-/// For a full example usage, see [`irc::client`](./index.html).
+/// For a full example usage, see [`irc::client`].
 #[derive(Debug)]
 pub struct Client {
     /// The internal, thread-safe server state.
@@ -1015,7 +1015,7 @@ impl Client {
         None
     }
 
-    /// Gets a list of [`Users`](./data/user/struct.User.html) in the specified channel. If the
+    /// Gets a list of [`Users`] in the specified channel. If the
     /// specified channel hasn't been joined or the `channel-lists` feature is disabled, this function
     /// will return `None`.
     ///
@@ -1052,7 +1052,7 @@ impl Client {
         self.state.current_nickname()
     }
 
-    /// Sends a [`Command`](../proto/command/enum.Command.html) as this `Client`. This is the
+    /// Sends a [`Command`] as this `Client`. This is the
     /// core primitive for sending messages to the server.
     ///
     /// # Example

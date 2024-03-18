@@ -60,7 +60,7 @@ pub enum Command {
     /// actually mean sending itself a response. In such a case, you should instead respond to the
     /// user sending the message as specified in the message prefix. Since this is a common
     /// pattern, there is a utility function
-    /// [`Message::response_target`](../message/struct.Message.html#method.response_target)
+    /// [`Message::response_target`]
     /// which is used for this exact purpose.
     PRIVMSG(String, String),
     /// NOTICE msgtarget :message
@@ -74,7 +74,7 @@ pub enum Command {
     /// actually mean sending itself a response. In such a case, you should instead respond to the
     /// user sending the message as specified in the message prefix. Since this is a common
     /// pattern, there is a utility function
-    /// [`Message::response_target`](../message/struct.Message.html#method.response_target)
+    /// [`Message::response_target`]
     /// which is used for this exact purpose.
     NOTICE(String, String),
 
