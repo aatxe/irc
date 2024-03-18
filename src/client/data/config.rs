@@ -144,6 +144,8 @@ pub struct Config {
     /// You should think very carefully before using this method. If invalid hostnames are trusted, *any* valid
     /// certificate for *any* site will be trusted for use. This introduces significant vulnerabilities, and should
     /// only be used as a last resort.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub dangerously_accept_invalid_certs: Option<bool>,
     /// The encoding type used for this connection.
     /// This is typically UTF-8, but could be something else.
@@ -517,6 +519,7 @@ impl Config {
 
     /// Gets whether or not to dangerously accept invalid certificates.
     /// This defaults to `false` when not specified.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn dangerously_accept_invalid_certs(&self) -> bool {
         self.dangerously_accept_invalid_certs
             .as_ref()
