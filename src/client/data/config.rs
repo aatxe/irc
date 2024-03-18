@@ -129,7 +129,8 @@ pub struct Config {
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cert_path: Option<String>,
-    /// The path to a TLS certificate to use for CertFP client authentication in DER format.
+    /// The path to a TLS certificate to use for CertFP client authentication in a DER-formatted
+    /// PKCS #12 archive.
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub client_cert_path: Option<String>,
