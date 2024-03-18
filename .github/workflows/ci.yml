@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request: {}
+  push:
+    branches:
+      - develop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: ["1.71", stable]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{matrix.rust}}
+    - run: cargo build --workspace --all-targets
+    - run: cargo build --workspace --all-targets --no-default-features
+    - run: cargo build --workspace --all-targets --features tls-native
+    - run: cargo build --workspace --all-targets --features tls-rust
+    # runs all tests for all targets, including examples and benchmarks. Only on
+    # stable, since we don't care about tests running on MSRV.
+    - run: cargo test --workspace --all-targets
+      if: matrix.rust == 'stable'
+    # runs all documentation tests separately, since those are not picked up by
+    # `--all-targets`.
+    - run: cargo test --workspace --doc
+      if: matrix.rust == 'stable'
+
+  rustfmt:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt
+    - run: cargo fmt --all --check

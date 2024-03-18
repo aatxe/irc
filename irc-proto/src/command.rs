@@ -60,7 +60,7 @@ pub enum Command {
     /// actually mean sending itself a response. In such a case, you should instead respond to the
     /// user sending the message as specified in the message prefix. Since this is a common
     /// pattern, there is a utility function
-    /// [`Message::response_target`](../message/struct.Message.html#method.response_target)
+    /// [`Message::response_target`]
     /// which is used for this exact purpose.
     PRIVMSG(String, String),
     /// NOTICE msgtarget :message
@@ -74,7 +74,7 @@ pub enum Command {
     /// actually mean sending itself a response. In such a case, you should instead respond to the
     /// user sending the message as specified in the message prefix. Since this is a common
     /// pattern, there is a utility function
-    /// [`Message::response_target`](../message/struct.Message.html#method.response_target)
+    /// [`Message::response_target`]
     /// which is used for this exact purpose.
     NOTICE(String, String),
 
@@ -209,7 +209,7 @@ fn stringify(cmd: &str, args: &[&str]) -> String {
         Some((suffix, args)) => {
             let args = args.join(" ");
             let sp = if args.is_empty() { "" } else { " " };
-            let co = if suffix.is_empty() || suffix.contains(' ') {
+            let co = if suffix.is_empty() || suffix.contains(' ') || suffix.starts_with(':') {
                 ":"
             } else {
                 ""
@@ -231,13 +231,13 @@ impl<'a> From<&'a Command> for String {
                 "MODE {}{}",
                 u,
                 m.iter().fold(String::new(), |mut acc, mode| {
-                    acc.push_str(" ");
+                    acc.push(' ');
                     acc.push_str(&mode.to_string());
                     acc
                 })
             ),
-            Command::SERVICE(ref n, ref r, ref d, ref t, ref re, ref i) => {
-                stringify("SERVICE", &[n, r, d, t, re, i])
+            Command::SERVICE(ref nick, ref r0, ref dist, ref typ, ref r1, ref info) => {
+                stringify("SERVICE", &[nick, r0, dist, typ, r1, info])
             }
             Command::QUIT(Some(ref m)) => stringify("QUIT", &[m]),
             Command::QUIT(None) => stringify("QUIT", &[]),
@@ -252,7 +252,7 @@ impl<'a> From<&'a Command> for String {
                 "MODE {}{}",
                 u,
                 m.iter().fold(String::new(), |mut acc, mode| {
-                    acc.push_str(" ");
+                    acc.push(' ');
                     acc.push_str(&mode.to_string());
                     acc
                 })
@@ -445,12 +445,10 @@ impl Command {
         } else if cmd.eq_ignore_ascii_case("MODE") {
             if args.is_empty() {
                 raw(cmd, args)
+            } else if args[0].is_channel_name() {
+                Command::ChannelMODE(args[0].to_owned(), Mode::as_channel_modes(&args[1..])?)
             } else {
-                if args[0].is_channel_name() {
-                    Command::ChannelMODE(args[0].to_owned(), Mode::as_channel_modes(&args[1..])?)
-                } else {
-                    Command::UserMODE(args[0].to_owned(), Mode::as_user_modes(&args[1..])?)
-                }
+                Command::UserMODE(args[0].to_owned(), Mode::as_user_modes(&args[1..])?)
             }
         } else if cmd.eq_ignore_ascii_case("SERVICE") {
             if args.len() != 6 {
@@ -665,7 +663,7 @@ impl Command {
             } else if args.len() == 1 {
                 Command::WHO(Some(args[0].to_owned()), None)
             } else if args.len() == 2 {
-                Command::WHO(Some(args[0].to_owned()), Some(&args[1][..] == "o"))
+                Command::WHO(Some(args[0].to_owned()), Some(args[1] == "o"))
             } else {
                 raw(cmd, args)
             }
@@ -907,13 +905,12 @@ impl Command {
                 raw(cmd, args)
             }
         } else if cmd.eq_ignore_ascii_case("METADATA") {
-            if args.len() == 2 {
-                match args[1].parse() {
+            match args.len() {
+                2 => match args[1].parse() {
                     Ok(c) => Command::METADATA(args[0].to_owned(), Some(c), None),
                     Err(_) => raw(cmd, args),
-                }
-            } else if args.len() > 2 {
-                match args[1].parse() {
+                },
+                3.. => match args[1].parse() {
                     Ok(c) => Command::METADATA(
                         args[0].to_owned(),
                         Some(c),
@@ -930,9 +927,8 @@ impl Command {
                             raw(cmd, args)
                         }
                     }
-                }
-            } else {
-                raw(cmd, args)
+                },
+                _ => raw(cmd, args),
             }
         } else if cmd.eq_ignore_ascii_case("MONITOR") {
             if args.len() == 2 {

@@ -16,30 +16,32 @@ use tokio_socks::tcp::Socks5Stream;
 #[cfg(feature = "proxy")]
 use crate::client::data::ProxyType;
 
-#[cfg(feature = "tls-native")]
+#[cfg(all(feature = "tls-native", not(feature = "tls-rust")))]
 use std::{fs::File, io::Read};
 
-#[cfg(feature = "tls-native")]
+#[cfg(all(feature = "tls-native", not(feature = "tls-rust")))]
 use native_tls::{Certificate, Identity, TlsConnector};
 
-#[cfg(feature = "tls-native")]
+#[cfg(all(feature = "tls-native", not(feature = "tls-rust")))]
 use tokio_native_tls::{self, TlsStream};
 
 #[cfg(feature = "tls-rust")]
+use rustls_pemfile::certs;
+#[cfg(feature = "tls-rust")]
 use std::{
+    convert::TryFrom,
     fs::File,
     io::{BufReader, Error, ErrorKind},
     sync::Arc,
 };
-
 #[cfg(feature = "tls-rust")]
-use webpki_roots::TLS_SERVER_ROOTS;
-
+use tokio_rustls::client::TlsStream;
 #[cfg(feature = "tls-rust")]
 use tokio_rustls::{
-    client::TlsStream,
-    rustls::{internal::pemfile::certs, ClientConfig, PrivateKey},
-    webpki::DNSNameRef,
+    rustls::client::{ServerCertVerified, ServerCertVerifier},
+    rustls::{
+        self, Certificate, ClientConfig, OwnedTrustAnchor, PrivateKey, RootCertStore, ServerName,
+    },
     TlsConnector,
 };
 
@@ -154,10 +156,10 @@ impl Connection {
         let stream = Self::new_stream(config).await?;
         let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
-        Ok(Transport::new(&config, framed, tx))
+        Ok(Transport::new(config, framed, tx))
     }
 
-    #[cfg(feature = "tls-native")]
+    #[cfg(all(feature = "tls-native", not(feature = "tls-rust")))]
     async fn new_secured_transport(
         config: &Config,
         tx: UnboundedSender<Message>,
@@ -186,7 +188,7 @@ impl Connection {
                 let mut client_cert_data = vec![];
                 file.read_to_end(&mut client_cert_data)?;
                 let client_cert_pass = config.client_cert_pass();
-                let pkcs12_archive = Identity::from_pkcs12(&client_cert_data, &client_cert_pass)?;
+                let pkcs12_archive = Identity::from_pkcs12(&client_cert_data, client_cert_pass)?;
                 builder.identity(pkcs12_archive);
                 log::info!(
                     "Using {} for client certificate authentication.",
@@ -202,6 +204,10 @@ impl Connection {
             }
         }
 
+        if config.dangerously_accept_invalid_certs() {
+            builder.danger_accept_invalid_certs(true);
+        }
+
         let connector: tokio_native_tls::TlsConnector = builder.build()?.into();
         let domain = config.server()?;
 
@@ -209,7 +215,7 @@ impl Connection {
         let stream = connector.connect(domain, stream).await?;
         let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
-        Ok(Transport::new(&config, framed, tx))
+        Ok(Transport::new(config, framed, tx))
     }
 
     #[cfg(feature = "tls-rust")]
@@ -217,44 +223,46 @@ impl Connection {
         config: &Config,
         tx: UnboundedSender<Message>,
     ) -> error::Result<Transport<TlsStream<TcpStream>>> {
-        let mut builder = ClientConfig::default();
-        builder
-            .root_store
-            .add_server_trust_anchors(&TLS_SERVER_ROOTS);
+        struct DangerousAcceptAllVerifier;
 
-        if let Some(cert_path) = config.cert_path() {
-            if let Ok(mut file) = File::open(cert_path) {
-                let mut cert_data = BufReader::new(file);
-                builder
-                    .root_store
-                    .add_pem_file(&mut cert_data)
-                    .map_err(|_| {
-                        error::Error::Io(Error::new(ErrorKind::InvalidInput, "invalid cert"))
-                    })?;
-                log::info!("Added {} to trusted certificates.", cert_path);
-            } else {
-                return Err(error::Error::InvalidConfig {
-                    path: config.path(),
-                    cause: error::ConfigError::FileMissing {
-                        file: cert_path.to_string(),
-                    },
-                });
+        impl ServerCertVerifier for DangerousAcceptAllVerifier {
+            fn verify_server_cert(
+                &self,
+                _: &Certificate,
+                _: &[Certificate],
+                _: &ServerName,
+                _: &mut dyn Iterator<Item = &[u8]>,
+                _: &[u8],
+                _: std::time::SystemTime,
+            ) -> Result<ServerCertVerified, rustls::Error> {
+                return Ok(ServerCertVerified::assertion());
             }
         }
 
-        if let Some(client_cert_path) = config.client_cert_path() {
-            if let Ok(mut file) = File::open(client_cert_path) {
+        enum ClientAuth {
+            SingleCert(Vec<Certificate>, PrivateKey),
+            NoClientAuth,
+        }
+
+        let client_auth = if let Some(client_cert_path) = config.client_cert_path() {
+            if let Ok(file) = File::open(client_cert_path) {
                 let client_cert_data = certs(&mut BufReader::new(file)).map_err(|_| {
                     error::Error::Io(Error::new(ErrorKind::InvalidInput, "invalid cert"))
                 })?;
+
+                let client_cert_data = client_cert_data
+                    .into_iter()
+                    .map(Certificate)
+                    .collect::<Vec<_>>();
+
                 let client_cert_pass = PrivateKey(Vec::from(config.client_cert_pass()));
-                builder
-                    .set_single_client_cert(client_cert_data, client_cert_pass)
-                    .map_err(|err| error::Error::Io(Error::new(ErrorKind::InvalidInput, err)))?;
+
                 log::info!(
                     "Using {} for client certificate authentication.",
                     client_cert_path
                 );
+
+                ClientAuth::SingleCert(client_cert_data, client_cert_pass)
             } else {
                 return Err(error::Error::InvalidConfig {
                     path: config.path(),
@@ -263,16 +271,73 @@ impl Connection {
                     },
                 });
             }
+        } else {
+            ClientAuth::NoClientAuth
+        };
+
+        macro_rules! make_client_auth {
+            ($builder:expr) => {
+                match client_auth {
+                    ClientAuth::SingleCert(data, pass) => {
+                        $builder.with_single_cert(data, pass).map_err(|err| {
+                            error::Error::Io(Error::new(ErrorKind::InvalidInput, err))
+                        })?
+                    }
+                    ClientAuth::NoClientAuth => $builder.with_no_client_auth(),
+                }
+            };
         }
 
-        let connector = TlsConnector::from(Arc::new(builder));
-        let domain = DNSNameRef::try_from_ascii_str(config.server()?)?;
+        let builder = ClientConfig::builder()
+            .with_safe_default_cipher_suites()
+            .with_safe_default_kx_groups()
+            .with_safe_default_protocol_versions()?;
 
+        let tls_config = if config.dangerously_accept_invalid_certs() {
+            let builder =
+                builder.with_custom_certificate_verifier(Arc::new(DangerousAcceptAllVerifier));
+            make_client_auth!(builder)
+        } else {
+            let mut root_store = RootCertStore::empty();
+
+            root_store.add_server_trust_anchors(webpki_roots::TLS_SERVER_ROOTS.0.iter().map(
+                |ta| {
+                    OwnedTrustAnchor::from_subject_spki_name_constraints(
+                        ta.subject,
+                        ta.spki,
+                        ta.name_constraints,
+                    )
+                },
+            ));
+
+            if let Some(cert_path) = config.cert_path() {
+                if let Ok(data) = std::fs::read(cert_path) {
+                    root_store.add(&Certificate(data)).map_err(|_| {
+                        error::Error::Io(Error::new(ErrorKind::InvalidInput, "invalid cert"))
+                    })?;
+
+                    log::info!("Added {} to trusted certificates.", cert_path);
+                } else {
+                    return Err(error::Error::InvalidConfig {
+                        path: config.path(),
+                        cause: error::ConfigError::FileMissing {
+                            file: cert_path.to_string(),
+                        },
+                    });
+                }
+            }
+
+            let builder = builder.with_root_certificates(root_store);
+            make_client_auth!(builder)
+        };
+
+        let connector = TlsConnector::from(Arc::new(tls_config));
+        let domain = ServerName::try_from(config.server()?)?;
         let stream = Self::new_stream(config).await?;
         let stream = connector.connect(domain, stream).await?;
         let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
-        Ok(Transport::new(&config, framed, tx))
+        Ok(Transport::new(config, framed, tx))
     }
 
     async fn new_mocked_transport(
@@ -298,7 +363,7 @@ impl Connection {
         let stream = MockStream::new(&initial);
         let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
-        Ok(Transport::new(&config, framed, tx))
+        Ok(Transport::new(config, framed, tx))
     }
 
     /// Gets a view of the internal logging if and only if this connection is using a mock stream.

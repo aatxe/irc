@@ -1,8 +1,8 @@
 //! A simple, thread-safe, and async-friendly IRC client library.
 //!
 //! This API provides the ability to connect to an IRC server via the
-//! [`Client`](struct.Client.html) type. The [`Client`](trait.Client.html) trait that
-//! [`Client`](struct.Client.html) implements provides methods for communicating with the
+//! [`Client`] type. The [`Client`] trait that
+//! [`Client`] implements provides methods for communicating with the
 //! server.
 //!
 //! # Examples
@@ -22,7 +22,7 @@
 //! # }
 //! ```
 //!
-//! We can then use functions from [`Client`](trait.Client.html) to receive messages from the
+//! We can then use functions from [`Client`] to receive messages from the
 //! server in a blocking fashion and perform any desired actions in response. The following code
 //! performs a simple call-and-response when the bot's name is mentioned in a channel.
 //!
@@ -113,11 +113,7 @@ macro_rules! pub_state_base {
         }
 
         /// Joins the specified channel or chanlist using the specified key or keylist.
-        pub fn send_join_with_keys<S1, S2>(
-            &self,
-            chanlist: &str,
-            keylist: &str,
-        ) -> error::Result<()>
+        pub fn send_join_with_keys<S1, S2>(&self, chanlist: S1, keylist: S2) -> error::Result<()>
         where
             S1: fmt::Display,
             S2: fmt::Display,
@@ -487,7 +483,7 @@ impl Stream for ClientStream {
         match ready!(Pin::new(&mut self.as_mut().stream).poll_next(cx)) {
             Some(Ok(msg)) => {
                 self.state.handle_message(&msg)?;
-                return Poll::Ready(Some(Ok(msg)));
+                Poll::Ready(Some(Ok(msg)))
             }
             other => Poll::Ready(other),
         }
@@ -526,7 +522,7 @@ impl ClientState {
     fn send<M: Into<Message>>(&self, msg: M) -> error::Result<()> {
         let msg = msg.into();
         self.handle_sent_message(&msg)?;
-        Ok(self.sender.send(msg)?)
+        self.sender.send(msg)
     }
 
     /// Gets the current nickname in use.
@@ -547,11 +543,8 @@ impl ClientState {
     fn handle_sent_message(&self, msg: &Message) -> error::Result<()> {
         log::trace!("[SENT] {}", msg.to_string());
 
-        match msg.command {
-            PART(ref chan, _) => {
-                let _ = self.chanlists.write().remove(chan);
-            }
-            _ => (),
+        if let PART(ref chan, _) = msg.command {
+            let _ = self.chanlists.write().remove(chan);
         }
 
         Ok(())
@@ -602,7 +595,7 @@ impl ClientState {
                 let joined_chans = self.chanlists.read();
                 for chan in joined_chans
                     .keys()
-                    .filter(|x| config_chans.iter().find(|c| c == x).is_none())
+                    .filter(|x| !config_chans.iter().any(|c| c == *x))
                 {
                     self.send_join(chan)?
                 }
@@ -679,10 +672,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_join(&self, _: &str, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_join(&self, src: &str, chan: &str) {
         if let Some(vec) = self.chanlists.write().get_mut(&chan.to_owned()) {
             if !src.is_empty() {
@@ -691,10 +684,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_part(&self, _: &str, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_part(&self, src: &str, chan: &str) {
         if let Some(vec) = self.chanlists.write().get_mut(&chan.to_owned()) {
             if !src.is_empty() {
@@ -705,10 +698,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_quit(&self, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_quit(&self, src: &str) {
         if src.is_empty() {
             return;
@@ -721,10 +714,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_nick_change(&self, _: &str, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_nick_change(&self, old_nick: &str, new_nick: &str) {
         if old_nick.is_empty() || new_nick.is_empty() {
             return;
@@ -738,10 +731,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_mode(&self, _: &str, _: &[Mode<ChannelMode>]) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_mode(&self, chan: &str, modes: &[Mode<ChannelMode>]) {
         for mode in modes {
             match *mode {
@@ -757,10 +750,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_namreply(&self, _: &[String]) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_namreply(&self, args: &[String]) {
         if args.len() == 4 {
             let chan = &args[2];
@@ -805,7 +798,7 @@ impl ClientState {
 
     #[cfg(feature = "ctcp")]
     fn send_ctcp_internal(&self, target: &str, msg: &str) -> error::Result<()> {
-        self.send_notice(target, &format!("\u{001}{}\u{001}", msg))
+        self.send_notice(target, format!("\u{001}{}\u{001}", msg))
     }
 
     #[cfg(not(feature = "ctcp"))]
@@ -896,7 +889,7 @@ impl Future for Outgoing {
 
 /// The canonical implementation of a connection to an IRC server.
 ///
-/// For a full example usage, see [`irc::client`](./index.html).
+/// For a full example usage, see [`irc::client`].
 #[derive(Debug)]
 pub struct Client {
     /// The internal, thread-safe server state.
@@ -984,8 +977,7 @@ impl Client {
 
     /// Gets a stream of incoming messages from the `Client`'s connection. This is only necessary
     /// when trying to set up more complex clients, and requires use of the `futures` crate. Most
-    /// IRC bots should be able to get by using only `for_each_incoming` to handle received
-    /// messages. You can find some examples of more complex setups using `stream` in the
+    /// You can find some examples of setups using `stream` in the
     /// [GitHub repository](https://github.com/aatxe/irc/tree/stable/examples).
     ///
     /// **Note**: The stream can only be returned once. Subsequent attempts will cause a panic.
@@ -994,7 +986,7 @@ impl Client {
         let stream = self
             .incoming
             .take()
-            .ok_or_else(|| error::Error::StreamAlreadyConfigured)?;
+            .ok_or(error::Error::StreamAlreadyConfigured)?;
 
         Ok(ClientStream {
             state: Arc::clone(&self.state),
@@ -1004,8 +996,8 @@ impl Client {
     }
 
     /// Gets a list of currently joined channels. This will be `None` if tracking is disabled
-    /// altogether via the `nochanlists` feature.
-    #[cfg(not(feature = "nochanlists"))]
+    /// altogether by disabling the `channel-lists` feature.
+    #[cfg(feature = "channel-lists")]
     pub fn list_channels(&self) -> Option<Vec<String>> {
         Some(
             self.state
@@ -1017,13 +1009,14 @@ impl Client {
         )
     }
 
-    #[cfg(feature = "nochanlists")]
+    /// Always returns `None` since `channel-lists` feature is disabled.
+    #[cfg(not(feature = "channel-lists"))]
     pub fn list_channels(&self) -> Option<Vec<String>> {
         None
     }
 
-    /// Gets a list of [`Users`](./data/user/struct.User.html) in the specified channel. If the
-    /// specified channel hasn't been joined or the `nochanlists` feature is enabled, this function
+    /// Gets a list of [`Users`] in the specified channel. If the
+    /// specified channel hasn't been joined or the `channel-lists` feature is disabled, this function
     /// will return `None`.
     ///
     /// For best results, be sure to request `multi-prefix` support from the server. This will allow
@@ -1041,12 +1034,13 @@ impl Client {
     /// # Ok(())
     /// # }
     /// ```
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     pub fn list_users(&self, chan: &str) -> Option<Vec<User>> {
         self.state.chanlists.read().get(&chan.to_owned()).cloned()
     }
 
-    #[cfg(feature = "nochanlists")]
+    /// Always returns `None` since `channel-lists` feature is disabled.
+    #[cfg(not(feature = "channel-lists"))]
     pub fn list_users(&self, _: &str) -> Option<Vec<User>> {
         None
     }
@@ -1058,7 +1052,7 @@ impl Client {
         self.state.current_nickname()
     }
 
-    /// Sends a [`Command`](../proto/command/enum.Command.html) as this `Client`. This is the
+    /// Sends a [`Command`] as this `Client`. This is the
     /// core primitive for sending messages to the server.
     ///
     /// # Example
@@ -1100,7 +1094,7 @@ mod test {
     use std::{collections::HashMap, default::Default, thread, time::Duration};
 
     use super::Client;
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     use crate::client::data::User;
     use crate::{
         client::data::Config,
@@ -1115,12 +1109,12 @@ mod test {
 
     pub fn test_config() -> Config {
         Config {
-            owners: vec![format!("test")],
-            nickname: Some(format!("test")),
-            alt_nicks: vec![format!("test2")],
-            server: Some(format!("irc.test.net")),
-            channels: vec![format!("#test"), format!("#test2")],
-            user_info: Some(format!("Testing.")),
+            owners: vec!["test".to_string()],
+            nickname: Some("test".to_string()),
+            alt_nicks: vec!["test2".to_string()],
+            server: Some("irc.test.net".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
+            user_info: Some("Testing.".to_string()),
             use_mock_connection: true,
             ..Default::default()
         }
@@ -1181,8 +1175,8 @@ mod test {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nick_password: Some(format!("password")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nick_password: Some("password".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             ..test_config()
         })
         .await?;
@@ -1200,11 +1194,11 @@ mod test {
         let value = ":irc.test.net 376 test :End of /MOTD command\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nickname: Some(format!("test")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nickname: Some("test".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             channel_keys: {
                 let mut map = HashMap::new();
-                map.insert(format!("#test2"), format!("password"));
+                map.insert("#test2".to_string(), "password".to_string());
                 map
             },
             ..test_config()
@@ -1224,10 +1218,10 @@ mod test {
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nickname: Some(format!("test")),
-            alt_nicks: vec![format!("test2")],
-            nick_password: Some(format!("password")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nickname: Some("test".to_string()),
+            alt_nicks: vec!["test2".to_string()],
+            nick_password: Some("password".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             should_ghost: true,
             ..test_config()
         })
@@ -1247,12 +1241,12 @@ mod test {
                      :irc.test.net 376 test2 :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nickname: Some(format!("test")),
-            alt_nicks: vec![format!("test2")],
-            nick_password: Some(format!("password")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nickname: Some("test".to_string()),
+            alt_nicks: vec!["test2".to_string()],
+            nick_password: Some("password".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             should_ghost: true,
-            ghost_sequence: Some(vec![format!("RECOVER"), format!("RELEASE")]),
+            ghost_sequence: Some(vec!["RECOVER".to_string(), "RELEASE".to_string()]),
             ..test_config()
         })
         .await?;
@@ -1271,9 +1265,9 @@ mod test {
         let value = ":irc.test.net 376 test :End of /MOTD command.\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nickname: Some(format!("test")),
-            umodes: Some(format!("+B")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nickname: Some("test".to_string()),
+            umodes: Some("+B".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             ..test_config()
         })
         .await?;
@@ -1309,7 +1303,6 @@ mod test {
         .await?;
         let res = client.stream()?.try_collect::<Vec<_>>().await;
         if let Err(Error::NoUsableNick) = res {
-            ()
         } else {
             panic!("expected error when no valid nicks were specified")
         }
@@ -1320,7 +1313,7 @@ mod test {
     async fn send() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
-            .send(PRIVMSG(format!("#test"), format!("Hi there!")))
+            .send(PRIVMSG("#test".to_string(), "Hi there!".to_string()))
             .is_ok());
         client.stream()?.collect().await?;
         assert_eq!(
@@ -1334,7 +1327,10 @@ mod test {
     async fn send_no_newline_injection() -> Result<()> {
         let mut client = Client::from_config(test_config()).await?;
         assert!(client
-            .send(PRIVMSG(format!("#test"), format!("Hi there!\r\nJOIN #bad")))
+            .send(PRIVMSG(
+                "#test".to_string(),
+                "Hi there!\r\nJOIN #bad".to_string()
+            ))
             .is_ok());
         client.stream()?.collect().await?;
         assert_eq!(
@@ -1362,7 +1358,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn channel_tracking_names() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
@@ -1376,7 +1372,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn channel_tracking_names_part() -> Result<()> {
         use crate::proto::command::Command::PART;
 
@@ -1392,13 +1388,13 @@ mod test {
         assert_eq!(client.list_channels(), Some(vec!["#test".to_owned()]));
         // we ignore the result, as soon as we queue an outgoing message we
         // update client state, regardless if the queue is available or not.
-        let _ = client.send(PART(format!("#test"), None));
+        let _ = client.send(PART("#test".to_string(), None));
         assert_eq!(client.list_channels(), Some(vec![]));
         Ok(())
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn user_tracking_names() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
@@ -1415,7 +1411,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn user_tracking_names_join() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :test2!test@test JOIN #test\r\n";
@@ -1438,7 +1434,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn user_tracking_names_kick() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test KICK #test test\r\n";
@@ -1456,7 +1452,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn user_tracking_names_part() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test PART #test\r\n";
@@ -1474,7 +1470,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn user_tracking_names_mode() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :+test ~owner &admin\r\n\
                      :test!test@test MODE #test +o test\r\n";
@@ -1503,7 +1499,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     async fn no_user_tracking() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
@@ -1521,8 +1517,8 @@ mod test {
         let value = ":test!test@test PRIVMSG #test :\u{001}\r\n";
         let mut client = Client::from_config(Config {
             mock_initial_value: Some(value.to_owned()),
-            nickname: Some(format!("test")),
-            channels: vec![format!("#test"), format!("#test2")],
+            nickname: Some("test".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
             ..test_config()
         })
         .await?;
@@ -1665,8 +1661,8 @@ mod test {
     #[tokio::test]
     async fn identify_with_password() -> Result<()> {
         let mut client = Client::from_config(Config {
-            nickname: Some(format!("test")),
-            password: Some(format!("password")),
+            nickname: Some("test".to_string()),
+            password: Some("password".to_string()),
             ..test_config()
         })
         .await?;

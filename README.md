@@ -1,14 +1,14 @@
 # the irc crate [![Build Status][ci-badge]][ci] [![Crates.io][cr-badge]][cr] ![Downloads][dl-badge] [![Docs][doc-badge]][doc]
 
-[ci-badge]: https://travis-ci.org/aatxe/irc.svg?branch=stable
-[ci]: https://travis-ci.org/aatxe/irc
+[ci-badge]: https://github.com/aatxe/irc/actions/workflows/ci.yml/badge.svg
+[ci]: https://github.com/aatxe/irc/actions/workflows/ci.yml
 [cr-badge]: https://img.shields.io/crates/v/irc.svg
 [cr]: https://crates.io/crates/irc
 [dl-badge]: https://img.shields.io/crates/d/irc.svg
 [doc-badge]: https://docs.rs/irc/badge.svg
 [doc]: https://docs.rs/irc
 
-[rfc2812]: http://tools.ietf.org/html/rfc2812
+[rfc2812]: http://datatracker.ietf.org/doc/html/rfc2812
 [ircv3.1]: http://ircv3.net/irc/3.1.html
 [ircv3.2]: http://ircv3.net/irc/3.2.html
 
@@ -41,7 +41,7 @@ Making your own project? [Submit a pull request](https://github.com/aatxe/irc/pu
 
 ## Getting Started
 
-To start using the irc crate with cargo, you can add `irc = "0.13"` to your dependencies in
+To start using the irc crate with cargo, you can add `irc = "0.15"` to your dependencies in
 your Cargo.toml file. The high-level API can be found in [`irc::client::prelude`][irc-prelude].
 You'll find a number of examples to help you get started in `examples/`, throughout the
 documentation, and below.
@@ -62,7 +62,7 @@ async fn main() -> Result<(), failure::Error> {
     let config = Config {
         nickname: Some("the-irc-crate".to_owned()),
         server: Some("chat.freenode.net".to_owned()),
-        channels: Some(vec!["#test".to_owned()]),
+        channels: vec!["#test".to_owned()],
         ..Config::default()
     };
 
@@ -77,6 +77,22 @@ async fn main() -> Result<(), failure::Error> {
 
     Ok(())
 }
+```
+
+Example Cargo.toml file:
+```rust,no_run,edition2018
+[package]
+name = "example"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+irc = "0.15.0"
+tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros", "net", "time"] }
+futures = "0.3.0"
+failure = "0.1.8"
 ```
 
 ## Configuring IRC Clients
@@ -120,7 +136,7 @@ user_info = "I'm a test user for the irc crate."
 version = "irc:git:Rust"
 source = "https://github.com/aatxe/irc"
 ping_time = 180
-ping_timeout = 10
+ping_timeout = 20
 burst_window_length = 8
 max_messages_in_burst = 15
 should_ghost = false

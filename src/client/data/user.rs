@@ -31,9 +31,9 @@ impl User {
         let username = state.find('@').map(|i| state[..i].to_owned());
         let hostname = state.find('@').map(|i| state[i + 1..].to_owned());
         User {
-            nickname: nickname,
-            username: username,
-            hostname: hostname,
+            nickname,
+            username,
+            hostname,
             access_levels: {
                 let mut ranks = ranks.clone();
                 ranks.push(AccessLevel::Member);
@@ -248,7 +248,7 @@ mod test {
     fn create_user() {
         let user = User::new("~owner");
         let exp = User {
-            nickname: format!("owner"),
+            nickname: "owner".to_string(),
             username: None,
             hostname: None,
             highest_access_level: Owner,
@@ -263,7 +263,7 @@ mod test {
     fn create_user_complex() {
         let user = User::new("~&+user");
         let exp = User {
-            nickname: format!("user"),
+            nickname: "user".to_string(),
             username: None,
             hostname: None,
             highest_access_level: Owner,

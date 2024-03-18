@@ -1,15 +1,16 @@
 [package]
 name = "irc"
-version = "0.15.0"
-description = "the irc crate – usable, async IRC for Rust "
+version = "1.0.0"
 authors = ["Aaron Weiss <aweiss@hey.com>"]
+edition = "2018"
+rust-version = "1.71"
+description = "the irc crate – usable, async IRC for Rust"
+documentation = "https://docs.rs/irc/"
+readme = "README.md"
+repository = "https://github.com/aatxe/irc"
 license = "MPL-2.0"
 keywords = ["irc", "client", "thread-safe", "async", "tokio"]
 categories = ["asynchronous", "network-programming"]
-documentation = "https://docs.rs/irc/"
-repository = "https://github.com/aatxe/irc"
-readme = "README.md"
-edition = "2018"
 
 
 [badges]
@@ -23,9 +24,9 @@ members = [ "./", "irc-proto/" ]
 
 
 [features]
-default = ["ctcp", "tls-native", "toml_config"]
+default = ["ctcp", "tls-native", "channel-lists", "toml_config"]
 ctcp = []
-nochanlists = []
+channel-lists = []
 
 json_config = ["serde", "serde/derive", "serde_derive", "serde_json"]
 toml_config = ["serde", "serde/derive", "serde_derive", "toml"]
@@ -37,46 +38,47 @@ yaml = ["yaml_config"]
 proxy = ["tokio-socks"]
 
 tls-native = ["native-tls", "tokio-native-tls"]
-tls-rust = ["tokio-rustls", "webpki-roots"]
+tls-rust = ["tokio-rustls", "webpki-roots", "rustls-pemfile"]
 
 
 [dependencies]
-chrono = "0.4.0"
-encoding = "0.2.0"
-futures-util = { version = "0.3.0", default-features = false, features = ["alloc", "sink"] }
-irc-proto = { version = "0.14.0", path = "irc-proto" }
-log = "0.4.0"
-parking_lot = "0.11.0"
-thiserror = "1.0.0"
-pin-project = "1.0.2"
-tokio = { version = "1.0.0", features = ["net", "time", "sync"] }
-tokio-stream = "0.1.0"
-tokio-util = { version = "0.6.0", features = ["codec"] }
+chrono = { version = "0.4.24", default-features = false, features = ["clock", "std"] }
+encoding = "0.2.33"
+futures-util = { version = "0.3.30", default-features = false, features = ["alloc", "sink"] }
+irc-proto = { version = "1.0.0", path = "irc-proto" }
+log = "0.4.21"
+parking_lot = "0.12.1"
+thiserror = "1.0.58"
+pin-project = "1.0.12"
+tokio = { version = "1.27.0", features = ["net", "time", "sync"] }
+tokio-stream = "0.1.12"
+tokio-util = { version = "0.7.7", features = ["codec"] }
 
 # Feature - Config
-serde = { version = "1.0.0", optional = true }
-serde_derive = { version = "1.0.0", optional = true }
-serde_json = { version = "1.0.0", optional = true }
-serde_yaml = { version = "0.8.0", optional = true }
-toml = { version = "0.5.0", optional = true }
+serde = { version = "1.0.160", optional = true }
+serde_derive = { version = "1.0.160", optional = true }
+serde_json = { version = "1.0.95", optional = true }
+serde_yaml = { version = "0.9.21", optional = true }
+toml = { version = "0.7.3", optional = true }
 
 # Feature - Proxy
 tokio-socks = { version = "0.5.1", optional = true }
 
 # Feature - TLS
-native-tls = { version = "0.2.0", optional = true }
-tokio-rustls = { version = "0.22.0", optional = true }
-tokio-native-tls = { version = "0.3.0", optional = true }
-webpki-roots = { version = "0.20.0", optional = true }
+native-tls = { version = "0.2.11", optional = true }
+tokio-rustls = { version = "0.24.0", features = ["dangerous_configuration"], optional = true }
+rustls-pemfile = { version = "1.0.2", optional = true }
+tokio-native-tls = { version = "0.3.1", optional = true }
+webpki-roots = { version = "0.23.0", optional = true }
 
 
 [dev-dependencies]
-anyhow = "1.0.0"
-args = "2.0.0"
-env_logger = "0.7.0"
-futures = "0.3.0"
-getopts = "0.2.0"
-tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros", "net", "time"] }
+anyhow = "1.0.81"
+args = "2.2.0"
+env_logger = "0.11.0"
+futures = "0.3.30"
+getopts = "0.2.21"
+tokio = { version = "1.27.0", features = ["rt", "rt-multi-thread", "macros", "net", "time"] }
 
 
 [[example]]

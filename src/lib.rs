@@ -1,17 +1,17 @@
 //! A simple, thread-safe, and async-friendly library for IRC clients.
 //!
 //! # Quick Start
-//! The main public API is entirely exported in [`client::prelude`](./client/prelude/index.html).
+//! The main public API is entirely exported in [`client::prelude`].
 //! This should include everything necessary to write an IRC client or bot.
 //!
 //! # A Whirlwind Tour
-//! The irc crate is divided into two main modules: [`client`](./client/index.html) and
-//! [`proto`](./proto/index.html). As the names suggest, the `client` module captures the whole of
+//! The irc crate is divided into two main modules: [`client`] and
+//! [`proto`]. As the names suggest, the `client` module captures the whole of
 //! the client-side functionality, while the `proto` module features general components of an IRC
 //! protocol implementation that could in principle be used in either client or server software.
 //! Both modules feature a number of components that are low-level and can be used to build
 //! alternative APIs for the IRC protocol. For the average user, the higher-level components for an
-//! IRC client are all re-exported in [`client::prelude`](./client/prelude/index.html). That module
+//! IRC client are all re-exported in [`client::prelude`]. That module
 //! serves as the best starting point for a new user trying to understand the high-level API.
 //!
 //! # Example

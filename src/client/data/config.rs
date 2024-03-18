@@ -129,7 +129,8 @@ pub struct Config {
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cert_path: Option<String>,
-    /// The path to a TLS certificate to use for CertFP client authentication in DER format.
+    /// The path to a TLS certificate to use for CertFP client authentication in a DER-formatted
+    /// PKCS #12 archive.
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub client_cert_path: Option<String>,
@@ -137,6 +138,15 @@ pub struct Config {
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub client_cert_pass: Option<String>,
+    /// On `true`, all certificate validations are skipped. Defaults to `false`.
+    ///
+    /// # Warning
+    /// You should think very carefully before using this method. If invalid hostnames are trusted, *any* valid
+    /// certificate for *any* site will be trusted for use. This introduces significant vulnerabilities, and should
+    /// only be used as a last resort.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub dangerously_accept_invalid_certs: Option<bool>,
     /// The encoding type used for this connection.
     /// This is typically UTF-8, but could be something else.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -234,7 +244,7 @@ impl Config {
 
     /// Loads a configuration from the desired path. This will use the file extension to detect
     /// which format to parse the file as (json, toml, or yaml). Using each format requires having
-    /// its respective crate feature enabled. Only json is available by default.
+    /// its respective crate feature enabled. Only toml is available by default.
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Config> {
         let mut file = File::open(&path)?;
         let mut data = String::new();
@@ -309,7 +319,7 @@ impl Config {
 
     /// Saves a configuration to the desired path. This will use the file extension to detect
     /// which format to parse the file as (json, toml, or yaml). Using each format requires having
-    /// its respective crate feature enabled. Only json is available by default.
+    /// its respective crate feature enabled. Only toml is available by default.
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
         let _ = self.path.take();
         let mut file = File::create(&path)?;
@@ -387,18 +397,15 @@ impl Config {
 
     /// Determines whether or not the nickname provided is the owner of the bot.
     pub fn is_owner(&self, nickname: &str) -> bool {
-        self.owners.iter().find(|n| *n == nickname).is_some()
+        self.owners.iter().any(|n| n == nickname)
     }
 
     /// Gets the nickname specified in the configuration.
     pub fn nickname(&self) -> Result<&str> {
-        self.nickname
-            .as_ref()
-            .map(String::as_str)
-            .ok_or_else(|| InvalidConfig {
-                path: self.path(),
-                cause: ConfigError::NicknameNotSpecified,
-            })
+        self.nickname.as_deref().ok_or_else(|| InvalidConfig {
+            path: self.path(),
+            cause: ConfigError::NicknameNotSpecified,
+        })
     }
 
     /// Gets the bot's nickserv password specified in the configuration.
@@ -418,7 +425,7 @@ impl Config {
     pub fn username(&self) -> &str {
         self.username
             .as_ref()
-            .map_or(self.nickname().unwrap_or("user"), |s| &s)
+            .map_or(self.nickname().unwrap_or("user"), |s| s)
     }
 
     /// Gets the real name specified in the configuration.
@@ -426,18 +433,15 @@ impl Config {
     pub fn real_name(&self) -> &str {
         self.realname
             .as_ref()
-            .map_or(self.nickname().unwrap_or("irc"), |s| &s)
+            .map_or(self.nickname().unwrap_or("irc"), |s| s)
     }
 
     /// Gets the address of the server specified in the configuration.
     pub fn server(&self) -> Result<&str> {
-        self.server
-            .as_ref()
-            .map(String::as_str)
-            .ok_or_else(|| InvalidConfig {
-                path: self.path(),
-                cause: ConfigError::ServerNotSpecified,
-            })
+        self.server.as_deref().ok_or_else(|| InvalidConfig {
+            path: self.path(),
+            cause: ConfigError::ServerNotSpecified,
+        })
     }
 
     /// Gets the port of the server specified in the configuration.
@@ -510,13 +514,23 @@ impl Config {
     /// Gets the path to the TLS certificate in DER format if specified.
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn cert_path(&self) -> Option<&str> {
-        self.cert_path.as_ref().map(String::as_str)
+        self.cert_path.as_deref()
+    }
+
+    /// Gets whether or not to dangerously accept invalid certificates.
+    /// This defaults to `false` when not specified.
+    #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
+    pub fn dangerously_accept_invalid_certs(&self) -> bool {
+        self.dangerously_accept_invalid_certs
+            .as_ref()
+            .cloned()
+            .unwrap_or(false)
     }
 
     /// Gets the path to the client authentication certificate in DER format if specified.
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn client_cert_path(&self) -> Option<&str> {
-        self.client_cert_path.as_ref().map(String::as_str)
+        self.client_cert_path.as_deref()
     }
 
     /// Gets the password to the client authentication certificate.
@@ -528,7 +542,7 @@ impl Config {
     /// Gets the encoding to use for this connection. This requires the encode feature to work.
     /// This defaults to UTF-8 when not specified.
     pub fn encoding(&self) -> &str {
-        self.encoding.as_ref().map_or("UTF-8", |s| &s)
+        self.encoding.as_ref().map_or("UTF-8", |s| s)
     }
 
     /// Gets the channels to join upon connection.
@@ -558,7 +572,7 @@ impl Config {
     /// This defaults to `irc:version:env` when not specified.
     /// For example, `irc:0.12.0:Compiled with rustc`
     pub fn version(&self) -> &str {
-        self.version.as_ref().map_or(crate::VERSION_STR, |s| &s)
+        self.version.as_ref().map_or(crate::VERSION_STR, |s| s)
     }
 
     /// Gets the string to be sent in response to CTCP SOURCE requests.
@@ -577,7 +591,7 @@ impl Config {
 
     /// Gets the amount of time in seconds for the client to disconnect after not receiving a ping
     /// response.
-    /// This defaults to 10 seconds when not specified.
+    /// This defaults to 20 seconds when not specified.
     pub fn ping_timeout(&self) -> u32 {
         self.ping_timeout.as_ref().cloned().unwrap_or(20)
     }
@@ -608,7 +622,7 @@ impl Config {
     /// Gets the NickServ command sequence to recover a nickname.
     /// This defaults to `["GHOST"]` when not specified.
     pub fn ghost_sequence(&self) -> Option<&[String]> {
-        self.ghost_sequence.as_ref().map(Vec::as_slice)
+        self.ghost_sequence.as_deref()
     }
 
     /// Looks up the specified string in the options map.
@@ -626,7 +640,7 @@ impl Config {
     /// This defaults to false when not specified.
     /// This has no effect if `use_mock_connection` is not `true`.
     pub fn mock_initial_value(&self) -> &str {
-        self.mock_initial_value.as_ref().map_or("", |s| &s)
+        self.mock_initial_value.as_ref().map_or("", |s| s)
     }
 }
 
@@ -645,16 +659,16 @@ mod test {
     #[allow(unused)]
     fn test_config() -> Config {
         Config {
-            owners: vec![format!("test")],
-            nickname: Some(format!("test")),
-            username: Some(format!("test")),
-            realname: Some(format!("test")),
+            owners: vec!["test".to_string()],
+            nickname: Some("test".to_string()),
+            username: Some("test".to_string()),
+            realname: Some("test".to_string()),
             password: Some(String::new()),
-            umodes: Some(format!("+BR")),
-            server: Some(format!("irc.test.net")),
+            umodes: Some("+BR".to_string()),
+            server: Some("irc.test.net".to_string()),
             port: Some(6667),
-            encoding: Some(format!("UTF-8")),
-            channels: vec![format!("#test"), format!("#test2")],
+            encoding: Some("UTF-8".to_string()),
+            channels: vec!["#test".to_string(), "#test2".to_string()],
 
             ..Default::default()
         }
@@ -663,7 +677,7 @@ mod test {
     #[test]
     fn is_owner() {
         let cfg = Config {
-            owners: vec![format!("test"), format!("test2")],
+            owners: vec!["test".to_string(), "test2".to_string()],
             ..Default::default()
         };
         assert!(cfg.is_owner("test"));
@@ -676,7 +690,7 @@ mod test {
         let cfg = Config {
             options: {
                 let mut map = HashMap::new();
-                map.insert(format!("testing"), format!("test"));
+                map.insert("testing".to_string(), "test".to_string());
                 map
             },
             ..Default::default()

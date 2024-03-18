@@ -5,9 +5,8 @@ use std::sync::mpsc::RecvError;
 
 use thiserror::Error;
 use tokio::sync::mpsc::error::{SendError, TrySendError};
-
 #[cfg(feature = "tls-rust")]
-use tokio_rustls::webpki::InvalidDNSNameError;
+use tokio_rustls::rustls::client::InvalidDnsNameError;
 
 use crate::proto::error::{MessageParseError, ProtocolError};
 
@@ -19,26 +18,51 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 pub enum Error {
     /// An internal I/O error.
     #[error("an io error occurred")]
-    Io(#[source] IoError),
+    Io(
+        #[source]
+        #[from]
+        IoError,
+    ),
 
     /// An internal proxy error.
     #[cfg(feature = "proxy")]
     #[error("a proxy error occurred")]
-    Proxy(tokio_socks::Error),
+    Proxy(#[from] tokio_socks::Error),
 
     /// An internal TLS error.
-    #[cfg(feature = "tls-native")]
-    #[error("a TLS error occurred")]
-    Tls(#[source] native_tls::Error),
+    #[cfg(all(feature = "tls-native", not(feature = "tls-rust")))]
+    #[error("a TLS error occurred: {0}")]
+    Tls(
+        #[source]
+        #[from]
+        native_tls::Error,
+    ),
 
-    /// An internal DNS error.
+    /// An internal TLS error.
     #[cfg(feature = "tls-rust")]
-    #[error("a DNS error occurred")]
-    Dns(#[source] InvalidDNSNameError),
+    #[error("a TLS error occurred")]
+    Tls(
+        #[source]
+        #[from]
+        tokio_rustls::rustls::Error,
+    ),
+
+    /// An invalid DNS name was specified.
+    #[cfg(feature = "tls-rust")]
+    #[error("invalid DNS name")]
+    InvalidDnsNameError(
+        #[source]
+        #[from]
+        InvalidDnsNameError,
+    ),
 
     /// An internal synchronous channel closed.
     #[error("a sync channel closed")]
-    SyncChannelClosed(#[source] RecvError),
+    SyncChannelClosed(
+        #[source]
+        #[from]
+        RecvError,
+    ),
 
     /// An internal asynchronous channel closed.
     #[error("an async channel closed")]
@@ -173,39 +197,6 @@ impl From<ProtocolError> for Error {
                 Error::InvalidMessage { string, cause }
             }
         }
-    }
-}
-
-impl From<IoError> for Error {
-    fn from(e: IoError) -> Error {
-        Error::Io(e)
-    }
-}
-
-#[cfg(feature = "proxy")]
-impl From<tokio_socks::Error> for Error {
-    fn from(e: tokio_socks::Error) -> Error {
-        Error::Proxy(e)
-    }
-}
-
-#[cfg(feature = "tls-native")]
-impl From<native_tls::Error> for Error {
-    fn from(e: native_tls::Error) -> Error {
-        Error::Tls(e)
-    }
-}
-
-#[cfg(feature = "tls-rust")]
-impl From<InvalidDNSNameError> for Error {
-    fn from(e: InvalidDNSNameError) -> Error {
-        Error::Dns(e)
-    }
-}
-
-impl From<RecvError> for Error {
-    fn from(e: RecvError) -> Error {
-        Error::SyncChannelClosed(e)
     }
 }
 

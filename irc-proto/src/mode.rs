@@ -3,8 +3,6 @@ use std::fmt;
 
 use crate::command::Command;
 use crate::error::MessageParseError;
-use crate::error::MessageParseError::InvalidModeString;
-use crate::error::ModeParseError::*;
 
 /// A marker trait for different kinds of Modes.
 pub trait ModeType: fmt::Display + fmt::Debug + Clone + PartialEq {
@@ -139,11 +137,18 @@ impl ModeType for ChannelMode {
     fn takes_arg(&self) -> bool {
         use self::ChannelMode::*;
 
-        match *self {
-            Ban | Exception | Limit | InviteException | Key | Founder | Admin | Oper | Halfop
-            | Voice => true,
-            _ => false,
-        }
+        matches!(
+            *self,
+            Ban | Exception
+                | Limit
+                | InviteException
+                | Key
+                | Founder
+                | Admin
+                | Oper
+                | Halfop
+                | Voice
+        )
     }
 
     fn from_char(c: char) -> ChannelMode {
@@ -211,6 +216,8 @@ where
     Plus(T, Option<String>),
     /// Removing the specified mode, optionally with an argument.
     Minus(T, Option<String>),
+    /// No prefix mode, used to query ban list on channel join.
+    NoPrefix(T),
 }
 
 impl<T> Mode<T>
@@ -226,6 +233,11 @@ where
     pub fn minus(inner: T, arg: Option<&str>) -> Mode<T> {
         Mode::Minus(inner, arg.map(|s| s.to_owned()))
     }
+
+    /// Create a no prefix mode with an `&str` argument.
+    pub fn no_prefix(inner: T) -> Mode<T> {
+        Mode::NoPrefix(inner)
+    }
 }
 
 impl<T> fmt::Display for Mode<T>
@@ -234,10 +246,11 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Mode::Plus(ref mode, Some(ref arg)) => write!(f, "{}{} {}", "+", mode, arg),
-            Mode::Minus(ref mode, Some(ref arg)) => write!(f, "{}{} {}", "-", mode, arg),
-            Mode::Plus(ref mode, None) => write!(f, "{}{}", "+", mode),
-            Mode::Minus(ref mode, None) => write!(f, "{}{}", "-", mode),
+            Mode::Plus(ref mode, Some(ref arg)) => write!(f, "+{} {}", mode, arg),
+            Mode::Minus(ref mode, Some(ref arg)) => write!(f, "-{} {}", mode, arg),
+            Mode::Plus(ref mode, None) => write!(f, "+{}", mode),
+            Mode::Minus(ref mode, None) => write!(f, "-{}", mode),
+            Mode::NoPrefix(ref mode) => write!(f, "{}", mode),
         }
     }
 }
@@ -245,6 +258,7 @@ where
 enum PlusMinus {
     Plus,
     Minus,
+    NoPrefix,
 }
 
 // MODE user [modes]
@@ -280,11 +294,10 @@ where
         let mut cur_mod = match modes.next() {
             Some('+') => Plus,
             Some('-') => Minus,
-            Some(c) => {
-                return Err(InvalidModeString {
-                    string: pieces.join(" ").to_owned(),
-                    cause: InvalidModeModifier { modifier: c },
-                })
+            Some(_) => {
+                // rewind modes
+                modes = first.chars();
+                NoPrefix
             }
             None => {
                 // No modifier
@@ -307,18 +320,18 @@ where
                     res.push(match cur_mod {
                         Plus => Mode::Plus(mode, arg.map(|s| s.to_string())),
                         Minus => Mode::Minus(mode, arg.map(|s| s.to_string())),
+                        NoPrefix => Mode::NoPrefix(mode),
                     })
                 }
             }
         }
 
         // TODO: if there are extra args left, this should error
-
-        Ok(res)
     } else {
         // No modifier
-        Ok(res)
-    }
+    };
+
+    Ok(res)
 }
 
 #[cfg(test)]
@@ -343,5 +356,14 @@ mod test {
     fn parse_no_mode() {
         let cmd = "MODE #foo".parse::<Message>().unwrap().command;
         assert_eq!(Command::ChannelMODE("#foo".to_string(), vec![]), cmd);
+    }
+
+    #[test]
+    fn parse_no_plus() {
+        let cmd = "MODE #foo b".parse::<Message>().unwrap().command;
+        assert_eq!(
+            Command::ChannelMODE("#foo".to_string(), vec![Mode::NoPrefix(ChannelMode::Ban)]),
+            cmd
+        );
     }
 }

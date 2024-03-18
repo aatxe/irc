@@ -20,13 +20,10 @@ async fn main() -> irc::error::Result<()> {
     while let Some(message) = stream.next().await.transpose()? {
         print!("{}", message);
 
-        match message.command {
-            Command::PRIVMSG(ref target, ref msg) => {
-                if msg.contains(client.current_nickname()) {
-                    sender.send_privmsg(target, "Hi!")?;
-                }
+        if let Command::PRIVMSG(ref target, ref msg) = message.command {
+            if msg.contains(client.current_nickname()) {
+                sender.send_privmsg(target, "Hi!")?;
             }
-            _ => (),
         }
     }
 
