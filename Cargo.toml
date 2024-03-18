@@ -24,9 +24,9 @@ members = [ "./", "irc-proto/" ]
 
 
 [features]
-default = ["ctcp", "tls-native", "toml_config"]
+default = ["ctcp", "tls-native", "channel-lists", "toml_config"]
 ctcp = []
-nochanlists = []
+channel-lists = []
 
 json_config = ["serde", "serde/derive", "serde_derive", "serde_json"]
 toml_config = ["serde", "serde/derive", "serde_derive", "toml"]

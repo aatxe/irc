@@ -672,10 +672,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_join(&self, _: &str, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_join(&self, src: &str, chan: &str) {
         if let Some(vec) = self.chanlists.write().get_mut(&chan.to_owned()) {
             if !src.is_empty() {
@@ -684,10 +684,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_part(&self, _: &str, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_part(&self, src: &str, chan: &str) {
         if let Some(vec) = self.chanlists.write().get_mut(&chan.to_owned()) {
             if !src.is_empty() {
@@ -698,10 +698,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_quit(&self, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_quit(&self, src: &str) {
         if src.is_empty() {
             return;
@@ -714,10 +714,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_nick_change(&self, _: &str, _: &str) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_nick_change(&self, old_nick: &str, new_nick: &str) {
         if old_nick.is_empty() || new_nick.is_empty() {
             return;
@@ -731,10 +731,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_mode(&self, _: &str, _: &[Mode<ChannelMode>]) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_mode(&self, chan: &str, modes: &[Mode<ChannelMode>]) {
         for mode in modes {
             match *mode {
@@ -750,10 +750,10 @@ impl ClientState {
         }
     }
 
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     fn handle_namreply(&self, _: &[String]) {}
 
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     fn handle_namreply(&self, args: &[String]) {
         if args.len() == 4 {
             let chan = &args[2];
@@ -996,8 +996,8 @@ impl Client {
     }
 
     /// Gets a list of currently joined channels. This will be `None` if tracking is disabled
-    /// altogether via the `nochanlists` feature.
-    #[cfg(not(feature = "nochanlists"))]
+    /// altogether by disabling the `channel-lists` feature.
+    #[cfg(feature = "channel-lists")]
     pub fn list_channels(&self) -> Option<Vec<String>> {
         Some(
             self.state
@@ -1009,13 +1009,14 @@ impl Client {
         )
     }
 
-    #[cfg(feature = "nochanlists")]
+    /// Always returns `None` since `channel-lists` feature is disabled.
+    #[cfg(not(feature = "channel-lists"))]
     pub fn list_channels(&self) -> Option<Vec<String>> {
         None
     }
 
     /// Gets a list of [`Users`](./data/user/struct.User.html) in the specified channel. If the
-    /// specified channel hasn't been joined or the `nochanlists` feature is enabled, this function
+    /// specified channel hasn't been joined or the `channel-lists` feature is disabled, this function
     /// will return `None`.
     ///
     /// For best results, be sure to request `multi-prefix` support from the server. This will allow
@@ -1033,12 +1034,13 @@ impl Client {
     /// # Ok(())
     /// # }
     /// ```
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     pub fn list_users(&self, chan: &str) -> Option<Vec<User>> {
         self.state.chanlists.read().get(&chan.to_owned()).cloned()
     }
 
-    #[cfg(feature = "nochanlists")]
+    /// Always returns `None` since `channel-lists` feature is disabled.
+    #[cfg(not(feature = "channel-lists"))]
     pub fn list_users(&self, _: &str) -> Option<Vec<User>> {
         None
     }
@@ -1092,7 +1094,7 @@ mod test {
     use std::{collections::HashMap, default::Default, thread, time::Duration};
 
     use super::Client;
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     use crate::client::data::User;
     use crate::{
         client::data::Config,
@@ -1356,7 +1358,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn channel_tracking_names() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
@@ -1370,7 +1372,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn channel_tracking_names_part() -> Result<()> {
         use crate::proto::command::Command::PART;
 
@@ -1392,7 +1394,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn user_tracking_names() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
@@ -1409,7 +1411,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn user_tracking_names_join() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :test2!test@test JOIN #test\r\n";
@@ -1432,7 +1434,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn user_tracking_names_kick() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test KICK #test test\r\n";
@@ -1450,7 +1452,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn user_tracking_names_part() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n\
                      :owner!test@test PART #test\r\n";
@@ -1468,7 +1470,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(not(feature = "nochanlists"))]
+    #[cfg(feature = "channel-lists")]
     async fn user_tracking_names_mode() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :+test ~owner &admin\r\n\
                      :test!test@test MODE #test +o test\r\n";
@@ -1497,7 +1499,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[cfg(feature = "nochanlists")]
+    #[cfg(not(feature = "channel-lists"))]
     async fn no_user_tracking() -> Result<()> {
         let value = ":irc.test.net 353 test = #test :test ~owner &admin\r\n";
         let mut client = Client::from_config(Config {
