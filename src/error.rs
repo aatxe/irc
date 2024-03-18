@@ -31,7 +31,7 @@ pub enum Error {
 
     /// An internal TLS error.
     #[cfg(all(feature = "tls-native", not(feature = "tls-rust")))]
-    #[error("a TLS error occurred")]
+    #[error("a TLS error occurred: {0}")]
     Tls(
         #[source]
         #[from]
