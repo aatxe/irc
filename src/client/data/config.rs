@@ -242,7 +242,7 @@ impl Config {
 
     /// Loads a configuration from the desired path. This will use the file extension to detect
     /// which format to parse the file as (json, toml, or yaml). Using each format requires having
-    /// its respective crate feature enabled. Only json is available by default.
+    /// its respective crate feature enabled. Only toml is available by default.
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Config> {
         let mut file = File::open(&path)?;
         let mut data = String::new();
@@ -317,7 +317,7 @@ impl Config {
 
     /// Saves a configuration to the desired path. This will use the file extension to detect
     /// which format to parse the file as (json, toml, or yaml). Using each format requires having
-    /// its respective crate feature enabled. Only json is available by default.
+    /// its respective crate feature enabled. Only toml is available by default.
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
         let _ = self.path.take();
         let mut file = File::create(&path)?;
