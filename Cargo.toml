@@ -1,6 +1,6 @@
 [package]
 name = "irc"
-version = "0.15.0"
+version = "1.0.0"
 authors = ["Aaron Weiss <aweiss@hey.com>"]
 edition = "2018"
 rust-version = "1.67"
@@ -45,7 +45,7 @@ tls-rust = ["tokio-rustls", "webpki-roots", "rustls-pemfile"]
 chrono = { version = "0.4.24", default-features = false, features = ["clock", "std"] }
 encoding = "0.2.33"
 futures-util = { version = "0.3.30", default-features = false, features = ["alloc", "sink"] }
-irc-proto = { version = "0.15.0", path = "irc-proto" }
+irc-proto = { version = "1.0.0", path = "irc-proto" }
 log = "0.4.21"
 parking_lot = "0.12.1"
 thiserror = "1.0.58"
