@@ -123,6 +123,14 @@ pub enum Error {
     /// Stream has already been configured.
     #[error("stream has already been configured")]
     StreamAlreadyConfigured,
+
+    /// A end of batch message was sent after a pending batch was removed from the inflight list
+    #[error("batch disappeared before end of batch was processed")]
+    BatchDisappearedBeforeEndOfBatchProcessed,
+
+    /// A new batch was started with the same reference tag
+    #[error("batch {} already exists but a new batch request with the same tag was sent", .0)]
+    BatchAlreadyExists(String),
 }
 
 /// Errors that occur with configurations.
