@@ -227,15 +227,13 @@ impl<'a> From<&'a Command> for String {
             Command::NICK(ref n) => stringify("NICK", &[n]),
             Command::USER(ref u, ref m, ref r) => stringify("USER", &[u, m, "*", r]),
             Command::OPER(ref u, ref p) => stringify("OPER", &[u, p]),
-            Command::UserMODE(ref u, ref m) => format!(
-                "MODE {}{}",
-                u,
-                m.iter().fold(String::new(), |mut acc, mode| {
-                    acc.push(' ');
-                    acc.push_str(&mode.to_string());
+            Command::UserMODE(ref u, ref m) => {
+                // User modes never have arguments.
+                m.iter().fold(format!("MODE {u} "), |mut acc, m| {
+                    acc.push_str(&m.flag());
                     acc
                 })
-            ),
+            }
             Command::SERVICE(ref nick, ref r0, ref dist, ref typ, ref r1, ref info) => {
                 stringify("SERVICE", &[nick, r0, dist, typ, r1, info])
             }
@@ -248,15 +246,17 @@ impl<'a> From<&'a Command> for String {
             Command::JOIN(ref c, None, None) => stringify("JOIN", &[c]),
             Command::PART(ref c, Some(ref m)) => stringify("PART", &[c, m]),
             Command::PART(ref c, None) => stringify("PART", &[c]),
-            Command::ChannelMODE(ref u, ref m) => format!(
-                "MODE {}{}",
-                u,
-                m.iter().fold(String::new(), |mut acc, mode| {
+            Command::ChannelMODE(ref c, ref m) => {
+                let cmd = m.iter().fold(format!("MODE {c} "), |mut acc, m| {
+                    acc.push_str(&m.flag());
+                    acc
+                });
+                m.iter().filter_map(|m| m.arg()).fold(cmd, |mut acc, arg| {
                     acc.push(' ');
-                    acc.push_str(&mode.to_string());
+                    acc.push_str(arg);
                     acc
                 })
-            ),
+            }
             Command::TOPIC(ref c, Some(ref t)) => stringify("TOPIC", &[c, t]),
             Command::TOPIC(ref c, None) => stringify("TOPIC", &[c]),
             Command::NAMES(Some(ref c), Some(ref t)) => stringify("NAMES", &[c, t]),

@@ -41,7 +41,7 @@ Making your own project? [Submit a pull request](https://github.com/aatxe/irc/pu
 
 ## Getting Started
 
-To start using the irc crate with cargo, you can add `irc = "0.15"` to your dependencies in
+To start using the irc crate with cargo, you can add `irc = "1.0.0"` to your dependencies in or you can use the comman `cargo add irc`.
 your Cargo.toml file. The high-level API can be found in [`irc::client::prelude`][irc-prelude].
 You'll find a number of examples to help you get started in `examples/`, throughout the
 documentation, and below.
@@ -52,12 +52,12 @@ documentation, and below.
 
 The release of v0.14 replaced all existing APIs with one based on async/await.
 
-```rust,no_run,edition2018
-use irc::client::prelude::*;
+```rust,no_run,edition2021
 use futures::prelude::*;
+use irc::client::prelude::*;
 
 #[tokio::main]
-async fn main() -> Result<(), failure::Error> {
+async fn main() -> Result<(), anyhow::Error> {
     // We can also load the Config at runtime via Config::load("path/to/config.toml")
     let config = Config {
         nickname: Some("the-irc-crate".to_owned()),
@@ -65,7 +65,6 @@ async fn main() -> Result<(), failure::Error> {
         channels: vec!["#test".to_owned()],
         ..Config::default()
     };
-
     let mut client = Client::from_config(config).await?;
     client.identify()?;
 
@@ -80,19 +79,25 @@ async fn main() -> Result<(), failure::Error> {
 ```
 
 Example Cargo.toml file:
-```rust,no_run,edition2018
+```rust,no_run,edition2021
 [package]
 name = "example"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-irc = "0.15.0"
-tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros", "net", "time"] }
-futures = "0.3.0"
-failure = "0.1.8"
+anyhow = "1.0"
+futures = "0.3"
+irc = "1.0.0"
+tokio = { version = "1.0", features = [
+    "rt",
+    "rt-multi-thread",
+    "macros",
+    "net",
+    "time",
+] }
 ```
 
 ## Configuring IRC Clients
@@ -122,7 +127,7 @@ port = 6697
 password = ""
 proxy_type = "None"
 proxy_server = "127.0.0.1"
-proxy_port = "1080"
+proxy_port = 1080
 proxy_username = ""
 proxy_password = ""
 use_tls = true
@@ -162,7 +167,7 @@ tool should make it easier for users to migrate their old configurations to TOML
 
 ## Contributing
 the irc crate is a free, open source library that relies on contributions from its maintainers,
-Aaron Weiss ([@aatxe][awe]) and Peter Atashian ([@retep998][bun]), as well as the broader Rust
+Ariel Weiss ([@aatxe][awe]) and Peter Atashian ([@retep998][bun]), as well as the broader Rust
 community. It's licensed under the Mozilla Public License 2.0 whose text can be found in
 `LICENSE.md`. To foster an inclusive community around the irc crate, we have adopted a Code of
 Conduct whose text can be found in `CODE_OF_CONDUCT.md`. You can find details about how to

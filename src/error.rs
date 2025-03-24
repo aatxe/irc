@@ -6,7 +6,7 @@ use std::sync::mpsc::RecvError;
 use thiserror::Error;
 use tokio::sync::mpsc::error::{SendError, TrySendError};
 #[cfg(feature = "tls-rust")]
-use tokio_rustls::rustls::client::InvalidDnsNameError;
+use tokio_rustls::rustls::pki_types::InvalidDnsNameError;
 
 use crate::proto::error::{MessageParseError, ProtocolError};
 

@@ -1101,7 +1101,7 @@ mod test {
         error::Error,
         proto::{
             command::Command::{Raw, PRIVMSG},
-            ChannelMode, IrcCodec, Mode,
+            ChannelMode, IrcCodec, Mode, UserMode,
         },
     };
     use anyhow::Result;
@@ -1807,10 +1807,31 @@ mod test {
         let mut client = Client::from_config(test_config()).await?;
         client.send_mode(
             "#test",
-            &[Mode::Plus(ChannelMode::Oper, Some("test".to_owned()))],
+            &[
+                Mode::Plus(ChannelMode::Oper, Some("test".to_owned())),
+                Mode::Minus(ChannelMode::Oper, Some("test2".to_owned())),
+            ],
         )?;
         client.stream()?.collect().await?;
-        assert_eq!(&get_client_value(client)[..], "MODE #test +o test\r\n");
+        assert_eq!(
+            &get_client_value(client)[..],
+            "MODE #test +o-o test test2\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn send_umode() -> Result<()> {
+        let mut client = Client::from_config(test_config()).await?;
+        client.send_mode(
+            "test",
+            &[
+                Mode::Plus(UserMode::Invisible, None),
+                Mode::Plus(UserMode::MaskedHost, None),
+            ],
+        )?;
+        client.stream()?.collect().await?;
+        assert_eq!(&get_client_value(client)[..], "MODE test +i+x\r\n");
         Ok(())
     }
 
