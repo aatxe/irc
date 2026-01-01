@@ -5,6 +5,7 @@ realname = "test"
 server = "irc.test.net"
 port = 6667
 password = ""
+sasl = "none"
 encoding = "UTF-8"
 channels = ["#test", "#test2"]
 umodes = "+BR"

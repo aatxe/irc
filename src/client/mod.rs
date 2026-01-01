@@ -47,6 +47,7 @@
 //! # }
 //! ```
 
+use base64ct::{Base64, Encoding};
 #[cfg(feature = "ctcp")]
 use chrono::prelude::*;
 use futures_util::{
@@ -72,6 +73,7 @@ use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 use crate::{
     client::{
         conn::Connection,
+        data::sasl::SASLMode,
         data::{Config, User},
     },
     error,
@@ -1070,11 +1072,37 @@ impl Client {
     }
 
     /// Sends a CAP END, NICK and USER to identify.
+    /// Also does the authentication with PASS or SASL if enabled
     pub fn identify(&self) -> error::Result<()> {
         // Send a CAP END to signify that we're IRCv3-compliant (and to end negotiations!).
+        if let SASLMode::Plain = self.config().sasl() {
+            // Best effort no state-machine (blind) SASL auth
+            if self.config().login().contains('\0') {
+                return Err(error::Error::LoginContainsNullByte);
+            }
+            if self.config().password().contains('\0') {
+                return Err(error::Error::PasswordContainsNullByte);
+            }
+            // No need to ask server for its capabilities, we won't parse the output
+            //self.send_cap_ls(NegotiationVersion::V301)?;
+            self.send_cap_req(&[Capability::Sasl])?;
+            self.send_sasl_plain()?;
+            let sasl_pass = Base64::encode_string(
+                &format!(
+                    "\x00{}\x00{}",
+                    self.config().login(),
+                    self.config().password(),
+                )
+                .bytes()
+                .collect::<Vec<_>>(),
+            );
+            self.send_sasl(sasl_pass)?;
+        }
         self.send(CAP(None, END, None, None))?;
-        if self.config().password() != "" {
-            self.send(PASS(self.config().password().to_owned()))?;
+        if let SASLMode::None = self.config().sasl() {
+            if self.config().password() != "" {
+                self.send(PASS(self.config().password().to_owned()))?;
+            }
         }
         self.send(NICK(self.config().nickname()?.to_owned()))?;
         self.send(USER(
@@ -1097,7 +1125,7 @@ mod test {
     #[cfg(feature = "channel-lists")]
     use crate::client::data::User;
     use crate::{
-        client::data::Config,
+        client::data::{sasl::SASLMode, Config},
         error::Error,
         proto::{
             command::Command::{Raw, PRIVMSG},
@@ -1653,6 +1681,28 @@ mod test {
         assert_eq!(
             &get_client_value(client)[..],
             "CAP END\r\nNICK test\r\n\
+             USER test 0 * test\r\n"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn identify_with_sasl() -> Result<()> {
+        let sasl_config = Config {
+            login: Some("test_login".to_string()),
+            password: Some("test_password".to_string()),
+            sasl: Some(SASLMode::Plain),
+            ..test_config()
+        };
+        let mut client = Client::from_config(sasl_config).await?;
+        client.identify()?;
+        client.stream()?.collect().await?;
+        assert_eq!(
+            &get_client_value(client)[..],
+            // echo -ne "\x00test_login\x00test_password" | base64
+            "CAP REQ sasl\r\nAUTHENTICATE PLAIN\r\n\
+             AUTHENTICATE AHRlc3RfbG9naW4AdGVzdF9wYXNzd29yZA==\r\n\
+             CAP END\r\nNICK test\r\n\
              USER test 0 * test\r\n"
         );
         Ok(())

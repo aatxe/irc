@@ -17,6 +17,7 @@ use toml;
 
 #[cfg(feature = "proxy")]
 use crate::client::data::proxy::ProxyType;
+use crate::client::data::sasl::SASLMode;
 
 use crate::error::Error::InvalidConfig;
 #[cfg(feature = "toml_config")]
@@ -97,9 +98,16 @@ pub struct Config {
     /// The port to connect on.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub port: Option<u16>,
-    /// The password to connect to the server.
+    /// The password to connect to the server. Used with PASS or with SASL authentication. Those
+    /// two modes are exclusive of each other.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub password: Option<String>,
+    /// The login to connect to the server (used with SASL plain)
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub login: Option<String>,
+    /// SASL authentication mode. Only SASL PLAIN is is supported
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub sasl: Option<SASLMode>,
     /// The proxy type to connect to.
     #[cfg(feature = "proxy")]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -467,6 +475,18 @@ impl Config {
         self.password.as_ref().map_or("", String::as_str)
     }
 
+    /// Gets the server login specified in the configuration.
+    /// This defaults to an empty string when not specified.
+    pub fn login(&self) -> &str {
+        self.login.as_ref().map_or("", String::as_str)
+    }
+
+    /// Gets the SASL mode specified in the configuration.
+    /// This defaults to None when not specified.
+    pub fn sasl(&self) -> SASLMode {
+        self.sasl.as_ref().cloned().unwrap_or(SASLMode::None)
+    }
+
     /// Gets the type of the proxy specified in the configuration.
     /// This defaults to a None ProxyType when not specified.
     #[cfg(feature = "proxy")]
@@ -646,6 +666,8 @@ impl Config {
 
 #[cfg(test)]
 mod test {
+    use crate::client::data::sasl::SASLMode;
+
     use super::Config;
     use std::collections::HashMap;
 
@@ -664,6 +686,7 @@ mod test {
             username: Some("test".to_string()),
             realname: Some("test".to_string()),
             password: Some(String::new()),
+            sasl: Some(SASLMode::None),
             umodes: Some("+BR".to_string()),
             server: Some("irc.test.net".to_string()),
             port: Some(6667),
