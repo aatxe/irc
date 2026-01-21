@@ -58,6 +58,14 @@ pub enum MessageParseError {
         /// The invalid subcommand.
         sub: String,
     },
+
+    /// The standard reply missed a description
+    #[error("missing description in standard reply")]
+    MissingDescriptionInStandardReply,
+
+    /// Invalid standard reply type
+    #[error("invalid standard reply type: {}", .0)]
+    InvalidStandardReplyType(&'static str)
 }
 
 /// Errors that occur while parsing mode strings.

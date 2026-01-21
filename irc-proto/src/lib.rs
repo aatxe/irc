@@ -15,6 +15,7 @@ pub mod message;
 pub mod mode;
 pub mod prefix;
 pub mod response;
+pub mod standard_reply;
 
 pub use self::caps::{Capability, NegotiationVersion};
 pub use self::chan::ChannelExt;
