@@ -61,7 +61,7 @@ log = "0.4.21"
 parking_lot = "0.12.1"
 thiserror = "1.0.58"
 pin-project = "1.0.12"
-tokio = { version = "1.27.0", features = ["net", "time", "sync"] }
+tokio = { version = "1.27.0", features = ["net", "time", "sync", "rt"] }
 tokio-stream = "0.1.12"
 tokio-util = { version = "0.7.7", features = ["codec"] }
 
