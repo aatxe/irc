@@ -28,8 +28,7 @@ use tokio_native_tls::{self, TlsStream};
 #[cfg(feature = "tls-rust")]
 use std::{
     convert::TryFrom,
-    fs::File,
-    io::{BufReader, Error, ErrorKind},
+    io::{Error, ErrorKind},
     sync::Arc,
 };
 #[cfg(feature = "tls-rust")]
@@ -39,7 +38,8 @@ use tokio_rustls::{
     rustls::client::danger::{ServerCertVerified, ServerCertVerifier},
     rustls::crypto::{verify_tls12_signature, verify_tls13_signature, CryptoProvider},
     rustls::pki_types::{
-        CertificateDer as Certificate, PrivateKeyDer as PrivateKey, ServerName, UnixTime,
+        pem::PemObject, CertificateDer as Certificate, PrivateKeyDer as PrivateKey, ServerName,
+        UnixTime,
     },
     rustls::{self, ClientConfig, RootCertStore},
     TlsConnector,
@@ -287,20 +287,21 @@ impl Connection {
         }
 
         let client_auth = if let Some(client_cert_path) = config.client_cert_path() {
-            if let Ok(file) = File::open(client_cert_path) {
-                let client_cert_data =
-                    rustls_pemfile::certs(&mut BufReader::new(file)).collect::<Result<_, _>>()?;
+            if let Ok(cert_iter) = Certificate::pem_file_iter(client_cert_path) {
+                let client_cert_data = cert_iter
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(|e| Error::new(ErrorKind::InvalidData, e.to_string()))?;
 
                 let client_cert_pass = config.client_cert_pass();
-                let client_cert_pass = rustls_pemfile::private_key(
-                    &mut client_cert_pass.as_bytes(),
-                )?
-                .ok_or_else(|| error::Error::InvalidConfig {
-                    path: config.path(),
-                    cause: error::ConfigError::UnknownConfigFormat {
-                        format: "Failed to parse private key".to_string(),
-                    },
-                })?;
+                let client_cert_pass =
+                    PrivateKey::from_pem_slice(client_cert_pass.as_bytes()).map_err(|_| {
+                        error::Error::InvalidConfig {
+                            path: config.path(),
+                            cause: error::ConfigError::UnknownConfigFormat {
+                                format: "Failed to parse private key".to_string(),
+                            },
+                        }
+                    })?;
 
                 log::info!(
                     "Using {} for client certificate authentication.",
@@ -352,9 +353,10 @@ impl Connection {
             }
 
             if let Some(cert_path) = config.cert_path() {
-                if let Ok(file) = File::open(cert_path) {
-                    let certificates = rustls_pemfile::certs(&mut BufReader::new(file))
-                        .collect::<Result<Vec<_>, _>>()?;
+                if let Ok(cert_iter) = Certificate::pem_file_iter(cert_path) {
+                    let certificates = cert_iter
+                        .collect::<Result<Vec<_>, _>>()
+                        .map_err(|e| Error::new(ErrorKind::InvalidData, e.to_string()))?;
                     let (added, ignored) = root_store.add_parsable_certificates(certificates);
 
                     if ignored > 0 {
