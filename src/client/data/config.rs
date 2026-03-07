@@ -97,6 +97,11 @@ pub struct Config {
     /// The port to connect on.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub port: Option<u16>,
+    /// The local address to bind to when connecting to the server.
+    /// This is useful for machines with multiple network interfaces or IP addresses.
+    /// The value should be a valid IPv4 or IPv6 address (e.g. "192.168.1.100" or "::1").
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub bind_address: Option<String>,
     /// The password to connect to the server.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub password: Option<String>,
@@ -459,6 +464,12 @@ impl Config {
     #[cfg(not(any(feature = "tls-native", feature = "tls-rust")))]
     pub fn port(&self) -> u16 {
         self.port.as_ref().cloned().unwrap_or(6667)
+    }
+
+    /// Gets the local address to bind to when connecting.
+    /// This defaults to `None`, meaning the OS will choose the local address.
+    pub fn bind_address(&self) -> Option<&str> {
+        self.bind_address.as_deref()
     }
 
     /// Gets the server password specified in the configuration.
