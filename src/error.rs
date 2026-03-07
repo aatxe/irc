@@ -175,6 +175,13 @@ pub enum ConfigError {
         /// The supposed location of the file.
         file: String,
     },
+
+    /// The specified bind address could not be parsed as a valid IP address.
+    #[error("invalid bind address: {}", address)]
+    InvalidBindAddress {
+        /// The invalid address string.
+        address: String,
+    },
 }
 
 /// A wrapper that combines toml's serialization and deserialization errors.

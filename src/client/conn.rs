@@ -113,7 +113,14 @@ impl Connection {
 
     #[cfg(not(feature = "proxy"))]
     async fn new_stream(config: &Config) -> error::Result<TcpStream> {
-        Ok(TcpStream::connect((config.server()?, config.port())).await?)
+        let server = config.server()?;
+        let port = config.port();
+
+        if let Some(bind_addr) = config.bind_address() {
+            return Self::connect_with_bind(server, port, bind_addr, config).await;
+        }
+
+        Ok(TcpStream::connect((server, port)).await?)
     }
 
     #[cfg(feature = "proxy")]
@@ -123,8 +130,18 @@ impl Connection {
         let address = (server, port);
 
         match config.proxy_type() {
-            ProxyType::None => Ok(TcpStream::connect(address).await?),
+            ProxyType::None => {
+                if let Some(bind_addr) = config.bind_address() {
+                    return Self::connect_with_bind(server, port, bind_addr, config).await;
+                }
+                Ok(TcpStream::connect(address).await?)
+            }
             ProxyType::Socks5 => {
+                if config.bind_address().is_some() {
+                    log::warn!(
+                        "bind_address is not supported with SOCKS5 proxy and will be ignored."
+                    );
+                }
                 let proxy_server = config.proxy_server();
                 let proxy_port = config.proxy_port();
                 let proxy = (proxy_server, proxy_port);
@@ -147,6 +164,48 @@ impl Connection {
                 Ok(Socks5Stream::connect(proxy, address).await?.into_inner())
             }
         }
+    }
+
+    async fn connect_with_bind(
+        server: &str,
+        port: u16,
+        bind_addr: &str,
+        config: &Config,
+    ) -> error::Result<TcpStream> {
+        use std::net::{IpAddr, SocketAddr};
+        use tokio::net::TcpSocket;
+
+        let bind_ip: IpAddr = bind_addr.parse().map_err(|_| error::Error::InvalidConfig {
+            path: config.path(),
+            cause: error::ConfigError::InvalidBindAddress {
+                address: bind_addr.to_string(),
+            },
+        })?;
+
+        let socket = if bind_ip.is_ipv4() {
+            TcpSocket::new_v4()?
+        } else {
+            TcpSocket::new_v6()?
+        };
+
+        socket.bind(SocketAddr::new(bind_ip, 0))?;
+
+        let remote_addr = tokio::net::lookup_host((server, port))
+            .await?
+            .find(|addr| addr.is_ipv4() == bind_ip.is_ipv4())
+            .ok_or_else(|| {
+                std::io::Error::new(
+                    std::io::ErrorKind::AddrNotAvailable,
+                    format!(
+                        "no {} address found for {}",
+                        if bind_ip.is_ipv4() { "IPv4" } else { "IPv6" },
+                        server
+                    ),
+                )
+            })?;
+
+        log::info!("Binding to {} for connection to {}.", bind_addr, server);
+        Ok(socket.connect(remote_addr).await?)
     }
 
     async fn new_unsecured_transport(
