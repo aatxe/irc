@@ -178,12 +178,24 @@ pub struct Config {
     /// messages will be delayed automatically as appropriate. In particular, in the past
     /// `burst_window_length` seconds, there will never be more than `max_messages_in_burst` messages
     /// sent.
+    #[deprecated(note = "Unimplemented. Use flood_penalty_threshold instead.")]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub burst_window_length: Option<u32>,
     /// The maximum number of messages that can be sent in a burst window before they'll be delayed.
     /// Messages are automatically delayed as appropriate.
+    #[deprecated(note = "Unimplemented. Use flood_penalty_threshold instead.")]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub max_messages_in_burst: Option<u32>,
+    /// The penalty threshold in milliseconds for IRC flood protection. Each outgoing command
+    /// incurs a penalty cost (e.g. PRIVMSG = 2000ms, WHO = 4000ms, PONG = 0ms) that mirrors
+    /// the IRC server's own flood detection (RFC 2813 penalty model). When accumulated penalty
+    /// exceeds this threshold, outgoing messages are delayed until the penalty drains below it.
+    /// Penalty drains in real-time at 1ms per 1ms elapsed.
+    ///
+    /// Set to `0` to disable flood protection entirely.
+    /// Defaults to 10000 (10 seconds), matching the standard IRCd excess flood limit.
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub flood_penalty_threshold: Option<u32>,
     /// Whether the client should use NickServ GHOST to reclaim its primary nickname if it is in
     /// use. This has no effect if `nick_password` is not set.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "is_false"))]
@@ -600,7 +612,9 @@ impl Config {
     /// system maintains the invariant that in the past `burst_window_length` seconds, the maximum
     /// number of messages sent is `max_messages_in_burst`.
     /// This defaults to 8 seconds when not specified.
+    #[deprecated(note = "Unimplemented. Use flood_penalty_threshold instead.")]
     pub fn burst_window_length(&self) -> u32 {
+        #[allow(deprecated)]
         self.burst_window_length.as_ref().cloned().unwrap_or(8)
     }
 
@@ -609,8 +623,17 @@ impl Config {
     /// system maintains the invariant that in the past `burst_window_length` seconds, the maximum
     /// number of messages sent is `max_messages_in_burst`.
     /// This defaults to 15 messages when not specified.
+    #[deprecated(note = "Unimplemented. Use flood_penalty_threshold instead.")]
     pub fn max_messages_in_burst(&self) -> u32 {
+        #[allow(deprecated)]
         self.max_messages_in_burst.as_ref().cloned().unwrap_or(15)
+    }
+
+    /// Gets the penalty threshold in milliseconds for IRC flood protection.
+    /// When accumulated penalty exceeds this value, outgoing messages are delayed.
+    /// Defaults to 10000ms (10 seconds). Set to 0 to disable.
+    pub fn flood_penalty_threshold(&self) -> u32 {
+        self.flood_penalty_threshold.unwrap_or(10_000)
     }
 
     /// Gets whether or not to attempt nickname reclamation using NickServ GHOST.

@@ -825,17 +825,61 @@ impl Sender {
     pub_sender_base!();
 }
 
-/// Future to handle outgoing messages.
+/// Future to handle outgoing messages with IRC flood protection.
 ///
-/// Note: this is essentially the same as a version of [SendAll](https://github.com/rust-lang-nursery/futures-rs/blob/master/futures-util/src/sink/send_all.rs) that owns it's sink and stream.
+/// Implements a penalty-based throttle modeled after irssi and IRCd (RFC 2813). Each outgoing
+/// command incurs a penalty cost in milliseconds. When the accumulated penalty exceeds a
+/// configurable threshold (default 10s), messages are delayed until the penalty drains below
+/// the threshold. Penalty drains in real-time at 1ms per 1ms elapsed.
 #[derive(Debug)]
 pub struct Outgoing {
     sink: SplitSink<Connection, Message>,
     stream: UnboundedReceiver<Message>,
     buffered: Option<Message>,
+    /// Accumulated penalty in milliseconds.
+    penalty: u64,
+    /// Threshold above which messages are delayed. 0 = disabled.
+    penalty_threshold: u64,
+    /// Last time penalty was drained.
+    last_penalty_check: tokio::time::Instant,
+    /// Active delay future for throttling.
+    delay: Option<Pin<Box<tokio::time::Sleep>>>,
 }
 
 impl Outgoing {
+    /// Returns the penalty cost in milliseconds for a given IRC command.
+    ///
+    /// Values mirror the irssi/IRCd penalty model (RFC 2813 §5.8):
+    /// - Connection control (PONG, QUIT, etc.): 0ms (never throttled)
+    /// - Standard messages (PRIVMSG, NOTICE, JOIN, etc.): 2000ms
+    /// - Expensive queries (WHO, WHOIS, LIST, etc.): 4000ms
+    fn command_penalty(command: &Command) -> u64 {
+        match command {
+            // Connection control — never throttled
+            Command::PONG(..) | Command::QUIT(..) | Command::PASS(..) => 0,
+
+            // CAP negotiation — must not be throttled during registration
+            Command::CAP(..) | Command::AUTHENTICATE(..) => 0,
+
+            // Expensive server queries
+            Command::WHO(..) | Command::WHOIS(..) | Command::WHOWAS(..)
+            | Command::LIST(..) | Command::NAMES(..) | Command::LINKS(..)
+            | Command::STATS(..) | Command::LUSERS(..) | Command::TRACE(..)
+            | Command::USERS(..) | Command::MOTD(..) => 4000,
+
+            // Everything else: standard 2s penalty
+            _ => 2000,
+        }
+    }
+
+    /// Drains accumulated penalty based on elapsed real time.
+    fn drain_penalty(&mut self) {
+        let now = tokio::time::Instant::now();
+        let elapsed = now.duration_since(self.last_penalty_check).as_millis() as u64;
+        self.penalty = self.penalty.saturating_sub(elapsed);
+        self.last_penalty_check = now;
+    }
+
     fn try_start_send(
         &mut self,
         cx: &mut Context<'_>,
@@ -867,13 +911,48 @@ impl Future for Outgoing {
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = &mut *self;
 
+        // If we're waiting on a throttle delay, poll it first.
+        if let Some(ref mut delay) = this.delay {
+            ready!(delay.as_mut().poll(cx));
+            this.delay = None;
+            this.drain_penalty();
+        }
+
         if let Some(message) = this.buffered.take() {
             ready!(this.try_start_send(cx, message))?
         }
 
         loop {
             match this.stream.poll_recv(cx) {
-                Poll::Ready(Some(message)) => ready!(this.try_start_send(cx, message))?,
+                Poll::Ready(Some(message)) => {
+                    // Apply penalty-based throttle if enabled.
+                    if this.penalty_threshold > 0 {
+                        let cost = Self::command_penalty(&message.command);
+                        if cost > 0 {
+                            this.drain_penalty();
+                            this.penalty += cost;
+
+                            if this.penalty > this.penalty_threshold {
+                                let excess = this.penalty - this.penalty_threshold;
+                                log::debug!(
+                                    "Flood penalty {}ms exceeds threshold {}ms, delaying {}ms.",
+                                    this.penalty, this.penalty_threshold, excess,
+                                );
+                                this.delay = Some(Box::pin(tokio::time::sleep(
+                                    std::time::Duration::from_millis(excess),
+                                )));
+                                // Buffer the message and return Pending so the delay runs.
+                                this.buffered = Some(message);
+                                // Register waker with the delay future.
+                                if let Some(ref mut delay) = this.delay {
+                                    let _ = delay.as_mut().poll(cx);
+                                }
+                                return Poll::Pending;
+                            }
+                        }
+                    }
+                    ready!(this.try_start_send(cx, message))?
+                }
                 Poll::Ready(None) => {
                     ready!(Pin::new(&mut this.sink).poll_flush(cx))?;
                     return Poll::Ready(Ok(()));
@@ -934,6 +1013,7 @@ impl Client {
         let (sink, incoming) = conn.split();
 
         let sender = Sender { tx_outgoing };
+        let penalty_threshold = config.flood_penalty_threshold() as u64;
 
         Ok(Client {
             sender: sender.clone(),
@@ -943,6 +1023,10 @@ impl Client {
                 sink,
                 stream: rx_outgoing,
                 buffered: None,
+                penalty: 0,
+                penalty_threshold,
+                last_penalty_check: tokio::time::Instant::now(),
+                delay: None,
             }),
             #[cfg(test)]
             view,
@@ -1116,6 +1200,7 @@ mod test {
             channels: vec!["#test".to_string(), "#test2".to_string()],
             user_info: Some("Testing.".to_string()),
             use_mock_connection: true,
+            flood_penalty_threshold: Some(0),
             ..Default::default()
         }
     }
