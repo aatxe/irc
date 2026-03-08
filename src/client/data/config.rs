@@ -186,11 +186,12 @@ pub struct Config {
     #[deprecated(note = "Unimplemented. Use flood_penalty_threshold instead.")]
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub max_messages_in_burst: Option<u32>,
-    /// The penalty threshold in milliseconds for IRC flood protection. Each outgoing command
-    /// incurs a penalty cost (e.g. PRIVMSG = 2000ms, WHO = 4000ms, PONG = 0ms) that mirrors
-    /// the IRC server's own flood detection (RFC 2813 penalty model). When accumulated penalty
-    /// exceeds this threshold, outgoing messages are delayed until the penalty drains below it.
-    /// Penalty drains in real-time at 1ms per 1ms elapsed.
+    /// The penalty threshold in milliseconds for IRC flood protection (RFC 2813 §5.8).
+    /// Each outgoing message incurs a penalty based on both its byte length and command type,
+    /// matching the IRC server's own flood detection formula:
+    /// `(1 + message_bytes / 100) * 1000ms + command_penalty_ms`.
+    /// When accumulated penalty exceeds this threshold, outgoing messages are delayed until
+    /// the penalty drains below it. Penalty drains in real-time at 1ms per 1ms elapsed.
     ///
     /// Set to `0` to disable flood protection entirely.
     /// Defaults to 10000 (10 seconds), matching the standard IRCd excess flood limit.

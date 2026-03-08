@@ -827,10 +827,13 @@ impl Sender {
 
 /// Future to handle outgoing messages with IRC flood protection.
 ///
-/// Implements a penalty-based throttle modeled after irssi and IRCd (RFC 2813). Each outgoing
-/// command incurs a penalty cost in milliseconds. When the accumulated penalty exceeds a
-/// configurable threshold (default 10s), messages are delayed until the penalty drains below
-/// the threshold. Penalty drains in real-time at 1ms per 1ms elapsed.
+/// Implements a penalty-based throttle modeled after IRCd (RFC 2813 §5.8). Each outgoing
+/// message incurs a penalty based on both its byte length and command type, matching the
+/// server's own flood detection formula. When accumulated penalty exceeds a configurable
+/// threshold (default 10s), messages are delayed until the penalty drains below it.
+/// Penalty drains in real-time at 1ms per 1ms elapsed.
+///
+/// Total penalty per message: `(1 + message_bytes / 100) * 1000 + command_penalty_ms`
 #[derive(Debug)]
 pub struct Outgoing {
     sink: SplitSink<Connection, Message>,
@@ -849,27 +852,70 @@ pub struct Outgoing {
 impl Outgoing {
     /// Returns the penalty cost in milliseconds for a given IRC command.
     ///
-    /// Values mirror the irssi/IRCd penalty model (RFC 2813 §5.8):
-    /// - Connection control (PONG, QUIT, etc.): 0ms (never throttled)
-    /// - Standard messages (PRIVMSG, NOTICE, JOIN, etc.): 2000ms
-    /// - Expensive queries (WHO, WHOIS, LIST, etc.): 4000ms
+    /// Values mirror the IRCd penalty model (RFC 2813 §5.8). The server-side
+    /// implementation charges `(1 + message_bytes / 100)` seconds as a base
+    /// cost per message, plus a command-specific penalty. We replicate this
+    /// client-side to stay under the server's flood threshold.
+    ///
+    /// The total penalty for a message is: `base_penalty(len) + command_penalty`
     fn command_penalty(command: &Command) -> u64 {
         match command {
-            // Connection control — never throttled
+            // Connection control — never throttled client-side. The server
+            // does charge 1-2s for PONG, but delaying pong replies risks
+            // ping timeout disconnects, so we exempt these.
             Command::PONG(..) | Command::QUIT(..) | Command::PASS(..) => 0,
 
             // CAP negotiation — must not be throttled during registration
             Command::CAP(..) | Command::AUTHENTICATE(..) => 0,
 
-            // Expensive server queries
-            Command::WHO(..) | Command::WHOIS(..) | Command::WHOWAS(..)
-            | Command::LIST(..) | Command::NAMES(..) | Command::LINKS(..)
-            | Command::STATS(..) | Command::LUSERS(..) | Command::TRACE(..)
-            | Command::USERS(..) | Command::MOTD(..) => 4000,
+            // NICK changes incur 3s on IRCd
+            Command::NICK(..) => 3000,
 
-            // Everything else: standard 2s penalty
+            // PART is expensive on IRCd (4s)
+            Command::PART(..) => 4000,
+
+            // WHO, NAMES, LIST without args are catastrophic on IRCd (10s).
+            // With args they're 2s. We can't distinguish no-arg vs arg here
+            // since the Option is always present in the enum, so we check
+            // whether the argument is None/empty.
+            Command::WHO(ref mask, _) => {
+                match mask {
+                    None => 10_000,
+                    Some(m) if m.is_empty() => 10_000,
+                    _ => 2000,
+                }
+            }
+            Command::LIST(ref mask, _) | Command::NAMES(ref mask, _) => {
+                match mask {
+                    None => 10_000,
+                    Some(m) if m.is_empty() => 10_000,
+                    _ => 2000,
+                }
+            }
+
+            // Other expensive server queries
+            Command::WHOIS(..) | Command::WHOWAS(..) => 3000,
+            Command::LINKS(..) | Command::STATS(..) => 3000,
+            Command::LUSERS(..) | Command::TRACE(..) => 2000,
+            Command::USERS(..) | Command::MOTD(..) | Command::INFO(..) => 5000,
+
+            // PRIVMSG/NOTICE: IRCd charges 1s per target. We approximate
+            // with a flat 2s since most client sends target a single entity.
+            Command::PRIVMSG(..) | Command::NOTICE(..) => 2000,
+
+            // JOIN, KICK, INVITE, MODE, TOPIC, AWAY, and all others: 2s
             _ => 2000,
         }
+    }
+
+    /// Returns the base penalty in milliseconds derived from message length.
+    ///
+    /// Mirrors the IRCd formula: `(1 + message_bytes / 100)` seconds.
+    /// This ensures long messages incur proportionally higher penalties,
+    /// matching the server's own flood calculation.
+    fn length_penalty(message: &Message) -> u64 {
+        let len = message.to_string().len() as u64;
+        (1 + len / 100) * 1000
     }
 
     /// Drains accumulated penalty based on elapsed real time.
@@ -927,8 +973,10 @@ impl Future for Outgoing {
                 Poll::Ready(Some(message)) => {
                     // Apply penalty-based throttle if enabled.
                     if this.penalty_threshold > 0 {
-                        let cost = Self::command_penalty(&message.command);
-                        if cost > 0 {
+                        let cmd_cost = Self::command_penalty(&message.command);
+                        if cmd_cost > 0 {
+                            let len_cost = Self::length_penalty(&message);
+                            let cost = len_cost + cmd_cost;
                             this.drain_penalty();
                             this.penalty += cost;
 
