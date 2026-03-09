@@ -1233,15 +1233,15 @@ impl Client {
 mod test {
     use std::{collections::HashMap, default::Default, thread, time::Duration};
 
-    use super::Client;
+    use super::{Client, Outgoing};
     #[cfg(feature = "channel-lists")]
     use crate::client::data::User;
     use crate::{
         client::data::Config,
         error::Error,
         proto::{
-            command::Command::{Raw, PRIVMSG},
-            ChannelMode, IrcCodec, Mode, UserMode,
+            command::Command::{self, Raw, PRIVMSG},
+            ChannelMode, IrcCodec, Message, Mode, UserMode,
         },
     };
     use anyhow::Result;
@@ -2114,5 +2114,115 @@ mod test {
             "PRIVMSG test \u{001}TIME\u{001}\r\n"
         );
         Ok(())
+    }
+
+    // -- Flood penalty unit tests --
+
+    #[test]
+    fn command_penalty_connection_control_is_zero() {
+        assert_eq!(
+            Outgoing::command_penalty(&Command::PONG(String::new(), None)),
+            0
+        );
+        assert_eq!(Outgoing::command_penalty(&Command::QUIT(None)), 0);
+        assert_eq!(Outgoing::command_penalty(&Command::PASS(String::new())), 0);
+    }
+
+    #[test]
+    fn command_penalty_cap_negotiation_is_zero() {
+        assert_eq!(
+            Outgoing::command_penalty(&Command::CAP(
+                None,
+                irc_proto::command::CapSubCommand::LS,
+                None,
+                None,
+            )),
+            0
+        );
+    }
+
+    #[test]
+    fn command_penalty_nick_is_3s() {
+        assert_eq!(
+            Outgoing::command_penalty(&Command::NICK("foo".into())),
+            3000
+        );
+    }
+
+    #[test]
+    fn command_penalty_part_is_4s() {
+        assert_eq!(
+            Outgoing::command_penalty(&Command::PART("#ch".into(), None)),
+            4000
+        );
+    }
+
+    #[test]
+    fn command_penalty_who_with_mask_is_2s() {
+        assert_eq!(
+            Outgoing::command_penalty(&Command::WHO(Some("#chan".into()), None)),
+            2000
+        );
+    }
+
+    #[test]
+    fn command_penalty_who_without_mask_is_10s() {
+        assert_eq!(Outgoing::command_penalty(&Command::WHO(None, None)), 10_000);
+        assert_eq!(
+            Outgoing::command_penalty(&Command::WHO(Some(String::new()), None)),
+            10_000
+        );
+    }
+
+    #[test]
+    fn command_penalty_privmsg_is_2s() {
+        assert_eq!(
+            Outgoing::command_penalty(&Command::PRIVMSG("#ch".into(), "hello".into())),
+            2000
+        );
+    }
+
+    #[test]
+    fn command_penalty_catchall_is_2s() {
+        assert_eq!(
+            Outgoing::command_penalty(&Command::JOIN("#ch".into(), None, None)),
+            2000
+        );
+        assert_eq!(
+            Outgoing::command_penalty(&Command::Raw("WHO".into(), vec!["#ch".into()])),
+            2000
+        );
+    }
+
+    #[test]
+    fn length_penalty_short_message() {
+        // A short PRIVMSG: "PRIVMSG #test :hi\r\n" ≈ 19 bytes → (1 + 19/100) * 1000 = 1000
+        let msg: Message = "PRIVMSG #test :hi\r\n".parse().unwrap();
+        assert_eq!(Outgoing::length_penalty(&msg), 1000);
+    }
+
+    #[test]
+    fn length_penalty_long_message() {
+        // Build a message > 200 bytes to verify scaling.
+        let long_text = "x".repeat(200);
+        let raw = format!("PRIVMSG #test :{}\r\n", long_text);
+        let msg: Message = raw.parse().unwrap();
+        let len = msg.to_string().len() as u64;
+        assert_eq!(Outgoing::length_penalty(&msg), (1 + len / 100) * 1000);
+        // With ~216 bytes: (1 + 216/100) * 1000 = (1+2)*1000 = 3000
+        assert!(Outgoing::length_penalty(&msg) >= 3000);
+    }
+
+    #[test]
+    fn flood_penalty_threshold_disabled_by_zero() {
+        // Verify that test_config() disables penalty (threshold = 0).
+        let config = test_config();
+        assert_eq!(config.flood_penalty_threshold(), 0);
+    }
+
+    #[test]
+    fn flood_penalty_threshold_default_is_10s() {
+        let config = Config::default();
+        assert_eq!(config.flood_penalty_threshold(), 10_000);
     }
 }
