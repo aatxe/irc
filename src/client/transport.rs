@@ -233,12 +233,12 @@ pub struct LogView {
 
 impl LogView {
     /// Gets a read guard for all the messages sent on the transport.
-    pub fn sent(&self) -> error::Result<RwLockReadGuard<Vec<Message>>> {
+    pub fn sent(&self) -> error::Result<RwLockReadGuard<'_, Vec<Message>>> {
         self.sent.read().map_err(|_| error::Error::PoisonedLog)
     }
 
     /// Gets a read guard for all the messages received on the transport.
-    pub fn received(&self) -> error::Result<RwLockReadGuard<Vec<Message>>> {
+    pub fn received(&self) -> error::Result<RwLockReadGuard<'_, Vec<Message>>> {
         self.received.read().map_err(|_| error::Error::PoisonedLog)
     }
 }
