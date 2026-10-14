@@ -47,6 +47,7 @@ tls-rust = [
 encoding = ["dep:encoding", "irc-proto/encoding"]
 
 [dependencies]
+base64ct = { version = "1.6.0", features = ["std"] }
 chrono = { version = "0.4.24", default-features = false, features = [
     "clock",
     "std",

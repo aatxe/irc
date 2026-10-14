@@ -6,6 +6,7 @@
   "username": "test",
   "realname": "test",
   "password": "",
+  "sasl": "none",
   "server": "irc.test.net",
   "port": 6667,
   "encoding": "UTF-8",

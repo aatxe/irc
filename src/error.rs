@@ -123,6 +123,14 @@ pub enum Error {
     /// Stream has already been configured.
     #[error("stream has already been configured")]
     StreamAlreadyConfigured,
+
+    /// Login contains null bytes
+    #[error("Login contains null '\\0' byte, which makes SASL plain authentication impossible")]
+    LoginContainsNullByte,
+
+    /// Password contains null bytes
+    #[error("Password contains null '\\0' byte, which makes SASL plain authentication impossible")]
+    PasswordContainsNullByte,
 }
 
 /// Errors that occur with configurations.

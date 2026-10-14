@@ -8,4 +8,5 @@ pub use crate::client::data::user::{AccessLevel, User};
 pub mod config;
 #[cfg(feature = "proxy")]
 pub mod proxy;
+pub mod sasl;
 pub mod user;
