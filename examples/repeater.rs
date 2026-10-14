@@ -7,8 +7,7 @@ async fn main() -> irc::error::Result<()> {
         nickname: Some("pickles".to_owned()),
         server: Some("chat.freenode.net".to_owned()),
         channels: vec!["#rust-spam".to_owned()],
-        burst_window_length: Some(4),
-        max_messages_in_burst: Some(4),
+        flood_penalty_threshold: Some(10_000),
         ..Default::default()
     };
 
