@@ -40,7 +40,6 @@ proxy = ["tokio-socks"]
 tls-native = ["native-tls", "tokio-native-tls"]
 tls-rust = [
     "rustls-native-certs",
-    "rustls-pemfile",
     "tokio-rustls",
     "webpki-roots",
 ]
@@ -78,7 +77,6 @@ tokio-socks = { version = "0.5.1", optional = true }
 native-tls = { version = "0.2.11", optional = true }
 tokio-native-tls = { version = "0.3.1", optional = true }
 rustls-native-certs = { version = "0.8", optional = true }
-rustls-pemfile = { version = "2", optional = true }
 tokio-rustls = { version = "0.26.0", optional = true }
 webpki-roots = { version = "0.26.0", optional = true }
 
