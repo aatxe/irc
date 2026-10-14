@@ -5,6 +5,7 @@ use crate::chan::ChannelExt;
 use crate::error::MessageParseError;
 use crate::mode::{ChannelMode, Mode, UserMode};
 use crate::response::Response;
+use crate::standard_reply::{StandardTypes, StandardCodes};
 
 /// List of all client commands as defined in [RFC 2812](http://tools.ietf.org/html/rfc2812). This
 /// also includes commands from the
@@ -200,6 +201,9 @@ pub enum Command {
     // Default option.
     /// An IRC response code with arguments and optional suffix.
     Response(Response, Vec<String>),
+    /// https://ircv3.net/specs/extensions/standard-replies
+    /// [FAIL | WARN | NOTE] <command> <code> [<context>] <description>
+    StandardResponse(StandardTypes, String, StandardCodes, Vec<String>, String),
     /// A raw IRC command unknown to the crate.
     Raw(String, Vec<String>),
 }
@@ -408,6 +412,10 @@ impl<'a> From<&'a Command> for String {
                 &format!("{:03}", *resp as u16),
                 &a.iter().map(|s| &s[..]).collect::<Vec<_>>(),
             ),
+            Command::StandardResponse(ref r#type, ref command, ref code, ref args, ref description) => {
+                match r#type {
+                }
+            },
             Command::Raw(ref c, ref a) => {
                 stringify(c, &a.iter().map(|s| &s[..]).collect::<Vec<_>>())
             }
@@ -958,6 +966,14 @@ impl Command {
             } else {
                 raw(cmd, args)
             }
+        } else if StandardTypes::is_standard_type(cmd) {
+            let code = StandardCodes::from_message(args[0], args[1]);
+            let mut std_args: Vec<String> = args.iter().skip(2).map(|&s| s.to_owned()).collect();
+            let desc = std_args.pop().ok_or_else(|| MessageParseError::MissingDescriptionInStandardReply)?;
+
+            Command::StandardResponse(
+                StandardTypes::from_str(cmd).map_err(MessageParseError::InvalidStandardReplyType)?, 
+                args[0].to_owned(), code, std_args, desc)
         } else if let Ok(resp) = cmd.parse() {
             Command::Response(resp, args.into_iter().map(|s| s.to_owned()).collect())
         } else {
@@ -1128,6 +1144,7 @@ mod test {
     use super::Command;
     use super::Response;
     use crate::Message;
+    use crate::standard_reply::{StandardTypes, StandardCodes};
 
     #[test]
     fn format_response() {
@@ -1153,6 +1170,22 @@ mod test {
         assert_eq!(
             Command::USER("a".to_string(), "0".to_string(), "b".to_string()),
             cmd
+        );
+    }
+
+    #[test]
+    fn parse_standard_reply() {
+        let msg = "FAIL BOX BOXES_INVALID STACK CLOCKWISE :Given boxes are not supported".parse::<Message>().unwrap();
+
+        assert_eq!(
+            msg.command,
+            Command::StandardResponse(StandardTypes::Fail, "BOX".to_string(), StandardCodes::Custom("BOXES_INVALID".to_string()), vec!["STACK".to_string(), "CLOCKWISE".to_string()], "Given boxes are not supported".to_string())
+        );
+
+        let msg = "NOTE * OPER_MESSAGE :Registering new accounts and channels has been disabled temporarily while we deal with the spam. Thanks for flying ExampleNet! -dan".parse::<Message>().unwrap();
+        assert_eq!(
+            msg.command,
+            Command::StandardResponse(StandardTypes::Note, "*".to_string(), StandardCodes::Custom("OPER_MESSAGE".to_string()), vec![], "Registering new accounts and channels has been disabled temporarily while we deal with the spam. Thanks for flying ExampleNet! -dan".to_string())
         );
     }
 }
