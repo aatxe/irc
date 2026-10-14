@@ -20,15 +20,15 @@ pub struct LineCodec {
 
 impl LineCodec {
     /// Creates a new instance of LineCodec from the specified encoding.
-    pub fn new(label: &str) -> error::Result<LineCodec> {
+    pub fn new(_label: &str) -> error::Result<LineCodec> {
         Ok(LineCodec {
             #[cfg(feature = "encoding")]
-            encoding: match encoding_from_whatwg_label(label) {
+            encoding: match encoding_from_whatwg_label(_label) {
                 Some(x) => x,
                 None => {
                     return Err(error::ProtocolError::Io(io::Error::new(
                         io::ErrorKind::InvalidInput,
-                        &format!("Attempted to use unknown codec {}.", label)[..],
+                        &format!("Attempted to use unknown codec {}.", _label)[..],
                     )));
                 }
             },

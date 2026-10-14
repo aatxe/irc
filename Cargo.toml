@@ -45,6 +45,7 @@ tls-rust = [
     "webpki-roots",
 ]
 encoding = ["dep:encoding", "irc-proto/encoding"]
+websocket = ["dep:tokio-tungstenite"]
 
 [dependencies]
 chrono = { version = "0.4.24", default-features = false, features = [
@@ -63,6 +64,7 @@ thiserror = "1.0.58"
 pin-project = "1.0.12"
 tokio = { version = "1.27.0", features = ["net", "time", "sync"] }
 tokio-stream = "0.1.12"
+tokio-tungstenite = { version = "0.30.0", optional = true }
 tokio-util = { version = "0.7.7", features = ["codec"] }
 
 # Feature - Config

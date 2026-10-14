@@ -55,6 +55,10 @@ use crate::{
     proto::{IrcCodec, Message},
 };
 
+#[cfg(feature = "websocket")]
+use crate::client::websocket::WebSocketConnection;
+
+#[allow(clippy::large_enum_variant)]
 /// An IRC connection used internally by `IrcServer`.
 #[pin_project(project = ConnectionProj)]
 pub enum Connection {
@@ -63,6 +67,9 @@ pub enum Connection {
     #[doc(hidden)]
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     Secured(#[pin] Transport<TlsStream<TcpStream>>),
+    #[cfg(feature = "websocket")]
+    #[doc(hidden)]
+    Websocket(#[pin] WebSocketConnection),
     #[doc(hidden)]
     Mock(#[pin] Logged<MockStream>),
 }
@@ -76,6 +83,7 @@ impl fmt::Debug for Connection {
                 Connection::Unsecured(_) => "Connection::Unsecured(...)",
                 #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
                 Connection::Secured(_) => "Connection::Secured(...)",
+                Connection::Websocket(_) => "Connection::Websocket(...)",
                 Connection::Mock(_) => "Connection::Mock(...)",
             }
         )
@@ -95,6 +103,16 @@ impl Connection {
             )));
         }
 
+        #[cfg(feature = "websocket")]
+        {
+            if config.use_websocket() {
+                log::info!("Connecting via websocket to {}.", config.server()?);
+                return Ok(Connection::Websocket(
+                    WebSocketConnection::connect(config, tx).await?,
+                ));
+            }
+        }
+
         #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
         {
             if config.use_tls() {
@@ -112,12 +130,12 @@ impl Connection {
     }
 
     #[cfg(not(feature = "proxy"))]
-    async fn new_stream(config: &Config) -> error::Result<TcpStream> {
+    pub(crate) async fn new_stream(config: &Config) -> error::Result<TcpStream> {
         Ok(TcpStream::connect((config.server()?, config.port())).await?)
     }
 
     #[cfg(feature = "proxy")]
-    async fn new_stream(config: &Config) -> error::Result<TcpStream> {
+    pub(crate) async fn new_stream(config: &Config) -> error::Result<TcpStream> {
         let server = config.server()?;
         let port = config.port();
         let address = (server, port);
@@ -160,10 +178,7 @@ impl Connection {
     }
 
     #[cfg(all(feature = "tls-native", not(feature = "tls-rust")))]
-    async fn new_secured_transport(
-        config: &Config,
-        tx: UnboundedSender<Message>,
-    ) -> error::Result<Transport<TlsStream<TcpStream>>> {
+    pub(crate) async fn new_secured_stream(config: &Config) -> error::Result<TlsStream<TcpStream>> {
         let mut builder = TlsConnector::builder();
 
         if let Some(cert_path) = config.cert_path() {
@@ -213,16 +228,23 @@ impl Connection {
 
         let stream = Self::new_stream(config).await?;
         let stream = connector.connect(domain, stream).await?;
+
+        Ok(stream)
+    }
+
+    #[cfg(all(feature = "tls-native", not(feature = "tls-rust")))]
+    pub(crate) async fn new_secured_transport(
+        config: &Config,
+        tx: UnboundedSender<Message>,
+    ) -> error::Result<Transport<TlsStream<TcpStream>>> {
+        let stream = Self::new_secured_stream(config).await?;
         let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
         Ok(Transport::new(config, framed, tx))
     }
 
     #[cfg(feature = "tls-rust")]
-    async fn new_secured_transport(
-        config: &Config,
-        tx: UnboundedSender<Message>,
-    ) -> error::Result<Transport<TlsStream<TcpStream>>> {
+    pub(crate) async fn new_secured_stream(config: &Config) -> error::Result<TlsStream<TcpStream>> {
         #[derive(Debug)]
         struct DangerousAcceptAllVerifier(Arc<CryptoProvider>);
 
@@ -243,7 +265,7 @@ impl Connection {
                 _oscp: &[u8],
                 _now: UnixTime,
             ) -> Result<ServerCertVerified, rustls::Error> {
-                return Ok(ServerCertVerified::assertion());
+                Ok(ServerCertVerified::assertion())
             }
 
             fn verify_tls12_signature(
@@ -348,7 +370,7 @@ impl Connection {
 
             let native_certs = rustls_native_certs::load_native_certs();
             for cert in native_certs.certs {
-                root_store.add(cert.into())?;
+                root_store.add(cert)?;
             }
 
             if let Some(cert_path) = config.cert_path() {
@@ -382,6 +404,16 @@ impl Connection {
         let domain = ServerName::try_from(config.server()?)?.to_owned();
         let stream = Self::new_stream(config).await?;
         let stream = connector.connect(domain, stream).await?;
+
+        Ok(stream)
+    }
+
+    #[cfg(feature = "tls-rust")]
+    pub(crate) async fn new_secured_transport(
+        config: &Config,
+        tx: UnboundedSender<Message>,
+    ) -> error::Result<Transport<TlsStream<TcpStream>>> {
+        let stream = Self::new_secured_stream(config).await?;
         let framed = Framed::new(stream, IrcCodec::new(config.encoding())?);
 
         Ok(Transport::new(config, framed, tx))
@@ -441,6 +473,7 @@ impl Stream for Connection {
             #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
             ConnectionProj::Secured(inner) => inner.poll_next(cx),
             ConnectionProj::Mock(inner) => inner.poll_next(cx),
+            ConnectionProj::Websocket(inner) => inner.poll_next(cx),
         }
     }
 }
@@ -454,6 +487,7 @@ impl Sink<Message> for Connection {
             #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
             ConnectionProj::Secured(inner) => inner.poll_ready(cx),
             ConnectionProj::Mock(inner) => inner.poll_ready(cx),
+            ConnectionProj::Websocket(inner) => inner.poll_ready(cx),
         }
     }
 
@@ -463,6 +497,7 @@ impl Sink<Message> for Connection {
             #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
             ConnectionProj::Secured(inner) => inner.start_send(item),
             ConnectionProj::Mock(inner) => inner.start_send(item),
+            ConnectionProj::Websocket(inner) => inner.start_send(item),
         }
     }
 
@@ -472,6 +507,7 @@ impl Sink<Message> for Connection {
             #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
             ConnectionProj::Secured(inner) => inner.poll_flush(cx),
             ConnectionProj::Mock(inner) => inner.poll_flush(cx),
+            ConnectionProj::Websocket(inner) => inner.poll_flush(cx),
         }
     }
 
@@ -481,6 +517,7 @@ impl Sink<Message> for Connection {
             #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
             ConnectionProj::Secured(inner) => inner.poll_close(cx),
             ConnectionProj::Mock(inner) => inner.poll_close(cx),
+            ConnectionProj::Websocket(inner) => inner.poll_close(cx),
         }
     }
 }

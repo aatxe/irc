@@ -312,7 +312,7 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG(format!("test"), format!("Testing!")),
+            command: PRIVMSG("test".to_string(), "Testing!".to_string()),
         };
         assert_eq!(
             Message::new(None, "PRIVMSG", vec!["test", "Testing!"]).unwrap(),
@@ -384,13 +384,13 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG(format!("test"), format!("Testing!")),
+            command: PRIVMSG("test".to_string(), "Testing!".to_string()),
         };
         assert_eq!(&message.to_string()[..], "PRIVMSG test Testing!\r\n");
         let message = Message {
             tags: None,
             prefix: Some("test!test@test".into()),
-            command: PRIVMSG(format!("test"), format!("Still testing!")),
+            command: PRIVMSG("test".to_string(), "Still testing!".to_string()),
         };
         assert_eq!(
             &message.to_string()[..],
@@ -403,7 +403,7 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG(format!("test"), format!("Testing!")),
+            command: PRIVMSG("test".to_string(), "Testing!".to_string()),
         };
         assert_eq!(
             "PRIVMSG test :Testing!\r\n".parse::<Message>().unwrap(),
@@ -412,7 +412,7 @@ mod test {
         let message = Message {
             tags: None,
             prefix: Some("test!test@test".into()),
-            command: PRIVMSG(format!("test"), format!("Still testing!")),
+            command: PRIVMSG("test".to_string(), "Still testing!".to_string()),
         };
         assert_eq!(
             ":test!test@test PRIVMSG test :Still testing!\r\n"
@@ -422,12 +422,12 @@ mod test {
         );
         let message = Message {
             tags: Some(vec![
-                Tag(format!("aaa"), Some(format!("bbb"))),
-                Tag(format!("ccc"), None),
-                Tag(format!("example.com/ddd"), Some(format!("eee"))),
+                Tag("aaa".to_string(), Some("bbb".to_string())),
+                Tag("ccc".to_string(), None),
+                Tag("example.com/ddd".to_string(), Some("eee".to_string())),
             ]),
             prefix: Some("test!test@test".into()),
-            command: PRIVMSG(format!("test"), format!("Testing with tags!")),
+            command: PRIVMSG("test".to_string(), "Testing with tags!".to_string()),
         };
         assert_eq!(
             "@aaa=bbb;ccc;example.com/ddd=eee :test!test@test PRIVMSG test :Testing with \
@@ -443,7 +443,7 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG(format!("test"), format!("Testing!")),
+            command: PRIVMSG("test".to_string(), "Testing!".to_string()),
         };
         assert_eq!(
             "PRIVMSG test :Testing!\r".parse::<Message>().unwrap(),
@@ -472,14 +472,14 @@ mod test {
         let message = Message {
             tags: None,
             prefix: None,
-            command: PRIVMSG(format!("test"), format!("Testing!")),
+            command: PRIVMSG("test".to_string(), "Testing!".to_string()),
         };
         let msg: Message = "PRIVMSG test :Testing!\r\n".into();
         assert_eq!(msg, message);
         let message = Message {
             tags: None,
             prefix: Some("test!test@test".into()),
-            command: PRIVMSG(format!("test"), format!("Still testing!")),
+            command: PRIVMSG("test".to_string(), "Still testing!".to_string()),
         };
         let msg: Message = ":test!test@test PRIVMSG test :Still testing!\r\n".into();
         assert_eq!(msg, message);
@@ -493,8 +493,8 @@ mod test {
             tags: None,
             prefix: Some("test!test@test".into()),
             command: Raw(
-                format!("COMMAND"),
-                vec![format!("ARG:test"), format!("Testing!")],
+                "COMMAND".to_string(),
+                vec!["ARG:test".to_string(), "Testing!".to_string()],
             ),
         };
         let msg: Message = ":test!test@test COMMAND ARG:test :Testing!\r\n".into();

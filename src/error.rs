@@ -123,6 +123,19 @@ pub enum Error {
     /// Stream has already been configured.
     #[error("stream has already been configured")]
     StreamAlreadyConfigured,
+
+    /// An internal websocket error
+    #[cfg(feature = "websocket")]
+    #[error("a websocket error occured")]
+    Websocket(
+        #[source]
+        #[from]
+        tokio_tungstenite::tungstenite::Error,
+    ),
+
+    /// Unsupported websocket subprotocol
+    #[error("unsupported websocket subprotocol: {0}")]
+    WebsocketUnsupportedSubprotocol(String),
 }
 
 /// Errors that occur with configurations.

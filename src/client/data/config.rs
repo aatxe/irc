@@ -221,6 +221,21 @@ pub struct Config {
     #[cfg_attr(feature = "serde", serde(skip_serializing))]
     #[doc(hidden)]
     pub path: Option<PathBuf>,
+
+    /// Assume the server is a websocket
+    #[cfg(feature = "websocket")]
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub use_websocket: bool,
+
+    /// URL path to use for the websocket
+    #[cfg(feature = "websocket")]
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub websocket_path: Option<String>,
+
+    /// The interval in seconds between WebSocket pings.
+    #[cfg(feature = "websocket")]
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub websocket_ping_time: Option<u64>,
 }
 
 #[cfg(feature = "serde")]
@@ -508,7 +523,7 @@ impl Config {
     /// This defaults to true when not specified.
     #[cfg(any(feature = "tls-native", feature = "tls-rust"))]
     pub fn use_tls(&self) -> bool {
-        self.use_tls.as_ref().cloned().map_or(true, |s| s)
+        self.use_tls.as_ref().cloned().unwrap_or(true)
     }
 
     /// Gets the path to the TLS certificate in DER format if specified.
@@ -641,6 +656,24 @@ impl Config {
     /// This has no effect if `use_mock_connection` is not `true`.
     pub fn mock_initial_value(&self) -> &str {
         self.mock_initial_value.as_ref().map_or("", |s| s)
+    }
+
+    /// Gets whether or not to assume a websocket connection
+    #[cfg(feature = "websocket")]
+    pub fn use_websocket(&self) -> bool {
+        self.use_websocket
+    }
+
+    /// Gets the websocket URL path
+    #[cfg(feature = "websocket")]
+    pub fn websocket_path(&self) -> &str {
+        self.websocket_path.as_deref().unwrap_or_default()
+    }
+
+    /// Gets the websocket ping time
+    #[cfg(feature = "websocket")]
+    pub fn websocket_ping_time(&self) -> u64 {
+        self.websocket_ping_time.unwrap_or(60)
     }
 }
 

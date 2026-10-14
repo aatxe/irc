@@ -370,7 +370,7 @@ impl<'a> From<&'a Command> for String {
             }
             Command::METADATA(ref t, Some(ref c), Some(ref a)) => stringify(
                 "METADATA",
-                &vec![t, &c.to_str().to_owned()]
+                &[t, &c.to_str().to_owned()]
                     .iter()
                     .map(|s| &s[..])
                     .chain(a.iter().map(|s| &s[..]))
@@ -386,7 +386,7 @@ impl<'a> From<&'a Command> for String {
             Command::MONITOR(ref c, None) => stringify("MONITOR", &[c]),
             Command::BATCH(ref t, Some(ref c), Some(ref a)) => stringify(
                 "BATCH",
-                &vec![t, &c.to_str().to_owned()]
+                &[t, &c.to_str().to_owned()]
                     .iter()
                     .map(|s| &s[..])
                     .chain(a.iter().map(|s| &s[..]))
@@ -395,8 +395,7 @@ impl<'a> From<&'a Command> for String {
             Command::BATCH(ref t, Some(ref c), None) => stringify("BATCH", &[t, c.to_str()]),
             Command::BATCH(ref t, None, Some(ref a)) => stringify(
                 "BATCH",
-                &vec![t]
-                    .iter()
+                &[t].iter()
                     .map(|s| &s[..])
                     .chain(a.iter().map(|s| &s[..]))
                     .collect::<Vec<_>>(),

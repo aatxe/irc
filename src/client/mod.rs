@@ -93,6 +93,9 @@ mod mock;
 pub mod prelude;
 pub mod transport;
 
+#[cfg(feature = "websocket")]
+pub mod websocket;
+
 macro_rules! pub_state_base {
     () => {
         /// Changes the modes for the specified target.
@@ -365,7 +368,7 @@ macro_rules! pub_sender_base {
         /// Sends a finger request to the specified target.
         /// This requires the CTCP feature to be enabled.
         #[cfg(feature = "ctcp")]
-        pub fn send_finger<S: fmt::Display>(&self, target: S) -> error::Result<()>
+        pub fn send_finger<S>(&self, target: S) -> error::Result<()>
         where
             S: fmt::Display,
         {
@@ -723,7 +726,7 @@ impl ClientState {
             return;
         }
 
-        for (_, vec) in self.chanlists.write().iter_mut() {
+        for vec in self.chanlists.write().values_mut() {
             if let Some(n) = vec.iter().position(|x| x.get_nickname() == old_nick) {
                 let new_entry = User::new(new_nick);
                 vec[n] = new_entry;
@@ -761,7 +764,7 @@ impl ClientState {
                 self.chanlists
                     .write()
                     .entry(chan.clone())
-                    .or_insert_with(Vec::new)
+                    .or_default()
                     .push(User::new(user))
             }
         }

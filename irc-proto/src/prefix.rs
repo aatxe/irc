@@ -102,7 +102,7 @@ impl fmt::Display for Prefix {
     }
 }
 
-impl<'a> From<&'a str> for Prefix {
+impl From<&str> for Prefix {
     fn from(s: &str) -> Self {
         Prefix::new_from_str(s)
     }

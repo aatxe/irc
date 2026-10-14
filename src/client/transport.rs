@@ -26,7 +26,7 @@ use crate::{
 
 /// Pinger-based futures helper.
 #[pin_project]
-struct Pinger {
+pub(crate) struct Pinger {
     tx: UnboundedSender<Message>,
     // Whether this pinger pings.
     enabled: bool,
@@ -56,7 +56,7 @@ impl Pinger {
     }
 
     /// Handle an incoming message.
-    fn handle_message(self: Pin<&mut Self>, message: &Message) -> error::Result<()> {
+    pub(crate) fn handle_message(self: Pin<&mut Self>, message: &Message) -> error::Result<()> {
         match message.command {
             Command::Response(Response::RPL_ENDOFMOTD, _)
             | Command::Response(Response::ERR_NOMOTD, _) => {

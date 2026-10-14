@@ -6,7 +6,7 @@ pub trait ChannelExt {
     fn is_channel_name(&self) -> bool;
 }
 
-impl<'a> ChannelExt for &'a str {
+impl ChannelExt for &str {
     fn is_channel_name(&self) -> bool {
         self.starts_with('#')
             || self.starts_with('&')
