@@ -437,6 +437,8 @@ pub struct ClientStream {
     stream: SplitStream<Connection>,
     // In case the client stream also handles outgoing messages.
     outgoing: Option<Outgoing>,
+
+    terminated: bool,
 }
 
 impl ClientStream {
@@ -453,11 +455,16 @@ impl ClientStream {
 
         Ok(output)
     }
+
+    /// marks this stream as terminated
+    pub fn set_terminated(&mut self) {
+        self.terminated = true;
+    }
 }
 
 impl FusedStream for ClientStream {
     fn is_terminated(&self) -> bool {
-        false
+        self.terminated
     }
 }
 
@@ -992,6 +999,7 @@ impl Client {
             state: Arc::clone(&self.state),
             stream,
             outgoing: self.outgoing.take(),
+            terminated: false,
         })
     }
 
